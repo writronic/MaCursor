@@ -1,11 +1,17 @@
-<?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0"
-     xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle"
-     xmlns:dc="http://purl.org/dc/elements/1.1/">
-  <channel>
-    <title>MaCursor Updates</title>
-    <link>https://github.com/writronic/macursor</link>
-    <description>Most recent changes with links to updates.</description>
-    <language>en</language>
-  </channel>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+    <channel>
+        <title>MaCursor Updates</title>
+        <link>https://github.com/writronic/macursor</link>
+        <description>Most recent changes with links to updates.</description>
+        <language>en</language>
+        <item>
+            <title>1.0.0</title>
+            <pubDate>Sun, 17 May 2026 00:51:26 +0000</pubDate>
+            <sparkle:version>1</sparkle:version>
+            <sparkle:shortVersionString>1.0.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/writronic/MaCursor/releases/download/v1.0.0/MaCursor.dmg" length="5273987" type="application/octet-stream" sparkle:edSignature="JIz2O0q7b8PAJxB5dlMfvHcVaadHZEBHimSCWQlHqQqk7SPvGciTP4u/hfn6IbmVy8/LCgpcC6yMLgrgzU7/AQ=="/>
+        </item>
+    </channel>
 </rss>
