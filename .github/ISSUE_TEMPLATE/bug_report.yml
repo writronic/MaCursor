@@ -1,0 +1,88 @@
+name: Bug Report
+description: Report a bug or unexpected behavior in MaCursor
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this issue!
+        Before submitting, please search [existing issues](https://github.com/writronic/MaCursor/issues) (including closed ones) to avoid duplicates.
+
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS Version
+      placeholder: "15-26"
+    validations:
+      required: true
+
+  - type: input
+    id: macursor-version
+    attributes:
+      label: MaCursor Version
+      description: "Found in MaCursor → About MaCursor (e.g. 1.0.0)"
+      placeholder: "1.0.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected-component
+    attributes:
+      label: Affected Component
+      description: Which part of MaCursor is affected?
+      options:
+        - MaCursor App (main application)
+        - Helper Tool (background service)
+        - Cursor Themes / Gallery
+        - Other / Not Sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      value: |
+        1. 
+        2. 
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      placeholder: What you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      placeholder: What actually happened instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots-logs
+    attributes:
+      label: Screenshots or Logs
+      description: "If applicable, drag and drop screenshots or paste relevant console logs. Crash reports can be found in ~/Library/Logs/DiagnosticReports/."
+      placeholder: Drag and drop files here or paste log output.
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      placeholder: Any other information that might help diagnose the issue.
+
+  - type: checkboxes
+    id: acknowledgments
+    attributes:
+      label: Acknowledgments
+      options:
+        - label: I searched existing issues (including closed) and found no duplicates.
+          required: true

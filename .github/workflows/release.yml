@@ -1,0 +1,104 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+env:
+  APP_NAME: MaCursor
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-sign-release:
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Install create-dmg
+        run: npm install -g create-dmg
+
+      - name: Import Certificate
+        env:
+          DEV_ID_P12_BASE64: ${{ secrets.DEV_ID_P12_BASE64 }}
+          DEV_ID_P12_PASSWORD: ${{ secrets.DEV_ID_P12_PASSWORD }}
+        run: |
+          KEYCHAIN_PASSWORD="$(uuidgen)"
+          echo "$DEV_ID_P12_BASE64" | base64 --decode > /tmp/cert.p12
+          security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+          security import /tmp/cert.p12 -k build.keychain \
+            -P "$DEV_ID_P12_PASSWORD" \
+            -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple: \
+            -s -k "$KEYCHAIN_PASSWORD" build.keychain
+          security list-keychains -d user -s build.keychain
+          rm -f /tmp/cert.p12
+
+      - name: Build Universal
+        env:
+          CI: true
+          SIGNING_IDENTITY: Developer ID Application
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: ./scripts/build.sh universal
+
+      - name: Sign with Sparkle & Generate Appcast
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        run: |
+          SPARKLE_BIN="$(find build_arm64 -path '*/Sparkle.framework/Versions/B/bin' -type d 2>/dev/null | head -1)"
+          if [ -z "$SPARKLE_BIN" ]; then
+            echo "Sparkle bin not found in build output, downloading..."
+            mkdir -p /tmp/sparkle
+            curl -sL https://github.com/sparkle-project/Sparkle/releases/download/2.9.1/Sparkle-2.9.1.tar.xz \
+              | tar xJ -C /tmp/sparkle
+            SPARKLE_BIN="/tmp/sparkle/bin"
+          fi
+          printf "%s" "$SPARKLE_PRIVATE_KEY" > /tmp/sparkle_key.txt
+          "$SPARKLE_BIN/sign_update" --ed-key-file /tmp/sparkle_key.txt output/MaCursor.dmg
+          "$SPARKLE_BIN/generate_appcast" \
+            --ed-key-file /tmp/sparkle_key.txt \
+            --download-url-prefix "https://github.com/${{ github.repository }}/releases/download/${{ github.event.release.tag_name }}/" \
+            -o appcast.xml \
+            output/
+          rm -f /tmp/sparkle_key.txt
+
+      - name: Upload DMG to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: output/MaCursor.dmg
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-dmg
+          path: output/MaCursor.dmg
+
+      - name: Commit Appcast
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add appcast.xml
+          git diff --cached --quiet && echo "No appcast changes" || {
+            git commit -m "chore: update appcast for ${{ github.event.release.tag_name }}"
+            git push origin main
+          }
+
+      - name: Cleanup
+        if: always()
+        run: security delete-keychain build.keychain 2>/dev/null || true

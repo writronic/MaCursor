@@ -1,0 +1,64 @@
+name: Feature Request
+description: Suggest a new feature or improvement for MaCursor
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We'd love to hear your ideas!
+        Please search [existing issues](https://github.com/writronic/MaCursor/issues?q=label%3Aenhancement) first to see if someone has already suggested this.
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      description: What area does this feature relate to?
+      options:
+        - UI / UX
+        - Cursor Themes
+        - Theme Editor
+        - System Integration
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: Use Case
+      description: Describe the problem you're trying to solve or the workflow you'd like to improve.
+      placeholder: "I often need to... / It's frustrating when..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe what you'd like MaCursor to do.
+      placeholder: A clear description of the feature or change.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any workarounds or alternative approaches?
+      placeholder: Other approaches you've thought about.
+
+  - type: textarea
+    id: screenshots-mockups
+    attributes:
+      label: Screenshots or Mockups
+      description: If applicable, add visuals to help explain your idea.
+      placeholder: Drag and drop images here.
+
+  - type: checkboxes
+    id: acknowledgments
+    attributes:
+      label: Acknowledgments
+      options:
+        - label: I searched existing issues and feature requests and found no duplicates.
+          required: true

@@ -1,0 +1,376 @@
+/*
+  Localizable.strings
+  MaCursor
+
+  Japanese
+  https://github.com/writronic/MaCursor
+*/
+
+/* Format: cursor scale value (e.g. "1.00×") */
+"%.2f×" = "%.2f×";
+
+/* Format: cursor dimensions (width × height) */
+"%lld × %lld" = "%1$lld × %2$lld";
+
+/* Format: cursor count in theme */
+"%lld cursors" = "%lld cursors";
+
+/* Format: additional cursor count overflow */
+"+%lld" = "+%lld";
+
+/* Settings tab title */
+"About" = "About";
+
+/* Menu item: about panel */
+"About MaCursor" = "About MaCursor";
+
+/* Undo: add cursor */
+"Add Cursor" = "Add Cursor";
+
+/* Button: add shortcut slot */
+"Add shortcut slot" = "Add shortcut slot";
+
+/* Button: add new theme */
+"Add Theme" = "Add Theme";
+
+/* Section: animation settings */
+"Animation" = "Animation";
+
+/* Label: appearance picker */
+"Appearance" = "Appearance";
+
+/* Badge: theme is applied */
+"Applied" = "Applied";
+
+/* Context menu: apply theme */
+"Apply" = "Apply";
+
+
+/* Label: theme author */
+"Author" = "Author";
+
+/* Label: theme author (with colon) */
+"Author:" = "Author:";
+
+
+/* Format: theme subtitle (author and version) */
+"by %@ • v%.1f" = "by %1$@ • v%2$.1f";
+
+/* Button: cancel action */
+"Cancel" = "Cancel";
+
+/* Undo: change theme author */
+"Change Author" = "Change Author";
+
+/* Undo: change theme HiDPI */
+"Change HiDPI" = "Change HiDPI";
+
+/* Undo: change theme identifier */
+"Change Identifier" = "Change Identifier";
+
+/* Undo: change theme name */
+"Change Name" = "Change Name";
+
+/* Undo: change theme version */
+"Change Version" = "Change Version";
+
+/* Placeholder: no cursor selected */
+"Choose a cursor from the list to edit its properties." = "Choose a cursor from the list to edit its properties.";
+
+/* Placeholder: no theme selected */
+"Choose a cursor theme from the sidebar to view its cursors." = "Choose a cursor theme from the sidebar to view its cursors.";
+
+/* Import panel description */
+"Choose cursor theme files to import (.cursor)" = "Choose cursor theme files to import (.cursor)";
+
+/* Button: close window */
+"Close" = "Close";
+
+/* About: copyright notice */
+"Copyright © %@ Writronic. All rights reserved." = "Copyright © %@ Writronic. All rights reserved.";
+
+/* Section: cursor settings */
+"Cursor" = "Cursor";
+
+/* Label: cursor scale slider */
+"Cursor Scale" = "Cursor Scale";
+
+/* Label: cursor theme picker */
+"Cursor Theme" = "Cursor Theme";
+
+/* Undo suffix: cursor type */
+"cursor type" = "cursor type";
+
+/* Label: cursor type picker */
+"Cursor Type:" = "Cursor Type:";
+
+/* About: app description */
+"Custom cursor themes for macOS" = "Custom cursor themes for macOS";
+
+/* Appearance mode: dark */
+"Dark" = "Dark";
+
+/* Button: delete cursor */
+"Delete" = "Delete";
+
+/* Undo suffix: dimensions */
+"dimensions" = "dimensions";
+
+/* Button: discard changes */
+"Discard" = "Discard";
+
+
+/* Label: drop zone */
+"Drop" = "Drop";
+
+/* Button: duplicate cursor */
+"Duplicate" = "Duplicate";
+
+/* Button: edit theme */
+"Edit" = "Edit";
+
+/* Window title: theme editor */
+"Edit Theme" = "Edit Theme";
+
+/* Error: write failure */
+"Error writing cursor theme to disk." = "Error writing cursor theme to disk.";
+
+/* Error: theme file creation failure */
+"Failed to create cursor theme file" = "Failed to create cursor theme file";
+
+/* Undo suffix: frame count */
+"frame count" = "frame count";
+
+/* Label: frame count */
+"Frame Count:" = "Frame Count:";
+
+/* Undo suffix: frame duration */
+"frame duration" = "frame duration";
+
+/* Label: frame duration */
+"Frame Duration:" = "Frame Duration:";
+
+/* Settings tab: general */
+"General" = "General";
+
+/* About: license */
+"GPL-3.0" = "GPL-3.0";
+
+/* Badge: high resolution */
+"HD" = "HD";
+
+/* Helper status: not found */
+"Helper Not Found" = "Helper Not Found";
+
+/* Section: helper tool */
+"Helper Tool" = "Helper Tool";
+
+/* Checkbox: HiDPI cursors */
+"HiDPI" = "HiDPI";
+
+/* Section: hot spot coordinates */
+"Hot Spot" = "Hot Spot";
+
+/* Undo suffix: hotspot */
+"hotspot" = "hotspot";
+
+/* Button: import */
+"Import" = "Import";
+
+/* Menu: import theme */
+"Import Theme..." = "Import Theme...";
+
+/* Button: install helper */
+"Install" = "Install";
+
+/* Helper status: installed and active */
+"Installed & Active" = "Installed & Active";
+
+/* Section/Picker: language setting */
+"Language" = "Language";
+
+/* Button: dismiss restart prompt */
+"Later" = "Later";
+
+/* Appearance mode: light */
+"Light" = "Light";
+
+/* App name */
+"MaCursor" = "MaCursor";
+
+/* Default cursor dump file name */
+"MaCursor Dump" = "MaCursor Dump";
+
+/* About: tagline */
+"Made with ❤️" = "Made with ❤️";
+
+/* Error: duplicate cursor names */
+"Multiple cursors with the name(s): %@ exist." = "Multiple cursors with the name(s): %@ exist.";
+
+/* Label: theme name */
+"Name:" = "Name:";
+
+/* Button: new theme */
+"New Theme" = "New Theme";
+
+/* Error: no file URL */
+"No file URL set." = "No file URL set.";
+
+/* Error: directory not found */
+"No path found for directory in domain." = "No path found for directory in domain.";
+
+/* Placeholder: no shortcuts */
+"No Shortcuts" = "No Shortcuts";
+
+/* Placeholder: no theme selected */
+"None" = "None";
+
+/* Helper status: not installed */
+"Not Installed" = "Not Installed";
+
+/* Placeholder: shortcut instructions */
+"Press + to add a favorite cursor shortcut." = "Press + to add a favorite cursor shortcut.";
+
+/* Button: recording shortcut */
+"Press shortcut…" = "Press shortcut…";
+
+/* Section: cursor preview */
+"Preview" = "Preview";
+
+/* Button: record shortcut */
+"Record Shortcut" = "Record Shortcut";
+
+/* Tooltip: remove representation */
+"Remove %@ representation" = "Remove %@ representation";
+
+/* Undo: remove cursor */
+"Remove Cursor" = "Remove Cursor";
+
+/* Button: remove shortcut slot */
+"Remove selected slot" = "Remove selected slot";
+
+/* Section: cursor representations */
+"Representations" = "Representations";
+
+/* Helper status: requires approval */
+"Requires Approval in System Settings" = "Requires Approval in System Settings";
+
+/* Button: reset settings */
+"Reset" = "Reset";
+
+/* Description: reset button */
+"Reset all settings to default values (cannot be undone)" = "Reset all settings to default values (cannot be undone)";
+
+/* Alert title: reset confirmation */
+"Reset All Settings?" = "Reset All Settings?";
+
+/* Section: reset settings */
+"Reset Settings" = "Reset Settings";
+
+/* Button: restart app */
+"Restart Now" = "Restart Now";
+
+/* Alert title: restart required */
+"Restart Required" = "Restart Required";
+
+/* Button: restore cursors */
+"Restore" = "Restore";
+
+/* Button: restore system cursors */
+"Restore system cursors" = "Restore system cursors";
+
+/* Menu: restore system cursors */
+"Restore System Cursors" = "Restore System Cursors";
+
+/* Button: save theme */
+"Save" = "Save";
+
+/* Alert title: save failure */
+"Save failed" = "Save failed";
+
+/* Unit: seconds */
+"sec" = "sec";
+
+/* Placeholder: select cursor */
+"Select a Cursor" = "Select a Cursor";
+
+/* Placeholder: select theme */
+"Select a Cursor Theme" = "Select a Cursor Theme";
+
+/* Window title: settings */
+"Settings" = "Settings";
+
+/* Menu: open settings */
+"Settings..." = "Settings...";
+
+/* Settings tab: shortcut */
+"Shortcut" = "Shortcut";
+
+/* Banner: helper tool required for shortcuts */
+"Shortcuts require the Helper Tool to be installed. You can install it from General → Helper Tool." = "Shortcuts require the Helper Tool to be installed. You can install it from General → Helper Tool.";
+
+/* Context menu: show in Finder */
+"Show in Finder" = "Show in Finder";
+
+/* Label: cursor size */
+"Size:" = "Size:";
+
+/* Appearance mode: system */
+"System" = "System";
+
+/* Language picker: system default */
+"System Default" = "System Default";
+
+/* Alert message: cursor theme load failure */
+"The cursor theme could not be loaded." = "The cursor theme could not be loaded.";
+
+/* Error: destination not writable */
+"The destination, %@, is not writable." = "The destination, %@, is not writable.";
+
+/* Alert message: language restart */
+"The language change will take effect after restarting MaCursor." = "The language change will take effect after restarting MaCursor.";
+
+/* Section: theme settings */
+"Theme" = "Theme";
+
+/* Label: theme name */
+"Theme Name" = "Theme Name";
+
+/* Placeholder title: theme not found */
+"Theme Not Found" = "Theme Not Found";
+
+/* Alert message: reset confirmation */
+"This will remove all cursor themes, restore system cursors, and reset every preference to its default value. This action cannot be undone." = "This will remove all cursor themes, restore system cursors, and reset every preference to its default value. This action cannot be undone.";
+
+/* Error: invalid directory */
+"Unable to create a cursor theme from the directory specified." = "Unable to create a cursor theme from the directory specified.";
+
+/* Button: uninstall helper */
+"Uninstall" = "Uninstall";
+
+/* Default author */
+"Unknown" = "Unknown";
+
+/* Default new theme name */
+"Unnamed" = "Unnamed";
+
+/* Alert title: unsaved changes */
+"Unsaved Changes" = "Unsaved Changes";
+
+/* About: version label */
+"Version %@" = "Version %@";
+
+/* Label: theme version */
+"Version:" = "Version:";
+
+/* Link: website */
+"Visit Website" = "Visit Website";
+
+/* Label: hotspot X coordinate */
+"X:" = "X:";
+
+/* Label: hotspot Y coordinate */
+"Y:" = "Y:";
+
+/* Alert message: unsaved changes */
+"Your changes will be discarded if you don't save them." = "Your changes will be discarded if you don't save them.";
