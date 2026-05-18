@@ -6,6 +6,14 @@
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
         <item>
+            <title>1.1.0</title>
+            <pubDate>Mon, 18 May 2026 16:48:41 +0000</pubDate>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>1.1.0</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <enclosure url="https://github.com/writronic/MaCursor/releases/download/v1.1.0/MaCursor.dmg" length="5268712" type="application/octet-stream" sparkle:edSignature="6DPa6hbwicfkDKJQugY4IlIBIOncYczHQ8X2Jf4SihRfilBH2UJ8ceO4eVU80PBnZTIjsElhMgntdWeXqOBDDQ=="/>
+        </item>
+        <item>
             <title>1.0.0</title>
             <pubDate>Sun, 17 May 2026 00:51:26 +0000</pubDate>
             <sparkle:version>1</sparkle:version>
