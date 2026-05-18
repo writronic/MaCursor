@@ -39,9 +39,39 @@ Requires **macOS 15 Sequoia** or later.
 - **10 Languages** — English, Deutsch, Español, Français, Nederlands, Русский, Türkçe, 日本語, 简体中文, العربية
 - **macOS Tahoe Ready** — Includes cursor identifiers for macOS 26 Tahoe's new "S" variant cursors
 
+## Quick Start
+
+Get up and running in under a minute:
+
+### 1. Install MaCursor
+
+Download the latest `.dmg` from the [Releases page](https://github.com/writronic/MaCursor/releases/latest), open it, and drag MaCursor to your Applications folder.
+
+### 2. Get Themes
+
+Browse and download `.cursor` theme files from the [Theme Gallery](https://github.com/writronic/MaCursor/tree/main/themes).
+
+> [!TIP]
+> On the GitHub page, click any `.cursor` file then click the **⬇ Download** button to save it.
+
+### 3. Import & Apply
+
+Double-click any `.cursor` file, drag & drop it onto the MaCursor library window, or use **File → Import Theme**. Then select the theme and click **Apply**.
+
+### 4. Make It Permanent (Recommended)
+
+Without the helper tool, cursors reset after a restart or user switch. To keep your theme active permanently:
+
+1. Open **MaCursor → Settings → General**.
+2. Click **Install** next to **Helper Tool**.
+3. That's it — the helper runs silently at login and reapplies your theme automatically.
+
+> [!IMPORTANT]
+> The helper tool is a lightweight login item. It uses minimal resources and keeps your chosen cursor theme across restarts, sleep/wake cycles, and user switches.
+
 ## Install
 
-Download the latest `.dmg` from the [Releases page](https://github.com/writronic/MaCursor/releases/latest). Both Apple Silicon (arm64) and Intel (x86_64) builds are available. Every release is **code-signed, notarized, and stapled** by Apple — macOS Gatekeeper will let you open it without any warnings.
+Download the latest `.dmg` from the [Releases page](https://github.com/writronic/MaCursor/releases/latest). The app ships as a **universal binary** (Apple Silicon + Intel). Every release is **code-signed, notarized, and stapled** by Apple.
 
 ## Usage
 

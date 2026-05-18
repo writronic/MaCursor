@@ -42,15 +42,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     
-    func application(_ sender: NSApplication, openFile filename: String) -> Bool {
-        let ext = (filename as NSString).pathExtension.lowercased()
-        guard ext == "cursor" else { return false }
-        
-        let url = URL(fileURLWithPath: filename)
-        enqueueOrImport(url)
-        return true
-    }
-    
     func application(_ application: NSApplication, open urls: [URL]) {
         for url in urls where url.pathExtension.lowercased() == "cursor" {
             enqueueOrImport(url)

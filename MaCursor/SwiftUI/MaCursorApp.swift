@@ -113,6 +113,8 @@ struct MaCursorApp: App {
             }
         }
         .defaultSize(width: 720, height: 520)
+        .restorationBehavior(.disabled)
+        .handlesExternalEvents(matching: [])
         
         Window("About MaCursor", id: "about") {
             AboutWindowView()
@@ -121,5 +123,6 @@ struct MaCursorApp: App {
         }
         .windowResizability(.contentSize)
         .restorationBehavior(.disabled)
+        .handlesExternalEvents(matching: [])
     }
 }
