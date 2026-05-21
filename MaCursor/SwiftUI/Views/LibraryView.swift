@@ -98,6 +98,7 @@ struct LibraryView: View {
             }
         }
         .navigationTitle("MaCursor")
+        .background(ToolbarConfigurator())
         .onChange(of: columnVisibility) { _, newValue in
             if newValue != .all {
                 columnVisibility = .all

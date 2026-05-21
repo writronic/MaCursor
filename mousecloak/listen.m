@@ -121,6 +121,12 @@ void listener(void) {
     }
     MMLog(BOLD CYAN "Listening for User changes" RESET);
     
+    NSString *systemDefaultPath = MCSystemDefaultCursorPath();
+    if (![[NSFileManager defaultManager] fileExistsAtPath:systemDefaultPath]) {
+        MMLog("Helper: Capturing system default cursors before first apply...");
+        MCCaptureSystemDefaults(systemDefaultPath);
+    }
+
     applyThemeAtPath(appliedThemePathForUser(NSUserName()));
     setCursorScale(defaultCursorScale());
     

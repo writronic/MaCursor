@@ -10,6 +10,12 @@ struct CursorThemeEditorView: View {
         self._viewModel = State(initialValue: CursorThemeEditorViewModel(cursorTheme: cursorTheme))
     }
     
+    private var visibleEditingCursors: [CursorModel] {
+        viewModel.editingCursors.filter {
+            !MCConstants.hiddenCursorAliases.contains($0.identifier)
+        }
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             themeMetadataSection
@@ -26,6 +32,7 @@ struct CursorThemeEditorView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(ToolbarConfigurator())
         .toolbar {
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save") {
@@ -112,7 +119,7 @@ struct CursorThemeEditorView: View {
     
     private var cursorListPane: some View {
         VStack(spacing: 0) {
-            List(viewModel.editingCursors, selection: $viewModel.selectedCursorId) { cursor in
+            List(visibleEditingCursors, selection: $viewModel.selectedCursorId) { cursor in
                 HStack(spacing: 8) {
                     CursorThumbnailView(cursor: cursor)
                     VStack(alignment: .leading, spacing: 1) {
@@ -157,7 +164,7 @@ struct CursorThemeEditorView: View {
                 
                 Spacer()
                 
-                Text("\(viewModel.editingCursors.count) cursors")
+                Text("\(visibleEditingCursors.count) cursors")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
@@ -191,7 +198,11 @@ struct CursorThemeEditorView: View {
     private var cursorDetailPane: some View {
         Group {
             if let cursor = viewModel.selectedCursor {
-                CursorEditorView(cursor: cursor, onDirty: { viewModel.markDirty() })
+                CursorEditorView(
+                    cursor: cursor,
+                    usedIdentifiers: viewModel.usedIdentifiers(excluding: cursor.id),
+                    onDirty: { viewModel.markDirty() }
+                )
                     .id(cursor.id)
             } else {
                 ContentUnavailableView(
@@ -260,4 +271,16 @@ private struct WindowAccessor: NSViewRepresentable {
             originalDelegate?.windowDidResignKey?(notification)
         }
     }
+}
+
+struct ToolbarConfigurator: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView {
+        let view = NSView()
+        DispatchQueue.main.async {
+            view.window?.toolbar?.allowsDisplayModeCustomization = false
+        }
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) {}
 }

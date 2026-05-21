@@ -4,7 +4,7 @@
 
 # Theme Gallery
 
-**Browse 34 cursor themes — click any name to download.**
+**Browse 34 cursor themes — click any name to download, or grab them all from the [Releases page](https://github.com/writronic/MaCursor/releases/latest).**
 
 ![Themes](https://img.shields.io/badge/Themes-34-brightgreen?style=flat-square)
 [![Contribute a Theme](https://img.shields.io/badge/Contribute%20a%20Theme-8A2BE2?style=flat-square)](https://github.com/writronic/MaCursor/blob/main/.github/CONTRIBUTING.md#submitting-a-theme-to-the-gallery)

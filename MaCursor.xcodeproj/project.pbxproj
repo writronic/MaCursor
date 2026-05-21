@@ -25,7 +25,6 @@
 		8047E40A04F8C4826F5B00E5 /* MCCursor.m in Sources */ = {isa = PBXBuildFile; fileRef = FAEE651E18A047E8003AA182 /* MCCursor.m */; };
 		9F35F2C2261B421B81BF7D9C /* SwiftUI/ViewModels/LibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 894F3AE778F544DEAC08AA46 /* SwiftUI/ViewModels/LibraryViewModel.swift */; };
 		A3002B87F5A59BCF52DA9C0D /* FileManagerExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EEA44062C061DBEDA426683 /* FileManagerExtensions.swift */; };
-		AA1B2C3D4E5F6A7B8C9D0E1F /* Resources/SystemDefault.cursor in Resources */ = {isa = PBXBuildFile; fileRef = BB2C3D4E5F6A7B8C9D0E1F2A /* Resources/SystemDefault.cursor */; };
 		AA77001100110022 /* hotkeys.m in Sources */ = {isa = PBXBuildFile; fileRef = AA77001100110011 /* hotkeys.m */; };
 		AA77002200220022 /* hotkeys.m in Sources */ = {isa = PBXBuildFile; fileRef = AA77001100110011 /* hotkeys.m */; };
 		AA77003300330022 /* hotkeys.m in Sources */ = {isa = PBXBuildFile; fileRef = AA77001100110011 /* hotkeys.m */; };
@@ -170,7 +169,6 @@
 		AABB006600660011 /* SwiftUI/Services/ModalWindowCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUI/Services/ModalWindowCoordinator.swift; sourceTree = "<group>"; };
 		B3BEB0D0CFFA402BA3259693 /* SwiftUI/Views/CursorPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUI/Views/CursorPreviewView.swift; sourceTree = "<group>"; };
 		B8944232BD39B741E9FA6DC2 /* MCPreferences.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MCPreferences.swift; path = SwiftUI/Models/MCPreferences.swift; sourceTree = "<group>"; };
-		BB2C3D4E5F6A7B8C9D0E1F2A /* Resources/SystemDefault.cursor */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = Resources/SystemDefault.cursor; sourceTree = "<group>"; };
 		EE11002200110011 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Resources/l10n/en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		EE11003300110011 /* nl */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = nl; path = Resources/l10n/nl.lproj/Localizable.strings; sourceTree = "<group>"; };
 		EE11004400110011 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "Resources/l10n/zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
@@ -185,6 +183,7 @@
 		CC11001100110011 /* SwiftUI/Services/WindowsCursorParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUI/Services/WindowsCursorParser.swift; sourceTree = "<group>"; };
 		CC22002200220011 /* SwiftUI/Services/WindowsCursorImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUI/Services/WindowsCursorImporter.swift; sourceTree = "<group>"; };
 		CC33003300330011 /* SwiftUI/Utils/WindowsCursorUTTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUI/Utils/WindowsCursorUTTypes.swift; sourceTree = "<group>"; };
+
 		CF712F2FEA344900B227E62A /* MCConstants.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = MCConstants.swift; path = SwiftUI/Models/MCConstants.swift; sourceTree = "<group>"; };
 		D2C7D9DD4213476ABBFDEC63 /* SwiftUI/Models/CursorModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUI/Models/CursorModel.swift; sourceTree = "<group>"; };
 		DB8D130C5D051BECDE7EC4D7 /* LibraryController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = LibraryController.swift; path = SwiftUI/Services/LibraryController.swift; sourceTree = "<group>"; };
@@ -506,7 +505,6 @@
 				FAC69F6C189D603C00BC829D /* MaCursor-Info.plist */,
 				FAC69F70189D603C00BC829D /* main.m */,
 				FAC69F72189D603C00BC829D /* MaCursor-Prefix.pch */,
-				BB2C3D4E5F6A7B8C9D0E1F2A /* Resources/SystemDefault.cursor */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -803,7 +801,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				FAC69F7D189D603C00BC829D /* Images.xcassets in Resources */,
-				AA1B2C3D4E5F6A7B8C9D0E1F /* Resources/SystemDefault.cursor in Resources */,
 				EE11001100110022 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1051,7 +1048,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = SP495GG2KZ;
@@ -1064,7 +1061,7 @@
 					"$(LD_RUNPATH_SEARCH_PATHS_$(IS_MACCATALYST))",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.writronic.macursor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1082,7 +1079,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = SP495GG2KZ;
@@ -1095,7 +1092,7 @@
 					"$(LD_RUNPATH_SEARCH_PATHS_$(IS_MACCATALYST))",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.writronic.macursor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1165,7 +1162,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = SP495GG2KZ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1186,7 +1183,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				METAL_ENABLE_DEBUG_INFO = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.writronic.macursorhelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1208,7 +1205,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = SP495GG2KZ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1225,7 +1222,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.2.0;
 				METAL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.writronic.macursorhelper;
 				PRODUCT_NAME = "$(TARGET_NAME)";

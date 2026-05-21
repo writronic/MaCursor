@@ -28,6 +28,7 @@ BOOL applyCursorForIdentifier(NSUInteger frameCount, CGFloat frameDuration, CGPo
         return NO;
     }
 
+
     NSArray *aliases = MCTahoeCursorAliasesForIdentifier(ident);
     for (NSString *alias in aliases) {
         int aliasSeed = 0;
@@ -135,24 +136,42 @@ BOOL applyThemeForIdentifier(NSDictionary *cursor, NSString *identifier, BOOL re
     NSUInteger fc = frameCount.unsignedIntegerValue;
     CGFloat fd = frameDuration.doubleValue;
     
-    if (images.count == 1 && fc > 1) {
-        CGImageRef spriteSheet = (__bridge CGImageRef)images[0];
-        NSUInteger sheetHeight = CGImageGetHeight(spriteSheet);
-        NSUInteger sheetWidth  = CGImageGetWidth(spriteSheet);
+    if (fc > 1 && images.count >= 1) {
+        CGImageRef firstSheet = (__bridge CGImageRef)images[0];
+        NSUInteger sheetHeight = CGImageGetHeight(firstSheet);
         NSUInteger frameHeight = sheetHeight / fc;
-        
-        if (frameHeight > 0 && frameHeight * fc <= sheetHeight) {
-            NSMutableArray *splitFrames = [NSMutableArray arrayWithCapacity:fc];
-            
-            for (NSUInteger i = 0; i < fc; i++) {
-                CGRect cropRect = CGRectMake(0, i * frameHeight, sheetWidth, frameHeight);
-                CGImageRef frame = CGImageCreateWithImageInRect(spriteSheet, cropRect);
-                if (frame) {
-                    [splitFrames addObject:(__bridge_transfer id)frame];
+
+        BOOL isSpriteSheet = (frameHeight > 0 && frameHeight * fc <= sheetHeight);
+
+        if (isSpriteSheet) {
+            NSMutableArray *splitFrames = [NSMutableArray arrayWithCapacity:fc * images.count];
+            BOOL allSplit = YES;
+
+            for (id sheet in images) {
+                CGImageRef sheetImg = (__bridge CGImageRef)sheet;
+                NSUInteger sw = CGImageGetWidth(sheetImg);
+                NSUInteger sh = CGImageGetHeight(sheetImg);
+                NSUInteger fh = sh / fc;
+
+                if (fh == 0 || fh * fc > sh) {
+                    allSplit = NO;
+                    break;
                 }
+
+                for (NSUInteger i = 0; i < fc; i++) {
+                    CGRect cropRect = CGRectMake(0, i * fh, sw, fh);
+                    CGImageRef frame = CGImageCreateWithImageInRect(sheetImg, cropRect);
+                    if (frame) {
+                        [splitFrames addObject:(__bridge_transfer id)frame];
+                    } else {
+                        allSplit = NO;
+                        break;
+                    }
+                }
+                if (!allSplit) break;
             }
-            
-            if (splitFrames.count == fc) {
+
+            if (allSplit && splitFrames.count == fc * images.count) {
                 images = splitFrames;
             }
         }
@@ -184,7 +203,6 @@ BOOL applyTheme(NSDictionary *dictionary) {
         NSNumber *version = dictionary[MCCursorDictionaryThemeVersionKey];
         
         resetAllCursors(NULL);
-        backupAllCursors(NULL);
         
         MMLog("Applying cursor theme: %s %.02f", name.UTF8String, version.floatValue);
         
@@ -194,13 +212,12 @@ BOOL applyTheme(NSDictionary *dictionary) {
             
             BOOL success = applyThemeForIdentifier(theme, key, NO);
             if (!success) {
-                MMLog(BOLD RED "Failed to hook identifier %s for some unknown reason. Bailing out..." RESET, key.UTF8String);
-                return NO;
+                MMLog(BOLD YELLOW "Failed to hook identifier %s, continuing with remaining cursors..." RESET, key.UTF8String);
             }
         }
         
         MCSetDefault(dictionary[MCCursorDictionaryIdentifierKey], MCPreferencesAppliedCursorKey);
-        
+
         MCFinalizeCursorApply(MCCursorRefreshScaleBumpSmall);
         
         MMLog(BOLD GREEN "Applied %s successfully!" RESET, name.UTF8String);

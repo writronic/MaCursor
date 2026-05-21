@@ -11,6 +11,16 @@ private enum ModalWindowTitles {
 private class BlockingOverlayView: NSView {
     weak var modalWindowToFocus: NSWindow?
     
+    override init(frame frameRect: NSRect) {
+        super.init(frame: frameRect)
+        wantsLayer = true
+        layer?.backgroundColor = NSColor.black.withAlphaComponent(0.15).cgColor
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func hitTest(_ point: NSPoint) -> NSView? {
         return self
     }
@@ -59,6 +69,7 @@ final class ModalWindowCoordinator {
     private var blockingWindowNumbers: Set<Int> = []
     private var overlayView: BlockingOverlayView?
     private weak var mainWindow: NSWindow?
+    private var eventMonitor: Any?
     
     private init() {}
     
@@ -118,30 +129,53 @@ final class ModalWindowCoordinator {
     private func blockMainWindow(for modalWindow: NSWindow) {
         guard let main = findMainWindow() else { return }
         
-        attachAsChildWindow(modalWindow, to: main)
+        modalWindow.level = .normal
+        modalWindow.order(.above, relativeTo: main.windowNumber)
         installOverlay(on: main, targeting: modalWindow)
+        installEventMonitor(targeting: modalWindow)
     }
     
     private func unblockMainWindow() {
         guard let main = findMainWindow() else { return }
         
         removeOverlay()
-        detachBlockingChildren(from: main)
+        removeEventMonitor()
+        
+        for num in blockingWindowNumbers {
+            if let w = NSApp.windows.first(where: { $0.windowNumber == num }) {
+                w.level = .normal
+            }
+        }
+        
         main.makeKeyAndOrderFront(nil)
     }
     
     
-    private func attachAsChildWindow(_ child: NSWindow, to parent: NSWindow) {
-        let alreadyAttached = parent.childWindows?.contains(child) ?? false
-        if !alreadyAttached {
-            parent.addChildWindow(child, ordered: .above)
+    private func installEventMonitor(targeting modal: NSWindow) {
+        removeEventMonitor()
+        eventMonitor = NSEvent.addLocalMonitorForEvents(
+            matching: [.leftMouseDown, .rightMouseDown, .otherMouseDown]
+        ) { [weak self] event in
+            guard let self else { return event }
+            if let eventWindow = event.window,
+               self.isMainLibraryWindow(eventWindow),
+               !self.blockingWindowNumbers.isEmpty {
+                NSSound.beep()
+                if let activeModal = NSApp.windows.first(where: {
+                    self.blockingWindowNumbers.contains($0.windowNumber) && $0.isVisible
+                }) {
+                    activeModal.makeKeyAndOrderFront(nil)
+                }
+                return nil
+            }
+            return event
         }
     }
     
-    private func detachBlockingChildren(from parent: NSWindow) {
-        guard let children = parent.childWindows else { return }
-        for child in children where blockingWindowNumbers.contains(child.windowNumber) {
-            parent.removeChildWindow(child)
+    private func removeEventMonitor() {
+        if let monitor = eventMonitor {
+            NSEvent.removeMonitor(monitor)
+            eventMonitor = nil
         }
     }
     
@@ -187,15 +221,17 @@ final class ModalWindowCoordinator {
         guard let window = notification.object as? NSWindow,
               isBlockingWindow(window) else { return }
         
-        blockingWindowNumbers.insert(window.windowNumber)
-        blockMainWindow(for: window)
+        let isNew = blockingWindowNumbers.insert(window.windowNumber).inserted
+        if isNew {
+            blockMainWindow(for: window)
+        }
     }
     
     @objc private func handleWindowWillClose(_ notification: Notification) {
         guard let window = notification.object as? NSWindow,
               blockingWindowNumbers.contains(window.windowNumber) else { return }
         
-        findMainWindow()?.removeChildWindow(window)
+        window.level = .normal
         blockingWindowNumbers.remove(window.windowNumber)
         pruneStaleEntries()
         

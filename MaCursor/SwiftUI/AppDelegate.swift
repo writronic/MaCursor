@@ -11,6 +11,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         ModalWindowCoordinator.shared.start()
         
+        let systemDefaultPath = MCSystemDefaultCursorPath()
+        if !FileManager.default.fileExists(atPath: systemDefaultPath) {
+            NSLog("MaCursor: Capturing system default cursors...")
+            let success = MCCaptureSystemDefaults(systemDefaultPath)
+            NSLog("MaCursor: System default capture %@", success ? "succeeded" : "failed")
+        }
+        
         
         let appliedId = MCPreferences.value(forKey: MCPreferences.appliedCursorKey) as? String
         if let appliedId, !appliedId.isEmpty {

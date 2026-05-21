@@ -3,14 +3,21 @@ import UniformTypeIdentifiers
 
 struct CursorEditorView: View {
     @Bindable var cursor: CursorModel
+    var usedIdentifiers: Set<String> = []
     var onDirty: (() -> Void)? = nil
+    
+    private var availableIdentifiers: [(identifier: String, name: String)] {
+        CursorIdentifier.allIdentifiers.filter {
+            $0.identifier == cursor.identifier || !usedIdentifiers.contains($0.identifier)
+        }
+    }
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Section {
                     Picker("Cursor Type:", selection: $cursor.identifier) {
-                        ForEach(CursorIdentifier.allIdentifiers, id: \.identifier) { entry in
+                        ForEach(availableIdentifiers, id: \.identifier) { entry in
                             Text(entry.name).tag(entry.identifier)
                         }
                     }

@@ -35,11 +35,12 @@ struct CursorThemeRowView: View {
             Spacer()
             
             HStack(spacing: 2) {
-                ForEach(cursorTheme.cursors.prefix(6)) { cursor in
+                let visible = cursorTheme.cursors.filter { !MCConstants.hiddenCursorAliases.contains($0.identifier) }
+                ForEach(visible.prefix(6)) { cursor in
                     CursorThumbnailView(cursor: cursor)
                 }
-                if cursorTheme.cursors.count > 6 {
-                    Text("+\(cursorTheme.cursors.count - 6)")
+                if visible.count > 6 {
+                    Text("+\(visible.count - 6)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }

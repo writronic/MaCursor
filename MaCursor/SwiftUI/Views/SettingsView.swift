@@ -2,9 +2,6 @@ import SwiftUI
 import AppKit
 import Sparkle
 
-import SwiftUI
-import AppKit
-
 private class SettingsPanel: NSWindow {
     override func cancelOperation(_ sender: Any?) {
         close()
@@ -78,11 +75,11 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate {
         window.titlebarSeparatorStyle = .none
         window.isMovableByWindowBackground = true
         window.isReleasedWhenClosed = false
-        window.setFrameAutosaveName("SettingsWindow")
         
         let toolbar = NSToolbar(identifier: "SettingsSplitToolbar")
         toolbar.showsBaselineSeparator = false
         toolbar.displayMode = .iconOnly
+        toolbar.allowsDisplayModeCustomization = false
         window.toolbar = toolbar
         window.toolbarStyle = .unified
         
@@ -129,7 +126,27 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate {
     
     override func showWindow(_ sender: Any?) {
         super.showWindow(sender)
-        window?.center()
+        centerOnMainWindow()
+    }
+    
+    private func centerOnMainWindow() {
+        guard let settingsWindow = window else { return }
+        
+        if let mainWindow = NSApp.windows.first(where: {
+            !$0.isSheet
+            && !($0 is NSPanel)
+            && ($0.title == "MaCursor" || $0.title.isEmpty)
+            && $0 !== settingsWindow
+            && $0.isVisible
+        }) {
+            let mainFrame = mainWindow.frame
+            let settingsSize = settingsWindow.frame.size
+            let x = mainFrame.midX - settingsSize.width / 2
+            let y = mainFrame.midY - settingsSize.height / 2
+            settingsWindow.setFrameOrigin(NSPoint(x: x, y: y))
+        } else {
+            settingsWindow.center()
+        }
     }
     
     

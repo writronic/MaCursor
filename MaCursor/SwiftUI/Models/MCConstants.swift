@@ -51,6 +51,16 @@ enum MCConstants {
     static let representationsKey  = "Representations"
     
     
+    static let hiddenCursorAliases: Set<String> = [
+        "com.apple.coregraphics.ArrowS",
+        "com.apple.coregraphics.IBeamS",
+    ]
+    
+    static let redundantCursorAliases: Set<String> = [
+        "com.apple.cursor.0",
+        "com.apple.cursor.1",
+    ]
+    
     static let cursorMap: [String: String] = [
         "com.apple.coregraphics.Arrow":    "Arrow",
         "com.apple.coregraphics.IBeam":    "IBeam",
@@ -61,6 +71,8 @@ enum MCConstants {
         "com.apple.coregraphics.ArrowCtx": "Ctx Arrow",
         "com.apple.coregraphics.Wait":     "Wait",
         "com.apple.coregraphics.Empty":    "Empty",
+        "com.apple.cursor.0":  "Arrow",
+        "com.apple.cursor.1":  "IBeam",
         "com.apple.cursor.2":  "Link",
         "com.apple.cursor.3":  "Forbidden",
         "com.apple.cursor.4":  "Busy",

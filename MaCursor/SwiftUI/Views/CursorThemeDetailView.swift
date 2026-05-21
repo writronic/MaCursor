@@ -7,6 +7,12 @@ struct CursorThemeDetailView: View {
         GridItem(.adaptive(minimum: 80, maximum: 120), spacing: 16)
     ]
     
+    private var visibleCursors: [CursorModel] {
+        cursorTheme.cursors.filter {
+            !MCConstants.hiddenCursorAliases.contains($0.identifier)
+        }
+    }
+    
     var body: some View {
         VStack(spacing: 0) {
             HStack {
@@ -26,7 +32,7 @@ struct CursorThemeDetailView: View {
                         .foregroundStyle(.green)
                 }
                 
-                Text("\(cursorTheme.cursors.count) cursors")
+                Text("\(visibleCursors.count) cursors")
                     .font(.callout)
                     .foregroundStyle(.secondary)
             }
@@ -36,7 +42,7 @@ struct CursorThemeDetailView: View {
             
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
-                    ForEach(cursorTheme.cursors) { cursor in
+                    ForEach(visibleCursors) { cursor in
                         VStack(spacing: 6) {
                             CursorPreviewView(cursor: cursor, showHotSpot: false)
                                 .frame(width: 64, height: 64)

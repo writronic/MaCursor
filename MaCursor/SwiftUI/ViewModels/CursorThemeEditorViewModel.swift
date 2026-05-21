@@ -5,7 +5,6 @@ import Observation
 class CursorThemeEditorViewModel {
     let cursorTheme: CursorThemeModel
     
-    
     var editingName: String
     var editingAuthor: String
     var editingVersion: Double
@@ -18,7 +17,8 @@ class CursorThemeEditorViewModel {
     var isDirty: Bool = false
     
     private var pendingAdditions: [MCCursorSwift] = []
-    private var pendingRemovals: [MCCursorSwift] = []
+    private var pendingRemovals: Set<String> = []
+    private var originalMapping: [String: CursorModel] = [:]
     
     init(cursorTheme: CursorThemeModel) {
         self.cursorTheme = cursorTheme
@@ -26,7 +26,17 @@ class CursorThemeEditorViewModel {
         self.editingAuthor = cursorTheme.author
         self.editingVersion = cursorTheme.version
         self.editingHiDPI = cursorTheme.isHiDPI
-        self.editingCursors = cursorTheme.cursors
+        
+        var copies: [CursorModel] = []
+        var mapping: [String: CursorModel] = [:]
+        for original in cursorTheme.cursors {
+            guard let backingCopy = original.backingCursor.copy() as? MCCursorSwift else { continue }
+            let copy = CursorModel(from: backingCopy, parentIdentifier: cursorTheme.backingLibrary.identifier)
+            copies.append(copy)
+            mapping[copy.id] = original
+        }
+        self.editingCursors = copies
+        self.originalMapping = mapping
     }
     
     var selectedCursor: CursorModel? {
@@ -38,18 +48,43 @@ class CursorThemeEditorViewModel {
         isDirty = true
     }
     
+    func usedIdentifiers(excluding cursorId: String) -> Set<String> {
+        Set(editingCursors.compactMap { $0.id == cursorId ? nil : $0.identifier })
+    }
     
     func save() -> Error? {
-        for cursorModel in editingCursors {
-            cursorModel.syncToBacking()
+        for editingModel in editingCursors {
+            editingModel.syncToBacking()
+            
+            if let original = originalMapping[editingModel.id] {
+                original.identifier = editingModel.identifier
+                original.frameCount = editingModel.frameCount
+                original.frameDuration = editingModel.frameDuration
+                original.hotSpot = editingModel.hotSpot
+                original.size = editingModel.size
+                
+                original.backingCursor.identifier = editingModel.backingCursor.identifier
+                original.backingCursor.frameCount = editingModel.backingCursor.frameCount
+                original.backingCursor.frameDuration = editingModel.backingCursor.frameDuration
+                original.backingCursor.hotSpot = editingModel.backingCursor.hotSpot
+                original.backingCursor.size = editingModel.backingCursor.size
+                if let reps = editingModel.backingCursor.representations as NSDictionary? {
+                    original.backingCursor.setValue(reps.mutableCopy(), forKey: "representations")
+                }
+                original.representationRevision += 1
+            }
         }
         
-        for cursorModel in editingCursors {
-            let backingId = cursorModel.backingCursor.identifier
+        for editingModel in editingCursors {
+            let backingId = editingModel.backingCursor.identifier
             if backingId == nil || backingId!.isEmpty {
                 let uniqueId = "Unassigned.\(UUID().uuidString)"
-                cursorModel.backingCursor.identifier = uniqueId
-                cursorModel.identifier = uniqueId
+                editingModel.backingCursor.identifier = uniqueId
+                editingModel.identifier = uniqueId
+                if let original = originalMapping[editingModel.id] {
+                    original.backingCursor.identifier = uniqueId
+                    original.identifier = uniqueId
+                }
             }
         }
         
@@ -57,15 +92,26 @@ class CursorThemeEditorViewModel {
         cursorTheme.author = editingAuthor
         cursorTheme.version = editingVersion
         cursorTheme.isHiDPI = editingHiDPI
-        cursorTheme.cursors = editingCursors
+        
+        var finalCursors: [CursorModel] = []
+        for editingModel in editingCursors {
+            if let original = originalMapping[editingModel.id] {
+                finalCursors.append(original)
+            } else {
+                finalCursors.append(editingModel)
+            }
+        }
+        cursorTheme.cursors = finalCursors
         
         for cursor in pendingAdditions {
             cursorTheme.backingLibrary.addCursor(cursor)
         }
         pendingAdditions.removeAll()
         
-        for cursor in pendingRemovals {
-            cursorTheme.backingLibrary.removeCursor(cursor)
+        for originalId in pendingRemovals {
+            if let original = cursorTheme.backingLibrary.cursors.first(where: { $0.identifier == originalId }) {
+                cursorTheme.backingLibrary.removeCursor(original)
+            }
         }
         pendingRemovals.removeAll()
         
@@ -84,11 +130,21 @@ class CursorThemeEditorViewModel {
         pendingAdditions.removeAll()
         pendingRemovals.removeAll()
         
+        var copies: [CursorModel] = []
+        var mapping: [String: CursorModel] = [:]
+        for original in cursorTheme.cursors {
+            guard let backingCopy = original.backingCursor.copy() as? MCCursorSwift else { continue }
+            let copy = CursorModel(from: backingCopy, parentIdentifier: cursorTheme.backingLibrary.identifier)
+            copies.append(copy)
+            mapping[copy.id] = original
+        }
+        
         editingName = cursorTheme.name
         editingAuthor = cursorTheme.author
         editingVersion = cursorTheme.version
         editingHiDPI = cursorTheme.isHiDPI
-        editingCursors = cursorTheme.cursors
+        editingCursors = copies
+        originalMapping = mapping
         
         isDirty = false
     }
@@ -108,9 +164,10 @@ class CursorThemeEditorViewModel {
         }
         if let idx = pendingAdditions.firstIndex(where: { $0 === cursor.backingCursor }) {
             pendingAdditions.remove(at: idx)
-        } else {
-            pendingRemovals.append(cursor.backingCursor)
+        } else if let original = originalMapping[cursor.id] {
+            pendingRemovals.insert(original.backingCursor.identifier ?? "")
         }
+        originalMapping.removeValue(forKey: cursor.id)
         editingCursors.removeAll { $0.id == cursor.id }
         markDirty()
     }

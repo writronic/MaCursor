@@ -79,4 +79,8 @@ extern BOOL MCCursorIsPointer(NSString *identifier);
 extern NSArray * _Nullable MCTahoeCursorAliasesForIdentifier(NSString *identifier);
 extern BOOL MCIsTahoeOrLater(void);
 
+extern BOOL MCCaptureSystemDefaults(NSString *outputPath);
+extern BOOL MCPerformCursorCapture(NSString *outputPath);
+extern NSString * _Nonnull MCSystemDefaultCursorPath(void);
+
 NS_ASSUME_NONNULL_END

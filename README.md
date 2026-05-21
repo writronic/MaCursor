@@ -16,17 +16,17 @@
 
 ---
 
-MaCursor lets you replace every macOS system cursor — arrow, I-beam, crosshair, wait spinner, and more — with custom artwork of your own. Browse 34+ built-in themes, import Windows `.cur` / `.ani` cursor files, design your own from scratch in the visual editor, and switch between themes instantly with global hotkeys.
+MaCursor lets you replace every macOS system cursor — arrow, I-beam, crosshair, wait spinner, and more — with custom artwork of your own. Browse 34+ ready-to-apply themes, import Windows `.cur` / `.ani` cursor files, design your own from scratch in the visual editor, and switch between themes instantly with global hotkeys.
 
 Requires **macOS 15 Sequoia** or later.
 
 <p align="center">
-  <img src="screenshot.png" alt="MaCursor Screenshot" width="720">
+  <img src="screenshot.png" alt="MaCursor Screenshot">
 </p>
 
 ## Features
 
-- **34+ Built-in Themes** — Ships with a curated themes, ready to apply
+- **34+ Ready-to-Apply Themes** — Browse and download curated cursor themes from the Theme Gallery
 - **One-Click Apply** — Double-click any theme to instantly replace all system cursors
 - **Full Theme Editor** — Create and edit themes with a split-pane editor: metadata, cursor list, per-cursor image slots, hotspot editing, and animated cursor preview
 - **Windows Cursor Import** — Drag & drop `.cur` and `.ani` files to import Windows cursors, including animated cursors with sprite sheet composition
@@ -37,7 +37,7 @@ Requires **macOS 15 Sequoia** or later.
 - **Auto-Updates** — Built-in Sparkle integration for seamless over-the-air updates
 - **Light / Dark / System Appearance** — Full appearance mode control
 - **10 Languages** — English, Deutsch, Español, Français, Nederlands, Русский, Türkçe, 日本語, 简体中文, العربية
-- **macOS Tahoe Ready** — Includes cursor identifiers for macOS 26 Tahoe's new "S" variant cursors
+- **macOS Tahoe Ready** — Full support for macOS 26 Tahoe, including automatic handling of new S-variant cursor identifiers
 
 ## Quick Start
 
@@ -49,10 +49,7 @@ Download the latest `.dmg` from the [Releases page](https://github.com/writronic
 
 ### 2. Get Themes
 
-Browse and download `.cursor` theme files from the [Theme Gallery](https://github.com/writronic/MaCursor/tree/main/themes).
-
-> [!TIP]
-> On the GitHub page, click any `.cursor` file then click the **⬇ Download** button to save it.
+Browse `.cursor` theme files in the [Theme Gallery](https://github.com/writronic/MaCursor/blob/main/themes/README.md) or grab them all from the [Releases page](https://github.com/writronic/MaCursor/releases/latest).
 
 ### 3. Import & Apply
 

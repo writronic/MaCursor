@@ -78,10 +78,23 @@ jobs:
             output/
           rm -f /tmp/sparkle_key.txt
 
-      - name: Upload DMG to Release
+      - name: Package Themes
+        run: |
+          cd themes
+          zip -r ../output/Themes.zip *.cursor
+          cd ..
+          if [ ! -f "output/Themes.zip" ]; then
+            echo "::error::Themes.zip was not created"
+            exit 1
+          fi
+          echo "Themes.zip created ($(du -h output/Themes.zip | cut -f1))"
+
+      - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
         with:
-          files: output/MaCursor.dmg
+          files: |
+            output/MaCursor.dmg
+            output/Themes.zip
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4

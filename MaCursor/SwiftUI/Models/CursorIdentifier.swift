@@ -11,6 +11,8 @@ enum CursorIdentifier {
     
     static var allIdentifiers: [(identifier: String, name: String)] {
         return MCConstants.cursorMap
+            .filter { !MCConstants.hiddenCursorAliases.contains($0.key) }
+            .filter { !MCConstants.redundantCursorAliases.contains($0.key) }
             .map { (identifier: $0.key, name: $0.value) }
             .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
     }

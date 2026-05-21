@@ -46,6 +46,7 @@ int main(int argc, char * argv[]) {
          "\t\t    └── 3.png\n"
                           flags:GBValueRequired];
         [options registerOption:'d' long:@"dump" description:@"Dumps the currently applied cursors to a file." flags:GBValueRequired];
+        [options registerOption:0 long:@"capture-defaults" description:@"Capture system default cursors to a .cursor file" flags:GBValueRequired | GBOptionNoHelp | GBOptionNoPrint];
         [options registerSeparator:@(BOLD "MISCELLANEOUS" RESET)];
         [options registerOption:'e' long:@"export" description:@"Export a cursor theme to a directory" flags:GBValueRequired];
         [options registerOption:'?' long:@"help" description:@"Display this help and exit" flags:GBValueNone];
@@ -97,17 +98,19 @@ int main(int argc, char * argv[]) {
             return EXIT_SUCCESS;
         }
         
-        BOOL apply   = [settings isKeyPresentAtThisLevel:@"apply"];
-        BOOL create  = [settings isKeyPresentAtThisLevel:@"create"];
-        BOOL dump    = [settings isKeyPresentAtThisLevel:@"dump"];
-        BOOL scale   = [settings isKeyPresentAtThisLevel:@"scale"];
-        BOOL listen  = [settings isKeyPresentAtThisLevel:@"listen"];
-        BOOL export  = [settings isKeyPresentAtThisLevel:@"export"];
+        BOOL apply           = [settings isKeyPresentAtThisLevel:@"apply"];
+        BOOL create          = [settings isKeyPresentAtThisLevel:@"create"];
+        BOOL dump            = [settings isKeyPresentAtThisLevel:@"dump"];
+        BOOL captureDefaults = [settings isKeyPresentAtThisLevel:@"capture-defaults"];
+        BOOL scale           = [settings isKeyPresentAtThisLevel:@"scale"];
+        BOOL listen          = [settings isKeyPresentAtThisLevel:@"listen"];
+        BOOL export          = [settings isKeyPresentAtThisLevel:@"export"];
         int amt = 0;
         
         if (apply) amt++;
         if (create) amt++;
         if (dump) amt++;
+        if (captureDefaults) amt++;
         if (scale) amt++;
         if (listen) amt++;
         if (export) amt++;
@@ -152,6 +155,12 @@ int main(int argc, char * argv[]) {
                 MMLog("Dumped %lu of %lu", (unsigned long)progress, (unsigned long)total);
                 return YES;
             });
+        } else if (captureDefaults) {
+            NSString *outputPath = [settings objectForKey:@"capture-defaults"];
+            BOOL ok = MCPerformCursorCapture(outputPath);
+            if (!suppressCopyright)
+                [options replacePlaceholdersAndPrintStringFromBlock:options.printHelpFooter];
+            return ok ? EXIT_SUCCESS : EXIT_FAILURE;
         } else if (scale) {
             NSNumber *number = [settings objectForKey:@"scale"];
             
