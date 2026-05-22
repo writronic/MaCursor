@@ -11,7 +11,7 @@
             <sparkle:version>4</sparkle:version>
             <sparkle:shortVersionString>1.3.0</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/writronic/MaCursor/releases/download/v1.3.0/MaCursor.dmg" length="4468654" type="application/octet-stream" sparkle:edSignature="BuGJWtRwYxqEE0+b4g8rjyAR/Im4Alp6QEdCo/1/odq+3yIjVCZwTi5EIU8uJ3l43uWD4hAOairQjXP4sbu3Cw=="/>
+            <enclosure url="https://github.com/writronic/MaCursor/releases/download/v1.3.0/MaCursor.dmg" length="4468426" type="application/octet-stream" sparkle:edSignature="jiDfRTR9JUzUO6FLsSuU7vRBo87ShJ5BSbq6tiNXfuDD0KEr50P3vZ93d9p59PdimqtJg08hp9hDF+qjpld5Dw=="/>
         </item>
         <item>
             <title>1.2.0</title>
