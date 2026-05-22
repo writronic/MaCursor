@@ -83,7 +83,6 @@ static OSStatus hotKeyEventHandler(EventHandlerCallRef nextHandler,
     if (!applyThemeAtPath(path)) {
         MMLog(BOLD RED "Failed to apply theme for hotkey %u" RESET, hotKeyID.id);
     } else {
-        MCFinalizeCursorApply(MCCursorRefreshScaleBumpSmall);
         forceCursorVisualRefresh();
     }
     

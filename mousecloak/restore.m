@@ -51,29 +51,24 @@ BOOL resetAllCursors(NSError **error) {
         return NO;
     }
 
+    CoreCursorUnregisterAll(cid);
+
+    for (int x = 0; x <= MC_MAX_CORE_CURSOR_ID; x++) {
+        CoreCursorSet(cid, x);
+    }
+
     NSUInteger restoredCount = 0;
     for (NSString *key in cursors) {
         NSDictionary *cursorData = cursors[key];
         BOOL success = applyThemeForIdentifier(cursorData, key, YES);
         if (success) {
             restoredCount++;
-
-            NSArray *aliases = MCTahoeCursorAliasesForIdentifier(key);
-            for (NSString *alias in aliases) {
-                applyThemeForIdentifier(cursorData, alias, YES);
-            }
         } else {
             MMLog(BOLD YELLOW "Failed to restore cursor: %s" RESET, key.UTF8String);
         }
     }
 
     MMLog("Restored %lu/%lu cursors from disk", (unsigned long)restoredCount, (unsigned long)cursors.count);
-
-    CoreCursorUnregisterAll(cid);
-
-    for (int x = 0; x <= MC_MAX_CORE_CURSOR_ID; x++) {
-        CoreCursorSet(cid, x);
-    }
 
     CGSSetSystemDefinedCursor(cid, 0);
 

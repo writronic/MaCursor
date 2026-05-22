@@ -44,6 +44,12 @@ class CursorThemeEditorViewModel {
         return editingCursors.first { $0.id == id }
     }
     
+    var visibleEditingCursors: [CursorModel] {
+        editingCursors.filter {
+            !MCConstants.hiddenCursorAliases.contains($0.identifier)
+        }
+    }
+    
     func markDirty() {
         isDirty = true
     }

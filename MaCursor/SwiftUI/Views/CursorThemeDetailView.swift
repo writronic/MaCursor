@@ -7,8 +7,11 @@ struct CursorThemeDetailView: View {
         GridItem(.adaptive(minimum: 80, maximum: 120), spacing: 16)
     ]
     
-    private var visibleCursors: [CursorModel] {
-        cursorTheme.cursors.filter {
+    private let visibleCursors: [CursorModel]
+    
+    init(cursorTheme: CursorThemeModel) {
+        self.cursorTheme = cursorTheme
+        self.visibleCursors = cursorTheme.cursors.filter {
             !MCConstants.hiddenCursorAliases.contains($0.identifier)
         }
     }

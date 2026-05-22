@@ -3,6 +3,16 @@ import SwiftUI
 struct CursorThemeRowView: View {
     let cursorTheme: CursorThemeModel
     
+    private let previewCursors: [CursorModel]
+    private let extraCount: Int
+    
+    init(cursorTheme: CursorThemeModel) {
+        self.cursorTheme = cursorTheme
+        let visible = cursorTheme.cursors.filter { !MCConstants.hiddenCursorAliases.contains($0.identifier) }
+        self.previewCursors = Array(visible.prefix(6))
+        self.extraCount = max(0, visible.count - 6)
+    }
+    
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: cursorTheme.isApplied ? "checkmark.circle.fill" : "circle")
@@ -35,12 +45,11 @@ struct CursorThemeRowView: View {
             Spacer()
             
             HStack(spacing: 2) {
-                let visible = cursorTheme.cursors.filter { !MCConstants.hiddenCursorAliases.contains($0.identifier) }
-                ForEach(visible.prefix(6)) { cursor in
+                ForEach(previewCursors) { cursor in
                     CursorThumbnailView(cursor: cursor)
                 }
-                if visible.count > 6 {
-                    Text("+\(visible.count - 6)")
+                if extraCount > 0 {
+                    Text("+\(extraCount)")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }

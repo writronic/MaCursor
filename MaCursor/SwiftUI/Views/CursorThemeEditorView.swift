@@ -10,12 +10,6 @@ struct CursorThemeEditorView: View {
         self._viewModel = State(initialValue: CursorThemeEditorViewModel(cursorTheme: cursorTheme))
     }
     
-    private var visibleEditingCursors: [CursorModel] {
-        viewModel.editingCursors.filter {
-            !MCConstants.hiddenCursorAliases.contains($0.identifier)
-        }
-    }
-    
     var body: some View {
         VStack(spacing: 0) {
             themeMetadataSection
@@ -119,7 +113,7 @@ struct CursorThemeEditorView: View {
     
     private var cursorListPane: some View {
         VStack(spacing: 0) {
-            List(visibleEditingCursors, selection: $viewModel.selectedCursorId) { cursor in
+            List(viewModel.visibleEditingCursors, selection: $viewModel.selectedCursorId) { cursor in
                 HStack(spacing: 8) {
                     CursorThumbnailView(cursor: cursor)
                     VStack(alignment: .leading, spacing: 1) {
@@ -164,7 +158,7 @@ struct CursorThemeEditorView: View {
                 
                 Spacer()
                 
-                Text("\(visibleEditingCursors.count) cursors")
+                Text("\(viewModel.visibleEditingCursors.count) cursors")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }

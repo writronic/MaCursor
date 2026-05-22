@@ -1,11 +1,4 @@
 
-//  GBSettings.m
-//  GBCli
-//
-//  Created by Tomaž Kragelj on 3/13/12.
-//  Copyright (c) 2012 Tomaz Kragelj. All rights reserved.
-//
-
 #import "GBSettings.h"
 
 static NSString * const GBSettingsArgumentsKey = @"B450A340-EC4F-40EC-B18D-B52DB881A16A";
@@ -53,13 +46,11 @@ static NSString * const GBSettingsArgumentsKey = @"B450A340-EC4F-40EC-B18D-B52DB
 	NSFileManager *manager = [NSFileManager defaultManager];
 	if (![manager fileExistsAtPath:path]) return NO;
 	
-	// Load data into dictionary.
 	NSData* data = [NSData dataWithContentsOfFile:path options:0 error:error];
 	if (!data) return NO;
 	NSDictionary *values = [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListImmutable format:NULL error:error];
 	if (!values) return NO;
 	
-	// Copy all values to ourself. Remove - or -- prefix which can optionally be used in the file!
 	[self.storage removeAllObjects];
 	[values enumerateKeysAndObjectsUsingBlock:^(NSString *key, id result, BOOL *stop) {
 		while ([key hasPrefix:@"-"]) key = [key substringFromIndex:1];
@@ -69,7 +60,6 @@ static NSString * const GBSettingsArgumentsKey = @"B450A340-EC4F-40EC-B18D-B52DB
 }
 
 - (BOOL)saveSettingsToPlist:(NSString *)path error:(NSError **)error {
-	// Note that we only save settings from current level!
 	NSData *data = [NSPropertyListSerialization dataWithPropertyList:self.storage format:NSPropertyListXMLFormat_v1_0 options:0 error:error];
 	if (!data) return NO;
 	return [data writeToFile:path options:NSDataWritingAtomic error:error];

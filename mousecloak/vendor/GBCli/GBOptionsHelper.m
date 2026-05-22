@@ -1,10 +1,3 @@
-//
-//  GBOptionsHelper.m
-//  GBCli
-//
-//  Created by Tomaž Kragelj on 3/15/12.
-//  Copyright (c) 2012 Tomaz Kragelj. All rights reserved.
-//
 
 #import "GBSettings.h"
 #import "GBCommandLineParser.h"
@@ -114,7 +107,6 @@
 	__weak GBOptionsHelper *blockSelf = self;
 	__block NSUInteger settingsHierarchyLevels = 0;
 	
-	// First add header row. Note that first element is the setting.
 	NSMutableArray *headers = [NSMutableArray arrayWithObject:@"Option"];
 	[lengths addObject:[NSNumber numberWithUnsignedInteger:[headers.lastObject length]]];
 	[settings enumerateSettings:^(GBSettings *settings, BOOL *stop) {
@@ -124,12 +116,10 @@
 	}];
 	[rows addObject:headers];
 	
-	// Append all rows for options.
 	__block NSUInteger lastSeparatorIndex = 0;
 	[self enumerateOptions:^(OptionDefinition *definition, BOOL *stop) {
 		if (![blockSelf isPrint:definition]) return;
 		
-		// Add separator. Note that we don't care about its length, we'll simply draw it over the whole line if needed.
 		if ([blockSelf isSeparator:definition]) {
 			if (rows.count == lastSeparatorIndex) {
 				[rows removeLastObject];
@@ -142,13 +132,11 @@
 			return;
 		}
 		
-		// Prepare values array. Note that the first element is simply the name of the option.
 		NSMutableArray *columns = [NSMutableArray array];
 		NSString *longOption = definition.longOption;
 		GB_UPDATE_MAX_LENGTH(longOption)
 		[columns addObject:longOption];
 		
-		// Now append value for the option on each settings level and update maximum size.
 		[settings enumerateSettings:^(GBSettings *settings, BOOL *stop) {
 			NSString *columnData = @"";
 			if ([settings isKeyPresentAtThisLevel:longOption]) {
@@ -170,20 +158,16 @@
 			[columns addObject:columnData];
 		}];
 		
-		// Add the row.
 		[rows addObject:columns];
 	}];
 	
-	// Remove last separator if there were no values.
 	if (rows.count == lastSeparatorIndex) {
 		[rows removeLastObject];
 		[rows removeLastObject];
 	}
 
-	// Render header.
 	[self replacePlaceholdersAndPrintStringFromBlock:self.printValuesHeader];
 	
-	// Render all arguments if any.
 	if (settings.arguments.count > 0) {
 		[self replacePlaceholdersAndPrintStringFromBlock:self.printValuesArgumentsHeader];
 		[settings.arguments enumerateObjectsUsingBlock:^(NSString *argument, NSUInteger idx, BOOL *stop) {
@@ -197,7 +181,6 @@
 		printf("\n");
 	}
 	
-	// Render all rows.
 	[self replacePlaceholdersAndPrintStringFromBlock:self.printValuesOptionsHeader];
 	[rows enumerateObjectsUsingBlock:^(NSArray *columns, NSUInteger rowIdx, BOOL *stopRow) {
 		NSMutableString *output = [NSMutableString string];
@@ -213,7 +196,6 @@
 		printf("%s\n", output.UTF8String);
 	}];
 	
-	// Render footer.
 	[self replacePlaceholdersAndPrintStringFromBlock:self.printValuesFooter];
 }
 
@@ -227,14 +209,12 @@
 }
 
 - (void)printHelp {	
-	// Prepare all rows.
 	__block NSUInteger maxNameTypeLength = 0;
 	__block NSUInteger lastSeparatorIndex = NSNotFound;
 	NSMutableArray *rows = [NSMutableArray array];
 	[self enumerateOptions:^(OptionDefinition *definition, BOOL *stop) {
 		if (![self isHelp:definition]) return;
 		
-		// Prepare separator. Remove previous one if there were no values prepared for it.
 		if ([self isSeparator:definition]) {
 			if (rows.count == lastSeparatorIndex) {
 				[rows removeLastObject];
@@ -246,13 +226,11 @@
 			return;
 		}
 		
-		// Prepare option description.
 		NSString *shortOption = (definition.shortOption > 0) ? [NSString stringWithFormat:@"-%c", definition.shortOption] : @"  ";
 		NSString *longOption = [NSString stringWithFormat:@"--%@", definition.longOption];
 		NSString *description = definition.description;
 		NSUInteger requirements = [self requirements:definition];
 		
-		// Prepare option type and update longest option+type string size for better alignment later on.
 		NSString *type = @"";
 		if (requirements == GBValueRequired)
 			type = @" <value>";
@@ -261,7 +239,6 @@
 		maxNameTypeLength = MAX(longOption.length + type.length, maxNameTypeLength);
 		NSString *nameAndType = [NSString stringWithFormat:@"%@%@", longOption, type];
 		
-		// Add option info to rows array.
 		NSMutableArray *columns = [NSMutableArray array];
 		[columns addObject:shortOption];
 		[columns addObject:nameAndType];
@@ -269,16 +246,13 @@
 		[rows addObject:columns];
 	}];
 	
-	// Remove last separator if there were no values.
 	if (rows.count == lastSeparatorIndex) {
 		[rows removeLastObject];
 		[rows removeLastObject];
 	}
 	
-	// Render header.
 	[self replacePlaceholdersAndPrintStringFromBlock:self.printHelpHeader];
 	
-	// Render all rows aligning long option columns properly.
 	[rows enumerateObjectsUsingBlock:^(NSArray *columns, NSUInteger rowIdx, BOOL *stop) {
 		NSMutableString *output = [NSMutableString string];
 		[columns enumerateObjectsUsingBlock:^(NSString *column, NSUInteger colIdx, BOOL *stop) {
@@ -294,7 +268,6 @@
 		printf("%s\n", output.UTF8String);
 	}];
 	
-	// Render footer.
 	[self replacePlaceholdersAndPrintStringFromBlock:self.printHelpFooter];
 }
 

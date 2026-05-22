@@ -1,41 +1,6 @@
-//
-//  GBSettings.h
-//  GBCli
-//
-//  Created by Tomaž Kragelj on 3/13/12.
-//  Copyright (c) 2012 Tomaz Kragelj. All rights reserved.
-//
 
 #import <Foundation/Foundation.h>
 
-/** The main application settings.
- 
- This class declares all possible settings for the rest of the application. It supports building a hierarchy of settings levels, for example: factory defaults, settings file and command line arguments. It provides methods for accessing any given setting, which will automatically descend to parent if current level doesn't provide a value. If no level provides a value, methods will fail! Example of usage:
- 
- ```
- // Initialize settings hierarchy
- GBSettings *factoryDefaults = [GBSettings settingsWithName:@"FactoryDefaults" parent:nil];
- GBSettings *fileSettings = [GBSettings settingsWithName:@"File" parent:factoryDefaults];
- GBSettings *settings = [GBSettings settingsWithName:@"CommandLine" parent:fileSettings];
- 
- // Setup default values
- [factoryDefaults setObject:@"Some value" forKey:@"MyString"];
- [factoryDefaults setInteger:50 forKey:@"MyInteger"];
- [factoryDefaults setBool:YES forKey:@"MyBool"];
- [fileSettings setInteger:12 forKey:@"MyInteger"];
- [settings setInteger:20 forKey:@"MyInteger"];
- [settings setBool:NO forKey:@"MyBool"];
- ... from here on, just use settings...
- 
- // Access values
- NSString *s = [settings objectForKey:@"MyString"]; // @"Some value"
- NSInteger i = [settings integerForKey:@"MyInteger"]; // 20
- BOOL b = [settings boolForKey:@"MyBool"]; // NO
- 
- // Determine which level certain setting comes from
- GBSettings *s = [settings settingsForKey:@"MyString"]; // factoryDefaults
- ```
- */
 @interface GBSettings : NSObject
 
 #pragma mark - Initialization & disposal

@@ -2,6 +2,8 @@ import AppKit
 
 class MCCursorSwift: MCCursor, @unchecked Sendable {
     
+    private var _cachedBitmapReps: [String: NSBitmapImageRep]?
+    
     
     override var name: String {
         return MCConstants.nameForIdentifier(identifier ?? "")
@@ -42,7 +44,14 @@ class MCCursorSwift: MCCursor, @unchecked Sendable {
     
     
     override func representation(for scale: MCCursorScale) -> NSBitmapImageRep? {
-        guard let reps = representations as? [String: NSBitmapImageRep] else { return nil }
+        let reps: [String: NSBitmapImageRep]
+        if let cached = _cachedBitmapReps {
+            reps = cached
+        } else {
+            guard let bridged = representations as? [String: NSBitmapImageRep] else { return nil }
+            _cachedBitmapReps = bridged
+            reps = bridged
+        }
         return reps["\(scale.rawValue)"]
     }
     
@@ -54,6 +63,8 @@ class MCCursorSwift: MCCursor, @unchecked Sendable {
     override func setRepresentation(_ imageRep: NSImageRep!, for scale: MCCursorScale) {
         let dictKey = "\(scale.rawValue)"
         let kvoKey = "cursorRep\(scale.rawValue)"
+        
+        _cachedBitmapReps = nil
         
         willChangeValue(forKey: "representations")
         willChangeValue(forKey: kvoKey)

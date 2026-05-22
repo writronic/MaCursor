@@ -136,7 +136,7 @@ BOOL applyThemeForIdentifier(NSDictionary *cursor, NSString *identifier, BOOL re
     NSUInteger fc = frameCount.unsignedIntegerValue;
     CGFloat fd = frameDuration.doubleValue;
     
-    if (fc > 1 && images.count >= 1) {
+    if ((fc > MCMaxFrameCount && images.count >= 1) || (images.count == 1 && fc > 1)) {
         CGImageRef firstSheet = (__bridge CGImageRef)images[0];
         NSUInteger sheetHeight = CGImageGetHeight(firstSheet);
         NSUInteger frameHeight = sheetHeight / fc;
@@ -172,7 +172,17 @@ BOOL applyThemeForIdentifier(NSDictionary *cursor, NSString *identifier, BOOL re
             }
 
             if (allSplit && splitFrames.count == fc * images.count) {
-                images = splitFrames;
+                NSUInteger repCount = splitFrames.count / fc;
+                if (repCount > 1) {
+                    NSUInteger offset = fc * (repCount - 1);
+                    NSMutableArray *bestRes = [NSMutableArray arrayWithCapacity:fc];
+                    for (NSUInteger i = 0; i < fc; i++) {
+                        [bestRes addObject:splitFrames[offset + i]];
+                    }
+                    images = bestRes;
+                } else {
+                    images = splitFrames;
+                }
             }
         }
     }
@@ -202,7 +212,11 @@ BOOL applyTheme(NSDictionary *dictionary) {
         NSString *name = dictionary[MCCursorDictionaryThemeNameKey];
         NSNumber *version = dictionary[MCCursorDictionaryThemeVersionKey];
         
-        resetAllCursors(NULL);
+        CGSConnectionID cid = CGSMainConnectionID();
+        CoreCursorUnregisterAll(cid);
+        for (int x = 0; x <= MC_MAX_CORE_CURSOR_ID; x++) {
+            CoreCursorSet(cid, x);
+        }
         
         MMLog("Applying cursor theme: %s %.02f", name.UTF8String, version.floatValue);
         

@@ -29,8 +29,6 @@ static void UserSpaceChanged(SCDynamicStoreRef	store, CFArrayRef changedKeys, vo
     MMLog(BOLD GREEN "User Space Changed to %s, applying cursor theme..." RESET, [(__bridge NSString *)currentConsoleUser UTF8String]);
     if (!applyThemeAtPath(appliedPath)) {
         MMLog(BOLD RED "Application of cursor theme failed" RESET);
-    } else {
-        MCFinalizeCursorApply(MCCursorRefreshScaleBumpSmall);
     }
     
     setCursorScale(defaultCursorScale());
@@ -58,7 +56,6 @@ void reconfigurationCallback(CGDirectDisplayID display,
     dispatch_source_set_event_handler(sReconfigTimer, ^{
         MMLog("Reconfigure debounce fired — applying theme");
         applyThemeAtPath(appliedThemePathForUser(NSUserName()));
-        MCFinalizeCursorApply(MCCursorRefreshScaleBumpLarge);
         sReconfigTimer = NULL;
     });
     dispatch_resume(sReconfigTimer);

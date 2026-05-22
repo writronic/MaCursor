@@ -27,6 +27,16 @@ class CursorModel: Identifiable, Hashable {
     
     let backingCursor: MCCursorSwift
     
+    
+    @ObservationIgnored private var _primaryImageCache: NSImage?
+    @ObservationIgnored private var _primaryImageCacheRevision: Int = -1
+    
+    @ObservationIgnored private var _scaleImageCache: [Int: NSImage] = [:]
+    @ObservationIgnored private var _scaleImageCacheRevision: Int = -1
+    
+    @ObservationIgnored private var _frameCache: [String: NSImage] = [:]
+    @ObservationIgnored private var _frameCacheRevision: Int = -1
+    
     init(from cursor: MCCursorSwift, parentIdentifier: String? = nil) {
         self.backingCursor = cursor
         let rawId = (cursor.identifier?.isEmpty == false) ? cursor.identifier! : UUID().uuidString
@@ -53,6 +63,16 @@ class CursorModel: Identifiable, Hashable {
     
     func image(forScale scale: Int) -> NSImage? {
         _ = representationRevision
+        
+        if _scaleImageCacheRevision == representationRevision, let cached = _scaleImageCache[scale] {
+            return cached
+        }
+        
+        if _scaleImageCacheRevision != representationRevision {
+            _scaleImageCache.removeAll()
+            _scaleImageCacheRevision = representationRevision
+        }
+        
         guard let scaleEnum = MCCursorScale(rawValue: UInt(scale)),
               let rep = backingCursor.representation(for: scaleEnum) else {
             return nil
@@ -63,12 +83,21 @@ class CursorModel: Identifiable, Hashable {
             height: CGFloat(rep.pixelsHigh) / s
         ))
         image.addRepresentation(rep)
+        _scaleImageCache[scale] = image
         return image
     }
     
     var primaryImage: NSImage? {
         _ = representationRevision
-        return image(forScale: 100) ?? image(forScale: 200) ?? backingCursor.imageWithAllReps()
+        
+        if _primaryImageCacheRevision == representationRevision {
+            return _primaryImageCache
+        }
+        
+        let img = image(forScale: 100) ?? image(forScale: 200) ?? backingCursor.imageWithAllReps()
+        _primaryImageCache = img
+        _primaryImageCacheRevision = representationRevision
+        return img
     }
     
     var cursorTypeName: String {
@@ -82,6 +111,17 @@ class CursorModel: Identifiable, Hashable {
     
     func frame(at index: Int, scale: Int = 100) -> NSImage? {
         _ = representationRevision
+        
+        let cacheKey = "\(scale)_\(index)"
+        if _frameCacheRevision == representationRevision, let cached = _frameCache[cacheKey] {
+            return cached
+        }
+        
+        if _frameCacheRevision != representationRevision {
+            _frameCache.removeAll()
+            _frameCacheRevision = representationRevision
+        }
+        
         guard let scaleEnum = MCCursorScale(rawValue: UInt(scale)),
               let rep = backingCursor.representation(for: scaleEnum) else {
             return nil
@@ -105,6 +145,8 @@ class CursorModel: Identifiable, Hashable {
         let frameImage = NSImage(size: NSSize(width: size.width, height: size.height))
         let frameRep = NSBitmapImageRep(cgImage: croppedCGImage)
         frameImage.addRepresentation(frameRep)
+        
+        _frameCache[cacheKey] = frameImage
         return frameImage
     }
     
