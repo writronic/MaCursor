@@ -197,7 +197,7 @@ BOOL applyThemeForIdentifier(NSDictionary *cursor, NSString *identifier, BOOL re
     CGFloat fd = frameDuration.doubleValue;
 
     BOOL sheetsRebuilt = NO;
-    if (fc > MACMaxFrameCount && images.count > 1) {
+    if (fc > MACMaxFrameCount && images.count >= 1) {
         NSUInteger targetCount = MACMaxFrameCount;
         NSMutableArray *rebuiltSheets = [NSMutableArray arrayWithCapacity:images.count];
         BOOL allRebuilt = YES;
@@ -243,8 +243,7 @@ BOOL applyThemeForIdentifier(NSDictionary *cursor, NSString *identifier, BOOL re
         }
     }
 
-    if (!sheetsRebuilt &&
-        ((fc > MACMaxFrameCount && images.count >= 1) || (images.count == 1 && fc > 1))) {
+    if (!sheetsRebuilt && fc > MACMaxFrameCount && images.count >= 1) {
         CGImageRef firstSheet = (__bridge CGImageRef)images[0];
         NSUInteger sheetHeight = CGImageGetHeight(firstSheet);
         NSUInteger frameHeight = sheetHeight / fc;
