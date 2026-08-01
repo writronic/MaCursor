@@ -505,7 +505,7 @@
 "No cursors in the input could be mapped to macOS cursor slots." = "Żaden kursor z pliku wejściowego nie mógł zostać przypisany do systemowych pozycji macOS.";
 
 /* Conversion error: the chosen file or folder could not be read */
-"Cannot read input: %@." = "Nie można wczytać wejśćia: %@.";
+"Cannot read input: %@." = "Nie można wczytać wejścia: %@.";
 
 /* Convert Theme failure detail, embedded in “Cannot read input: …” */
 "no such file or directory: %@" = "brak pliku lub katalogu: %@";
