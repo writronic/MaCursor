@@ -538,7 +538,7 @@
 "Slot Sizes Out of Order" = "Rozmiary Slotów Nie w Kolejności";
 
 /* Slot order rejection alert message */
-"Slot images must stay in size order (10× > 5× > 2× > 1×). This image does not fit the %1$@ slot because of the image in the %2$@ slot." = "Obrazy w slotach muszą być w kolejności (10× > 5× > 2× > 1×). Ten obraz nie mieści się w slot %1$@ przez obraz w slocie %2$@.";
+"Slot images must stay in size order (10× > 5× > 2× > 1×). This image does not fit the %1$@ slot because of the image in the %2$@ slot." = "Obrazy w slotach muszą być w kolejności (10× > 5× > 2× > 1×). Ten obraz nie mieści się w slocie %1$@ przez obraz w slocie %2$@.";
 
 /* Save blocked: cursor slot pixel sizes out of order */
 "“%@” has slot images out of size order (10× > 5× > 2× > 1×). Fix the slots before saving." = "“%@” posiada obrazy nie w kolejności (10× > 5× > 2× > 1×). Napraw sloty przed zapisem.";
