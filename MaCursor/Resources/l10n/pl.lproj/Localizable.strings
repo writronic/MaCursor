@@ -532,7 +532,7 @@
 "The theme has no cursors to write." = "Schemat nie ma kursorów do zapisu.";
 
 /* Conversion error: the theme name yields no valid identifier */
-"Theme name “%@” contains no usable characters." = "Nazwa schematu “%@” nie posiada znaków których można użyć.";
+"Theme name “%@” contains no usable characters." = "Nazwa schematu „%@” nie posiada znaków, których można użyć.";
 
 /* Slot order rejection alert title */
 "Slot Sizes Out of Order" = "Rozmiary Slotów Nie w Kolejności";
