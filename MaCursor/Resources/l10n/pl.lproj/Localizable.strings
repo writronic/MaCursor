@@ -133,7 +133,7 @@
 "Edit Theme" = "Edytuj Schemat";
 
 /* Error: write failure */
-"Error writing cursor theme to disk." = "Bład zapisu schematu kursorów na dysku.";
+"Error writing cursor theme to disk." = "Błąd zapisu schematu kursorów na dysku.";
 
 /* Error: theme file creation failure */
 "Failed to create cursor theme file" = "Nie udało się utworzyć pliku schematu kursorów";
