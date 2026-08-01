@@ -389,7 +389,7 @@
 "Convert" = "Konwertuj";
 
 /* Convert theme panel message */
-"Choose a Mousecape .cape file, a Windows cursor folder (.cur/.ani), or a Linux Xcursor theme folder." = "Wybierz plik .cape Mousecape, folder kursorów Windows (.cur/.ani), lub folder schematu kursorów Xcursor Linux";
+"Choose a Mousecape .cape file, a Windows cursor folder (.cur/.ani), or a Linux Xcursor theme folder." = "Wybierz plik .cape Mousecape, folder kursorów Windows (.cur/.ani) lub folder schematu kursorów Xcursor Linux.";
 
 /* Mapped cursors group title */
 "Mapped" = "Zmapowane";
