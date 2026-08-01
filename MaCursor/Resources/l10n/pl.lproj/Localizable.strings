@@ -81,7 +81,7 @@
 "Choose a cursor theme from the sidebar to view its cursors." = "Wybierz schemat kursorów z paska bocznego, aby zobaczyć jego kursory.";
 
 /* Import panel description */
-"Choose cursor theme files to import (.cursor)" = "Wybierz pliki schematu kursorów aby zaimportować (.cursor)";
+"Choose cursor theme files to import (.cursor)" = "Wybierz pliki schematu kursorów, aby zaimportować (.cursor)";
 
 /* Button: close window */
 "Close" = "Zamknij";
