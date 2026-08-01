@@ -205,7 +205,7 @@
 "Made with ❤️" = "Stworzone z ❤️";
 
 /* Error: duplicate cursor names */
-"Multiple cursors with the name(s): %@ exist." = "Istnieje już kursor o nazwie %@";
+"Multiple cursors with the name(s): %@ exist." = "Istnieją kursory o nazwach: %@.";
 
 /* Label: theme name */
 "Name:" = "Nazwa:";
