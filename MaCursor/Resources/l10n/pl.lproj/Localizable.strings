@@ -75,7 +75,7 @@
 "Change Version" = "Zmień Wersję";
 
 /* Placeholder: no cursor selected */
-"Choose a cursor from the list to edit its properties." = "Wybierz kursor z listy aby zmienić jego właściwości.";
+"Choose a cursor from the list to edit its properties." = "Wybierz kursor z listy, aby zmienić jego właściwości.";
 
 /* Placeholder: no theme selected */
 "Choose a cursor theme from the sidebar to view its cursors." = "Wybierz schemat kursorów z paska bocznego aby zobaczyć jego kursory.";
