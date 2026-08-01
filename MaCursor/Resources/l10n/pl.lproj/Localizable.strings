@@ -373,7 +373,7 @@
 "Y:" = "Y:";
 
 /* Alert message: unsaved changes */
-"Your changes will be discarded if you don't save them." = "Twoje zmiany zostaną odrzucone jeśli ich nie zapiszesz.";
+"Your changes will be discarded if you don't save them." = "Twoje zmiany zostaną odrzucone, jeśli ich nie zapiszesz.";
 
 
 /* --- Theme conversion (import from other formats) --- */
