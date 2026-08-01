@@ -241,7 +241,7 @@
 "Record Shortcut" = "Nagraj Skrót";
 
 /* Tooltip: remove representation */
-"Remove %@ representation" = "Usuń  reprezentację %@";
+"Remove %@ representation" = "Usuń reprezentację %@";
 
 /* Undo: remove cursor */
 "Remove Cursor" = "Usuń Kursor";
