@@ -449,7 +449,7 @@
 "Could Not Replace Cursor" = "Nie Udało Się Zamienić Kursora";
 
 /* Replace source failure alert message */
-"“%@” could not be read as a cursor or image file." = "“%@” nie mógł zostać odczytany jako plik kursora lub obrazu.";
+"“%@” could not be read as a cursor or image file." = "„%@” nie mógł zostać odczytany jako plik kursora lub obrazu.";
 
 /* Tooltip: Apply stays disabled until the theme has a cursor */
 "Add at least one cursor to this theme before applying it." = "Dodaj przynajmniej jeden kursor do tego schematu aby go zastosować.";
