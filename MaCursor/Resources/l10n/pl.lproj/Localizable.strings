@@ -499,7 +499,7 @@
 "The cursor has no images." = "Kursor nie ma obrazów.";
 
 /* Conversion error: the hot spot lies outside the cursor image */
-"Hotspot %lld,%lld is outside the %lld×%lld image." = "Punkt kliknięcia %lld,%lld jest poza obrazem.";
+"Hotspot %lld,%lld is outside the %lld×%lld image." = "Punkt kliknięcia %1$lld,%2$lld znajduje się poza obrazem %3$lld×%4$lld.";
 
 /* Conversion error: nothing in the source maps to a macOS cursor slot */
 "No cursors in the input could be mapped to macOS cursor slots." = "Żaden kursor z pliku wejściowego nie mógł zostać przypisany do systemowych pozycji macOS.";
