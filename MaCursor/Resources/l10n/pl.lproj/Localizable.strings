@@ -526,7 +526,7 @@
 "%@ is an image, not a cursor theme. Use Edit Theme to drop images onto a cursor slot." = "%@ jest obrazem, nie schematem kursorów. Użyj Edytuj Schemat, aby upuścić obrazy do slotu kursora.";
 
 /* Conversion error: the chosen folder holds more than one theme */
-"This folder holds %lld theme files. Choose a single one to convert." = "Ten folder ma %lld schematów kursorów. Wybierz jeden z nich do konwersji";
+"This folder holds %lld theme files. Choose a single one to convert." = "Ten folder ma %lld schematów kursorów. Wybierz jeden z nich do konwersji.";
 
 /* Conversion error: the converted theme ended up with no cursors */
 "The theme has no cursors to write." = "Schemat nie ma kursorów do zapisu.";
