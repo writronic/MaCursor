@@ -523,7 +523,7 @@
 "%@ is an archive. Expand it first, then choose the theme folder inside it." = "%@ jest archiwum. Najpierw go rozpakuj a potem wybierz folder schematu wewnątrz.";
 
 /* Convert Theme rejection: the chosen file is a plain image */
-"%@ is an image, not a cursor theme. Use Edit Theme to drop images onto a cursor slot." = "%@ jest obrazem, nie schematem kursorów. Użyj Edytuj Schemat aby upuścić obrazy do slotu kursora.";
+"%@ is an image, not a cursor theme. Use Edit Theme to drop images onto a cursor slot." = "%@ jest obrazem, nie schematem kursorów. Użyj Edytuj Schemat, aby upuścić obrazy do slotu kursora.";
 
 /* Conversion error: the chosen folder holds more than one theme */
 "This folder holds %lld theme files. Choose a single one to convert." = "Ten folder ma %lld schematów kursorów. Wybierz jeden z nich do konwersji";
