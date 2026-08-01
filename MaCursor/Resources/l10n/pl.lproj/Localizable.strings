@@ -452,7 +452,7 @@
 "“%@” could not be read as a cursor or image file." = "„%@” nie mógł zostać odczytany jako plik kursora lub obrazu.";
 
 /* Tooltip: Apply stays disabled until the theme has a cursor */
-"Add at least one cursor to this theme before applying it." = "Dodaj przynajmniej jeden kursor do tego schematu aby go zastosować.";
+"Add at least one cursor to this theme before applying it." = "Dodaj przynajmniej jeden kursor do tego schematu, aby go zastosować.";
 
 /* Tooltip: Apply stays disabled until a cursor is bound to a cursor type */
 "Assign at least one cursor to a cursor type before applying this theme." = "Przypisz przynajmniej jeden kursor do typu kursora przed zastosowaniem tego schematu.";
