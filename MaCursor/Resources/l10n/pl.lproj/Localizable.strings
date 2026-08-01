@@ -340,7 +340,7 @@
 "Theme Not Found" = "Nie Znaleziono Schematu";
 
 /* Alert message: reset confirmation */
-"This will remove all cursor themes, restore system cursors, and reset every preference to its default value. This action cannot be undone." = "To usunie wszystkie schematy kursorów, przywróci kursory systemowe, i zresetuje wszystkie preferencje do wartości domyślnych. Tej czynności nie można cofnąć.";
+"This will remove all cursor themes, restore system cursors, and reset every preference to its default value. This action cannot be undone." = "To usunie wszystkie schematy kursorów, przywróci kursory systemowe i zresetuje wszystkie preferencje do wartości domyślnych. Tej czynności nie można cofnąć.";
 
 /* Error: invalid directory */
 "Unable to create a cursor theme from the directory specified." = "Nie można utworzyć schematu kursorów z wybranego katalogu.";
