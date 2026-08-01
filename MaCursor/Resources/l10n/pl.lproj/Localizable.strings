@@ -517,7 +517,7 @@
 "cannot list %@" = "nie można wyświetlić listy %@";
 
 /* Conversion error: unsupported input; %@ is a sentence naming the specific reason */
-"%@ Convert Theme accepts a Mousecape .cape file, a Windows cursor folder, or a Linux Xcursor theme folder." = "%@ Konwertowanie Schematu przyjmuje plik .cape Mousecape, folder kursorów Windows (.cur/.ani), lub folder schematu kursorów Xcursor Linux.";
+"%@ Convert Theme accepts a Mousecape .cape file, a Windows cursor folder, or a Linux Xcursor theme folder." = "%@ Konwertowanie Schematu przyjmuje plik .cape Mousecape, folder kursorów Windows (.cur/.ani) lub folder schematu kursorów Xcursor Linux.";
 
 /* Convert Theme rejection: the chosen file is a compressed archive */
 "%@ is an archive. Expand it first, then choose the theme folder inside it." = "%@ jest archiwum. Najpierw go rozpakuj a potem wybierz folder schematu wewnątrz.";
