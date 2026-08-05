@@ -45,6 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        MACAutoSwitchApplyIfNeeded()
         refreshHelperRegistrationIfNeeded()
     }
 

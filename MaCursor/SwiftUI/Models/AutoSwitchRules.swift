@@ -1,3 +1,4 @@
+import AppKit
 import Foundation
 
 enum ScheduleRole: String, Codable, CaseIterable, Identifiable {
@@ -10,6 +11,13 @@ enum ScheduleRole: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .day:   return String(localized: "Day mode")
         case .night: return String(localized: "Night mode")
+        }
+    }
+
+    var appearanceLabel: String {
+        switch self {
+        case .day:   return String(localized: "Light")
+        case .night: return String(localized: "Dark")
         }
     }
 
@@ -113,15 +121,30 @@ struct AppRule: Identifiable, Codable, Hashable {
 
 struct AutoSwitchConfig: Codable {
     var enabled: Bool
+    var followsSystemAppearance: Bool
+    var colorAdjustmentEnabled: Bool
+    var baseColorHex: String
+    var followsSystemAccent: Bool
+    var accentAdaptivity: Double
     var use24HourTime: Bool
     var scheduleRules: [ScheduleRule]
     var appRules: [AppRule]
 
     init(enabled: Bool = false,
+         followsSystemAppearance: Bool = false,
+         colorAdjustmentEnabled: Bool = false,
+         baseColorHex: String = "#FF8300",
+         followsSystemAccent: Bool = false,
+         accentAdaptivity: Double = 1.0,
          use24HourTime: Bool = AutoSwitchConfig.systemPrefers24HourTime(),
          scheduleRules: [ScheduleRule] = [],
          appRules: [AppRule] = []) {
         self.enabled = enabled
+        self.followsSystemAppearance = followsSystemAppearance
+        self.colorAdjustmentEnabled = colorAdjustmentEnabled
+        self.baseColorHex = CursorColorHex.normalized(baseColorHex) ?? "#FF8300"
+        self.followsSystemAccent = followsSystemAccent
+        self.accentAdaptivity = min(max(accentAdaptivity, 0), 1)
         self.use24HourTime = use24HourTime
         self.scheduleRules = scheduleRules
         self.appRules = appRules
@@ -130,6 +153,18 @@ struct AutoSwitchConfig: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? false
+        followsSystemAppearance = try container.decodeIfPresent(
+            Bool.self, forKey: .followsSystemAppearance) ?? false
+        colorAdjustmentEnabled = try container.decodeIfPresent(
+            Bool.self, forKey: .colorAdjustmentEnabled) ?? false
+        baseColorHex = CursorColorHex.normalized(
+            try container.decodeIfPresent(String.self, forKey: .baseColorHex) ?? "#FF8300"
+        ) ?? "#FF8300"
+        followsSystemAccent = try container.decodeIfPresent(
+            Bool.self, forKey: .followsSystemAccent) ?? false
+        accentAdaptivity = min(max(
+            try container.decodeIfPresent(Double.self, forKey: .accentAdaptivity) ?? 1.0,
+            0), 1)
         use24HourTime = try container.decodeIfPresent(Bool.self, forKey: .use24HourTime)
             ?? AutoSwitchConfig.systemPrefers24HourTime()
         scheduleRules = try container.decodeIfPresent([ScheduleRule].self, forKey: .scheduleRules) ?? []
@@ -177,6 +212,9 @@ struct AutoSwitchConfig: Codable {
     }
 
     mutating func normalize() {
+        baseColorHex = CursorColorHex.normalized(baseColorHex) ?? "#FF8300"
+        accentAdaptivity = min(max(accentAdaptivity, 0), 1)
+
         var day = rule(for: .day)
         var night = rule(for: .night)
         day.role = .day
@@ -229,5 +267,36 @@ struct AutoSwitchConfig: Codable {
             userInfo: nil,
             deliverImmediately: true
         )
+    }
+}
+
+enum CursorColorHex {
+    static func normalized(_ value: String) -> String? {
+        let hex = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: "#", with: "")
+            .uppercased()
+        guard hex.count == 6, UInt64(hex, radix: 16) != nil else { return nil }
+        return "#" + hex
+    }
+
+    static func color(from value: String) -> NSColor {
+        guard let hex = normalized(value),
+              let number = UInt64(hex.dropFirst(), radix: 16) else {
+            return NSColor(srgbRed: 1, green: 131 / 255, blue: 0, alpha: 1)
+        }
+        return NSColor(
+            srgbRed: CGFloat((number >> 16) & 0xFF) / 255,
+            green: CGFloat((number >> 8) & 0xFF) / 255,
+            blue: CGFloat(number & 0xFF) / 255,
+            alpha: 1
+        )
+    }
+
+    static func hex(from color: NSColor) -> String? {
+        guard let rgb = color.usingColorSpace(.sRGB) else { return nil }
+        let red = Int(round(min(max(rgb.redComponent, 0), 1) * 255))
+        let green = Int(round(min(max(rgb.greenComponent, 0), 1) * 255))
+        let blue = Int(round(min(max(rgb.blueComponent, 0), 1) * 255))
+        return String(format: "#%02X%02X%02X", red, green, blue)
     }
 }

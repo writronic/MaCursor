@@ -297,6 +297,7 @@ void reconfigurationCallback(CGDirectDisplayID display,
 }
 
 static dispatch_source_t sScheduleTimer = NULL;
+static dispatch_source_t sAutoSwitchConfigTimer = NULL;
 
 static void rescheduleAutoSwitchTimer(void) {
     if (sScheduleTimer) {
@@ -307,6 +308,10 @@ static void rescheduleAutoSwitchTimer(void) {
     NSDictionary *config = MACAutoSwitchReadConfig();
     if (![config[@"enabled"] boolValue]) {
         MMLog(BOLD CYAN "Auto-switch disabled, no timer scheduled" RESET);
+        return;
+    }
+    if (MACAutoSwitchUsesSystemAppearance(config)) {
+        MMLog(BOLD CYAN "Auto-switch follows system appearance, no time timer scheduled" RESET);
         return;
     }
 
@@ -338,11 +343,57 @@ static void autoSwitchDidChangeCallback(CFNotificationCenterRef center,
     void *observer, CFNotificationName name, const void *object,
     CFDictionaryRef userInfo)
 {
-    MMLog(BOLD CYAN "Auto-switch config changed, re-resolving" RESET);
-    if (MACAutoSwitchApplyIfNeeded()) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (sAutoSwitchConfigTimer) {
+            dispatch_source_cancel(sAutoSwitchConfigTimer);
+            sAutoSwitchConfigTimer = NULL;
+        }
+
+        sAutoSwitchConfigTimer = dispatch_source_create(
+            DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
+        dispatch_source_set_timer(
+            sAutoSwitchConfigTimer,
+            dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.15 * NSEC_PER_SEC)),
+            DISPATCH_TIME_FOREVER, 0);
+        dispatch_source_set_event_handler(sAutoSwitchConfigTimer, ^{
+            MMLog(BOLD CYAN "Auto-switch config changed, re-resolving" RESET);
+            if (MACAutoSwitchReapplyCurrentConfiguration()) {
+                forceCursorVisualRefresh();
+            }
+            rescheduleAutoSwitchTimer();
+            sAutoSwitchConfigTimer = NULL;
+        });
+        dispatch_resume(sAutoSwitchConfigTimer);
+    });
+}
+
+static void systemAppearanceDidChangeCallback(CFNotificationCenterRef center,
+    void *observer, CFNotificationName name, const void *object,
+    CFDictionaryRef userInfo)
+{
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC)),
+                   dispatch_get_main_queue(), ^{
+        NSDictionary *config = MACAutoSwitchReadConfig();
+        if (!MACAutoSwitchUsesSystemAppearance(config)) return;
+
+        MMLog(BOLD CYAN "System appearance changed, re-resolving cursor theme" RESET);
+        if (MACAutoSwitchApplyIfNeeded()) {
+            forceCursorVisualRefresh();
+        }
+    });
+}
+
+static void systemColorsDidChangeCallback(NSNotification *note) {
+    NSDictionary *config = MACAutoSwitchReadConfig();
+    BOOL followsAppearance = MACAutoSwitchUsesSystemAppearance(config);
+    BOOL followsAccent = MACAutoSwitchUsesColorAdjustment(config)
+        && [config[@"followsSystemAccent"] boolValue];
+    if (!followsAppearance && !followsAccent) return;
+
+    MMLog(BOLD CYAN "System colors changed, re-resolving cursor theme" RESET);
+    if (MACAutoSwitchReapplyCurrentConfiguration()) {
         forceCursorVisualRefresh();
     }
-    rescheduleAutoSwitchTimer();
 }
 
 static void shortcutsDidChangeCallback(CFNotificationCenterRef center,
@@ -441,6 +492,25 @@ void listener(void) {
         CFNotificationSuspensionBehaviorDeliverImmediately
     );
     MMLog(BOLD CYAN "Listening for Auto-switch config changes" RESET);
+
+    CFNotificationCenterAddObserver(
+        CFNotificationCenterGetDistributedCenter(),
+        NULL,
+        systemAppearanceDidChangeCallback,
+        CFSTR("AppleInterfaceThemeChangedNotification"),
+        NULL,
+        CFNotificationSuspensionBehaviorDeliverImmediately
+    );
+    MMLog(BOLD CYAN "Listening for System appearance changes" RESET);
+
+    [[NSNotificationCenter defaultCenter]
+        addObserverForName:NSSystemColorsDidChangeNotification
+        object:nil
+        queue:[NSOperationQueue mainQueue]
+        usingBlock:^(NSNotification *note) {
+            systemColorsDidChangeCallback(note);
+        }];
+    MMLog(BOLD CYAN "Listening for System accent color changes" RESET);
 
     [[[NSWorkspace sharedWorkspace] notificationCenter]
         addObserverForName:NSWorkspaceDidWakeNotification

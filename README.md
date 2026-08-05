@@ -38,7 +38,8 @@ Requires **macOS 15 Sequoia** or later.
 - **Cursor Scale** — Adjust cursor size from 0.50× to 4.00× with a precision slider (0.1× steps), or type any custom value and press Enter to apply
 - **Left / Right Hand Mode** — Switch cursor orientation for left-handed or right-handed mouse usage directly from Settings
 - **Global Hotkeys** — Assign keyboard shortcuts to favorite themes for instant switching from anywhere
-- **Automatic Day / Night Switching** — Set a start time and a theme for Day mode and Night mode, and MaCursor changes your cursor on schedule
+- **Automatic Theme Switching** — Switch Day / Night themes on a schedule or map separate cursor themes to macOS Light and Dark appearance
+- **Adaptive Cursor Colors** — Recolor a theme's main fill while preserving white outlines and shadows, with optional blending toward the macOS accent color
 - **Background Helper Tool** — Lightweight login item (`macursorhelper`) that keeps shortcuts active and reapplies your theme across user switches
 - **Auto-Updates** — Built-in Sparkle integration for seamless over-the-air updates
 - **Light / Dark / System Appearance** — Full appearance mode control
@@ -98,13 +99,19 @@ The new scale takes effect immediately.
 
 ### Automatic Switching
 
-Let MaCursor change your cursor theme on a schedule:
+Let MaCursor change your cursor theme on a schedule or follow the system appearance:
 
 1. Open **MaCursor → Settings → Cursor Control** and turn on **Switch cursor automatically**. This needs the Helper Tool, which you can install from **General → Helper Tool**.
-2. Pick **AM/PM** or **24 hours** as your time format.
-3. Set a start time and a theme for **Day mode** and for **Night mode**.
+2. To follow macOS, turn on **Follow system appearance** and choose a theme for **Light** and **Dark**.
+3. To use a schedule instead, leave that option off, pick **AM/PM** or **24 hours**, then set a start time and theme for **Day mode** and **Night mode**.
 
-MaCursor switches at those times and keeps that theme until the next one. The two modes must start at different times.
+The Helper Tool reacts to appearance changes in the background and keeps the selected theme active after login, sleep, wake, and user switches.
+
+### Adaptive Cursor Colors
+
+Open **MaCursor → Settings → Cursor Control** and turn on **Custom cursor color**. Choose a base color, then optionally enable **Follow system accent color** and use **Accent adaptivity** to control how strongly the macOS accent influences the cursor.
+
+MaCursor recolors the dominant fill of the applied theme while preserving white outlines, shadows, hotspots, animation frames, and Retina representations. Generated variants are cached locally and refreshed when the source theme, chosen color, or system accent changes.
 
 ### Importing Themes
 
