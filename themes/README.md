@@ -361,6 +361,14 @@
 
 ---
 
+### [MD3E Cursors](https://github.com/writronic/MaCursor/blob/main/themes/MD3ECursors.cursor)
+
+<img src="screenshots/MD3ECursors.png" alt="MD3E Cursors">
+
+*Sleek cursor set by playagain96 ([DeviantArt](https://www.deviantart.com/playagain96), [GitHub](https://github.com/playagain96)), following Google's Material Design 3 Expressive rules*
+
+---
+
 ### [Memori](https://github.com/writronic/MaCursor/blob/main/themes/Memori.cursor)
 
 <img src="screenshots/Memori.png" alt="Memori">
