@@ -575,6 +575,13 @@
 
 /* Explanation of scheduled cursor switching in Cursor settings */
 "Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one." = "Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one.";
+"Follow system appearance" = "Follow system appearance";
+"Pick a cursor theme for Light and Dark mode. MaCursor follows the macOS appearance automatically." = "Pick a cursor theme for Light and Dark mode. MaCursor follows the macOS appearance automatically.";
+"Custom cursor color" = "Custom cursor color";
+"Base color" = "Base color";
+"Follow system accent color" = "Follow system accent color";
+"Accent adaptivity" = "Accent adaptivity";
+"The cursor fill follows your chosen color and, optionally, the macOS accent color. White outlines and shadows stay unchanged." = "The cursor fill follows your chosen color and, optionally, the macOS accent color. White outlines and shadows stay unchanged.";
 
 /* Warning when both scheduled modes are given the same clock time */
 "Day mode and Night mode must start at different times, so the time was moved by one minute." = "Day mode and Night mode must start at different times, so the time was moved by one minute.";

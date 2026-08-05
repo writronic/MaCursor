@@ -100,6 +100,41 @@ struct CursorSettingsView: View {
                 Text("When enabled, a soft drop shadow is drawn under the cursor, similar to the pointer shadow on Windows. The shadow appears while a cursor theme is applied.")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
+
+                Toggle("Custom cursor color", isOn: $autoSwitch.colorAdjustmentEnabled)
+                    .onChange(of: autoSwitch.colorAdjustmentEnabled) { _, _ in
+                        autoSwitch.save()
+                    }
+
+                if autoSwitch.colorAdjustmentEnabled {
+                    ColorPicker("Base color", selection: cursorColorBinding, supportsOpacity: false)
+
+                    Toggle("Follow system accent color", isOn: $autoSwitch.followsSystemAccent)
+                        .onChange(of: autoSwitch.followsSystemAccent) { _, _ in
+                            autoSwitch.save()
+                        }
+
+                    if autoSwitch.followsSystemAccent {
+                        HStack {
+                            Text("Accent adaptivity")
+
+                            Slider(value: $autoSwitch.accentAdaptivity, in: 0...1) { editing in
+                                if !editing {
+                                    autoSwitch.save()
+                                }
+                            }
+
+                            Text(autoSwitch.accentAdaptivity, format: .percent.precision(.fractionLength(0)))
+                                .monospacedDigit()
+                                .foregroundStyle(.secondary)
+                                .frame(width: 42, alignment: .trailing)
+                        }
+                    }
+
+                    Text("The cursor fill follows your chosen color and, optionally, the macOS accent color. White outlines and shadows stay unchanged.")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
             }
 
             Section("Automatic Switching") {
@@ -120,24 +155,37 @@ struct CursorSettingsView: View {
                     }
 
                 if autoSwitch.enabled {
-                    Picker("Time Format", selection: $autoSwitch.use24HourTime) {
-                        Text("AM/PM").tag(false)
-                        Text("24 hours").tag(true)
-                    }
-                    .pickerStyle(.radioGroup)
-                    .onChange(of: autoSwitch.use24HourTime) { _, _ in
-                        autoSwitch.save()
+                    Toggle("Follow system appearance", isOn: $autoSwitch.followsSystemAppearance)
+                        .onChange(of: autoSwitch.followsSystemAppearance) { _, _ in
+                            showTimeCollisionNotice = false
+                            autoSwitch.save()
+                        }
+
+                    if !autoSwitch.followsSystemAppearance {
+                        Picker("Time Format", selection: $autoSwitch.use24HourTime) {
+                            Text("AM/PM").tag(false)
+                            Text("24 hours").tag(true)
+                        }
+                        .pickerStyle(.radioGroup)
+                        .onChange(of: autoSwitch.use24HourTime) { _, _ in
+                            autoSwitch.save()
+                        }
                     }
 
                     ForEach(ScheduleRole.allCases) { role in
                         HStack(spacing: 10) {
-                            Label(role.label, systemImage: role.icon)
-                                .frame(width: 118, alignment: .leading)
-
-                            TimeOfDayField(
-                                minutes: timeBinding(for: role),
-                                use24Hour: autoSwitch.use24HourTime
+                            Label(
+                                autoSwitch.followsSystemAppearance ? role.appearanceLabel : role.label,
+                                systemImage: role.icon
                             )
+                            .frame(width: 118, alignment: .leading)
+
+                            if !autoSwitch.followsSystemAppearance {
+                                TimeOfDayField(
+                                    minutes: timeBinding(for: role),
+                                    use24Hour: autoSwitch.use24HourTime
+                                )
+                            }
 
                             Spacer(minLength: 6)
 
@@ -155,7 +203,7 @@ struct CursorSettingsView: View {
                         }
                     }
 
-                    if showTimeCollisionNotice {
+                    if showTimeCollisionNotice && !autoSwitch.followsSystemAppearance {
                         HStack(spacing: 6) {
                             Image(systemName: "exclamationmark.triangle.fill")
                                 .foregroundStyle(.orange)
@@ -167,9 +215,15 @@ struct CursorSettingsView: View {
                     }
                 }
 
-                Text("Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one.")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+                if autoSwitch.followsSystemAppearance {
+                    Text("Pick a cursor theme for Light and Dark mode. MaCursor follows the macOS appearance automatically.")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                } else {
+                    Text("Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one.")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
             }
         }
         .formStyle(.grouped)
@@ -205,6 +259,17 @@ struct CursorSettingsView: View {
                 var rule = autoSwitch.rule(for: role)
                 rule.themeIdentifier = newValue
                 autoSwitch.setRule(rule, for: role)
+                autoSwitch.save()
+            }
+        )
+    }
+
+    private var cursorColorBinding: Binding<Color> {
+        Binding(
+            get: { Color(nsColor: CursorColorHex.color(from: autoSwitch.baseColorHex)) },
+            set: { newValue in
+                guard let hex = CursorColorHex.hex(from: NSColor(newValue)) else { return }
+                autoSwitch.baseColorHex = hex
                 autoSwitch.save()
             }
         )

@@ -563,6 +563,13 @@
 
 /* Explanation of scheduled cursor switching in Cursor settings */
 "Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one." = "Wählen Sie für jeden Modus eine Uhrzeit und ein Cursor-Design aus. MaCursor wechselt zu diesen Zeiten und behält das jeweilige Design bis zum nächsten Wechsel bei.";
+"Follow system appearance" = "Systemdarstellung folgen";
+"Pick a cursor theme for Light and Dark mode. MaCursor follows the macOS appearance automatically." = "Wählen Sie ein Cursor-Design für den hellen und dunklen Modus. MaCursor folgt automatisch der macOS-Darstellung.";
+"Custom cursor color" = "Eigene Cursorfarbe";
+"Base color" = "Grundfarbe";
+"Follow system accent color" = "Systemakzentfarbe folgen";
+"Accent adaptivity" = "Akzent-Anpassung";
+"The cursor fill follows your chosen color and, optionally, the macOS accent color. White outlines and shadows stay unchanged." = "Die Cursorfüllung folgt Ihrer gewählten Farbe und optional der macOS-Akzentfarbe. Weiße Konturen und Schatten bleiben unverändert.";
 
 /* Warning when both scheduled modes are given the same clock time */
 "Day mode and Night mode must start at different times, so the time was moved by one minute." = "Der Tagesmodus und der Nachtmodus müssen zu unterschiedlichen Zeiten beginnen, daher wurde die Uhrzeit um eine Minute verschoben.";
