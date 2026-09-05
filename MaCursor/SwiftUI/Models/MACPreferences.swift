@@ -5,7 +5,6 @@ enum MACPreferences {
 
 
     static let appliedCursorKey          = "MACAppliedCursor"
-    static let clickActionKey            = "MACLibraryClickAction"
     static let cursorScaleKey            = "MACCursorScale"
     static let handednessKey             = "MACHandedness"
     static let cursorShadowKey           = "MACCursorShadow"
@@ -17,10 +16,19 @@ enum MACPreferences {
     static let hideTahoeCursorsKey       = "MACHideTahoeCursors"
     static let advancedEditorLayoutKey   = "MACAdvancedEditorLayout"
     static let autoSwitchRulesKey        = "MACAutoSwitchRules"
+    static let appOverrideKey            = "MACAutoSwitchAppOverride"
+    static let appOverrideBaseKey        = "MACAutoSwitchAppOverrideBase"
+    static let focusFollowsMouseKey      = "MACFocusFollowsMouse"
+    static let ffmAccessibilityTrustedKey = "MACFFMAccessibilityTrusted"
+    static let showMenuBarIconKey        = "MACShowMenuBarIcon"
+    static let menuBarPanelBackgroundKey = "MACMenuBarPanelBackground"
+    static let favoriteThemesKey         = "MACFavoriteThemes"
+    static let pendingOpenSettingsKey    = "MACPendingOpenSettings"
+    static let pendingFFMAccessWindowKey = "MACPendingFFMAccessWindow"
+    static let helperBuildKey            = "MACHelperBuild"
 
     static let resetKeys: [String] = [
         appliedCursorKey,
-        clickActionKey,
         cursorScaleKey,
         handednessKey,
         suppressDeleteLibraryKey,
@@ -30,7 +38,14 @@ enum MACPreferences {
         languageKey,
         hideTahoeCursorsKey,
         cursorShadowKey,
-        autoSwitchRulesKey
+        autoSwitchRulesKey,
+        appOverrideKey,
+        appOverrideBaseKey,
+        focusFollowsMouseKey,
+        showMenuBarIconKey,
+        menuBarPanelBackgroundKey,
+        favoriteThemesKey,
+        ffmAccessibilityTrustedKey
     ]
 
     static var hideTahoeCursors: Bool {

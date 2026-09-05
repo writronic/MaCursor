@@ -13,7 +13,7 @@
 "%lld × %lld" = "%1$lld × %2$lld";
 
 /* Format: cursor count in theme */
-"%lld cursors" = "%lld kursorów";
+"%lld cursors" = "Kursorów: %lld";
 
 /* Format: additional cursor count overflow */
 "+%lld" = "+%lld";
@@ -22,7 +22,7 @@
 "About" = "O programie";
 
 /* Menu item: about panel */
-"About MaCursor" = "O MaCursor";
+"About MaCursor" = "O programie MaCursor";
 
 /* Undo: add cursor */
 "Add Cursor" = "Dodaj kursor";
@@ -124,7 +124,7 @@
 "Drop" = "Upuść";
 
 /* Button: duplicate cursor */
-"Duplicate" = "Duplikuj";
+"Duplicate" = "Powiel";
 
 /* Button: edit theme */
 "Edit" = "Edytuj";
@@ -134,9 +134,6 @@
 
 /* Error: write failure */
 "Error writing cursor theme to disk." = "Błąd zapisu schematu kursorów na dysku.";
-
-/* Error: theme file creation failure */
-"Failed to create cursor theme file" = "Nie udało się utworzyć pliku schematu kursorów";
 
 /* Undo suffix: frame count */
 "frame count" = "liczba klatek";
@@ -178,10 +175,10 @@
 "Import" = "Importuj";
 
 /* Menu: import theme */
-"Import Theme..." = "Importuj schemat...";
+"Import Theme..." = "Importuj schemat…";
 
 /* Button: install helper */
-"Install" = "Instaluj";
+"Install" = "Zainstaluj";
 
 /* Helper status: installed and active */
 "Installed & Active" = "Zainstalowany i aktywny";
@@ -256,7 +253,7 @@
 "Requires Approval in System Settings" = "Wymaga zgody w Ustawieniach systemowych";
 
 /* Button: reset settings */
-"Reset" = "Resetuj";
+"Reset" = "Zresetuj";
 
 /* Description: reset button */
 "Reset all settings to default values (cannot be undone)" = "Resetuj wszystkie ustawienia do wartości domyślnych (nie można tego cofnąć)";
@@ -268,10 +265,10 @@
 "Reset Settings" = "Resetuj ustawienia";
 
 /* Button: restart app */
-"Restart Now" = "Zrestartuj teraz";
+"Restart Now" = "Uruchom ponownie teraz";
 
 /* Alert title: restart required */
-"Restart Required" = "Wymagany restart";
+"Restart Required" = "Wymagane ponowne uruchomienie";
 
 /* Button: restore cursors */
 "Restore" = "Przywróć";
@@ -279,14 +276,11 @@
 /* Button: restore system cursors */
 "Restore system cursors" = "Przywróć systemowe kursory";
 
-/* Menu: restore system cursors */
-"Restore System Cursors" = "Przywróć systemowe kursory";
-
 /* Button: save theme */
-"Save" = "Zapisz";
+"Save" = "Zachowaj";
 
 /* Alert title: save failure */
-"Save failed" = "Zapis nieudany";
+"Save failed" = "Nie udało się zachować";
 
 /* Unit: seconds */
 "sec" = "sek";
@@ -301,7 +295,7 @@
 "Settings" = "Ustawienia";
 
 /* Menu: open settings */
-"Settings..." = "Ustawienia...";
+"Settings..." = "Ustawienia…";
 
 /* Settings tab: shortcut */
 "Shortcut" = "Skrót";
@@ -319,19 +313,16 @@
 "System" = "Systemowy";
 
 /* Language picker: system default */
-"System Default" = "Systemowy";
+"System Default" = "Domyślny systemowy";
 
 /* Alert message: cursor theme load failure */
-"The cursor theme could not be loaded." = "Schemat Kursorów nie mógł zostać załadowany.";
-
-/* Error: destination not writable */
-"The destination, %@, is not writable." = "Miejsce docelowe, %@, nie jest zapisywalne.";
+"The cursor theme could not be loaded." = "Nie udało się wczytać schematu kursorów.";
 
 /* Alert message: language restart */
-"The language change will take effect after restarting MaCursor." = "Zmiana języka przyniesie efekt po restarcie MaCursor.";
+"The language change will take effect after restarting MaCursor." = "Zmiana języka zacznie obowiązywać po ponownym uruchomieniu programu MaCursor.";
 
 /* Section: theme settings */
-"Theme" = "Motyw";
+"Theme" = "Schemat";
 
 /* Label: theme name */
 "Theme Name" = "Nazwa schematu";
@@ -341,9 +332,6 @@
 
 /* Alert message: reset confirmation */
 "This will remove all cursor themes, restore system cursors, and reset every preference to its default value. This action cannot be undone." = "To usunie wszystkie schematy kursorów, przywróci kursory systemowe i zresetuje wszystkie preferencje do wartości domyślnych. Tej czynności nie można cofnąć.";
-
-/* Error: invalid directory */
-"Unable to create a cursor theme from the directory specified." = "Nie można utworzyć schematu kursorów z wybranego katalogu.";
 
 /* Button: uninstall helper */
 "Uninstall" = "Odinstaluj";
@@ -355,7 +343,7 @@
 "Unnamed" = "Bez nazwy";
 
 /* Alert title: unsaved changes */
-"Unsaved Changes" = "Niezapisane zmiany";
+"Unsaved Changes" = "Niezachowane zmiany";
 
 /* About: version label */
 "Version %@" = "Wersja %@";
@@ -373,14 +361,14 @@
 "Y:" = "Y:";
 
 /* Alert message: unsaved changes */
-"Your changes will be discarded if you don't save them." = "Twoje zmiany zostaną odrzucone, jeśli ich nie zapiszesz.";
+"Your changes will be discarded if you don't save them." = "Twoje zmiany zostaną odrzucone, jeśli ich nie zachowasz.";
 
 
 /* --- Theme conversion (import from other formats) --- */
 
 
 /* Menu: convert theme from another format */
-"Convert Theme..." = "Konwertuj schemat...";
+"Convert Theme..." = "Konwertuj schemat…";
 
 /* Convert theme panel title */
 "Convert Theme" = "Konwertuj schemat";
@@ -428,7 +416,7 @@
 "No cursor assigned" = "Brak przypisanego kursora";
 
 /* Empty slot inspector description */
-"Choose a source file or drop one onto the cell." = "Wybierz plik źródłowy lub upuść go do komórki.";
+"Choose a source file or drop one onto the cell." = "Wybierz plik źródłowy lub upuść go na komórkę.";
 
 /* Choose cursor source button */
 "Choose Source…" = "Wybierz źródło…";
@@ -517,13 +505,13 @@
 "cannot list %@" = "nie można wyświetlić listy %@";
 
 /* Conversion error: unsupported input; %@ is a sentence naming the specific reason */
-"%@ Convert Theme accepts a Mousecape .cape file, a Windows cursor folder, or a Linux Xcursor theme folder." = "%@ Konwertowanie schematu przyjmuje plik .cape Mousecape, folder kursorów Windows (.cur/.ani) lub folder schematu kursorów Xcursor Linux.";
+"%@ Convert Theme accepts a Mousecape .cape file, a Windows cursor folder, or a Linux Xcursor theme folder." = "%@ Polecenie „Konwertuj schemat” przyjmuje plik .cape Mousecape, folder kursorów Windows lub folder schematu kursorów Xcursor Linux.";
 
 /* Convert Theme rejection: the chosen file is a compressed archive */
-"%@ is an archive. Expand it first, then choose the theme folder inside it." = "%@ jest archiwum. Najpierw go rozpakuj a potem wybierz folder schematu wewnątrz.";
+"%@ is an archive. Expand it first, then choose the theme folder inside it." = "%@ jest archiwum. Najpierw go rozpakuj, a potem wybierz znajdujący się w nim folder schematu.";
 
 /* Convert Theme rejection: the chosen file is a plain image */
-"%@ is an image, not a cursor theme. Use Edit Theme to drop images onto a cursor slot." = "%@ jest obrazem, nie schematem kursorów. Użyj Edytuj schemat, aby upuścić obrazy do slotu kursora.";
+"%@ is an image, not a cursor theme. Use Edit Theme to drop images onto a cursor slot." = "%@ jest obrazem, nie schematem kursorów. Użyj Edytuj schemat, aby upuścić obrazy na slot kursora.";
 
 /* Conversion error: the chosen folder holds more than one theme */
 "This folder holds %lld theme files. Choose a single one to convert." = "Ten folder ma %lld schematów kursorów. Wybierz jeden z nich do konwersji.";
@@ -541,7 +529,7 @@
 "Slot images must stay in size order (10× > 5× > 2× > 1×). This image does not fit the %1$@ slot because of the image in the %2$@ slot." = "Obrazy w slotach muszą być w kolejności (10× > 5× > 2× > 1×). Ten obraz nie mieści się w slocie %1$@ przez obraz w slocie %2$@.";
 
 /* Save blocked: cursor slot pixel sizes out of order */
-"“%@” has slot images out of size order (10× > 5× > 2× > 1×). Fix the slots before saving." = "„%@” posiada obrazy nie w kolejności (10× > 5× > 2× > 1×). Napraw sloty przed zapisem.";
+"“%@” has slot images out of size order (10× > 5× > 2× > 1×). Fix the slots before saving." = "„%@” posiada obrazy nie w kolejności (10× > 5× > 2× > 1×). Napraw sloty przed zachowaniem.";
 
 /* Toggle: cursor drop shadow */
 "Cursor Shadow" = "Cień kursora";
@@ -549,14 +537,20 @@
 /* Caption explaining the cursor shadow toggle */
 "When enabled, a soft drop shadow is drawn under the cursor, similar to the pointer shadow on Windows. The shadow appears while a cursor theme is applied." = "Po włączeniu tej opcji pod kursorem rysowany jest delikatny cień, podobny do cienia wskaźnika w systemie Windows. Cień pojawia się, gdy zastosowany jest schemat kursorów.";
 
-/* Cursor settings section header for scheduled theme switching */
-"Automatic Switching" = "Automatyczne przełączanie";
+/* Toggle switching the cursor theme by appearance or by time of day */
+"Theme Automation" = "Automatyzacja schematów";
 
-/* Toggle enabling scheduled cursor theme switching */
-"Switch cursor automatically" = "Automatycznie zmieniaj kursor";
+/* Toggle that makes automatic switching follow the macOS appearance */
+"Match system appearance" = "Dopasuj do wyglądu systemu";
 
-/* Warning shown when the helper tool is required for automatic switching */
-"Automatic switching requires the Helper Tool. You can install it from General → Helper Tool." = "Automatyczne przełączanie wymaga Narzędzia pomocniczego. Możesz je zainstalować w sekcji Ogólne → Narzędzie pomocnicze.";
+/* Label for the Light appearance theme pick */
+"Light Appearance" = "Jasny wygląd";
+
+/* Label for the Dark appearance theme pick */
+"Dark Appearance" = "Ciemny wygląd";
+
+/* Warning shown when the Helper Tool is missing, under Theme Automation */
+"Theme Automation requires the Helper Tool. You can install it from General → Helper Tool." = "Funkcja „Automatyzacja schematów” wymaga Narzędzia pomocniczego. Możesz je zainstalować w sekcji Ogólne → Narzędzie pomocnicze.";
 
 /* Label for the daytime scheduled switch */
 "Day mode" = "Tryb dzienny";
@@ -573,8 +567,8 @@
 /* 24-hour clock option */
 "24 hours" = "24 godziny";
 
-/* Explanation of scheduled cursor switching in Cursor settings */
-"Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one." = "Wybierz godzinę i motyw kursora dla każdego trybu. MaCursor przełącza się o tych porach i zachowuje dany motyw do następnej zmiany.";
+/* Explanation shown under the Theme Automation toggle, naming both modes */
+"Switch the cursor theme with the macOS Light and Dark appearance, or set your own day and night times." = "Zmieniaj schemat kursorów wraz z jasnym i ciemnym wyglądem macOS albo ustaw własne godziny dnia i nocy.";
 
 /* Warning when both scheduled modes are given the same clock time */
 "Day mode and Night mode must start at different times, so the time was moved by one minute." = "Tryb dzienny i tryb nocny muszą rozpoczynać się o różnych porach, dlatego czas został przesunięty o jedną minutę.";
@@ -587,3 +581,136 @@
 
 /* Button opening the donation page */
 "Donate" = "Wesprzyj";
+
+/* Toggle giving one app its own cursor theme */
+"Per-App Themes" = "Schematy dla aplikacji";
+
+/* Button that opens a file panel to add an app rule */
+"Add App…" = "Dodaj aplikację…";
+
+/* Accessibility label for the button that removes an app rule row */
+"Remove app rule" = "Usuń regułę aplikacji";
+
+/* Notice shown when the picked app already has a rule */
+"That app is already in the list." = "Ta aplikacja jest już na liście.";
+
+/* Explanation shown under the Per-App Themes toggle */
+"Each app can carry its own cursor theme. While that app is in front, MaCursor uses the theme you picked for it." = "Każda aplikacja może mieć własny schemat kursorów. Gdy dana aplikacja jest na pierwszym planie, MaCursor stosuje schemat wybrany właśnie dla niej.";
+
+/* Warning shown when the Helper Tool is missing, under Per-App Themes */
+"Per-App Themes requires the Helper Tool. You can install it from General → Helper Tool." = "Funkcja „Schematy dla aplikacji” wymaga Narzędzia pomocniczego. Możesz je zainstalować w sekcji Ogólne → Narzędzie pomocnicze.";
+
+/* Toggle activating the window under the pointer, also the Accessibility request window title */
+"Focus on Hover" = "Fokus po najechaniu";
+
+/* Warning shown when the Helper Tool is missing, under Focus on Hover */
+"Focus on Hover requires the Helper Tool. You can install it from General → Helper Tool." = "Funkcja „Fokus po najechaniu” wymaga Narzędzia pomocniczego. Możesz je zainstalować w sekcji Ogólne → Narzędzie pomocnicze.";
+
+/* Warning shown while focus follows mouse is enabled but Accessibility permission is missing */
+"Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility." = "Brak dostępu do funkcji Dostępność. Zezwól na MaCursorHelper w sekcji Prywatność i ochrona → Dostępność.";
+
+/* Button that opens the Accessibility pane of System Settings */
+"Open System Settings" = "Otwórz Ustawienia systemowe";
+
+/* Explanation shown under the Focus on Hover toggle */
+"When you hover over a window with the cursor, MaCursor raises it to the front and hands it the focus after a short delay." = "Gdy najedziesz kursorem na okno, MaCursor po krótkim opóźnieniu wysuwa je na wierzch i przenosi na nie fokus.";
+
+/* Menu bar panel: heading in front of the applied theme name */
+"Current Cursor" = "Aktualny kursor";
+
+/* Menu bar panel: heading above the theme list */
+"Cursor Themes" = "Schematy kursorów";
+
+/* Menu bar right-click menu: opens the main window */
+"Open MaCursor" = "Otwórz MaCursor";
+
+/* Settings section: MaCursor's own menu bar options */
+"Menu Bar" = "Pasek menu";
+
+/* Toggle: show the Helper Tool's icon in the menu bar */
+"Show Menu Bar Icon" = "Pokaż ikonę na pasku menu";
+
+/* Caption under the Show Menu Bar Icon toggle while the Helper Tool is not installed */
+"The menu bar icon is provided by the Helper Tool. Install it above to use it." = "Ikona na pasku menu jest udostępniana przez Narzędzie pomocnicze. Zainstaluj je powyżej, aby z niej korzystać.";
+
+/* Caption under the Show Menu Bar Icon toggle */
+"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "Wyświetla ikonę MaCursor na pasku menu do przełączania schematów kursorów i reguł dla poszczególnych aplikacji. Jeśli się nie pojawi, otwórz Ustawienia systemowe i sprawdź sekcję Pasek menu.";
+
+/* Menu bar panel */
+
+/* Menu bar panel: theme name shown when no theme is applied */
+"System cursors" = "Kursory systemowe";
+
+/* Menu bar panel: placeholder when the library is empty */
+"No cursor themes yet" = "Brak schematów kursorów";
+
+/* Menu bar panel: heading above the frontmost app */
+"Active App" = "Aktywna aplikacja";
+
+/* Menu bar panel: label of the per-app theme picker */
+"Cursor for this app" = "Kursor dla tej aplikacji";
+
+/* Menu bar panel: the theme the frontmost app's rule applies; %@ is the theme name */
+"Uses %@" = "Używa %@";
+
+/* Menu bar panel: the frontmost app has no rule and follows the applied theme */
+"Uses the current cursor" = "Używa aktualnego kursora";
+
+/* Menu bar panel: placeholder when no app is frontmost */
+"No app in front" = "Brak aplikacji na pierwszym planie";
+
+/* Menu bar panel: heading above the scale slider and the toggles */
+"Quick Controls" = "Szybkie sterowanie";
+
+/* Menu bar panel: status under the Focus on Hover toggle while the permission is missing */
+"Needs Accessibility access" = "Wymaga dostępu do Dostępności";
+
+/* Slider label: translucency of the menu bar panel */
+"Panel Background" = "Tło panelu";
+
+/* Caption under the Panel Background slider */
+"Sets how see-through the menu bar panel is: the middle of the slider is the standard frosted glass, the minimum is clear, the maximum is solid." = "Określa stopień przezroczystości panelu paska menu: środkowa pozycja suwaka odpowiada standardowemu matowemu szkłu, pozycja minimalna – pełnej przezroczystości, a pozycja maksymalna – pełnej nieprzezroczystości.";
+
+/* Favorites */
+
+/* Context menu: mark the theme as a favorite */
+"Add to Favorites" = "Dodaj do ulubionych";
+
+/* Context menu: unmark the favorite theme */
+"Remove from Favorites" = "Usuń z ulubionych";
+
+/* Menu bar panel: placeholder when no theme is a favorite */
+"No favorite themes yet" = "Brak ulubionych schematów";
+
+/* Menu bar panel: caption under the favorites placeholder */
+"Mark themes as favorites in MaCursor to show them here." = "Oznacz schematy jako ulubione w MaCursor, aby wyświetlić je tutaj.";
+
+/* Helper status: installed but not running */
+"Installed, not running" = "Zainstalowany, ale nie uruchomiony";
+
+/* Menu bar right-click menu: quits the app */
+"Quit MaCursor" = "Zakończ MaCursor";
+
+/* Heading of the window that opens when focus follows mouse is turned on without Accessibility access */
+"Allow Accessibility Access" = "Zezwól na dostęp do funkcji Dostępność";
+
+/* Explanation in that window; "MaCursorHelper" is the product name of the login-item helper and stays untranslated; "Allow for Accessibility" is the button below it */
+"MaCursorHelper needs Accessibility access to bring the window under the mouse pointer to the front. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelper wymaga dostępu do funkcji Dostępność, aby przenieść na wierzch okno znajdujące się pod wskaźnikiem myszy. Wybierz „Zezwól na dostępność”, a następnie włącz MaCursorHelper w sekcji Prywatność i ochrona → Dostępność.";
+
+/* Primary button of that window; asks the helper to show the macOS permission dialog */
+"Allow for Accessibility" = "Zezwól na dostępność";
+
+/* Secondary button of that window; closes it and leaves focus follows mouse on */
+"Not Now" = "Nie teraz";
+
+/* Status shown in that window after the button was pressed */
+"Waiting for access. This window updates as soon as MaCursorHelper is allowed." = "Oczekiwanie na dostęp. To okno zaktualizuje się, gdy tylko MaCursorHelper uzyska zezwolenie.";
+
+/* Status shown in that window once Accessibility access was granted */
+"Access granted" = "Dostęp przyznany";
+
+/* Button that closes that window once access was granted */
+"Let’s Go!" = "Zaczynamy!";
+
+/* Empty search result in the Edit Theme sidebar; %@ is the search text */
+"No Results for “%@”" = "Brak wyników dla „%@”";

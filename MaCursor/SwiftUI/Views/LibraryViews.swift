@@ -2,14 +2,12 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct LibraryView: View {
-    @Environment(LibraryViewModel.self) var library
+    @EnvironmentObject var library: LibraryViewModel
     @Environment(\.openWindow) private var openWindow
     @State private var selectedThemeId: String?
     @State private var columnVisibility = NavigationSplitViewVisibility.all
 
     var body: some View {
-        @Bindable var library = library
-
         NavigationSplitView(columnVisibility: $columnVisibility) {
             ScrollViewReader { proxy in
             List(library.cursorThemes, selection: $selectedThemeId) { cursorTheme in
@@ -26,6 +24,9 @@ struct LibraryView: View {
                         .disabled(!cursorTheme.isApplicable)
                     Button("Edit") {
                         openEditorWindow(for: cursorTheme)
+                    }
+                    Button(favoriteTitle(for: cursorTheme)) {
+                        library.toggleFavorite(cursorTheme)
                     }
                     Divider()
                     Button("Duplicate") {
@@ -51,7 +52,7 @@ struct LibraryView: View {
             }
             .listStyle(.sidebar)
             .background(ListSelectionClearer())
-            .toolbar(removing: .sidebarToggle)
+            .sidebarToggleRemoved()
             .toolbar {
                 ToolbarItem { Spacer() }
                 ToolbarItemGroup(placement: .primaryAction) {
@@ -94,10 +95,23 @@ struct LibraryView: View {
                                 openEditorWindow(for: cursorTheme)
                             }
                         }
+                        ToolbarItem {
+                            Button {
+                                library.toggleFavorite(cursorTheme)
+                            } label: {
+                                if library.isFavorite(cursorTheme) {
+                                    Label("Remove from Favorites", systemImage: "star.fill")
+                                        .foregroundStyle(.yellow)
+                                } else {
+                                    Label("Add to Favorites", systemImage: "star")
+                                }
+                            }
+                            .help(favoriteTitle(for: cursorTheme))
+                        }
                     }
             } else {
-                ContentUnavailableView(
-                    "Select a Cursor Theme",
+                UnavailableContent(
+                    title: Text("Select a Cursor Theme"),
                     systemImage: "cursorarrow.and.square.on.square.dashed",
                     description: Text("Choose a cursor theme from the sidebar to view its cursors.")
                 )
@@ -106,7 +120,7 @@ struct LibraryView: View {
         .navigationTitle("MaCursor")
         .background(ToolbarConfigurator())
         .background(WindowRoleAccessor(role: .main))
-        .onChange(of: columnVisibility) { _, newValue in
+        .onChangeCompat(of: columnVisibility) { newValue in
             if newValue != .all {
                 columnVisibility = .all
             }
@@ -167,6 +181,10 @@ struct LibraryView: View {
     private func openEditorWindow(for cursorTheme: CursorThemeModel) {
         openWindow(value: cursorTheme.id)
     }
+
+    private func favoriteTitle(for cursorTheme: CursorThemeModel) -> LocalizedStringKey {
+        library.isFavorite(cursorTheme) ? "Remove from Favorites" : "Add to Favorites"
+    }
 }
 
 extension LibraryView {
@@ -176,7 +194,7 @@ extension LibraryView {
 }
 
 private struct ApplyBlockedHelp: ViewModifier {
-    let cursorTheme: CursorThemeModel
+    @ObservedObject var cursorTheme: CursorThemeModel
 
     func body(content: Content) -> some View {
         if cursorTheme.isApplicable {
@@ -242,7 +260,7 @@ private enum RowSelectionStyle {
 }
 
 struct CursorThemeRowView: View {
-    let cursorTheme: CursorThemeModel
+    @ObservedObject var cursorTheme: CursorThemeModel
     var isSelected: Bool = false
 
     @State private var preferenceRevision = 0
@@ -353,7 +371,7 @@ struct CursorThemeRowView: View {
 }
 
 struct CursorThemeDetailView: View {
-    let cursorTheme: CursorThemeModel
+    @ObservedObject var cursorTheme: CursorThemeModel
 
     private let columns = [
         GridItem(.adaptive(minimum: 80, maximum: 120), spacing: 16)

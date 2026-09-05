@@ -1,6 +1,6 @@
 import AppKit
+import Combine
 import Foundation
-import Observation
 
 enum ModalWindowRole {
     case main
@@ -99,28 +99,24 @@ class BlockingOverlayView: NSView {
     }
 }
 
-@Observable
 @MainActor
-final class ModalWindowCoordinator {
-    @ObservationIgnored
+final class ModalWindowCoordinator: ObservableObject {
     static let shared = ModalWindowCoordinator()
 
-    @ObservationIgnored
     var windowProvider: () -> [NSWindow] = { NSApp.windows }
 
-    @ObservationIgnored
     var isApplicationActive: () -> Bool = { NSApp.isActive }
 
-    private(set) var isMainWindowBlocked = false
+    @Published private(set) var isMainWindowBlocked = false
 
-    @ObservationIgnored private var modalStack: [WeakWindow] = []
-    @ObservationIgnored private var registeredMain: [WeakWindow] = []
-    @ObservationIgnored private var registeredModals: [WeakWindow] = []
-    @ObservationIgnored private var overlayView: BlockingOverlayView?
-    @ObservationIgnored private weak var overlayHost: NSWindow?
-    @ObservationIgnored private weak var mainWindow: NSWindow?
-    @ObservationIgnored private var eventMonitor: Any?
-    @ObservationIgnored private var isReassertingOrder = false
+    private var modalStack: [WeakWindow] = []
+    private var registeredMain: [WeakWindow] = []
+    private var registeredModals: [WeakWindow] = []
+    private var overlayView: BlockingOverlayView?
+    private weak var overlayHost: NSWindow?
+    private weak var mainWindow: NSWindow?
+    private var eventMonitor: Any?
+    private var isReassertingOrder = false
 
     init() {}
 
@@ -193,6 +189,7 @@ final class ModalWindowCoordinator {
             mainWindow = window
 
         case .modal:
+            window.isRestorable = false
             let alreadyRegistered = isRegisteredModal(window)
             if !alreadyRegistered {
                 pruneRegistrations()

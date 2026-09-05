@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated:** May 2026
+**Last Updated:** August 2026
 
 ## Overview
 
@@ -30,6 +30,16 @@ All data stays on your device:
 | Cursor themes | `~/Library/Application Support/MaCursor/` | Persist installed themes |
 | Preferences | `com.writronic.MaCursor` domain | Remember your settings |
 | Login item | Managed by macOS via `SMAppService` | Optionally apply themes at startup |
+
+---
+
+## Accessibility Access
+
+The optional Focus on Hover feature uses macOS Accessibility APIs so the helper (`MaCursorHelper`) can activate the window under your pointer:
+
+- Requested only when you turn the feature on, and used only while it stays on
+- Window information is read at the moment of activation and never stored
+- Nothing is logged or transmitted
 
 ---
 

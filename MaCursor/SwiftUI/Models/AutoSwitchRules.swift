@@ -28,6 +28,27 @@ enum ScheduleRole: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+enum AppearanceRole: String, CaseIterable, Identifiable {
+    case light
+    case dark
+
+    var id: String { rawValue }
+
+    var label: String {
+        switch self {
+        case .light: return String(localized: "Light Appearance")
+        case .dark:  return String(localized: "Dark Appearance")
+        }
+    }
+
+    var icon: String {
+        switch self {
+        case .light: return "sun.max.fill"
+        case .dark:  return "moon.fill"
+        }
+    }
+}
+
 struct ScheduleRule: Identifiable, Codable, Hashable {
     let id: UUID
     var themeIdentifier: String?
@@ -114,15 +135,27 @@ struct AppRule: Identifiable, Codable, Hashable {
 struct AutoSwitchConfig: Codable {
     var enabled: Bool
     var use24HourTime: Bool
+    var matchSystemAppearance: Bool
+    var switchByApp: Bool
+    var lightThemeIdentifier: String?
+    var darkThemeIdentifier: String?
     var scheduleRules: [ScheduleRule]
     var appRules: [AppRule]
 
     init(enabled: Bool = false,
          use24HourTime: Bool = AutoSwitchConfig.systemPrefers24HourTime(),
+         matchSystemAppearance: Bool = false,
+         switchByApp: Bool = false,
+         lightThemeIdentifier: String? = nil,
+         darkThemeIdentifier: String? = nil,
          scheduleRules: [ScheduleRule] = [],
          appRules: [AppRule] = []) {
         self.enabled = enabled
         self.use24HourTime = use24HourTime
+        self.matchSystemAppearance = matchSystemAppearance
+        self.switchByApp = switchByApp
+        self.lightThemeIdentifier = lightThemeIdentifier
+        self.darkThemeIdentifier = darkThemeIdentifier
         self.scheduleRules = scheduleRules
         self.appRules = appRules
     }
@@ -132,6 +165,10 @@ struct AutoSwitchConfig: Codable {
         enabled = try container.decodeIfPresent(Bool.self, forKey: .enabled) ?? false
         use24HourTime = try container.decodeIfPresent(Bool.self, forKey: .use24HourTime)
             ?? AutoSwitchConfig.systemPrefers24HourTime()
+        matchSystemAppearance = try container.decodeIfPresent(Bool.self, forKey: .matchSystemAppearance) ?? false
+        switchByApp = try container.decodeIfPresent(Bool.self, forKey: .switchByApp) ?? false
+        lightThemeIdentifier = try container.decodeIfPresent(String.self, forKey: .lightThemeIdentifier)
+        darkThemeIdentifier = try container.decodeIfPresent(String.self, forKey: .darkThemeIdentifier)
         scheduleRules = try container.decodeIfPresent([ScheduleRule].self, forKey: .scheduleRules) ?? []
         appRules = try container.decodeIfPresent([AppRule].self, forKey: .appRules) ?? []
     }
@@ -185,10 +222,50 @@ struct AutoSwitchConfig: Codable {
         night.startMinutes = TimeOfDay.resolvedNonColliding(night.startMinutes,
                                                             avoiding: day.startMinutes)
         scheduleRules = [day, night]
+
+        var seenBundles = Set<String>()
+        appRules = appRules.filter { rule in
+            guard let bundle = rule.bundleIdentifier, !bundle.isEmpty else { return false }
+            return seenBundles.insert(bundle).inserted
+        }
+    }
+
+    func appRule(forBundleIdentifier bundleIdentifier: String) -> AppRule? {
+        appRules.first { $0.bundleIdentifier == bundleIdentifier }
+    }
+
+    mutating func setAppRule(_ newRule: AppRule) {
+        if let index = appRules.firstIndex(where: { $0.id == newRule.id }) {
+            appRules[index] = newRule
+        } else {
+            appRules.append(newRule)
+        }
+    }
+
+    mutating func removeAppRule(id: UUID) {
+        appRules.removeAll { $0.id == id }
     }
 
     static func counterpart(of role: ScheduleRole) -> ScheduleRole {
         role == .day ? .night : .day
+    }
+
+    func themeIdentifier(for role: AppearanceRole) -> String? {
+        role == .light ? lightThemeIdentifier : darkThemeIdentifier
+    }
+
+    mutating func setThemeIdentifier(_ identifier: String?, for role: AppearanceRole) {
+        if role == .light {
+            lightThemeIdentifier = identifier
+        } else {
+            darkThemeIdentifier = identifier
+        }
+    }
+
+    mutating func seedAppearanceThemesIfNeeded() {
+        guard lightThemeIdentifier == nil, darkThemeIdentifier == nil else { return }
+        lightThemeIdentifier = rule(for: .day).themeIdentifier
+        darkThemeIdentifier = rule(for: .night).themeIdentifier
     }
 
     @discardableResult
@@ -219,6 +296,7 @@ struct AutoSwitchConfig: Codable {
         normalized.normalize()
         guard let data = try? JSONEncoder().encode(normalized) else { return }
         MACPreferences.set(data, forKey: MACPreferences.autoSwitchRulesKey)
+        NotificationCenter.default.post(name: .macAutoSwitchConfigDidChange, object: nil)
         AutoSwitchConfig.notifyHelper()
     }
 
@@ -230,4 +308,8 @@ struct AutoSwitchConfig: Codable {
             deliverImmediately: true
         )
     }
+}
+
+extension Notification.Name {
+    static let macAutoSwitchConfigDidChange = Notification.Name("MACAutoSwitchConfigDidChangeLocally")
 }

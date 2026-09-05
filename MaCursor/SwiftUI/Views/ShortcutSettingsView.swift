@@ -41,9 +41,9 @@ struct FavoriteCursorSlot: Identifiable, Codable, Hashable {
 }
 
 struct ShortcutSettingsView: View {
-    @Environment(LibraryViewModel.self) private var library
+    @EnvironmentObject private var library: LibraryViewModel
 
-    @State private var helperManager = HelperToolManager.shared
+    @ObservedObject private var helperManager = HelperToolManager.shared
     @State private var slots: [FavoriteCursorSlot] = []
     @State private var selectedSlotId: UUID?
 
@@ -73,8 +73,8 @@ struct ShortcutSettingsView: View {
             ScrollView {
                 LazyVStack(spacing: 8) {
                     if slots.isEmpty {
-                        ContentUnavailableView(
-                            "No Shortcuts",
+                        UnavailableContent(
+                            title: Text("No Shortcuts"),
                             systemImage: "star.slash",
                             description: Text("Press + to add a favorite cursor shortcut.")
                         )
@@ -83,7 +83,7 @@ struct ShortcutSettingsView: View {
                         ForEach(slots) { slot in
                             SlotCardView(
                                 slot: binding(for: slot),
-                                themes: library.cursorThemes,
+                                themes: library.cursorThemes.map { ThemeChoice(id: $0.id, name: $0.name) },
                                 isSelected: selectedSlotId == slot.id
                             )
                             .onTapGesture {
@@ -95,6 +95,7 @@ struct ShortcutSettingsView: View {
                     }
                 }
                 .padding(16)
+                .disabled(!helperManager.isInstalled)
             }
             .frame(maxHeight: .infinity)
 
@@ -134,12 +135,11 @@ struct ShortcutSettingsView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
+            .disabled(!helperManager.isInstalled)
         }
         .navigationTitle("Shortcut")
         .onAppear {
             loadSlots()
-        }
-        .onChange(of: slots) { _, _ in
         }
     }
 
@@ -189,9 +189,14 @@ final class ShortcutManager {
     }
 }
 
+private struct ThemeChoice: Identifiable, Equatable {
+    let id: String
+    let name: String
+}
+
 private struct SlotCardView: View {
     @Binding var slot: FavoriteCursorSlot
-    let themes: [CursorThemeModel]
+    let themes: [ThemeChoice]
     let isSelected: Bool
 
     var body: some View {
@@ -246,6 +251,7 @@ private struct SlotCardView: View {
 
 private struct KeyRecorderView: View {
     @Binding var shortcut: KeyboardShortcutData?
+    @Environment(\.isEnabled) private var isEnabled
     @State private var isRecording: Bool = false
     @State private var eventMonitor: Any?
 
@@ -276,7 +282,7 @@ private struct KeyRecorderView: View {
             .frame(width: 130, height: 25)
             .background {
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(isRecording ? Color.accentColor.opacity(0.15) : Color(nsColor: .quaternarySystemFill))
+                    .fill(isRecording ? Color.accentColor.opacity(0.15) : Color.quaternaryFill)
             }
             .overlay {
                 RoundedRectangle(cornerRadius: 6)
@@ -287,6 +293,11 @@ private struct KeyRecorderView: View {
             }
         }
         .buttonStyle(.plain)
+        .onChangeCompat(of: isEnabled) { enabled in
+            if !enabled {
+                stopRecording()
+            }
+        }
         .onDisappear {
             stopRecording()
         }

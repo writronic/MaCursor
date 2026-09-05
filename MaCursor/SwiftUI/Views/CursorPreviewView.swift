@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CursorPreviewView: View {
-    let cursor: CursorModel
+    @ObservedObject var cursor: CursorModel
     var showHotSpot: Bool = true
     var scale: Int = 200
     var showCheckerboard: Bool = true
@@ -66,7 +66,7 @@ struct CursorPreviewView: View {
             animationTimer?.invalidate()
             animationTimer = nil
         }
-        .onChange(of: cursor.frameCount) { _, newCount in
+        .onChangeCompat(of: cursor.frameCount) { newCount in
             currentFrame = 0
             if newCount > 1 {
                 startAnimation()
@@ -75,7 +75,7 @@ struct CursorPreviewView: View {
                 animationTimer = nil
             }
         }
-        .onChange(of: cursor.frameDuration) { _, _ in
+        .onChangeCompat(of: cursor.frameDuration) { _ in
             if isAnimated {
                 startAnimation()
             }
@@ -120,7 +120,7 @@ struct CursorPreviewView: View {
 }
 
 struct CursorThumbnailView: View {
-    let cursor: CursorModel
+    @ObservedObject var cursor: CursorModel
     var size: CGFloat = 24
 
     private var thumbnailImage: NSImage? {

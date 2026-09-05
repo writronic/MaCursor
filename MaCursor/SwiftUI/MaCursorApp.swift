@@ -4,9 +4,9 @@ import Sparkle
 @main
 struct MaCursorApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @State private var library = LibraryViewModel()
-    @State private var appearanceManager = AppearanceManager()
-    @State private var languageManager = LanguageManager()
+    @StateObject private var library = LibraryViewModel()
+    @StateObject private var appearanceManager = AppearanceManager()
+    @StateObject private var languageManager = LanguageManager()
     @Environment(\.openWindow) private var openWindow
 
     private let updaterController: SPUStandardUpdaterController
@@ -22,9 +22,9 @@ struct MaCursorApp: App {
     var body: some Scene {
         WindowGroup("MaCursor") {
             LibraryView()
-                .environment(library)
-                .environment(appearanceManager)
-                .environment(languageManager)
+                .environmentObject(library)
+                .environmentObject(appearanceManager)
+                .environmentObject(languageManager)
                 .onAppear {
                     appearanceManager.applyOnLaunch()
 
@@ -34,6 +34,13 @@ struct MaCursorApp: App {
                     for url in pendingURLs {
                         library.importTheme(at: url)
                     }
+
+                    drainPendingSettingsRequest()
+                }
+                .onReceive(DistributedNotificationCenter.default().publisher(
+                    for: .MACOpenSettingsRequested)) { _ in
+                    MACPreferences.setFlag(false, forKey: MACPreferences.pendingOpenSettingsKey)
+                    openSettingsWindow()
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .macursorImportFile)) { notification in
                     if let url = notification.userInfo?["url"] as? URL {
@@ -58,10 +65,7 @@ struct MaCursorApp: App {
 
             CommandGroup(replacing: .appSettings) {
                 Button("Settings...") {
-                    NSApp.windows.first(where: { $0.title.hasPrefix("About MaCursor") })?.close()
-                    SettingsWindowController.shared.configure(library: library, appearanceManager: appearanceManager, languageManager: languageManager, updater: updaterController.updater)
-                    SettingsWindowController.shared.showWindow(nil)
-                    NSApp.activate(ignoringOtherApps: true)
+                    openSettingsWindow()
                 }
                 .keyboardShortcut(",", modifiers: .command)
             }
@@ -85,7 +89,7 @@ struct MaCursorApp: App {
         WindowGroup("Edit Theme", for: String.self) { $themeId in
             if let themeId, let cursorTheme = library.theme(withId: themeId) {
                 CursorThemeEditorView(cursorTheme: cursorTheme)
-                    .environment(library)
+                    .environmentObject(library)
                     .onReceive(NotificationCenter.default.publisher(for: .cursorLibraryIdentifierDidChange)) { note in
                         guard let oldId = note.userInfo?["oldId"] as? String,
                               let newId = note.userInfo?["newId"] as? String,
@@ -93,33 +97,53 @@ struct MaCursorApp: App {
                         $themeId.wrappedValue = newId
                     }
             } else {
-                ContentUnavailableView(
-                    "Theme Not Found",
+                UnavailableContent(
+                    title: Text("Theme Not Found"),
                     systemImage: "exclamationmark.triangle",
                     description: Text("The cursor theme could not be loaded.")
                 )
             }
         }
         .defaultSize(width: 1000, height: 700)
-        .restorationBehavior(.disabled)
         .handlesExternalEvents(matching: [])
 
         Window("About MaCursor", id: "about") {
-            AboutWindowView()
-                .windowMinimizeBehavior(.disabled)
-                .windowResizeBehavior(.disabled)
+            if #available(macOS 15, *) {
+                AboutWindowView()
+                    .windowMinimizeBehavior(.disabled)
+                    .windowResizeBehavior(.disabled)
+            } else {
+                AboutWindowView()
+            }
         }
         .windowResizability(.contentSize)
-        .restorationBehavior(.disabled)
         .handlesExternalEvents(matching: [])
         .commandsRemoved()
+    }
+}
+
+private extension MaCursorApp {
+    func openSettingsWindow() {
+        NSApp.windows.first(where: { $0.title.hasPrefix("About MaCursor") })?.close()
+        SettingsWindowController.shared.configure(library: library,
+                                                  appearanceManager: appearanceManager,
+                                                  languageManager: languageManager,
+                                                  updater: updaterController.updater)
+        SettingsWindowController.shared.showWindow(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    func drainPendingSettingsRequest() {
+        guard MACPreferences.flag(MACPreferences.pendingOpenSettingsKey) else { return }
+        MACPreferences.setFlag(false, forKey: MACPreferences.pendingOpenSettingsKey)
+        openSettingsWindow()
     }
 }
 
 private struct LibraryFileCommands: View {
     let library: LibraryViewModel
 
-    private var coordinator: ModalWindowCoordinator { .shared }
+    @ObservedObject private var coordinator = ModalWindowCoordinator.shared
 
     var body: some View {
         Button("New Theme") {

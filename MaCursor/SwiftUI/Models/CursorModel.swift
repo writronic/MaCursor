@@ -1,11 +1,10 @@
+import Combine
 import Foundation
 import AppKit
-import Observation
 
-@Observable
-class CursorModel: Identifiable, Hashable {
+class CursorModel: ObservableObject, Identifiable, Hashable {
     let id: String
-    var identifier: String
+    @Published var identifier: String
 
     var name: String {
         let resolved = CursorIdentifier.displayName(for: identifier)
@@ -18,24 +17,24 @@ class CursorModel: Identifiable, Hashable {
         return resolved
     }
 
-    var frameCount: Int
-    var frameDuration: Double
-    var hotSpot: CGPoint
-    var size: CGSize
+    @Published var frameCount: Int
+    @Published var frameDuration: Double
+    @Published var hotSpot: CGPoint
+    @Published var size: CGSize
 
-    var representationRevision: Int = 0
+    @Published var representationRevision: Int = 0
 
     let backingCursor: MACCursorSwift
 
 
-    @ObservationIgnored private var _primaryImageCache: NSImage?
-    @ObservationIgnored private var _primaryImageCacheRevision: Int = -1
+    private var _primaryImageCache: NSImage?
+    private var _primaryImageCacheKey: String?
 
-    @ObservationIgnored private var _scaleImageCache: [Int: NSImage] = [:]
-    @ObservationIgnored private var _scaleImageCacheRevision: Int = -1
+    private var _scaleImageCache: [Int: NSImage] = [:]
+    private var _scaleImageCacheKey: String?
 
-    @ObservationIgnored private var _frameCache: [String: NSImage] = [:]
-    @ObservationIgnored private var _frameCacheRevision: Int = -1
+    private var _frameCache: [String: NSImage] = [:]
+    private var _frameCacheRevision: Int = -1
 
     init(from cursor: MACCursorSwift, parentIdentifier: String? = nil) {
         self.backingCursor = cursor
@@ -55,22 +54,26 @@ class CursorModel: Identifiable, Hashable {
 
     func syncToBacking() {
         backingCursor.identifier = identifier
-        backingCursor.frameCount = UInt(frameCount)
+        backingCursor.frameCount = UInt(max(1, frameCount))
         backingCursor.frameDuration = frameDuration
         backingCursor.hotSpot = NSPoint(x: hotSpot.x, y: hotSpot.y)
         backingCursor.size = NSSize(width: size.width, height: size.height)
     }
 
-    func image(forScale scale: Int) -> NSImage? {
-        _ = representationRevision
+    private var geometryCacheKey: String {
+        "\(representationRevision)_\(frameCount)_\(size.width)x\(size.height)"
+    }
 
-        if _scaleImageCacheRevision == representationRevision, let cached = _scaleImageCache[scale] {
-            return cached
+    func image(forScale scale: Int) -> NSImage? {
+        let key = geometryCacheKey
+
+        if _scaleImageCacheKey != key {
+            _scaleImageCache.removeAll()
+            _scaleImageCacheKey = key
         }
 
-        if _scaleImageCacheRevision != representationRevision {
-            _scaleImageCache.removeAll()
-            _scaleImageCacheRevision = representationRevision
+        if let cached = _scaleImageCache[scale] {
+            return cached
         }
 
         guard let scaleEnum = MACCursorScale(rawValue: UInt(scale)),
@@ -87,16 +90,16 @@ class CursorModel: Identifiable, Hashable {
     }
 
     var primaryImage: NSImage? {
-        _ = representationRevision
+        let key = geometryCacheKey
 
-        if _primaryImageCacheRevision == representationRevision {
+        if _primaryImageCacheKey == key {
             return _primaryImageCache
         }
 
         let staticImage = image(forScale: 200) ?? image(forScale: 100) ?? backingCursor.imageWithAllReps()
         let img = frameCount > 1 ? (previewFrame(at: 0) ?? staticImage) : staticImage
         _primaryImageCache = img
-        _primaryImageCacheRevision = representationRevision
+        _primaryImageCacheKey = key
         return img
     }
 
@@ -190,13 +193,67 @@ class CursorModel: Identifiable, Hashable {
         backingCursor.setRepresentation(normalized, for: scaleEnum)
         representationRevision += 1
 
+        if governsPointSize(scale),
+           let derived = CursorGeometry.pointSize(of: normalized,
+                                                  scaleValue: UInt(scale),
+                                                  frameCount: frameCount) {
+            size = derived
+            clampHotSpotToSize()
+        }
+
         backingCursor.size = NSSize(width: size.width, height: size.height)
+    }
+
+    func applyFrameCount(_ newFrameCount: Int) {
+        guard newFrameCount != frameCount else { return }
+        frameCount = newFrameCount
+        backingCursor.frameCount = UInt(max(1, newFrameCount))
+        rederivePointSizeFromGoverningRepresentation()
+    }
+
+    private func rederivePointSizeFromGoverningRepresentation() {
+        let width = size.width > 0
+            ? size.width
+            : CGFloat(CursorGeometry.normalizedPointWidth(size.width))
+        guard let governing = governingRepresentation(),
+              let exact = CursorGeometry.pointHeight(of: governing.rep,
+                                                     pointWidth: width,
+                                                     frameCount: frameCount) else { return }
+        let integral = size.width == size.width.rounded() && size.height == size.height.rounded()
+        size = CGSize(width: width, height: integral ? exact.rounded() : exact)
+        clampHotSpotToSize()
+        backingCursor.size = NSSize(width: size.width, height: size.height)
+    }
+
+    private func ladderRepresentations() -> [(scale: Int, rep: NSBitmapImageRep)] {
+        let reps = (backingCursor.representations as? [String: NSBitmapImageRep]) ?? [:]
+        return reps.compactMap { key, rep in
+            guard let scale = Int(key), CursorGeometry.ladder.contains(UInt(scale)) else { return nil }
+            return (scale, rep)
+        }
+    }
+
+    private func governingRepresentation() -> (scale: Int, rep: NSBitmapImageRep)? {
+        ladderRepresentations().max { $0.scale < $1.scale }
+    }
+
+    private func governsPointSize(_ scale: Int) -> Bool {
+        !ladderRepresentations().contains { $0.scale > scale }
+    }
+
+    private func clampHotSpotToSize() {
+        guard size.width > 0, size.height > 0 else { return }
+        let x = min(max(hotSpot.x, 0), max(size.width - 1, 0))
+        let y = min(max(hotSpot.y, 0), max(size.height - 1, 0))
+        guard x != hotSpot.x || y != hotSpot.y else { return }
+        hotSpot = CGPoint(x: x, y: y)
     }
 
     func removeRepresentation(forScale scale: Int) {
         guard let scaleEnum = MACCursorScale(rawValue: UInt(scale)) else { return }
         backingCursor.removeRepresentation(for: scaleEnum)
         representationRevision += 1
+        rederivePointSizeFromGoverningRepresentation()
     }
 
     struct SlotOrderConflict: Equatable {
@@ -249,6 +306,9 @@ class CursorModel: Identifiable, Hashable {
             frameDuration = incomingFrameDuration
         }
         setRepresentation(rep, forScale: scale)
+        if incomingFrameCount != nil {
+            rederivePointSizeFromGoverningRepresentation()
+        }
         return nil
     }
 
@@ -260,12 +320,12 @@ class CursorModel: Identifiable, Hashable {
 
         let reps = (backingCursor.representations as? [String: Any]) ?? [:]
         let hasOtherScales = reps.keys.contains { $0 != "\(scale)" }
-        if hasOtherScales, frameCount != newFrameCount { return false }
-
-        guard size.width.isFinite,
+        guard hasOtherScales else { return true }
+        guard frameCount == newFrameCount,
+              size.width.isFinite,
               size.height.isFinite,
               size.width > 0,
-              size.height > 0 else { return !hasOtherScales }
+              size.height > 0 else { return false }
 
         let frameHeight = CGFloat(pixelsHigh / newFrameCount)
         let artworkAspect = CGFloat(pixelsWide) / frameHeight

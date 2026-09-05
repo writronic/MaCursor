@@ -1,6 +1,6 @@
 import AppKit
+import Combine
 import Foundation
-import Observation
 
 enum TahoeVariantSynthesizer {
     static let pairs: [(base: String, variant: String)] = [
@@ -97,10 +97,10 @@ protocol ThemeLibraryLanding {
     @discardableResult func importThemeReturningId(at url: URL) -> String?
 }
 
-@MainActor @Observable final class ThemeConversionCoordinator {
+@MainActor final class ThemeConversionCoordinator: ObservableObject {
     enum Phase: Equatable { case idle, converting, review, failed(String) }
-    private(set) var phase: Phase = .idle
-    private(set) var outcome: ConversionOutcome?
+    @Published private(set) var phase: Phase = .idle
+    @Published private(set) var outcome: ConversionOutcome?
 
     func convert(_ input: URL) async {
         phase = .converting

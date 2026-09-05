@@ -40,7 +40,7 @@
 "Appearance" = "المظهر";
 
 /* Badge: theme is applied */
-"Applied" = "مُطبَّق";
+"Applied" = "مُطبَّقة";
 
 /* Context menu: apply theme */
 "Apply" = "تطبيق";
@@ -135,9 +135,6 @@
 /* Error: write failure */
 "Error writing cursor theme to disk." = "حدث خطأ أثناء كتابة سمة المؤشر على القرص.";
 
-/* Error: theme file creation failure */
-"Failed to create cursor theme file" = "فشل إنشاء ملف سمة المؤشر";
-
 /* Undo suffix: frame count */
 "frame count" = "عدد الإطارات";
 
@@ -178,7 +175,7 @@
 "Import" = "استيراد";
 
 /* Menu: import theme */
-"Import Theme..." = "استيراد السمة...";
+"Import Theme..." = "استيراد السمة…";
 
 /* Button: install helper */
 "Install" = "تثبيت";
@@ -279,9 +276,6 @@
 /* Button: restore system cursors */
 "Restore system cursors" = "استعادة مؤشرات النظام";
 
-/* Menu: restore system cursors */
-"Restore System Cursors" = "استعادة مؤشرات النظام";
-
 /* Button: save theme */
 "Save" = "حفظ";
 
@@ -301,7 +295,7 @@
 "Settings" = "الإعدادات";
 
 /* Menu: open settings */
-"Settings..." = "الإعدادات...";
+"Settings..." = "الإعدادات…";
 
 /* Settings tab: shortcut */
 "Shortcut" = "اختصار";
@@ -310,7 +304,7 @@
 "Shortcuts require the Helper Tool to be installed. You can install it from General → Helper Tool." = "تتطلب الاختصارات تثبيت «الأداة المساعدة». يمكنك تثبيتها من «عام» ← «الأداة المساعدة».";
 
 /* Context menu: show in Finder */
-"Show in Finder" = "عرض في Finder";
+"Show in Finder" = "إظهار في Finder";
 
 /* Label: cursor size */
 "Size:" = "الحجم:";
@@ -323,9 +317,6 @@
 
 /* Alert message: cursor theme load failure */
 "The cursor theme could not be loaded." = "تعذّر تحميل سمة المؤشر.";
-
-/* Error: destination not writable */
-"The destination, %@, is not writable." = "الوجهة، %@، غير قابلة للكتابة.";
 
 /* Alert message: language restart */
 "The language change will take effect after restarting MaCursor." = "سيصبح تغيير اللغة ساري المفعول بعد إعادة تشغيل MaCursor.";
@@ -342,11 +333,8 @@
 /* Alert message: reset confirmation */
 "This will remove all cursor themes, restore system cursors, and reset every preference to its default value. This action cannot be undone." = "سيؤدي هذا إلى إزالة جميع سمات المؤشر، واستعادة مؤشرات النظام، وإعادة تعيين كل تفضيل إلى قيمته الافتراضية. لا يمكن التراجع عن هذا الإجراء.";
 
-/* Error: invalid directory */
-"Unable to create a cursor theme from the directory specified." = "تعذّر إنشاء سمة مؤشر من الدليل المحدد.";
-
 /* Button: uninstall helper */
-"Uninstall" = "إزالة";
+"Uninstall" = "إلغاء التثبيت";
 
 /* Default creator */
 "Unknown" = "غير معروف";
@@ -408,7 +396,7 @@
 
 /* --- Theme conversion (import from other formats) --- */
 
-"Convert Theme..." = "تحويل السمة...";
+"Convert Theme..." = "تحويل السمة…";
 
 "Convert Theme" = "تحويل السمة";
 
@@ -537,14 +525,20 @@
 /* Save blocked: cursor slot pixel sizes out of order */
 "“%@” has slot images out of size order (10× > 5× > 2× > 1×). Fix the slots before saving." = "تحتوي «%@» على صور خانات خارج ترتيب الحجم (10× > 5× > 2× > 1×). صحّح الخانات قبل الحفظ.";
 
-/* Cursor settings section header for scheduled theme switching */
-"Automatic Switching" = "التبديل التلقائي";
+/* Toggle switching the cursor theme by appearance or by time of day */
+"Theme Automation" = "أتمتة السمات";
 
-/* Toggle enabling scheduled cursor theme switching */
-"Switch cursor automatically" = "تغيير المؤشر تلقائيًا";
+/* Toggle that makes automatic switching follow the macOS appearance */
+"Match system appearance" = "مطابقة مظهر النظام";
 
-/* Warning shown when the helper tool is required for automatic switching */
-"Automatic switching requires the Helper Tool. You can install it from General → Helper Tool." = "يتطلب التبديل التلقائي الأداة المساعدة. يمكنك تثبيتها من «عام» ← «الأداة المساعدة».";
+/* Label for the Light appearance theme pick */
+"Light Appearance" = "المظهر الفاتح";
+
+/* Label for the Dark appearance theme pick */
+"Dark Appearance" = "المظهر الداكن";
+
+/* Warning shown when the Helper Tool is missing, under Theme Automation */
+"Theme Automation requires the Helper Tool. You can install it from General → Helper Tool." = "تتطلب ميزة «أتمتة السمات» الأداة المساعدة. يمكنك تثبيتها من «عام» ← «الأداة المساعدة».";
 
 /* Label for the daytime scheduled switch */
 "Day mode" = "الوضع النهاري";
@@ -561,8 +555,8 @@
 /* 24-hour clock option */
 "24 hours" = "24 ساعة";
 
-/* Explanation of scheduled cursor switching in Cursor settings */
-"Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one." = "اختر وقتًا وسمة مؤشر لكل وضع. يبدّل MaCursor في تلك الأوقات ويبقي تلك السمة حتى التبديل التالي.";
+/* Explanation shown under the Theme Automation toggle, naming both modes */
+"Switch the cursor theme with the macOS Light and Dark appearance, or set your own day and night times." = "يمكنك تبديل سمة المؤشر بين المظهر الفاتح والمظهر الداكن في macOS، أو تعيين أوقات النهار والليل الخاصة بك.";
 
 /* Warning when both scheduled modes are given the same clock time */
 "Day mode and Night mode must start at different times, so the time was moved by one minute." = "يجب أن يبدأ الوضع النهاري والوضع الليلي في أوقات مختلفة، لذا تم تغيير الوقت بمقدار دقيقة واحدة.";
@@ -575,3 +569,136 @@
 
 /* Button opening the donation page */
 "Donate" = "تبرع";
+
+/* Toggle giving one app its own cursor theme */
+"Per-App Themes" = "سمات لكل تطبيق";
+
+/* Button that opens a file panel to add an app rule */
+"Add App…" = "إضافة تطبيق…";
+
+/* Accessibility label for the button that removes an app rule row */
+"Remove app rule" = "إزالة قاعدة التطبيق";
+
+/* Notice shown when the picked app already has a rule */
+"That app is already in the list." = "هذا التطبيق موجود بالفعل في القائمة.";
+
+/* Explanation shown under the Per-App Themes toggle */
+"Each app can carry its own cursor theme. While that app is in front, MaCursor uses the theme you picked for it." = "يمكن لكل تطبيق أن يحمل سمة المؤشر الخاصة به. وعندما يكون هذا التطبيق في المقدمة، يستخدم MaCursor السمة التي اخترتها له.";
+
+/* Warning shown when the Helper Tool is missing, under Per-App Themes */
+"Per-App Themes requires the Helper Tool. You can install it from General → Helper Tool." = "تتطلب ميزة «سمات لكل تطبيق» الأداة المساعدة. يمكنك تثبيتها من «عام» ← «الأداة المساعدة».";
+
+/* Toggle activating the window under the pointer, also the Accessibility request window title */
+"Focus on Hover" = "التركيز عند المرور";
+
+/* Warning shown when the Helper Tool is missing, under Focus on Hover */
+"Focus on Hover requires the Helper Tool. You can install it from General → Helper Tool." = "تتطلب ميزة «التركيز عند المرور» الأداة المساعدة. يمكنك تثبيتها من «عام» ← «الأداة المساعدة».";
+
+/* Warning shown while focus follows mouse is enabled but Accessibility permission is missing */
+"Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility." = "إذن تسهيلات الاستخدام مفقود. اسمح لـ MaCursorHelper في «الخصوصية والأمن» ← «تسهيلات الاستخدام».";
+
+/* Button that opens the Accessibility pane of System Settings */
+"Open System Settings" = "فتح إعدادات النظام";
+
+/* Explanation shown under the Focus on Hover toggle */
+"When you hover over a window with the cursor, MaCursor raises it to the front and hands it the focus after a short delay." = "عندما تمرر المؤشر فوق نافذة ما، يرفعها MaCursor إلى المقدمة ويمنحها التركيز بعد تأخير قصير.";
+
+/* Menu bar panel: heading in front of the applied theme name */
+"Current Cursor" = "المؤشر الحالي";
+
+/* Menu bar panel: heading above the theme list */
+"Cursor Themes" = "سمات المؤشر";
+
+/* Menu bar right-click menu: opens the main window */
+"Open MaCursor" = "فتح MaCursor";
+
+/* Settings section: MaCursor's own menu bar options */
+"Menu Bar" = "شريط القوائم";
+
+/* Toggle: show the Helper Tool's icon in the menu bar */
+"Show Menu Bar Icon" = "إظهار رمز شريط القوائم";
+
+/* Caption under the Show Menu Bar Icon toggle while the Helper Tool is not installed */
+"The menu bar icon is provided by the Helper Tool. Install it above to use it." = "يتم توفير رمز شريط القوائم بواسطة الأداة المساعدة. قم بتثبيتها أعلاه لاستخدامها.";
+
+/* Caption under the Show Menu Bar Icon toggle */
+"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "يُظهر رمز MaCursor في شريط القوائم لتبديل سمات المؤشر وقواعد كل تطبيق. إذا لم يظهر، فافتح «إعدادات النظام» وابحث في قسم «شريط القوائم».";
+
+/* Menu bar panel */
+
+/* Menu bar panel: theme name shown when no theme is applied */
+"System cursors" = "مؤشرات النظام";
+
+/* Menu bar panel: placeholder when the library is empty */
+"No cursor themes yet" = "لا توجد سمات مؤشر بعد";
+
+/* Menu bar panel: heading above the frontmost app */
+"Active App" = "التطبيق النشط";
+
+/* Menu bar panel: label of the per-app theme picker */
+"Cursor for this app" = "مؤشر هذا التطبيق";
+
+/* Menu bar panel: the theme the frontmost app's rule applies; %@ is the theme name */
+"Uses %@" = "يستخدم %@";
+
+/* Menu bar panel: the frontmost app has no rule and follows the applied theme */
+"Uses the current cursor" = "يستخدم المؤشر الحالي";
+
+/* Menu bar panel: placeholder when no app is frontmost */
+"No app in front" = "لا يوجد تطبيق في المقدمة";
+
+/* Menu bar panel: heading above the scale slider and the toggles */
+"Quick Controls" = "عناصر التحكم السريعة";
+
+/* Menu bar panel: status under the Focus on Hover toggle while the permission is missing */
+"Needs Accessibility access" = "يحتاج إلى الوصول إلى تسهيلات الاستخدام";
+
+/* Slider label: translucency of the menu bar panel */
+"Panel Background" = "خلفية اللوحة";
+
+/* Caption under the Panel Background slider */
+"Sets how see-through the menu bar panel is: the middle of the slider is the standard frosted glass, the minimum is clear, the maximum is solid." = "يحدد درجة شفافية لوحة شريط القوائم: يمثل منتصف شريط التمرير الزجاج المصنفر القياسي، والحد الأدنى شفاف تمامًا، والحد الأقصى غير شفاف.";
+
+/* Favorites */
+
+/* Context menu: mark the theme as a favorite */
+"Add to Favorites" = "إضافة إلى المفضلة";
+
+/* Context menu: unmark the favorite theme */
+"Remove from Favorites" = "إزالة من المفضلة";
+
+/* Menu bar panel: placeholder when no theme is a favorite */
+"No favorite themes yet" = "لا توجد سمات مفضلة بعد";
+
+/* Menu bar panel: caption under the favorites placeholder */
+"Mark themes as favorites in MaCursor to show them here." = "ضع علامة على السمات كمفضلة في MaCursor لعرضها هنا.";
+
+/* Helper status: installed but not running */
+"Installed, not running" = "مُثبَّتة، غير قيد التشغيل";
+
+/* Menu bar right-click menu: quits the app */
+"Quit MaCursor" = "إنهاء MaCursor";
+
+/* Heading of the window that opens when focus follows mouse is turned on without Accessibility access */
+"Allow Accessibility Access" = "السماح بالوصول إلى تسهيلات الاستخدام";
+
+/* Explanation in that window; "MaCursorHelper" is the product name of the login-item helper and stays untranslated; "Allow for Accessibility" is the button below it */
+"MaCursorHelper needs Accessibility access to bring the window under the mouse pointer to the front. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "يحتاج MaCursorHelper إلى «تسهيلات الاستخدام» لإحضار النافذة الموجودة تحت مؤشر الماوس إلى المقدمة. اختر «السماح بتسهيلات الاستخدام»، ثم اسمح لـ MaCursorHelper في «الخصوصية والأمن» ← «تسهيلات الاستخدام».";
+
+/* Primary button of that window; asks the helper to show the macOS permission dialog */
+"Allow for Accessibility" = "السماح بتسهيلات الاستخدام";
+
+/* Secondary button of that window; closes it and leaves focus follows mouse on */
+"Not Now" = "ليس الآن";
+
+/* Status shown in that window after the button was pressed */
+"Waiting for access. This window updates as soon as MaCursorHelper is allowed." = "في انتظار الإذن. سيتم تحديث هذه النافذة فور السماح لـ MaCursorHelper.";
+
+/* Status shown in that window once Accessibility access was granted */
+"Access granted" = "تم منح الإذن";
+
+/* Button that closes that window once access was granted */
+"Let’s Go!" = "هيا بنا!";
+
+/* Empty search result in the Edit Theme sidebar; %@ is the search text */
+"No Results for “%@”" = "لا توجد نتائج لـ «%@»";

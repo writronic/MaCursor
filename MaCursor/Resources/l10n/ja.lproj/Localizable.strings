@@ -135,9 +135,6 @@
 /* Error: write failure */
 "Error writing cursor theme to disk." = "カーソルテーマをディスクに書き込む際にエラーが発生しました。";
 
-/* Error: theme file creation failure */
-"Failed to create cursor theme file" = "カーソルテーマファイルの作成に失敗しました";
-
 /* Undo suffix: frame count */
 "frame count" = "フレーム数";
 
@@ -279,9 +276,6 @@
 /* Button: restore system cursors */
 "Restore system cursors" = "システムカーソルを復元";
 
-/* Menu: restore system cursors */
-"Restore System Cursors" = "システムカーソルを復元";
-
 /* Button: save theme */
 "Save" = "保存";
 
@@ -310,7 +304,7 @@
 "Shortcuts require the Helper Tool to be installed. You can install it from General → Helper Tool." = "ショートカットを使用するには、ヘルパーツールのインストールが必要です。「一般」→「ヘルパーツール」からインストールできます。";
 
 /* Context menu: show in Finder */
-"Show in Finder" = "Finderで表示";
+"Show in Finder" = "Finderに表示";
 
 /* Label: cursor size */
 "Size:" = "サイズ：";
@@ -323,9 +317,6 @@
 
 /* Alert message: cursor theme load failure */
 "The cursor theme could not be loaded." = "カーソルテーマを読み込めませんでした。";
-
-/* Error: destination not writable */
-"The destination, %@, is not writable." = "保存先 %@ は書き込みできません。";
 
 /* Alert message: language restart */
 "The language change will take effect after restarting MaCursor." = "言語の変更は、MaCursorを再起動した後に反映されます。";
@@ -341,9 +332,6 @@
 
 /* Alert message: reset confirmation */
 "This will remove all cursor themes, restore system cursors, and reset every preference to its default value. This action cannot be undone." = "すべてのカーソルテーマを削除し、システムカーソルを復元し、すべての設定をデフォルト値にリセットします。この操作は元に戻せません。";
-
-/* Error: invalid directory */
-"Unable to create a cursor theme from the directory specified." = "指定されたディレクトリからカーソルテーマを作成できませんでした。";
 
 /* Button: uninstall helper */
 "Uninstall" = "アンインストール";
@@ -468,7 +456,7 @@
 "Could Not Replace Cursor" = "カーソルを置き換えられませんでした";
 
 /* Replace source failure alert message */
-"“%@” could not be read as a cursor or image file." = "“%@”はカーソルまたは画像ファイルとして読み込めませんでした。";
+"“%@” could not be read as a cursor or image file." = "「%@」はカーソルまたは画像ファイルとして読み込めませんでした。";
 
 /* Tooltip: Apply stays disabled until the theme has a cursor */
 "Add at least one cursor to this theme before applying it." = "このテーマを適用する前に、少なくとも1つのカーソルを追加してください。";
@@ -537,14 +525,20 @@
 /* Save blocked: cursor slot pixel sizes out of order */
 "“%@” has slot images out of size order (10× > 5× > 2× > 1×). Fix the slots before saving." = "「%@」のスロット画像はサイズ順（10× > 5× > 2× > 1×）に反しています。保存する前にスロットを修正してください。";
 
-/* Cursor settings section header for scheduled theme switching */
-"Automatic Switching" = "自動切り替え";
+/* Toggle switching the cursor theme by appearance or by time of day */
+"Theme Automation" = "テーマの自動切り替え";
 
-/* Toggle enabling scheduled cursor theme switching */
-"Switch cursor automatically" = "カーソルを自動的に切り替える";
+/* Toggle that makes automatic switching follow the macOS appearance */
+"Match system appearance" = "システムの外観に合わせる";
 
-/* Warning shown when the helper tool is required for automatic switching */
-"Automatic switching requires the Helper Tool. You can install it from General → Helper Tool." = "自動切り替えにはヘルパーツールが必要です。「一般」→「ヘルパーツール」からインストールできます。";
+/* Label for the Light appearance theme pick */
+"Light Appearance" = "ライト外観";
+
+/* Label for the Dark appearance theme pick */
+"Dark Appearance" = "ダーク外観";
+
+/* Warning shown when the Helper Tool is missing, under Theme Automation */
+"Theme Automation requires the Helper Tool. You can install it from General → Helper Tool." = "「テーマの自動切り替え」にはヘルパーツールが必要です。「一般」→「ヘルパーツール」からインストールできます。";
 
 /* Label for the daytime scheduled switch */
 "Day mode" = "デイモード";
@@ -561,8 +555,8 @@
 /* 24-hour clock option */
 "24 hours" = "24時間";
 
-/* Explanation of scheduled cursor switching in Cursor settings */
-"Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one." = "各モードごとに時刻とカーソルテーマを選択してください。MaCursor はその時刻に切り替わり、次の切り替え時までそのテーマを維持します。";
+/* Explanation shown under the Theme Automation toggle, naming both modes */
+"Switch the cursor theme with the macOS Light and Dark appearance, or set your own day and night times." = "macOSの「ライト」と「ダーク」の外観に合わせてカーソルテーマを切り替えるか、独自の昼と夜の時間帯を設定できます。";
 
 /* Warning when both scheduled modes are given the same clock time */
 "Day mode and Night mode must start at different times, so the time was moved by one minute." = "デイモードとナイトモードは異なる時刻に開始する必要があるため、時刻を 1 分ずらしました。";
@@ -575,3 +569,136 @@
 
 /* Button opening the donation page */
 "Donate" = "寄付";
+
+/* Toggle giving one app its own cursor theme */
+"Per-App Themes" = "アプリごとのカーソルテーマ";
+
+/* Button that opens a file panel to add an app rule */
+"Add App…" = "アプリを追加…";
+
+/* Accessibility label for the button that removes an app rule row */
+"Remove app rule" = "アプリルールを削除";
+
+/* Notice shown when the picked app already has a rule */
+"That app is already in the list." = "そのアプリはすでにリストにあります。";
+
+/* Explanation shown under the Per-App Themes toggle */
+"Each app can carry its own cursor theme. While that app is in front, MaCursor uses the theme you picked for it." = "各アプリは独自のカーソルテーマを設定できます。そのアプリが最前面にある間、MaCursorはそのアプリ用に選択したテーマを使用します。";
+
+/* Warning shown when the Helper Tool is missing, under Per-App Themes */
+"Per-App Themes requires the Helper Tool. You can install it from General → Helper Tool." = "「アプリごとのカーソルテーマ」にはヘルパーツールが必要です。「一般」→「ヘルパーツール」からインストールできます。";
+
+/* Toggle activating the window under the pointer, also the Accessibility request window title */
+"Focus on Hover" = "ホバー時にフォーカス";
+
+/* Warning shown when the Helper Tool is missing, under Focus on Hover */
+"Focus on Hover requires the Helper Tool. You can install it from General → Helper Tool." = "「ホバー時にフォーカス」にはヘルパーツールが必要です。「一般」→「ヘルパーツール」からインストールできます。";
+
+/* Warning shown while focus follows mouse is enabled but Accessibility permission is missing */
+"Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility." = "アクセシビリティのアクセス権がありません。「プライバシーとセキュリティ」→「アクセシビリティ」でMaCursorHelperを許可してください。";
+
+/* Button that opens the Accessibility pane of System Settings */
+"Open System Settings" = "システム設定を開く";
+
+/* Explanation shown under the Focus on Hover toggle */
+"When you hover over a window with the cursor, MaCursor raises it to the front and hands it the focus after a short delay." = "カーソルをウインドウの上に重ねると、MaCursorは少し待ってからそのウインドウを最前面に表示し、フォーカスを移します。";
+
+/* Menu bar panel: heading in front of the applied theme name */
+"Current Cursor" = "現在のカーソル";
+
+/* Menu bar panel: heading above the theme list */
+"Cursor Themes" = "カーソルテーマ";
+
+/* Menu bar right-click menu: opens the main window */
+"Open MaCursor" = "MaCursorを開く";
+
+/* Settings section: MaCursor's own menu bar options */
+"Menu Bar" = "メニューバー";
+
+/* Toggle: show the Helper Tool's icon in the menu bar */
+"Show Menu Bar Icon" = "メニューバーアイコンを表示";
+
+/* Caption under the Show Menu Bar Icon toggle while the Helper Tool is not installed */
+"The menu bar icon is provided by the Helper Tool. Install it above to use it." = "メニューバーアイコンはヘルパーツールが提供します。使用するには上でインストールしてください。";
+
+/* Caption under the Show Menu Bar Icon toggle */
+"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "カーソルテーマやアプリごとのルールを切り替えるためのMaCursorアイコンをメニューバーに表示します。表示されない場合は、「システム設定」を開いて「メニューバー」の項目を確認してください。";
+
+/* Menu bar panel */
+
+/* Menu bar panel: theme name shown when no theme is applied */
+"System cursors" = "システムカーソル";
+
+/* Menu bar panel: placeholder when the library is empty */
+"No cursor themes yet" = "カーソルテーマはまだありません";
+
+/* Menu bar panel: heading above the frontmost app */
+"Active App" = "アクティブなアプリ";
+
+/* Menu bar panel: label of the per-app theme picker */
+"Cursor for this app" = "このアプリのカーソル";
+
+/* Menu bar panel: the theme the frontmost app's rule applies; %@ is the theme name */
+"Uses %@" = "%@を使用";
+
+/* Menu bar panel: the frontmost app has no rule and follows the applied theme */
+"Uses the current cursor" = "現在のカーソルを使用";
+
+/* Menu bar panel: placeholder when no app is frontmost */
+"No app in front" = "最前面にアプリがありません";
+
+/* Menu bar panel: heading above the scale slider and the toggles */
+"Quick Controls" = "クイックコントロール";
+
+/* Menu bar panel: status under the Focus on Hover toggle while the permission is missing */
+"Needs Accessibility access" = "アクセシビリティへのアクセスが必要です";
+
+/* Slider label: translucency of the menu bar panel */
+"Panel Background" = "パネルの背景";
+
+/* Caption under the Panel Background slider */
+"Sets how see-through the menu bar panel is: the middle of the slider is the standard frosted glass, the minimum is clear, the maximum is solid." = "メニューバーパネルの透明度を設定します。スライダーの中央が標準のすりガラス、最小が透明、最大が不透明になります。";
+
+/* Favorites */
+
+/* Context menu: mark the theme as a favorite */
+"Add to Favorites" = "お気に入りに追加";
+
+/* Context menu: unmark the favorite theme */
+"Remove from Favorites" = "お気に入りから削除";
+
+/* Menu bar panel: placeholder when no theme is a favorite */
+"No favorite themes yet" = "お気に入りのテーマはまだありません";
+
+/* Menu bar panel: caption under the favorites placeholder */
+"Mark themes as favorites in MaCursor to show them here." = "MaCursorでテーマをお気に入りに登録すると、ここに表示されます。";
+
+/* Helper status: installed but not running */
+"Installed, not running" = "インストール済み・停止中";
+
+/* Menu bar right-click menu: quits the app */
+"Quit MaCursor" = "MaCursorを終了";
+
+/* Heading of the window that opens when focus follows mouse is turned on without Accessibility access */
+"Allow Accessibility Access" = "アクセシビリティへのアクセスを許可";
+
+/* Explanation in that window; "MaCursorHelper" is the product name of the login-item helper and stays untranslated; "Allow for Accessibility" is the button below it */
+"MaCursorHelper needs Accessibility access to bring the window under the mouse pointer to the front. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelperは、マウスポインタの下にあるウインドウを最前面に移動するためにアクセシビリティへのアクセス権を必要とします。「アクセシビリティを許可」を選択し、「プライバシーとセキュリティ」→「アクセシビリティ」でMaCursorHelperを許可してください。";
+
+/* Primary button of that window; asks the helper to show the macOS permission dialog */
+"Allow for Accessibility" = "アクセシビリティを許可";
+
+/* Secondary button of that window; closes it and leaves focus follows mouse on */
+"Not Now" = "今はしない";
+
+/* Status shown in that window after the button was pressed */
+"Waiting for access. This window updates as soon as MaCursorHelper is allowed." = "アクセスを待機中です。MaCursorHelperが許可されると、このウインドウはすぐに更新されます。";
+
+/* Status shown in that window once Accessibility access was granted */
+"Access granted" = "アクセスが許可されました";
+
+/* Button that closes that window once access was granted */
+"Let’s Go!" = "さあ、始めましょう！";
+
+/* Empty search result in the Edit Theme sidebar; %@ is the search text */
+"No Results for “%@”" = "「%@」の検索結果なし";

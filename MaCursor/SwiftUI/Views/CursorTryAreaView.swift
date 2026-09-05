@@ -3,6 +3,8 @@ import SwiftUI
 
 @MainActor
 final class TryAreaCursorLoop {
+    private static let staticReassertInterval = 0.1
+
     private var timer: Timer?
     private var startDate = Date()
     private var cursor: CursorModel?
@@ -38,23 +40,31 @@ final class TryAreaCursorLoop {
                               y: min(max(cursor.hotSpot.y, 0), cursor.size.height))
             NSCursor(image: image, hotSpot: hot).set()
         }
-        guard count > 1 else { return }
-        timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { [weak self] _ in
+        let delay = count > 1 ? interval : Self.staticReassertInterval
+        timer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
             MainActor.assumeIsolated { self?.advance() }
         }
     }
 }
 
 struct CursorTryAreaView: View {
-    let cursor: CursorModel
+    @ObservedObject var cursor: CursorModel
 
     @State private var loop = TryAreaCursorLoop()
     @State private var loopIdle = true
     @State private var clickPoint: CGPoint?
     @State private var clickFadeTask: Task<Void, Never>?
 
+    private static let hoverLoopHandlesStaticCursors: Bool = {
+        if #available(macOS 15, *) { return false }
+        return true
+    }()
+
     private var isAnimated: Bool { cursor.frameCount > 1 }
 
+    private var loopShouldRun: Bool { isAnimated || Self.hoverLoopHandlesStaticCursors }
+
+    @available(macOS 15, *)
     private var staticPointerStyle: PointerStyle? {
         guard !isAnimated,
               let image = cursor.previewFrame(at: 0) ?? cursor.primaryImage,
@@ -64,7 +74,7 @@ struct CursorTryAreaView: View {
                                          y: min(max(cursor.hotSpot.y / cursor.size.height, 0), 1)))
     }
 
-    var body: some View {
+    private var tryArea: some View {
         ZStack {
             GeometryReader { geo in
                 HStack(spacing: 0) {
@@ -86,11 +96,20 @@ struct CursorTryAreaView: View {
         .frame(height: 120)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.quaternary))
-        .pointerStyle(staticPointerStyle)
+    }
+
+    var body: some View {
+        Group {
+            if #available(macOS 15, *) {
+                tryArea.pointerStyle(staticPointerStyle)
+            } else {
+                tryArea
+            }
+        }
         .onContinuousHover { phase in
             switch phase {
             case .active:
-                if isAnimated, loopIdle {
+                if loopShouldRun, loopIdle {
                     loopIdle = false
                     loop.start(cursor: cursor)
                 }
@@ -99,8 +118,8 @@ struct CursorTryAreaView: View {
                 loop.stop()
             }
         }
-        .onChange(of: cursor.frameCount) { _, _ in
-            if !isAnimated, !loopIdle {
+        .onChangeCompat(of: cursor.frameCount) { _ in
+            if !loopShouldRun, !loopIdle {
                 loopIdle = true
                 loop.stop()
             }

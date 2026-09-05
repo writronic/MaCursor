@@ -25,7 +25,7 @@ If applicable, add screenshots to demonstrate the change.
 ## Checklist
 
 - [ ] I have read [CONTRIBUTING.md](CONTRIBUTING.md)
-- [ ] I have tested this change on macOS 15+
+- [ ] I have tested this change on macOS 13+ (say which versions)
 - [ ] My code follows the project's coding conventions
 - [ ] I have updated documentation if needed
 - [ ] This change does not introduce breaking changes

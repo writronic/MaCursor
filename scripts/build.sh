@@ -150,12 +150,12 @@ codesign --force --options runtime --timestamp \
     "$APP_PATH/Contents/Frameworks/Sparkle.framework"
 
 
-echo "  Signing macursorhelper..."
+echo "  Signing MaCursorHelper.app..."
 codesign --force --options runtime --timestamp \
     --sign "$SIGNING_IDENTITY" \
     "${CODESIGN_EXTRA[@]}" \
     --entitlements "$ENTITLEMENTS_HELPER" \
-    "$APP_PATH/Contents/Library/LoginItems/com.writronic.macursorhelper.app"
+    "$APP_PATH/Contents/Library/LoginItems/MaCursorHelper.app"
 
 echo "  Signing MaCursor.app..."
 codesign --force --options runtime --timestamp \

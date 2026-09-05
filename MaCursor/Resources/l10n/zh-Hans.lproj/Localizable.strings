@@ -135,9 +135,6 @@
 /* Error: write failure */
 "Error writing cursor theme to disk." = "将指针主题写入磁盘时出错。";
 
-/* Error: theme file creation failure */
-"Failed to create cursor theme file" = "无法创建指针主题文件";
-
 /* Undo suffix: frame count */
 "frame count" = "帧数";
 
@@ -279,14 +276,11 @@
 /* Button: restore system cursors */
 "Restore system cursors" = "恢复系统指针";
 
-/* Menu: restore system cursors */
-"Restore System Cursors" = "恢复系统指针";
-
 /* Button: save theme */
-"Save" = "存储";
+"Save" = "保存";
 
 /* Alert title: save failure */
-"Save failed" = "存储失败";
+"Save failed" = "保存失败";
 
 /* Unit: seconds */
 "sec" = "秒";
@@ -324,9 +318,6 @@
 /* Alert message: cursor theme load failure */
 "The cursor theme could not be loaded." = "无法加载该指针主题。";
 
-/* Error: destination not writable */
-"The destination, %@, is not writable." = "目标位置 %@ 不可写入。";
-
 /* Alert message: language restart */
 "The language change will take effect after restarting MaCursor." = "语言更改将在重新启动 MaCursor 后生效。";
 
@@ -342,9 +333,6 @@
 /* Alert message: reset confirmation */
 "This will remove all cursor themes, restore system cursors, and reset every preference to its default value. This action cannot be undone." = "此操作将移除所有指针主题、恢复系统指针，并将每项偏好设置重置为默认值。此操作无法撤销。";
 
-/* Error: invalid directory */
-"Unable to create a cursor theme from the directory specified." = "无法从指定的目录创建指针主题。";
-
 /* Button: uninstall helper */
 "Uninstall" = "卸载";
 
@@ -355,7 +343,7 @@
 "Unnamed" = "未命名";
 
 /* Alert title: unsaved changes */
-"Unsaved Changes" = "未存储的更改";
+"Unsaved Changes" = "未保存的更改";
 
 /* About: version label */
 "Version %@" = "版本 %@";
@@ -373,7 +361,7 @@
 "Y:" = "Y:";
 
 /* Alert message: unsaved changes */
-"Your changes will be discarded if you don't save them." = "如果你不存储更改，这些更改将被放弃。";
+"Your changes will be discarded if you don't save them." = "如果你不保存更改，这些更改将被放弃。";
 
 /* Toggle: hide Tahoe-specific cursor variants */
 "Hide Tahoe cursors" = "隐藏 Tahoe 指针";
@@ -382,7 +370,7 @@
 "When enabled, Tahoe-specific cursor variants (ArrowS, IBeamS) are hidden. Removing a cursor will also remove its Tahoe counterpart." = "启用后，Tahoe 专属的指针变体（ArrowS、IBeamS）将被隐藏。移除某个指针时，也会一并移除其对应的 Tahoe 项。";
 
 /* Picker: mouse handedness */
-"Mouse Hand" = "鼠标手";
+"Mouse Hand" = "持鼠标的手";
 
 /* Mouse Hand option: left-handed */
 "Left Hand" = "左手";
@@ -414,7 +402,7 @@
 
 "Convert" = "转换";
 
-"Choose a Mousecape .cape file, a Windows cursor folder (.cur/.ani), or a Linux Xcursor theme folder." = "请选择一个 Mousecape .cape 文件、一个 Windows 光标文件夹（.cur/.ani）或一个 Linux Xcursor 主题文件夹。";
+"Choose a Mousecape .cape file, a Windows cursor folder (.cur/.ani), or a Linux Xcursor theme folder." = "请选择一个 Mousecape .cape 文件、一个 Windows 指针文件夹（.cur/.ani）或一个 Linux Xcursor 主题文件夹。";
 
 "Mapped" = "已映射";
 
@@ -511,7 +499,7 @@
 "cannot list %@" = "无法列出 %@";
 
 /* Conversion error: unsupported input; %@ is a sentence naming the specific reason */
-"%@ Convert Theme accepts a Mousecape .cape file, a Windows cursor folder, or a Linux Xcursor theme folder." = "%@“转换主题”支持 Mousecape .cape 文件、Windows 光标文件夹或 Linux Xcursor 主题文件夹。";
+"%@ Convert Theme accepts a Mousecape .cape file, a Windows cursor folder, or a Linux Xcursor theme folder." = "%@“转换主题”支持 Mousecape .cape 文件、Windows 指针文件夹或 Linux Xcursor 主题文件夹。";
 
 /* Convert Theme rejection: the chosen file is a compressed archive */
 "%@ is an archive. Expand it first, then choose the theme folder inside it." = "%@ 是一个归档文件。请先解压，然后选择其中的主题文件夹。";
@@ -535,16 +523,22 @@
 "Slot images must stay in size order (10× > 5× > 2× > 1×). This image does not fit the %1$@ slot because of the image in the %2$@ slot." = "各槽的图像必须保持尺寸顺序（10× > 5× > 2× > 1×）。由于 %2$@ 槽中已有图像，此图像无法放入 %1$@ 槽。";
 
 /* Save blocked: cursor slot pixel sizes out of order */
-"“%@” has slot images out of size order (10× > 5× > 2× > 1×). Fix the slots before saving." = "“%@”的槽图像尺寸顺序错误（10× > 5× > 2× > 1×）。请先修正各槽再存储。";
+"“%@” has slot images out of size order (10× > 5× > 2× > 1×). Fix the slots before saving." = "“%@”的槽图像尺寸顺序错误（10× > 5× > 2× > 1×）。请先修正各槽再保存。";
 
-/* Cursor settings section header for scheduled theme switching */
-"Automatic Switching" = "自动切换";
+/* Toggle switching the cursor theme by appearance or by time of day */
+"Theme Automation" = "主题自动化";
 
-/* Toggle enabling scheduled cursor theme switching */
-"Switch cursor automatically" = "自动切换光标";
+/* Toggle that makes automatic switching follow the macOS appearance */
+"Match system appearance" = "跟随系统外观";
 
-/* Warning shown when the helper tool is required for automatic switching */
-"Automatic switching requires the Helper Tool. You can install it from General → Helper Tool." = "自动切换需要“辅助工具”。你可以从“通用”→“辅助工具”中安装。";
+/* Label for the Light appearance theme pick */
+"Light Appearance" = "浅色外观";
+
+/* Label for the Dark appearance theme pick */
+"Dark Appearance" = "深色外观";
+
+/* Warning shown when the Helper Tool is missing, under Theme Automation */
+"Theme Automation requires the Helper Tool. You can install it from General → Helper Tool." = "“主题自动化”需要“辅助工具”。你可以从“通用”→“辅助工具”中安装。";
 
 /* Label for the daytime scheduled switch */
 "Day mode" = "日间模式";
@@ -556,13 +550,13 @@
 "Time Format" = "时间格式";
 
 /* 12-hour clock option */
-"AM/PM" = "AM/PM";
+"AM/PM" = "上午/下午";
 
 /* 24-hour clock option */
 "24 hours" = "24 小时制";
 
-/* Explanation of scheduled cursor switching in Cursor settings */
-"Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one." = "为每种模式选择一个时间和一个光标主题。MaCursor 将在指定时间切换，并保持该主题直至下次切换。";
+/* Explanation shown under the Theme Automation toggle, naming both modes */
+"Switch the cursor theme with the macOS Light and Dark appearance, or set your own day and night times." = "让指针主题跟随 macOS 的浅色外观和深色外观切换，或自行设置白天和夜间的时间。";
 
 /* Warning when both scheduled modes are given the same clock time */
 "Day mode and Night mode must start at different times, so the time was moved by one minute." = "日间模式和夜间模式必须在不同时间开始，因此将时间调整了一分钟。";
@@ -575,3 +569,136 @@
 
 /* Button opening the donation page */
 "Donate" = "捐赠";
+
+/* Toggle giving one app its own cursor theme */
+"Per-App Themes" = "按应用设置主题";
+
+/* Button that opens a file panel to add an app rule */
+"Add App…" = "添加应用…";
+
+/* Accessibility label for the button that removes an app rule row */
+"Remove app rule" = "移除应用规则";
+
+/* Notice shown when the picked app already has a rule */
+"That app is already in the list." = "该应用已在列表中。";
+
+/* Explanation shown under the Per-App Themes toggle */
+"Each app can carry its own cursor theme. While that app is in front, MaCursor uses the theme you picked for it." = "每个应用都可以拥有自己的指针主题。当该应用处于前台时，MaCursor 会使用你为其选择的指针主题。";
+
+/* Warning shown when the Helper Tool is missing, under Per-App Themes */
+"Per-App Themes requires the Helper Tool. You can install it from General → Helper Tool." = "“按应用设置主题”需要“辅助工具”。你可以从“通用”→“辅助工具”中安装。";
+
+/* Toggle activating the window under the pointer, also the Accessibility request window title */
+"Focus on Hover" = "悬停即聚焦";
+
+/* Warning shown when the Helper Tool is missing, under Focus on Hover */
+"Focus on Hover requires the Helper Tool. You can install it from General → Helper Tool." = "“悬停即聚焦”需要“辅助工具”。你可以从“通用”→“辅助工具”中安装。";
+
+/* Warning shown while focus follows mouse is enabled but Accessibility permission is missing */
+"Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility." = "缺少辅助功能权限。请在“隐私与安全性”→“辅助功能”中允许 MaCursorHelper。";
+
+/* Button that opens the Accessibility pane of System Settings */
+"Open System Settings" = "打开“系统设置”";
+
+/* Explanation shown under the Focus on Hover toggle */
+"When you hover over a window with the cursor, MaCursor raises it to the front and hands it the focus after a short delay." = "当指针悬停在某个窗口上时，MaCursor 会在短暂延迟后将该窗口移至最前并给予焦点。";
+
+/* Menu bar panel: heading in front of the applied theme name */
+"Current Cursor" = "当前指针";
+
+/* Menu bar panel: heading above the theme list */
+"Cursor Themes" = "指针主题";
+
+/* Menu bar right-click menu: opens the main window */
+"Open MaCursor" = "打开 MaCursor";
+
+/* Settings section: MaCursor's own menu bar options */
+"Menu Bar" = "菜单栏";
+
+/* Toggle: show the Helper Tool's icon in the menu bar */
+"Show Menu Bar Icon" = "显示菜单栏图标";
+
+/* Caption under the Show Menu Bar Icon toggle while the Helper Tool is not installed */
+"The menu bar icon is provided by the Helper Tool. Install it above to use it." = "菜单栏图标由辅助工具提供。请在上方安装后使用。";
+
+/* Caption under the Show Menu Bar Icon toggle */
+"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "在菜单栏中显示 MaCursor 图标，用于切换指针主题和按应用设置的规则。如果未显示，请打开“系统设置”并查看“菜单栏”部分。";
+
+/* Menu bar panel */
+
+/* Menu bar panel: theme name shown when no theme is applied */
+"System cursors" = "系统指针";
+
+/* Menu bar panel: placeholder when the library is empty */
+"No cursor themes yet" = "尚无指针主题";
+
+/* Menu bar panel: heading above the frontmost app */
+"Active App" = "当前活动应用";
+
+/* Menu bar panel: label of the per-app theme picker */
+"Cursor for this app" = "此应用的指针";
+
+/* Menu bar panel: the theme the frontmost app's rule applies; %@ is the theme name */
+"Uses %@" = "使用 %@";
+
+/* Menu bar panel: the frontmost app has no rule and follows the applied theme */
+"Uses the current cursor" = "使用当前指针";
+
+/* Menu bar panel: placeholder when no app is frontmost */
+"No app in front" = "无前置应用";
+
+/* Menu bar panel: heading above the scale slider and the toggles */
+"Quick Controls" = "快速控制";
+
+/* Menu bar panel: status under the Focus on Hover toggle while the permission is missing */
+"Needs Accessibility access" = "需要辅助功能访问权限";
+
+/* Slider label: translucency of the menu bar panel */
+"Panel Background" = "面板背景";
+
+/* Caption under the Panel Background slider */
+"Sets how see-through the menu bar panel is: the middle of the slider is the standard frosted glass, the minimum is clear, the maximum is solid." = "设置菜单栏面板的透明度：滑块中间为标准的磨砂玻璃效果，最小值为透明，最大值为实色。";
+
+/* Favorites */
+
+/* Context menu: mark the theme as a favorite */
+"Add to Favorites" = "添加到收藏";
+
+/* Context menu: unmark the favorite theme */
+"Remove from Favorites" = "从收藏中移除";
+
+/* Menu bar panel: placeholder when no theme is a favorite */
+"No favorite themes yet" = "尚无收藏的主题";
+
+/* Menu bar panel: caption under the favorites placeholder */
+"Mark themes as favorites in MaCursor to show them here." = "在 MaCursor 中将主题标记为收藏，即可在此处显示。";
+
+/* Helper status: installed but not running */
+"Installed, not running" = "已安装，未运行";
+
+/* Menu bar right-click menu: quits the app */
+"Quit MaCursor" = "退出 MaCursor";
+
+/* Heading of the window that opens when focus follows mouse is turned on without Accessibility access */
+"Allow Accessibility Access" = "允许辅助功能访问";
+
+/* Explanation in that window; "MaCursorHelper" is the product name of the login-item helper and stays untranslated; "Allow for Accessibility" is the button below it */
+"MaCursorHelper needs Accessibility access to bring the window under the mouse pointer to the front. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelper 需要辅助功能权限，才能将鼠标指针下方的窗口置于最前面。请选择“允许辅助功能”，然后在“隐私与安全性”→“辅助功能”中允许 MaCursorHelper。";
+
+/* Primary button of that window; asks the helper to show the macOS permission dialog */
+"Allow for Accessibility" = "允许辅助功能";
+
+/* Secondary button of that window; closes it and leaves focus follows mouse on */
+"Not Now" = "以后再说";
+
+/* Status shown in that window after the button was pressed */
+"Waiting for access. This window updates as soon as MaCursorHelper is allowed." = "正在等待权限。一旦允许 MaCursorHelper，此窗口会立即更新。";
+
+/* Status shown in that window once Accessibility access was granted */
+"Access granted" = "已获得权限";
+
+/* Button that closes that window once access was granted */
+"Let’s Go!" = "开始吧！";
+
+/* Empty search result in the Edit Theme sidebar; %@ is the search text */
+"No Results for “%@”" = "未找到“%@”的相关结果";

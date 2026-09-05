@@ -1,16 +1,15 @@
+import Combine
 import Foundation
-import Observation
 
-@Observable
-class CursorThemeModel: Identifiable, Hashable {
+class CursorThemeModel: ObservableObject, Identifiable, Hashable {
     var id: String { backingLibrary.identifier }
-    var name: String
-    var creator: String
-    var version: Double
-    var isHiDPI: Bool
-    var cursors: [CursorModel]
-    var isApplied: Bool = false
-    var fileURL: URL?
+    @Published var name: String
+    @Published var creator: String
+    @Published var version: Double
+    @Published var isHiDPI: Bool
+    @Published var cursors: [CursorModel]
+    @Published var isApplied: Bool = false
+    @Published var fileURL: URL?
 
     let backingLibrary: CursorLibrary
 

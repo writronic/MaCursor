@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HotspotEditorView: View {
-    @Bindable var cursor: CursorModel
+    @ObservedObject var cursor: CursorModel
     var onDirty: (() -> Void)? = nil
 
     var body: some View {

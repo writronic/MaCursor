@@ -35,15 +35,6 @@ extern NSString * _Nonnull defaultCursors[];
 
 NS_ASSUME_NONNULL_BEGIN
 
-extern NSString *MACErrorDomain;
-
-typedef NS_ENUM(NSInteger, MACErrorCode) {
-    MACErrorInvalidThemeCode              = -1,
-    MACErrorWriteFailCode                 = -2,
-    MACErrorInvalidFormatCode             = -100,
-    MACErrorMultipleCursorIdentifiersCode = -101
-};
-
 extern NSString * const MACCursorDictionaryCursorsKey;
 extern NSString * const MACCursorDictionaryCreatorKey;
 extern NSString * const MACCursorDictionaryHiDPIKey;
@@ -61,13 +52,10 @@ extern NSString * const MACCursorDictionaryRepresentationsKey;
 
 extern NSDictionary *cursorMap(void);
 extern NSString *nameForCursorIdentifier(NSString *identifier);
-extern NSString *cursorIdentifierForName(NSString *name);
 extern NSString *UUID(void);
 extern NSDictionary * _Nullable cursorThemeWithIdentifier(NSString *identifier);
 extern NSData *pngDataForImage(id image);
-extern NSString *MMGet(NSString *prompt);
 extern CGError MACIsCursorRegistered(CGSConnectionID cid, char *cursorName, bool *registered);
-extern BOOL MACCursorIsPointer(NSString *identifier);
 extern NSArray * _Nullable MACTahoeCursorAliasesForIdentifier(NSString *identifier);
 extern NSArray * _Nullable MACBrowserCursorAliasesForIdentifier(NSString *identifier);
 extern BOOL MACIsTahoeOrLater(void);
@@ -78,9 +66,7 @@ extern NSString * _Nonnull MACSystemDefaultCursorPath(void);
 #define kMACDomain @"com.writronic.MaCursor"
 
 extern NSString *MACPreferencesAppliedCursorKey;
-extern NSString *MACPreferencesAppliedClickActionKey;
 extern NSString *MACPreferencesCursorScaleKey;
-extern NSString *MACPreferencesDoubleActionKey;
 extern NSString *MACPreferencesHandednessKey;
 extern NSString *MACPreferencesCursorShadowKey;
 extern NSString *MACSuppressDeleteLibraryConfirmationKey;
@@ -89,7 +75,7 @@ extern id MACDefaultFor(NSString *key, NSString *user, NSString *host);
 extern id MACDefault(NSString *key);
 extern BOOL MACResolvePreferredCursorScale(NSNumber * _Nullable prefValue, float * _Nullable outScale);
 #define MACFlag(key) [MACDefault(key) boolValue]
-extern void MACSetDefaultFor(id value, NSString *key, NSString *user, NSString *host);
+extern void MACSetDefaultFor(id _Nullable value, NSString *key, NSString *user, NSString *host);
 #define MACSetDefault(value, key) MACSetDefaultFor(value, key, (__bridge NSString *)kCFPreferencesCurrentUser, (__bridge NSString *)kCFPreferencesCurrentHost)
 #define MACSetFlag(value, key) MACSetDefault(@(value), key)
 

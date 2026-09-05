@@ -135,9 +135,6 @@
 /* Error: write failure */
 "Error writing cursor theme to disk." = "Fout bij het schrijven van het cursorthema naar de schijf.";
 
-/* Error: theme file creation failure */
-"Failed to create cursor theme file" = "Kan cursorthemabestand niet aanmaken";
-
 /* Undo suffix: frame count */
 "frame count" = "aantal frames";
 
@@ -256,7 +253,7 @@
 "Requires Approval in System Settings" = "Goedkeuring vereist in Systeeminstellingen";
 
 /* Button: reset settings */
-"Reset" = "Herstel standaardwaarden";
+"Reset" = "Herstel";
 
 /* Description: reset button */
 "Reset all settings to default values (cannot be undone)" = "Herstel alle instellingen naar de standaardwaarden (kan niet ongedaan worden gemaakt)";
@@ -265,7 +262,7 @@
 "Reset All Settings?" = "Alle instellingen herstellen naar standaardwaarden?";
 
 /* Section: reset settings */
-"Reset Settings" = "Instellingen herstellen naar standaardwaarden";
+"Reset Settings" = "Instellingen herstellen";
 
 /* Button: restart app */
 "Restart Now" = "Start nu opnieuw";
@@ -278,9 +275,6 @@
 
 /* Button: restore system cursors */
 "Restore system cursors" = "Herstel systeemcursors";
-
-/* Menu: restore system cursors */
-"Restore System Cursors" = "Herstel systeemcursors";
 
 /* Button: save theme */
 "Save" = "Bewaar";
@@ -324,9 +318,6 @@
 /* Alert message: cursor theme load failure */
 "The cursor theme could not be loaded." = "Het cursorthema kon niet worden geladen.";
 
-/* Error: destination not writable */
-"The destination, %@, is not writable." = "De bestemming, %@, is niet beschrijfbaar.";
-
 /* Alert message: language restart */
 "The language change will take effect after restarting MaCursor." = "De taalwijziging wordt van kracht nadat MaCursor opnieuw is opgestart.";
 
@@ -341,9 +332,6 @@
 
 /* Alert message: reset confirmation */
 "This will remove all cursor themes, restore system cursors, and reset every preference to its default value. This action cannot be undone." = "Hierdoor worden alle cursorthema's verwijderd, worden de systeemcursors hersteld en worden alle instellingen teruggezet naar hun standaardwaarden. Deze handeling kan niet ongedaan worden gemaakt.";
-
-/* Error: invalid directory */
-"Unable to create a cursor theme from the directory specified." = "Kan geen cursorthema aanmaken op basis van de opgegeven map.";
 
 /* Button: uninstall helper */
 "Uninstall" = "Verwijder";
@@ -373,7 +361,7 @@
 "Y:" = "Y:";
 
 /* Alert message: unsaved changes */
-"Your changes will be discarded if you don't save them." = "Je wijzigingen worden genegeerd als je ze niet bewaart.";
+"Your changes will be discarded if you don't save them." = "Je wijzigingen gaan verloren als je ze niet bewaart.";
 
 /* Toggle: hide Tahoe-specific cursor variants */
 "Hide Tahoe cursors" = "Verberg Tahoe-cursors";
@@ -465,7 +453,7 @@
 "Clear Slot" = "Wis vak";
 
 /* Replace source failure alert title */
-"Could Not Replace Cursor" = "Kan bron niet vervangen";
+"Could Not Replace Cursor" = "Kan cursor niet vervangen";
 
 /* Replace source failure alert message */
 "“%@” could not be read as a cursor or image file." = "“%@” kan niet worden gelezen als cursor- of afbeeldingsbestand.";
@@ -511,13 +499,13 @@
 "cannot list %@" = "kan %@ niet weergeven";
 
 /* Conversion error: unsupported input; %@ is a sentence naming the specific reason */
-"%@ Convert Theme accepts a Mousecape .cape file, a Windows cursor folder, or a Linux Xcursor theme folder." = "%@ ‘Converteer thema’ accepteert een Mousecape .cape-bestand, een Windows-cursormap of een Linux Xcursor-themamap.";
+"%@ Convert Theme accepts a Mousecape .cape file, a Windows cursor folder, or a Linux Xcursor theme folder." = "%@ “Converteer thema” accepteert een Mousecape .cape-bestand, een Windows-cursormap of een Linux Xcursor-themamap.";
 
 /* Convert Theme rejection: the chosen file is a compressed archive */
 "%@ is an archive. Expand it first, then choose the theme folder inside it." = "%@ is een archief. Pak het eerst uit en kies dan de themamap die erin zit.";
 
 /* Convert Theme rejection: the chosen file is a plain image */
-"%@ is an image, not a cursor theme. Use Edit Theme to drop images onto a cursor slot." = "%@ is een afbeelding, geen cursorthema. Gebruik ‘Thema bewerken’ om afbeeldingen naar een cursorvak te slepen.";
+"%@ is an image, not a cursor theme. Use Edit Theme to drop images onto a cursor slot." = "%@ is een afbeelding, geen cursorthema. Gebruik “Thema bewerken” om afbeeldingen naar een cursorvak te slepen.";
 
 /* Conversion error: the chosen folder holds more than one theme */
 "This folder holds %lld theme files. Choose a single one to convert." = "Deze map bevat %lld themabestanden. Kies er één om te converteren.";
@@ -537,14 +525,20 @@
 /* Save blocked: cursor slot pixel sizes out of order */
 "“%@” has slot images out of size order (10× > 5× > 2× > 1×). Fix the slots before saving." = "“%@” heeft vak-afbeeldingen die niet op grootte geordend zijn (10× > 5× > 2× > 1×). Corrigeer de vakken voordat je bewaart.";
 
-/* Cursor settings section header for scheduled theme switching */
-"Automatic Switching" = "Automatisch wisselen";
+/* Toggle switching the cursor theme by appearance or by time of day */
+"Theme Automation" = "Thema-automatisering";
 
-/* Toggle enabling scheduled cursor theme switching */
-"Switch cursor automatically" = "Cursor automatisch wisselen";
+/* Toggle that makes automatic switching follow the macOS appearance */
+"Match system appearance" = "Systeemweergave volgen";
 
-/* Warning shown when the helper tool is required for automatic switching */
-"Automatic switching requires the Helper Tool. You can install it from General → Helper Tool." = "Voor automatisch wisselen is het Hulpprogramma vereist. Je kunt dit installeren via Algemeen → Hulpprogramma.";
+/* Label for the Light appearance theme pick */
+"Light Appearance" = "Lichte weergave";
+
+/* Label for the Dark appearance theme pick */
+"Dark Appearance" = "Donkere weergave";
+
+/* Warning shown when the Helper Tool is missing, under Theme Automation */
+"Theme Automation requires the Helper Tool. You can install it from General → Helper Tool." = "Voor “Thema-automatisering” is het Hulpprogramma vereist. Je kunt dit installeren via Algemeen → Hulpprogramma.";
 
 /* Label for the daytime scheduled switch */
 "Day mode" = "Dagmodus";
@@ -561,8 +555,8 @@
 /* 24-hour clock option */
 "24 hours" = "24 uur";
 
-/* Explanation of scheduled cursor switching in Cursor settings */
-"Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one." = "Kies voor elke modus een tijdstip en een cursorthema. MaCursor schakelt op die tijdstippen over en behoudt dat thema tot de volgende omschakeling.";
+/* Explanation shown under the Theme Automation toggle, naming both modes */
+"Switch the cursor theme with the macOS Light and Dark appearance, or set your own day and night times." = "Laat het cursorthema meewisselen met de lichte en donkere weergave van macOS, of stel je eigen dag- en nachttijden in.";
 
 /* Warning when both scheduled modes are given the same clock time */
 "Day mode and Night mode must start at different times, so the time was moved by one minute." = "De dagmodus en de nachtmodus moeten op verschillende tijdstippen beginnen, dus is de tijd met één minuut verschoven.";
@@ -575,3 +569,136 @@
 
 /* Button opening the donation page */
 "Donate" = "Doneer";
+
+/* Toggle giving one app its own cursor theme */
+"Per-App Themes" = "Cursorthema’s per app";
+
+/* Button that opens a file panel to add an app rule */
+"Add App…" = "App toevoegen…";
+
+/* Accessibility label for the button that removes an app rule row */
+"Remove app rule" = "App-regel verwijderen";
+
+/* Notice shown when the picked app already has a rule */
+"That app is already in the list." = "Die app staat al in de lijst.";
+
+/* Explanation shown under the Per-App Themes toggle */
+"Each app can carry its own cursor theme. While that app is in front, MaCursor uses the theme you picked for it." = "Elke app kan zijn eigen cursorthema hebben. Zolang die app op de voorgrond staat, gebruikt MaCursor het thema dat je ervoor hebt gekozen.";
+
+/* Warning shown when the Helper Tool is missing, under Per-App Themes */
+"Per-App Themes requires the Helper Tool. You can install it from General → Helper Tool." = "Voor “Cursorthema’s per app” is het Hulpprogramma vereist. Je kunt dit installeren via Algemeen → Hulpprogramma.";
+
+/* Toggle activating the window under the pointer, also the Accessibility request window title */
+"Focus on Hover" = "Focus bij aanwijzen";
+
+/* Warning shown when the Helper Tool is missing, under Focus on Hover */
+"Focus on Hover requires the Helper Tool. You can install it from General → Helper Tool." = "Voor “Focus bij aanwijzen” is het Hulpprogramma vereist. Je kunt dit installeren via Algemeen → Hulpprogramma.";
+
+/* Warning shown while focus follows mouse is enabled but Accessibility permission is missing */
+"Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility." = "Toegankelijkheidstoegang ontbreekt. Sta MaCursorHelper toe via Privacy en beveiliging → Toegankelijkheid.";
+
+/* Button that opens the Accessibility pane of System Settings */
+"Open System Settings" = "Open Systeeminstellingen";
+
+/* Explanation shown under the Focus on Hover toggle */
+"When you hover over a window with the cursor, MaCursor raises it to the front and hands it the focus after a short delay." = "Als je met de cursor over een venster beweegt, brengt MaCursor het na een korte vertraging naar de voorgrond en geeft het de focus.";
+
+/* Menu bar panel: heading in front of the applied theme name */
+"Current Cursor" = "Huidige cursor";
+
+/* Menu bar panel: heading above the theme list */
+"Cursor Themes" = "Cursorthema’s";
+
+/* Menu bar right-click menu: opens the main window */
+"Open MaCursor" = "Open MaCursor";
+
+/* Settings section: MaCursor's own menu bar options */
+"Menu Bar" = "Menubalk";
+
+/* Toggle: show the Helper Tool's icon in the menu bar */
+"Show Menu Bar Icon" = "Menubalkpictogram tonen";
+
+/* Caption under the Show Menu Bar Icon toggle while the Helper Tool is not installed */
+"The menu bar icon is provided by the Helper Tool. Install it above to use it." = "Het menubalkpictogram wordt geleverd door het Hulpprogramma. Installeer dat hierboven om het te gebruiken.";
+
+/* Caption under the Show Menu Bar Icon toggle */
+"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "Toont een MaCursor-pictogram in de menubalk om cursorthema’s en regels per app te wisselen. Als het niet verschijnt, open Systeeminstellingen en kijk bij Menubalk.";
+
+/* Menu bar panel */
+
+/* Menu bar panel: theme name shown when no theme is applied */
+"System cursors" = "Systeemcursors";
+
+/* Menu bar panel: placeholder when the library is empty */
+"No cursor themes yet" = "Nog geen cursorthema’s";
+
+/* Menu bar panel: heading above the frontmost app */
+"Active App" = "Actieve app";
+
+/* Menu bar panel: label of the per-app theme picker */
+"Cursor for this app" = "Cursor voor deze app";
+
+/* Menu bar panel: the theme the frontmost app's rule applies; %@ is the theme name */
+"Uses %@" = "Gebruikt %@";
+
+/* Menu bar panel: the frontmost app has no rule and follows the applied theme */
+"Uses the current cursor" = "Gebruikt de huidige cursor";
+
+/* Menu bar panel: placeholder when no app is frontmost */
+"No app in front" = "Geen app op de voorgrond";
+
+/* Menu bar panel: heading above the scale slider and the toggles */
+"Quick Controls" = "Snelle bediening";
+
+/* Menu bar panel: status under the Focus on Hover toggle while the permission is missing */
+"Needs Accessibility access" = "Heeft toegang tot Toegankelijkheid nodig";
+
+/* Slider label: translucency of the menu bar panel */
+"Panel Background" = "Paneelachtergrond";
+
+/* Caption under the Panel Background slider */
+"Sets how see-through the menu bar panel is: the middle of the slider is the standard frosted glass, the minimum is clear, the maximum is solid." = "Hiermee stel je in hoe doorschijnend het menubalkpaneel is: het midden van de schuifknop is het standaard matglas, het minimum is volledig doorzichtig, het maximum is ondoorzichtig.";
+
+/* Favorites */
+
+/* Context menu: mark the theme as a favorite */
+"Add to Favorites" = "Voeg toe aan favorieten";
+
+/* Context menu: unmark the favorite theme */
+"Remove from Favorites" = "Verwijder uit favorieten";
+
+/* Menu bar panel: placeholder when no theme is a favorite */
+"No favorite themes yet" = "Nog geen favoriete thema’s";
+
+/* Menu bar panel: caption under the favorites placeholder */
+"Mark themes as favorites in MaCursor to show them here." = "Markeer thema’s als favoriet in MaCursor om ze hier te tonen.";
+
+/* Helper status: installed but not running */
+"Installed, not running" = "Geïnstalleerd, draait niet";
+
+/* Menu bar right-click menu: quits the app */
+"Quit MaCursor" = "Stop MaCursor";
+
+/* Heading of the window that opens when focus follows mouse is turned on without Accessibility access */
+"Allow Accessibility Access" = "Toegang tot Toegankelijkheid toestaan";
+
+/* Explanation in that window; "MaCursorHelper" is the product name of the login-item helper and stays untranslated; "Allow for Accessibility" is the button below it */
+"MaCursorHelper needs Accessibility access to bring the window under the mouse pointer to the front. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelper heeft toegang tot Toegankelijkheid nodig om het venster onder de muisaanwijzer naar de voorgrond te halen. Kies “Toegankelijkheid toestaan” en schakel MaCursorHelper daarna in via Privacy en beveiliging → Toegankelijkheid.";
+
+/* Primary button of that window; asks the helper to show the macOS permission dialog */
+"Allow for Accessibility" = "Toegankelijkheid toestaan";
+
+/* Secondary button of that window; closes it and leaves focus follows mouse on */
+"Not Now" = "Niet nu";
+
+/* Status shown in that window after the button was pressed */
+"Waiting for access. This window updates as soon as MaCursorHelper is allowed." = "Wachten op toegang. Dit venster wordt bijgewerkt zodra MaCursorHelper is toegestaan.";
+
+/* Status shown in that window once Accessibility access was granted */
+"Access granted" = "Toegang verleend";
+
+/* Button that closes that window once access was granted */
+"Let’s Go!" = "Aan de slag!";
+
+/* Empty search result in the Edit Theme sidebar; %@ is the search text */
+"No Results for “%@”" = "Geen resultaten voor “%@”";

@@ -39,6 +39,29 @@ enum CursorGeometry {
         return Int(width.rounded())
     }
 
+    static func framePixelHeight(of rep: NSBitmapImageRep, frameCount: Int) -> Int? {
+        guard rep.pixelsWide > 0, rep.pixelsHigh > 0 else { return nil }
+        let height = rep.pixelsHigh / max(1, frameCount)
+        return height > 0 ? height : nil
+    }
+
+    static func pointSize(of rep: NSBitmapImageRep, scaleValue scale: UInt, frameCount: Int) -> CGSize? {
+        guard let framePixels = framePixelHeight(of: rep, frameCount: frameCount) else { return nil }
+        let divisor = Double(multiplier(forScaleValue: scale))
+        let width = (Double(rep.pixelsWide) / divisor).rounded()
+        let height = (Double(framePixels) / divisor).rounded()
+        guard width >= 1, height >= 1 else { return nil }
+        return CGSize(width: width, height: height)
+    }
+
+    static func pointHeight(of rep: NSBitmapImageRep, pointWidth: CGFloat, frameCount: Int) -> CGFloat? {
+        guard pointWidth > 0,
+              let framePixels = framePixelHeight(of: rep, frameCount: frameCount) else { return nil }
+        let height = Double(pointWidth) * Double(framePixels) / Double(rep.pixelsWide)
+        guard height >= 1 else { return nil }
+        return CGFloat(height)
+    }
+
     static func baseSize(matchingAspectOf rep: NSBitmapImageRep, frameCount: Int) -> CGSize {
         let width = Double(basePointSize)
         let frames = max(1, frameCount)

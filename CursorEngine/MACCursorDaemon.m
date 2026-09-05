@@ -2,11 +2,21 @@
 #import "MACCursorActions.h"
 #import "MACCursorDefs.h"
 #import "MACAutoSwitch.h"
+#import "MACFocusFollowsMouse.h"
+#import "MACMenuBarState.h"
+#import "MACMenuBar.h"
 #import <SystemConfiguration/SystemConfiguration.h>
 #import <Cocoa/Cocoa.h>
 #import <Carbon/Carbon.h>
 
 static const OSType kMACHotKeySignature = 'MACR';
+
+static NSString * _Nullable menuBarSafeFrontmostBundleID(void) {
+    NSString *cached = MACMenuBarLastForegroundBundleID();
+    if (cached.length > 0) return cached;
+    NSString *live = [[NSWorkspace sharedWorkspace] frontmostApplication].bundleIdentifier;
+    return MACMenuBarIsHelperBundleIdentifier(live) ? nil : live;
+}
 
 static NSMutableDictionary<NSNumber *, NSString *> *sRegisteredThemes = nil;
 
@@ -16,31 +26,40 @@ static BOOL sHandlerInstalled = NO;
 
 static EventHandlerRef sEventHandlerRef = NULL;
 
-static void forceCursorVisualRefresh(void) {
+static void systemAppearanceDidChange(void) {
     dispatch_async(dispatch_get_main_queue(), ^{
-        NSPoint loc = [NSEvent mouseLocation];
-        NSRect windowRect = NSMakeRect(loc.x, loc.y, 1, 1);
-
-        NSWindow *invisibleWindow = [[NSWindow alloc] initWithContentRect:windowRect
-                                                                styleMask:NSWindowStyleMaskBorderless
-                                                                  backing:NSBackingStoreBuffered
-                                                                    defer:NO];
-        [invisibleWindow setReleasedWhenClosed:NO];
-        [invisibleWindow setOpaque:NO];
-        [invisibleWindow setBackgroundColor:[NSColor clearColor]];
-        [invisibleWindow setIgnoresMouseEvents:NO];
-        [invisibleWindow setLevel:NSFloatingWindowLevel];
-        [invisibleWindow setHasShadow:NO];
-
-        [invisibleWindow orderFront:nil];
-
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(MACWindowDismissDelay * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [invisibleWindow close];
-        });
+        NSDictionary *config = MACAutoSwitchReadConfig();
+        if (!MACAutoSwitchMatchesSystemAppearance(config)) return;
+        MMLog(BOLD CYAN "System appearance changed, re-resolving auto-switch" RESET);
+        if (MACAutoSwitchApplyIfNeeded()) {
+            MACAutoSwitchForceVisualRefresh();
+        }
     });
-
-    MMLog(BOLD CYAN "Forcing visual refresh via Invisible Window trick" RESET);
 }
+
+@interface MACSystemAppearanceWatcher : NSObject
+@end
+
+@implementation MACSystemAppearanceWatcher
+
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context
+{
+    systemAppearanceDidChange();
+}
+
+@end
+
+static void interfaceThemeChangedCallback(CFNotificationCenterRef center,
+    void *observer, CFNotificationName name, const void *object,
+    CFDictionaryRef userInfo)
+{
+    systemAppearanceDidChange();
+}
+
+static MACSystemAppearanceWatcher *sAppearanceWatcher = nil;
 
 static OSStatus hotKeyEventHandler(EventHandlerCallRef nextHandler,
                                     EventRef event,
@@ -76,7 +95,7 @@ static OSStatus hotKeyEventHandler(EventHandlerCallRef nextHandler,
     if (!applyThemeAtPath(path)) {
         MMLog(BOLD RED "Failed to apply theme for hotkey %u" RESET, hotKeyID.id);
     } else {
-        forceCursorVisualRefresh();
+        MACAutoSwitchForceVisualRefresh();
     }
 
     return noErr;
@@ -232,19 +251,25 @@ static void UserSpaceChanged(SCDynamicStoreRef	store, CFArrayRef changedKeys, vo
 
     if (!currentConsoleUser) return;
     if (CFEqual(currentConsoleUser, CFSTR("loginwindow"))) {
+        MACFocusFollowsMouseStop();
         CFRelease(currentConsoleUser);
         return;
     }
 
     NSString *appliedPath = appliedThemePathForUser((__bridge NSString *)currentConsoleUser);
     MMLog(BOLD GREEN "User Space Changed to %s, applying cursor theme..." RESET, [(__bridge NSString *)currentConsoleUser UTF8String]);
+    MACAutoSwitchClearAppOverride();
     if (!applyThemeAtPath(appliedPath)) {
         MMLog(BOLD RED "Application of cursor theme failed" RESET);
     }
 
     MACAutoSwitchApplyIfNeeded();
+    MACAutoSwitchHandleFrontmostApp(menuBarSafeFrontmostBundleID());
 
     assertPreferredCursorScale();
+
+    MACFocusFollowsMouseStop();
+    MACFocusFollowsMouseStart();
 
     CFRelease(currentConsoleUser);
 }
@@ -253,6 +278,22 @@ static dispatch_source_t sReconfigTimer = NULL;
 static dispatch_source_t sActivationTimer = NULL;
 
 static void appActivationCallback(NSNotification *note) {
+    NSRunningApplication *activated = note.userInfo[NSWorkspaceApplicationKey];
+    NSString *bundleID = activated.bundleIdentifier;
+
+    if (MACMenuBarIsHelperBundleIdentifier(bundleID)) {
+        MACFocusFollowsMouseCancelPendingRaise();
+        MMLog("Menu bar activation, keeping the current cursor override");
+        return;
+    }
+    MACMenuBarNoteForegroundBundleID(bundleID);
+
+    if (MACFocusFollowsMouseConsumeRecentRaise(bundleID)) {
+        MMLog("App activation caused by focus follows mouse, skipping cursor re-assert");
+        return;
+    }
+    MACFocusFollowsMouseCancelPendingRaise();
+
     if (sActivationTimer) {
         dispatch_source_cancel(sActivationTimer);
         sActivationTimer = NULL;
@@ -265,6 +306,7 @@ static void appActivationCallback(NSNotification *note) {
         DISPATCH_TIME_FOREVER, 0);
     dispatch_source_set_event_handler(sActivationTimer, ^{
         MMLog("App activation detected — re-asserting cursor override");
+        MACAutoSwitchHandleFrontmostApp(bundleID);
         MACFinalizeCursorApply(MACCursorRefreshScaleBumpSmall);
         sActivationTimer = NULL;
     });
@@ -288,8 +330,10 @@ void reconfigurationCallback(CGDirectDisplayID display,
         DISPATCH_TIME_FOREVER, 0);
     dispatch_source_set_event_handler(sReconfigTimer, ^{
         MMLog("Reconfigure debounce fired — applying theme");
+        MACAutoSwitchClearAppOverride();
         applyThemeAtPath(appliedThemePathForUser(NSUserName()));
         MACAutoSwitchApplyIfNeeded();
+        MACAutoSwitchHandleFrontmostApp(menuBarSafeFrontmostBundleID());
         assertPreferredCursorScale();
         sReconfigTimer = NULL;
     });
@@ -310,6 +354,11 @@ static void rescheduleAutoSwitchTimer(void) {
         return;
     }
 
+    if (MACAutoSwitchMatchesSystemAppearance(config)) {
+        MMLog(BOLD CYAN "Auto-switch follows the system appearance, no timer scheduled" RESET);
+        return;
+    }
+
     NSInteger minutes = MACAutoSwitchMinutesUntilNextBoundary(
         config[@"scheduleRules"], MACAutoSwitchCurrentMinuteOfDay());
     if (minutes < 0) {
@@ -326,7 +375,7 @@ static void rescheduleAutoSwitchTimer(void) {
     dispatch_source_set_event_handler(sScheduleTimer, ^{
         MMLog(BOLD CYAN "Auto-switch boundary reached" RESET);
         if (MACAutoSwitchApplyIfNeeded()) {
-            forceCursorVisualRefresh();
+            MACAutoSwitchForceVisualRefresh();
         }
         rescheduleAutoSwitchTimer();
     });
@@ -340,9 +389,26 @@ static void autoSwitchDidChangeCallback(CFNotificationCenterRef center,
 {
     MMLog(BOLD CYAN "Auto-switch config changed, re-resolving" RESET);
     if (MACAutoSwitchApplyIfNeeded()) {
-        forceCursorVisualRefresh();
+        MACAutoSwitchForceVisualRefresh();
     }
+    MACAutoSwitchHandleFrontmostApp(menuBarSafeFrontmostBundleID());
     rescheduleAutoSwitchTimer();
+}
+
+static void menuBarDidChangeCallback(CFNotificationCenterRef center,
+    void *observer, CFNotificationName name, const void *object,
+    CFDictionaryRef userInfo)
+{
+    MMLog(BOLD CYAN "Menu bar visibility preference changed" RESET);
+    MACMenuBarApplyVisibilityPreference();
+}
+
+static void focusFollowsMouseDidChangeCallback(CFNotificationCenterRef center,
+    void *observer, CFNotificationName name, const void *object,
+    CFDictionaryRef userInfo)
+{
+    MMLog(BOLD CYAN "Focus follows mouse config changed, restarting" RESET);
+    MACFocusFollowsMouseConfigDidChange();
 }
 
 static void shortcutsDidChangeCallback(CFNotificationCenterRef center,
@@ -357,6 +423,8 @@ static void shortcutsDidChangeCallback(CFNotificationCenterRef center,
 }
 
 void listener(void) {
+    MACSetDefault(MACHelperBuildIdentityAtPath([NSBundle mainBundle].executablePath), MACPreferencesHelperBuildKey);
+
     SCDynamicStoreRef store = SCDynamicStoreCreate(NULL, CFSTR("com.apple.dts.ConsoleUser"), UserSpaceChanged, NULL);
     if (!store) {
         MMLog(BOLD RED "Failed to create SCDynamicStore" RESET);
@@ -388,6 +456,23 @@ void listener(void) {
     }
 
     [NSApplication sharedApplication];
+    [NSApp setActivationPolicy:NSApplicationActivationPolicyAccessory];
+
+    sAppearanceWatcher = [MACSystemAppearanceWatcher new];
+    [NSApp addObserver:sAppearanceWatcher
+            forKeyPath:@"effectiveAppearance"
+               options:0
+               context:NULL];
+
+    CFNotificationCenterAddObserver(
+        CFNotificationCenterGetDistributedCenter(),
+        NULL,
+        interfaceThemeChangedCallback,
+        CFSTR("AppleInterfaceThemeChangedNotification"),
+        NULL,
+        CFNotificationSuspensionBehaviorDeliverImmediately
+    );
+    MMLog(BOLD CYAN "Listening for system appearance changes" RESET);
 
     CGDisplayRegisterReconfigurationCallback(reconfigurationCallback, NULL);
     MMLog(BOLD CYAN "Listening for Display changes" RESET);
@@ -408,6 +493,7 @@ void listener(void) {
         MACCaptureSystemDefaults(systemDefaultPath);
     }
 
+    MACAutoSwitchRecoverBaseThemeIfNeeded();
     applyThemeAtPath(appliedThemePathForUser(NSUserName()));
     assertPreferredCursorScale();
 
@@ -442,6 +528,35 @@ void listener(void) {
     );
     MMLog(BOLD CYAN "Listening for Auto-switch config changes" RESET);
 
+    CFNotificationCenterAddObserver(
+        CFNotificationCenterGetDistributedCenter(),
+        NULL,
+        menuBarDidChangeCallback,
+        (__bridge CFStringRef)MACMenuBarDidChangeNotification,
+        NULL,
+        CFNotificationSuspensionBehaviorDeliverImmediately
+    );
+    MMLog(BOLD CYAN "Listening for Menu bar visibility changes" RESET);
+
+    CFNotificationCenterAddObserver(
+        CFNotificationCenterGetDistributedCenter(),
+        NULL,
+        focusFollowsMouseDidChangeCallback,
+        (__bridge CFStringRef)MACFocusFollowsMouseDidChangeNotification,
+        NULL,
+        CFNotificationSuspensionBehaviorDeliverImmediately
+    );
+    MMLog(BOLD CYAN "Listening for Focus follows mouse config changes" RESET);
+
+    [[[NSWorkspace sharedWorkspace] notificationCenter]
+        addObserverForName:NSWorkspaceActiveSpaceDidChangeNotification
+        object:nil
+        queue:[NSOperationQueue mainQueue]
+        usingBlock:^(NSNotification *note) {
+            MACFocusFollowsMouseNoteSpaceChange();
+        }];
+    MMLog(BOLD CYAN "Listening for Space changes" RESET);
+
     [[[NSWorkspace sharedWorkspace] notificationCenter]
         addObserverForName:NSWorkspaceDidWakeNotification
         object:nil
@@ -449,15 +564,23 @@ void listener(void) {
         usingBlock:^(NSNotification *note) {
             MMLog(BOLD CYAN "Woke from sleep, re-resolving auto-switch" RESET);
             if (MACAutoSwitchApplyIfNeeded()) {
-                forceCursorVisualRefresh();
+                MACAutoSwitchForceVisualRefresh();
             }
+            MACAutoSwitchHandleFrontmostApp(menuBarSafeFrontmostBundleID());
             assertPreferredCursorScale();
             rescheduleAutoSwitchTimer();
+            MACFocusFollowsMouseStop();
+            MACFocusFollowsMouseStart();
         }];
     MMLog(BOLD CYAN "Listening for Wake notifications" RESET);
 
     MACAutoSwitchApplyIfNeeded();
+    MACMenuBarNoteForegroundBundleID(menuBarSafeFrontmostBundleID());
+    MACAutoSwitchHandleFrontmostApp(menuBarSafeFrontmostBundleID());
     rescheduleAutoSwitchTimer();
+    MACFocusFollowsMouseStart();
+    MACFocusFollowsMouseSyncTrust();
+    MACMenuBarStart();
 
     CFRunLoopAddSource(CFRunLoopGetCurrent(), rls, kCFRunLoopDefaultMode);
 

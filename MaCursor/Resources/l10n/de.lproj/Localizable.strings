@@ -135,9 +135,6 @@
 /* Error: write failure */
 "Error writing cursor theme to disk." = "Fehler beim Schreiben des Cursor-Themas auf die Festplatte.";
 
-/* Error: theme file creation failure */
-"Failed to create cursor theme file" = "Das Erstellen der Cursor-Thema-Datei ist fehlgeschlagen";
-
 /* Undo suffix: frame count */
 "frame count" = "Bildanzahl";
 
@@ -279,9 +276,6 @@
 /* Button: restore system cursors */
 "Restore system cursors" = "Systemcursor wiederherstellen";
 
-/* Menu: restore system cursors */
-"Restore System Cursors" = "Systemcursor wiederherstellen";
-
 /* Button: save theme */
 "Save" = "Sichern";
 
@@ -324,9 +318,6 @@
 /* Alert message: cursor theme load failure */
 "The cursor theme could not be loaded." = "Das Cursor-Thema konnte nicht geladen werden.";
 
-/* Error: destination not writable */
-"The destination, %@, is not writable." = "Das Ziel %@ ist nicht beschreibbar.";
-
 /* Alert message: language restart */
 "The language change will take effect after restarting MaCursor." = "Die Sprachänderung wird nach einem Neustart von MaCursor wirksam.";
 
@@ -341,9 +332,6 @@
 
 /* Alert message: reset confirmation */
 "This will remove all cursor themes, restore system cursors, and reset every preference to its default value. This action cannot be undone." = "Dadurch werden alle Cursor-Themen entfernt, die Systemcursor wiederhergestellt und alle Einstellungen auf ihre Standardwerte zurückgesetzt. Dieser Vorgang kann nicht rückgängig gemacht werden.";
-
-/* Error: invalid directory */
-"Unable to create a cursor theme from the directory specified." = "Aus dem angegebenen Verzeichnis konnte kein Cursor-Thema erstellt werden.";
 
 /* Button: uninstall helper */
 "Uninstall" = "Deinstallieren";
@@ -403,7 +391,7 @@
 "Automatically check for updates" = "Automatisch nach Updates suchen";
 
 /* Menu: check for updates (Sparkle) */
-"Check for Updates…" = "Nach Updates suchen…";
+"Check for Updates…" = "Nach Updates suchen …";
 
 
 /* --- Theme conversion (import from other formats) --- */
@@ -537,14 +525,20 @@
 /* Save blocked: cursor slot pixel sizes out of order */
 "“%@” has slot images out of size order (10× > 5× > 2× > 1×). Fix the slots before saving." = "„%@“ hat Slot-Bilder in falscher Größenreihenfolge (10× > 5× > 2× > 1×). Korrigieren Sie die Slots vor dem Sichern.";
 
-/* Cursor settings section header for scheduled theme switching */
-"Automatic Switching" = "Automatische Umschaltung";
+/* Toggle switching the cursor theme by appearance or by time of day */
+"Theme Automation" = "Themenautomatik";
 
-/* Toggle enabling scheduled cursor theme switching */
-"Switch cursor automatically" = "Cursor automatisch wechseln";
+/* Toggle that makes automatic switching follow the macOS appearance */
+"Match system appearance" = "An das Erscheinungsbild des Systems anpassen";
 
-/* Warning shown when the helper tool is required for automatic switching */
-"Automatic switching requires the Helper Tool. You can install it from General → Helper Tool." = "Für die automatische Umschaltung ist das Hilfsprogramm erforderlich. Sie können es über „Allgemein“ → „Hilfsprogramm“ installieren.";
+/* Label for the Light appearance theme pick */
+"Light Appearance" = "Helles Erscheinungsbild";
+
+/* Label for the Dark appearance theme pick */
+"Dark Appearance" = "Dunkles Erscheinungsbild";
+
+/* Warning shown when the Helper Tool is missing, under Theme Automation */
+"Theme Automation requires the Helper Tool. You can install it from General → Helper Tool." = "Für „Themenautomatik“ ist das Hilfsprogramm erforderlich. Sie können es über „Allgemein“ → „Hilfsprogramm“ installieren.";
 
 /* Label for the daytime scheduled switch */
 "Day mode" = "Tagesmodus";
@@ -561,8 +555,8 @@
 /* 24-hour clock option */
 "24 hours" = "24 Stunden";
 
-/* Explanation of scheduled cursor switching in Cursor settings */
-"Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one." = "Wählen Sie für jeden Modus eine Uhrzeit und ein Cursor-Design aus. MaCursor wechselt zu diesen Zeiten und behält das jeweilige Design bis zum nächsten Wechsel bei.";
+/* Explanation shown under the Theme Automation toggle, naming both modes */
+"Switch the cursor theme with the macOS Light and Dark appearance, or set your own day and night times." = "Wechseln Sie das Cursor-Thema mit dem macOS-Erscheinungsbild „Hell“ und „Dunkel“, oder legen Sie eigene Tages- und Nachtzeiten fest.";
 
 /* Warning when both scheduled modes are given the same clock time */
 "Day mode and Night mode must start at different times, so the time was moved by one minute." = "Der Tagesmodus und der Nachtmodus müssen zu unterschiedlichen Zeiten beginnen, daher wurde die Uhrzeit um eine Minute verschoben.";
@@ -575,3 +569,136 @@
 
 /* Button opening the donation page */
 "Donate" = "Spenden";
+
+/* Toggle giving one app its own cursor theme */
+"Per-App Themes" = "Themen pro App";
+
+/* Button that opens a file panel to add an app rule */
+"Add App…" = "App hinzufügen …";
+
+/* Accessibility label for the button that removes an app rule row */
+"Remove app rule" = "App-Regel entfernen";
+
+/* Notice shown when the picked app already has a rule */
+"That app is already in the list." = "Diese App ist bereits in der Liste.";
+
+/* Explanation shown under the Per-App Themes toggle */
+"Each app can carry its own cursor theme. While that app is in front, MaCursor uses the theme you picked for it." = "Jede App kann ein eigenes Cursor-Thema verwenden. Solange diese App im Vordergrund ist, verwendet MaCursor das Thema, das Sie für sie ausgewählt haben.";
+
+/* Warning shown when the Helper Tool is missing, under Per-App Themes */
+"Per-App Themes requires the Helper Tool. You can install it from General → Helper Tool." = "Für „Themen pro App“ ist das Hilfsprogramm erforderlich. Sie können es über „Allgemein“ → „Hilfsprogramm“ installieren.";
+
+/* Toggle activating the window under the pointer, also the Accessibility request window title */
+"Focus on Hover" = "Fokus beim Daraufzeigen";
+
+/* Warning shown when the Helper Tool is missing, under Focus on Hover */
+"Focus on Hover requires the Helper Tool. You can install it from General → Helper Tool." = "Für „Fokus beim Daraufzeigen“ ist das Hilfsprogramm erforderlich. Sie können es über „Allgemein“ → „Hilfsprogramm“ installieren.";
+
+/* Warning shown while focus follows mouse is enabled but Accessibility permission is missing */
+"Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility." = "Der Bedienungshilfen-Zugriff fehlt. Erlauben Sie MaCursorHelper unter „Datenschutz & Sicherheit“ → „Bedienungshilfen“.";
+
+/* Button that opens the Accessibility pane of System Settings */
+"Open System Settings" = "Systemeinstellungen öffnen";
+
+/* Explanation shown under the Focus on Hover toggle */
+"When you hover over a window with the cursor, MaCursor raises it to the front and hands it the focus after a short delay." = "Wenn Sie mit dem Cursor über ein Fenster fahren, rückt MaCursor es nach einer kurzen Verzögerung in den Vordergrund und übergibt ihm den Fokus.";
+
+/* Menu bar panel: heading in front of the applied theme name */
+"Current Cursor" = "Aktueller Cursor";
+
+/* Menu bar panel: heading above the theme list */
+"Cursor Themes" = "Cursor-Themen";
+
+/* Menu bar right-click menu: opens the main window */
+"Open MaCursor" = "MaCursor öffnen";
+
+/* Settings section: MaCursor's own menu bar options */
+"Menu Bar" = "Menüleiste";
+
+/* Toggle: show the Helper Tool's icon in the menu bar */
+"Show Menu Bar Icon" = "Menüleisten-Symbol einblenden";
+
+/* Caption under the Show Menu Bar Icon toggle while the Helper Tool is not installed */
+"The menu bar icon is provided by the Helper Tool. Install it above to use it." = "Das Menüleisten-Symbol wird vom Hilfsprogramm bereitgestellt. Installieren Sie es oben, um es zu verwenden.";
+
+/* Caption under the Show Menu Bar Icon toggle */
+"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "Zeigt ein MaCursor-Symbol in der Menüleiste an, über das Sie zwischen Cursor-Themen und app-spezifischen Regeln wechseln können. Falls es nicht erscheint, öffnen Sie die Systemeinstellungen und sehen Sie im Bereich „Menüleiste“ nach.";
+
+/* Menu bar panel */
+
+/* Menu bar panel: theme name shown when no theme is applied */
+"System cursors" = "Systemcursor";
+
+/* Menu bar panel: placeholder when the library is empty */
+"No cursor themes yet" = "Noch keine Cursor-Themen";
+
+/* Menu bar panel: heading above the frontmost app */
+"Active App" = "Aktive App";
+
+/* Menu bar panel: label of the per-app theme picker */
+"Cursor for this app" = "Cursor für diese App";
+
+/* Menu bar panel: the theme the frontmost app's rule applies; %@ is the theme name */
+"Uses %@" = "Verwendet %@";
+
+/* Menu bar panel: the frontmost app has no rule and follows the applied theme */
+"Uses the current cursor" = "Verwendet den aktuellen Cursor";
+
+/* Menu bar panel: placeholder when no app is frontmost */
+"No app in front" = "Keine App im Vordergrund";
+
+/* Menu bar panel: heading above the scale slider and the toggles */
+"Quick Controls" = "Schnellsteuerung";
+
+/* Menu bar panel: status under the Focus on Hover toggle while the permission is missing */
+"Needs Accessibility access" = "Benötigt Zugriff auf die Bedienungshilfen";
+
+/* Slider label: translucency of the menu bar panel */
+"Panel Background" = "Panel-Hintergrund";
+
+/* Caption under the Panel Background slider */
+"Sets how see-through the menu bar panel is: the middle of the slider is the standard frosted glass, the minimum is clear, the maximum is solid." = "Legt fest, wie durchsichtig das Menüleisten-Panel ist: Die Mitte des Schiebereglers entspricht dem normalen Milchglas-Look, die minimale Einstellung ist durchsichtig, die maximale Einstellung ist deckend.";
+
+/* Favorites */
+
+/* Context menu: mark the theme as a favorite */
+"Add to Favorites" = "Zu den Favoriten hinzufügen";
+
+/* Context menu: unmark the favorite theme */
+"Remove from Favorites" = "Aus den Favoriten entfernen";
+
+/* Menu bar panel: placeholder when no theme is a favorite */
+"No favorite themes yet" = "Noch keine Themen in den Favoriten";
+
+/* Menu bar panel: caption under the favorites placeholder */
+"Mark themes as favorites in MaCursor to show them here." = "Markieren Sie Themen in MaCursor als Favoriten, um sie hier anzuzeigen.";
+
+/* Helper status: installed but not running */
+"Installed, not running" = "Installiert, läuft nicht";
+
+/* Menu bar right-click menu: quits the app */
+"Quit MaCursor" = "MaCursor beenden";
+
+/* Empty search result in the Edit Theme sidebar; %@ is the search text */
+"No Results for “%@”" = "Keine Ergebnisse für „%@“";
+
+/* Heading of the window that opens when focus follows mouse is turned on without Accessibility access */
+"Allow Accessibility Access" = "Bedienungshilfen-Zugriff erlauben";
+
+/* Explanation in that window; "MaCursorHelper" is the product name of the login-item helper and stays untranslated; "Allow for Accessibility" is the button below it */
+"MaCursorHelper needs Accessibility access to bring the window under the mouse pointer to the front. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelper benötigt den Bedienungshilfen-Zugriff, um das Fenster unter dem Mauszeiger in den Vordergrund zu bringen. Wählen Sie „Bedienungshilfen erlauben“ und aktivieren Sie MaCursorHelper anschließend unter „Datenschutz & Sicherheit“ → „Bedienungshilfen“.";
+
+/* Primary button of that window; asks the helper to show the macOS permission dialog */
+"Allow for Accessibility" = "Bedienungshilfen erlauben";
+
+/* Secondary button of that window; closes it and leaves focus follows mouse on */
+"Not Now" = "Nicht jetzt";
+
+/* Status shown in that window after the button was pressed */
+"Waiting for access. This window updates as soon as MaCursorHelper is allowed." = "Warten auf den Zugriff. Dieses Fenster wird aktualisiert, sobald MaCursorHelper erlaubt ist.";
+
+/* Status shown in that window once Accessibility access was granted */
+"Access granted" = "Zugriff gewährt";
+
+/* Button that closes that window once access was granted */
+"Let’s Go!" = "Los geht’s!";

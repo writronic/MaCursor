@@ -15,8 +15,6 @@ NSString *defaultCursors[] = {
     @"com.apple.coregraphics.IBeamS",
     nil };
 
-NSString *MACErrorDomain = @"com.writronic.macursor.error";
-
 NSString * const MACCursorDictionaryCursorsKey         = @"Cursors";
 NSString * const MACCursorDictionaryCreatorKey         = @"Creator";
 NSString * const MACCursorDictionaryHiDPIKey           = @"HiDPI";
@@ -35,14 +33,6 @@ NSString * const MACCursorDictionaryRepresentationsKey = @"Representations";
 
 NSString *UUID(void) {
     return [[NSUUID UUID] UUIDString];
-}
-
-NSString *MMGet(NSString *prompt) {
-    MMOut("%s: ", prompt.UTF8String);
-    NSFileHandle *input = [NSFileHandle fileHandleWithStandardInput];
-    NSData *data = [input availableData];
-    NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    return [str stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
 }
 
 NSData *pngDataForImage(id image) {
@@ -165,13 +155,6 @@ NSString *nameForCursorIdentifier(NSString *identifier) {
     return name ?: @"Unknown";
 }
 
-NSString *cursorIdentifierForName(NSString *name) {
-    NSArray *keys = [cursorMap() allKeysForObject:name];
-    if (keys.count)
-        return keys[0];
-    return UUID();
-}
-
 CGError MACIsCursorRegistered(CGSConnectionID cid, char *cursorName, bool *registered) {
 
     size_t size = 0;
@@ -181,48 +164,6 @@ CGError MACIsCursorRegistered(CGSConnectionID cid, char *cursorName, bool *regis
     *registered = !((BOOL)err) && size > 0;
 
     return err;
-}
-
-static NSString *safeFirstKeyForObject(NSDictionary *dict, NSString *object) {
-    NSArray *keys = [dict allKeysForObject:object];
-    return keys.count > 0 ? keys[0] : nil;
-}
-
-BOOL MACCursorIsPointer(NSString *identifier) {
-    static NSArray *pointers = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        NSDictionary *c = cursorMap();
-        NSArray *candidates = @[
-            safeFirstKeyForObject(c, @"Alias") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Arrow") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Busy") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Closed") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Copy Drag") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Counting Down") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Counting Up") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Counting Up/Down") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Ctx Menu") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Forbidden") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Link") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Move") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Open") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Pointing") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Poof") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Wait") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Zoom In") ?: [NSNull null],
-            safeFirstKeyForObject(c, @"Zoom Out") ?: [NSNull null],
-        ];
-        NSMutableArray *filtered = [NSMutableArray arrayWithCapacity:candidates.count];
-        for (id obj in candidates) {
-            if (obj != [NSNull null]) {
-                [filtered addObject:obj];
-            }
-        }
-        pointers = [filtered copy];
-    });
-
-    return [pointers containsObject:identifier];
 }
 
 BOOL MACIsTahoeOrLater(void) {
@@ -813,9 +754,7 @@ BOOL MACCaptureSystemDefaults(NSString *outputPath) {
 }
 
 NSString *MACPreferencesAppliedCursorKey          = @"MACAppliedCursor";
-NSString *MACPreferencesAppliedClickActionKey     = @"MACLibraryClickAction";
 NSString *MACPreferencesCursorScaleKey            = @"MACCursorScale";
-NSString *MACPreferencesDoubleActionKey           = @"MACDoubleAction";
 NSString *MACPreferencesHandednessKey             = @"MACHandedness";
 NSString *MACPreferencesCursorShadowKey           = @"MACCursorShadow";
 NSString *MACSuppressDeleteLibraryConfirmationKey = @"MACSuppressDeleteLibraryConfirmationKey";
@@ -829,7 +768,7 @@ id MACDefault(NSString *key) {
     return (__bridge_transfer id)CFPreferencesCopyAppValue((CFStringRef)key, (CFStringRef)kMACDomain);
 }
 
-void MACSetDefaultFor(id value, NSString *key, NSString *user, NSString *host) {
+void MACSetDefaultFor(id _Nullable value, NSString *key, NSString *user, NSString *host) {
     CFPreferencesSetValue((CFStringRef)key, (CFPropertyListRef)value, (CFStringRef)kMACDomain, (CFStringRef)user, (CFStringRef)host);
     CFPreferencesSynchronize((CFStringRef)kMACDomain, (CFStringRef)user, (CFStringRef)host);
 }

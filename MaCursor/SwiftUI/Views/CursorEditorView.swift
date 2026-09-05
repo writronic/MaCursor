@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct CursorEditorView: View {
-    @Bindable var cursor: CursorModel
+    @ObservedObject var cursor: CursorModel
     var usedIdentifiers: Set<String> = []
     var onDirty: (() -> Void)? = nil
     var onReplaceSource: ((URL) -> Bool)? = nil
@@ -23,7 +23,7 @@ struct CursorEditorView: View {
                             Text(entry.name).tag(entry.identifier)
                         }
                     }
-                    .onChange(of: cursor.identifier) { _, _ in onDirty?() }
+                    .onChangeCompat(of: cursor.identifier) { _ in onDirty?() }
                 }
 
                 Divider()
@@ -33,10 +33,10 @@ struct CursorEditorView: View {
                         LabeledContent("Frame Count:") {
                             NumericTextField(value: Binding(
                                 get: { Double(cursor.frameCount) },
-                                set: { cursor.frameCount = NumericFieldValue.integer(from: $0) }
+                                set: { cursor.applyFrameCount(NumericFieldValue.integer(from: $0)) }
                             ), fractionDigits: 0)
                                 .frame(width: 60)
-                                .onChange(of: cursor.frameCount) { _, _ in onDirty?() }
+                                .onChangeCompat(of: cursor.frameCount) { _ in onDirty?() }
                         }
 
                         LabeledContent("Frame Duration:") {
@@ -44,7 +44,7 @@ struct CursorEditorView: View {
                                 value: $cursor.frameDuration,
                                 fractionDigits: ThemeFieldLimits.frameDurationFractionDigits)
                                 .frame(width: 80)
-                                .onChange(of: cursor.frameDuration) { _, _ in onDirty?() }
+                                .onChangeCompat(of: cursor.frameDuration) { _ in onDirty?() }
                             Text("sec")
                                 .foregroundStyle(.secondary)
                         }
@@ -149,7 +149,7 @@ struct CursorEditorView: View {
 }
 
 struct RepresentationDropZone: View {
-    let cursor: CursorModel
+    @ObservedObject var cursor: CursorModel
     let scale: Int
     let label: String
     var onDirty: (() -> Void)? = nil
@@ -182,7 +182,7 @@ struct RepresentationDropZone: View {
                             .padding(4)
                     } else {
                         VStack(spacing: 4) {
-                            Image(systemName: "photo.badge.plus")
+                            Image(systemName: "photo")
                                 .font(.title3)
                                 .foregroundStyle(.secondary)
                             Text("Drop")

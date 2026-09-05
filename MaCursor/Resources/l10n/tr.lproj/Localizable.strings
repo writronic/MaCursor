@@ -57,7 +57,7 @@
 "by %@ • v%.1f" = "%1$@ tarafından • v%2$.1f";
 
 /* Button: cancel action */
-"Cancel" = "İptal";
+"Cancel" = "Vazgeç";
 
 /* Undo: change theme creator */
 "Change Creator" = "Oluşturanı Değiştir";
@@ -117,7 +117,7 @@
 "dimensions" = "boyutlar";
 
 /* Button: discard changes */
-"Discard" = "Vazgeç";
+"Discard" = "Kaydetme";
 
 
 /* Label: drop zone */
@@ -134,9 +134,6 @@
 
 /* Error: write failure */
 "Error writing cursor theme to disk." = "İmleç teması diske yazılırken hata oluştu.";
-
-/* Error: theme file creation failure */
-"Failed to create cursor theme file" = "İmleç teması dosyası oluşturulamadı";
 
 /* Undo suffix: frame count */
 "frame count" = "kare sayısı";
@@ -178,7 +175,7 @@
 "Import" = "İçe Aktar";
 
 /* Menu: import theme */
-"Import Theme..." = "Temayı İçe Aktar...";
+"Import Theme..." = "Temayı İçe Aktar…";
 
 /* Button: install helper */
 "Install" = "Yükle";
@@ -279,9 +276,6 @@
 /* Button: restore system cursors */
 "Restore system cursors" = "Sistem imleçlerini geri yükle";
 
-/* Menu: restore system cursors */
-"Restore System Cursors" = "Sistem İmleçlerini Geri Yükle";
-
 /* Button: save theme */
 "Save" = "Kaydet";
 
@@ -301,7 +295,7 @@
 "Settings" = "Ayarlar";
 
 /* Menu: open settings */
-"Settings..." = "Ayarlar...";
+"Settings..." = "Ayarlar…";
 
 /* Settings tab: shortcut */
 "Shortcut" = "Kısayol";
@@ -324,9 +318,6 @@
 /* Alert message: cursor theme load failure */
 "The cursor theme could not be loaded." = "İmleç teması yüklenemedi.";
 
-/* Error: destination not writable */
-"The destination, %@, is not writable." = "%@ hedefi yazılabilir değil.";
-
 /* Alert message: language restart */
 "The language change will take effect after restarting MaCursor." = "Dil değişikliği, MaCursor yeniden başlatıldıktan sonra geçerli olacak.";
 
@@ -341,9 +332,6 @@
 
 /* Alert message: reset confirmation */
 "This will remove all cursor themes, restore system cursors, and reset every preference to its default value. This action cannot be undone." = "Bu işlem tüm imleç temalarını kaldırır, sistem imleçlerini geri yükler ve tüm tercihleri varsayılan değerlerine sıfırlar. Bu işlem geri alınamaz.";
-
-/* Error: invalid directory */
-"Unable to create a cursor theme from the directory specified." = "Belirtilen dizinden bir imleç teması oluşturulamadı.";
 
 /* Button: uninstall helper */
 "Uninstall" = "Kaldır";
@@ -408,7 +396,7 @@
 
 /* --- Theme conversion (import from other formats) --- */
 
-"Convert Theme..." = "Temayı Dönüştür...";
+"Convert Theme..." = "Temayı Dönüştür…";
 
 "Convert Theme" = "Temayı Dönüştür";
 
@@ -532,19 +520,25 @@
 "Slot Sizes Out of Order" = "Yuva Boyutları Sıralamaya Aykırı";
 
 /* Slot order rejection alert message */
-"Slot images must stay in size order (10× > 5× > 2× > 1×). This image does not fit the %1$@ slot because of the image in the %2$@ slot." = "Yuva görselleri boyut sıralamasına uymalıdır (10× > 5× > 2× > 1×). Bu görsel, %2$@ yuvasındaki görsel nedeniyle %1$@ yuvasına eklenemez.";
+"Slot images must stay in size order (10× > 5× > 2× > 1×). This image does not fit the %1$@ slot because of the image in the %2$@ slot." = "Yuva görüntüleri boyut sıralamasına uymalıdır (10× > 5× > 2× > 1×). Bu görüntü, %2$@ yuvasındaki görüntü nedeniyle %1$@ yuvasına eklenemez.";
 
 /* Save blocked: cursor slot pixel sizes out of order */
-"“%@” has slot images out of size order (10× > 5× > 2× > 1×). Fix the slots before saving." = "“%@” imlecinin yuva görselleri boyut sıralamasına aykırı (10× > 5× > 2× > 1×). Kaydetmeden önce yuvaları düzeltin.";
+"“%@” has slot images out of size order (10× > 5× > 2× > 1×). Fix the slots before saving." = "“%@” imlecinin yuva görüntüleri boyut sıralamasına aykırı (10× > 5× > 2× > 1×). Kaydetmeden önce yuvaları düzeltin.";
 
-/* Cursor settings section header for scheduled theme switching */
-"Automatic Switching" = "Otomatik Değiştirme";
+/* Toggle switching the cursor theme by appearance or by time of day */
+"Theme Automation" = "Tema Otomasyonu";
 
-/* Toggle enabling scheduled cursor theme switching */
-"Switch cursor automatically" = "İmleci otomatik olarak değiştir";
+/* Toggle that makes automatic switching follow the macOS appearance */
+"Match system appearance" = "Sistem görünümüne uy";
 
-/* Warning shown when the helper tool is required for automatic switching */
-"Automatic switching requires the Helper Tool. You can install it from General → Helper Tool." = "Otomatik değiştirme için Yardımcı Araç gereklidir. Genel → Yardımcı Araç bölümünden yükleyebilirsiniz.";
+/* Label for the Light appearance theme pick */
+"Light Appearance" = "Açık Görünüm";
+
+/* Label for the Dark appearance theme pick */
+"Dark Appearance" = "Koyu Görünüm";
+
+/* Warning shown when the Helper Tool is missing, under Theme Automation */
+"Theme Automation requires the Helper Tool. You can install it from General → Helper Tool." = "Tema Otomasyonu özelliği için Yardımcı Araç gereklidir. Genel → Yardımcı Araç bölümünden yükleyebilirsiniz.";
 
 /* Label for the daytime scheduled switch */
 "Day mode" = "Gündüz modu";
@@ -561,8 +555,8 @@
 /* 24-hour clock option */
 "24 hours" = "24 saat";
 
-/* Explanation of scheduled cursor switching in Cursor settings */
-"Pick a time and a cursor theme for each mode. MaCursor switches at those times and keeps that theme until the next one." = "Her mod için bir saat ve bir imleç teması seçin. MaCursor belirlediğiniz saatlerde geçiş yapar ve bir sonraki geçişe kadar o temayı kullanır.";
+/* Explanation shown under the Theme Automation toggle, naming both modes */
+"Switch the cursor theme with the macOS Light and Dark appearance, or set your own day and night times." = "İmleç temasını macOS’un Açık ve Koyu görünümleriyle değiştirin veya kendi gündüz ve gece saatlerinizi ayarlayın.";
 
 /* Warning when both scheduled modes are given the same clock time */
 "Day mode and Night mode must start at different times, so the time was moved by one minute." = "Gündüz modu ve Gece modu farklı saatlerde başlamalıdır, bu nedenle saat bir dakika kaydırıldı.";
@@ -575,3 +569,136 @@
 
 /* Button opening the donation page */
 "Donate" = "Bağış Yap";
+
+/* Toggle giving one app its own cursor theme */
+"Per-App Themes" = "Uygulamaya Özel Temalar";
+
+/* Button that opens a file panel to add an app rule */
+"Add App…" = "Uygulama Ekle…";
+
+/* Accessibility label for the button that removes an app rule row */
+"Remove app rule" = "Uygulama kuralını kaldır";
+
+/* Notice shown when the picked app already has a rule */
+"That app is already in the list." = "Bu uygulama zaten listede.";
+
+/* Explanation shown under the Per-App Themes toggle */
+"Each app can carry its own cursor theme. While that app is in front, MaCursor uses the theme you picked for it." = "Her uygulama kendi imleç temasını taşıyabilir. O uygulama ön plandayken MaCursor, onun için seçtiğiniz temayı kullanır.";
+
+/* Warning shown when the Helper Tool is missing, under Per-App Themes */
+"Per-App Themes requires the Helper Tool. You can install it from General → Helper Tool." = "Uygulamaya Özel Temalar özelliği için Yardımcı Araç gereklidir. Genel → Yardımcı Araç bölümünden yükleyebilirsiniz.";
+
+/* Toggle activating the window under the pointer, also the Accessibility request window title */
+"Focus on Hover" = "Üzerine Gelince Odak";
+
+/* Warning shown when the Helper Tool is missing, under Focus on Hover */
+"Focus on Hover requires the Helper Tool. You can install it from General → Helper Tool." = "Üzerine Gelince Odak özelliği için Yardımcı Araç gereklidir. Genel → Yardımcı Araç bölümünden yükleyebilirsiniz.";
+
+/* Warning shown while focus follows mouse is enabled but Accessibility permission is missing */
+"Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility." = "Erişilebilirlik izni eksik. Gizlilik ve Güvenlik → Erişilebilirlik bölümünde MaCursorHelper’a izin verin.";
+
+/* Button that opens the Accessibility pane of System Settings */
+"Open System Settings" = "Sistem Ayarları’nı Aç";
+
+/* Explanation shown under the Focus on Hover toggle */
+"When you hover over a window with the cursor, MaCursor raises it to the front and hands it the focus after a short delay." = "İmleci bir pencerenin üzerine getirdiğinizde, MaCursor kısa bir gecikmeden sonra o pencereyi ön plana getirir ve odağı ona verir.";
+
+/* Menu bar panel: heading in front of the applied theme name */
+"Current Cursor" = "Mevcut İmleç";
+
+/* Menu bar panel: heading above the theme list */
+"Cursor Themes" = "İmleç Temaları";
+
+/* Menu bar right-click menu: opens the main window */
+"Open MaCursor" = "MaCursor'u Aç";
+
+/* Settings section: MaCursor's own menu bar options */
+"Menu Bar" = "Menü Çubuğu";
+
+/* Toggle: show the Helper Tool's icon in the menu bar */
+"Show Menu Bar Icon" = "Menü Çubuğu Simgesini Göster";
+
+/* Caption under the Show Menu Bar Icon toggle while the Helper Tool is not installed */
+"The menu bar icon is provided by the Helper Tool. Install it above to use it." = "Menü Çubuğu simgesi Yardımcı Araç tarafından sağlanır. Kullanmak için yukarıdan yükleyin.";
+
+/* Caption under the Show Menu Bar Icon toggle */
+"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "İmleç temalarını ve uygulamaya özel kuralları değiştirmek için menü çubuğunda bir MaCursor simgesi gösterir. Görünmüyorsa Sistem Ayarları'nı açıp Menü Çubuğu bölümüne bakın.";
+
+/* Menu bar panel */
+
+/* Menu bar panel: theme name shown when no theme is applied */
+"System cursors" = "Sistem imleçleri";
+
+/* Menu bar panel: placeholder when the library is empty */
+"No cursor themes yet" = "Henüz imleç teması yok";
+
+/* Menu bar panel: heading above the frontmost app */
+"Active App" = "Etkin Uygulama";
+
+/* Menu bar panel: label of the per-app theme picker */
+"Cursor for this app" = "Bu uygulama için imleç";
+
+/* Menu bar panel: the theme the frontmost app's rule applies; %@ is the theme name */
+"Uses %@" = "%@ kullanır";
+
+/* Menu bar panel: the frontmost app has no rule and follows the applied theme */
+"Uses the current cursor" = "Mevcut imleci kullanır";
+
+/* Menu bar panel: placeholder when no app is frontmost */
+"No app in front" = "Ön planda uygulama yok";
+
+/* Menu bar panel: heading above the scale slider and the toggles */
+"Quick Controls" = "Hızlı Kontroller";
+
+/* Menu bar panel: status under the Focus on Hover toggle while the permission is missing */
+"Needs Accessibility access" = "Erişilebilirlik izni gerekiyor";
+
+/* Slider label: translucency of the menu bar panel */
+"Panel Background" = "Panel Arka Planı";
+
+/* Caption under the Panel Background slider */
+"Sets how see-through the menu bar panel is: the middle of the slider is the standard frosted glass, the minimum is clear, the maximum is solid." = "Menü çubuğu panelinin ne kadar saydam olacağını ayarlar: kaydırıcının ortası standart buzlu camdır, en düşük ayar şeffaftır, en yüksek ayar tamamen opaktır.";
+
+/* Favorites */
+
+/* Context menu: mark the theme as a favorite */
+"Add to Favorites" = "Favorilere Ekle";
+
+/* Context menu: unmark the favorite theme */
+"Remove from Favorites" = "Favorilerden Kaldır";
+
+/* Menu bar panel: placeholder when no theme is a favorite */
+"No favorite themes yet" = "Henüz favori tema yok";
+
+/* Menu bar panel: caption under the favorites placeholder */
+"Mark themes as favorites in MaCursor to show them here." = "Temaları burada göstermek için MaCursor’da favori olarak işaretleyin.";
+
+/* Helper status: installed but not running */
+"Installed, not running" = "Yüklü, çalışmıyor";
+
+/* Menu bar right-click menu: quits the app */
+"Quit MaCursor" = "MaCursor'dan Çık";
+
+/* Empty search result in the Edit Theme sidebar; %@ is the search text */
+"No Results for “%@”" = "“%@” için sonuç yok";
+
+/* Heading of the window that opens when focus follows mouse is turned on without Accessibility access */
+"Allow Accessibility Access" = "Erişilebilirlik İznini Ver";
+
+/* Explanation in that window; "MaCursorHelper" is the product name of the login-item helper and stays untranslated; "Allow for Accessibility" is the button below it */
+"MaCursorHelper needs Accessibility access to bring the window under the mouse pointer to the front. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelper, fare imlecinin altındaki pencereyi ön plana getirmek için Erişilebilirlik iznine ihtiyaç duyar. “Erişilebilirlik İçin İzin Ver” düğmesini seçin, ardından Gizlilik ve Güvenlik → Erişilebilirlik bölümünde MaCursorHelper’a izin verin.";
+
+/* Primary button of that window; asks the helper to show the macOS permission dialog */
+"Allow for Accessibility" = "Erişilebilirlik İçin İzin Ver";
+
+/* Secondary button of that window; closes it and leaves focus follows mouse on */
+"Not Now" = "Şimdi Değil";
+
+/* Status shown in that window after the button was pressed */
+"Waiting for access. This window updates as soon as MaCursorHelper is allowed." = "Erişim izni bekleniyor. MaCursorHelper’a izin verilir verilmez bu pencere güncellenir.";
+
+/* Status shown in that window once Accessibility access was granted */
+"Access granted" = "Erişim izni verildi";
+
+/* Button that closes that window once access was granted */
+"Let’s Go!" = "Hadi Başlayalım!";

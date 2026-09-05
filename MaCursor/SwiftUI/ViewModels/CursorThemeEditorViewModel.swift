@@ -1,19 +1,20 @@
 import AppKit
+import Combine
 import Foundation
-import Observation
 
-@Observable
-class CursorThemeEditorViewModel {
+class CursorThemeEditorViewModel: ObservableObject {
     let cursorTheme: CursorThemeModel
 
-    var editingName: String
-    var editingCreator: String
-    var editingVersion: Double
-    var editingHiDPI: Bool
-    var editingCursors: [CursorModel]
+    @Published var editingName: String
+    @Published var editingCreator: String
+    @Published var editingVersion: Double
+    @Published var editingHiDPI: Bool
+    @Published var editingCursors: [CursorModel] {
+        didSet { forwardCursorChanges() }
+    }
 
-    var selectedCursorId: String?
-    var isShowingUnsavedAlert = false
+    @Published var selectedCursorId: String?
+    @Published var isShowingUnsavedAlert = false
 
     struct CursorFingerprint: Equatable {
         let identifier: String
@@ -32,7 +33,7 @@ class CursorThemeEditorViewModel {
         var cursors: [CursorFingerprint] = []
     }
 
-    private var savedBaseline = EditorSnapshot()
+    @Published private var savedBaseline = EditorSnapshot()
 
     var isDirty: Bool {
         !pendingAdditions.isEmpty
@@ -65,9 +66,16 @@ class CursorThemeEditorViewModel {
         savedBaseline = currentSnapshot()
     }
 
-    private var pendingAdditions: [MACCursorSwift] = []
-    private var pendingRemovals: Set<String> = []
+    @Published private var pendingAdditions: [MACCursorSwift] = []
+    @Published private var pendingRemovals: Set<String> = []
     private var originalMapping: [String: CursorModel] = [:]
+    private var cursorForwarders: [AnyCancellable] = []
+
+    private func forwardCursorChanges() {
+        cursorForwarders = editingCursors.map { cursor in
+            cursor.objectWillChange.sink { [weak self] _ in self?.objectWillChange.send() }
+        }
+    }
 
     init(cursorTheme: CursorThemeModel) {
         self.cursorTheme = cursorTheme
@@ -102,6 +110,7 @@ class CursorThemeEditorViewModel {
                 )
             }
         )
+        forwardCursorChanges()
     }
 
     var selectedCursor: CursorModel? {
@@ -109,7 +118,7 @@ class CursorThemeEditorViewModel {
         return editingCursors.first { $0.id == id }
     }
 
-    var hideTahoeCursors: Bool = MACPreferences.hideTahoeCursors
+    @Published var hideTahoeCursors: Bool = MACPreferences.hideTahoeCursors
 
     var visibleEditingCursors: [CursorModel] {
         if hideTahoeCursors {

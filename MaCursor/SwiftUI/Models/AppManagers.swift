@@ -25,10 +25,9 @@ enum AppearanceMode: Int, CaseIterable, Identifiable {
     }
 }
 
-@Observable
 @MainActor
-final class AppearanceManager {
-    var currentMode: AppearanceMode {
+final class AppearanceManager: ObservableObject {
+    @Published var currentMode: AppearanceMode {
         didSet { applyAndPersist() }
     }
 
@@ -96,14 +95,13 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     }
 }
 
-@Observable
 @MainActor
-final class LanguageManager {
-    var currentLanguage: AppLanguage {
+final class LanguageManager: ObservableObject {
+    @Published var currentLanguage: AppLanguage {
         didSet { applyAndPersist() }
     }
 
-    var needsRestart: Bool = false
+    @Published var needsRestart: Bool = false
 
     private let launchLanguage: AppLanguage
 

@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct CursorThemeEditorView: View {
-    @State private var viewModel: CursorThemeEditorViewModel
+    @StateObject private var viewModel: CursorThemeEditorViewModel
     @State private var isListDropTargeted = false
     @State private var editorWindow: NSWindow?
     @State private var sidebarLayout =
@@ -12,7 +12,7 @@ struct CursorThemeEditorView: View {
     @State private var metadataFieldsEnabled = false
 
     init(cursorTheme: CursorThemeModel) {
-        self._viewModel = State(initialValue: CursorThemeEditorViewModel(cursorTheme: cursorTheme))
+        self._viewModel = StateObject(wrappedValue: CursorThemeEditorViewModel(cursorTheme: cursorTheme))
     }
 
     var body: some View {
@@ -87,7 +87,7 @@ struct CursorThemeEditorView: View {
             return true
         }))
         .background(WindowRoleAccessor(role: .modal))
-        .onChange(of: editorWindow) { _, window in
+        .onChangeCompat(of: editorWindow) { window in
             guard let window else { return }
             EditorTextShortcutCoordinator.shared.register(window)
             redirectInitialFocus(in: window)
@@ -205,7 +205,7 @@ struct CursorThemeEditorView: View {
                 .pickerStyle(.segmented)
                 .labelsHidden()
                 .fixedSize()
-                .onChange(of: sidebarLayout) { _, newLayout in
+                .onChangeCompat(of: sidebarLayout) { newLayout in
                     MACPreferences.set(newLayout.rawValue,
                                        forKey: MACPreferences.advancedEditorLayoutKey)
                 }
@@ -217,7 +217,7 @@ struct CursorThemeEditorView: View {
 
             Group {
                 if sidebarRows.isEmpty && !trimmedSearchText.isEmpty {
-                    ContentUnavailableView.search(text: trimmedSearchText)
+                    UnavailableContent.search(text: trimmedSearchText)
                 } else {
                     switch sidebarLayout {
                     case .list:
@@ -273,7 +273,7 @@ struct CursorThemeEditorView: View {
             .padding(.vertical, 4)
             .background(.bar)
         }
-        .onChange(of: showAllSlots) { _, showing in
+        .onChangeCompat(of: showAllSlots) { showing in
             if !showing, viewModel.selectedEmptySlotIdentifier != nil {
                 viewModel.selectedCursorId = nil
             }
@@ -409,8 +409,8 @@ struct CursorThemeEditorView: View {
                     })
                     .id(emptyIdentifier)
             } else {
-                ContentUnavailableView(
-                    "Select a Cursor",
+                UnavailableContent(
+                    title: Text("Select a Cursor"),
                     systemImage: "cursorarrow.click.2",
                     description: Text("Choose a cursor from the list to edit its properties.")
                 )
@@ -455,7 +455,7 @@ private struct EmptySlotRowView: View {
 }
 
 private struct CursorGridCellView: View {
-    let cursor: CursorModel
+    @ObservedObject var cursor: CursorModel
     let isSelected: Bool
     let onSelect: () -> Void
     let onDuplicate: () -> Void
@@ -556,9 +556,9 @@ private struct EmptySlotDetailView: View {
                     .foregroundStyle(.secondary)
             }
 
-            ContentUnavailableView(
-                NSLocalizedString("No cursor assigned", comment: "Empty slot inspector title"),
-                systemImage: "cursorarrow.slash",
+            UnavailableContent(
+                title: Text(NSLocalizedString("No cursor assigned", comment: "Empty slot inspector title")),
+                systemImage: "square.dashed",
                 description: Text(NSLocalizedString(
                     "Choose a source file or drop one onto the cell.",
                     comment: "Empty slot inspector description")))
@@ -660,7 +660,9 @@ struct ToolbarConfigurator: NSViewRepresentable {
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
         DispatchQueue.main.async {
-            view.window?.toolbar?.allowsDisplayModeCustomization = false
+            if #available(macOS 15, *) {
+                view.window?.toolbar?.allowsDisplayModeCustomization = false
+            }
         }
         return view
     }

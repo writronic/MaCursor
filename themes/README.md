@@ -365,7 +365,7 @@
 
 <img src="screenshots/MD3ECursors.png" alt="MD3E Cursors">
 
-*Sleek cursor set by playagain96 ([DeviantArt](https://www.deviantart.com/playagain96), [GitHub](https://github.com/playagain96)), following Google's Material Design 3 Expressive rules*
+*Created by playagain96 ([DeviantArt](https://www.deviantart.com/playagain96), [GitHub](https://github.com/playagain96))*
 
 ---
 
@@ -499,7 +499,7 @@
 
 <img src="screenshots/VisionCursorBlack.png" alt="VisionCursorBlack">
 
-*Design by [IDarques](https://www.deviantart.com/idarques) · port by [playagain96](https://github.com/playagain96)*
+*Created by [IDarques](https://www.deviantart.com/idarques), port by [playagain96](https://github.com/playagain96)*
 
 ---
 
@@ -507,7 +507,7 @@
 
 <img src="screenshots/VisionCursorWhite.png" alt="VisionCursorWhite">
 
-*Design by [IDarques](https://www.deviantart.com/idarques) · port by [playagain96](https://github.com/playagain96)*
+*Created by [IDarques](https://www.deviantart.com/idarques), port by [playagain96](https://github.com/playagain96)*
 
 ---
 

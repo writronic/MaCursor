@@ -50,7 +50,7 @@ struct SettingsSidebarView: View {
                 .tag(tab)
         }
         .listStyle(.sidebar)
-        .contentMargins(.top, 12, for: .scrollContent)
+        .scrollContentTopMargin(12)
         .environment(\.sidebarRowSize, .medium)
     }
 }
@@ -89,7 +89,9 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate {
         let toolbar = NSToolbar(identifier: "SettingsSplitToolbar")
         toolbar.showsBaselineSeparator = false
         toolbar.displayMode = .iconOnly
-        toolbar.allowsDisplayModeCustomization = false
+        if #available(macOS 15, *) {
+            toolbar.allowsDisplayModeCustomization = false
+        }
         window.toolbar = toolbar
         window.toolbarStyle = .unified
 
@@ -200,9 +202,9 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate {
 
         let injectedView = AnyView(
             detailView
-                .environment(library)
-                .environment(appearanceManager)
-                .environment(languageManager)
+                .environmentObject(library)
+                .environmentObject(appearanceManager)
+                .environmentObject(languageManager)
                 .frame(minWidth: 265, maxWidth: .infinity, minHeight: 350, maxHeight: .infinity)
         )
 
@@ -237,20 +239,20 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate {
 struct GeneralSettingsView: View {
     var updater: SPUUpdater?
 
-    @Environment(AppearanceManager.self) private var appearanceManager
-    @Environment(LanguageManager.self) private var languageManager
-    @Environment(LibraryViewModel.self) private var library
+    @EnvironmentObject private var appearanceManager: AppearanceManager
+    @EnvironmentObject private var languageManager: LanguageManager
+    @EnvironmentObject private var library: LibraryViewModel
 
     @State private var showResetConfirmation = false
     @State private var showRestartAlert = false
+    @ObservedObject private var helperManager = HelperToolManager.shared
+    @State private var showMenuBarIcon = MACPreferences.flag(MACPreferences.showMenuBarIconKey)
+    @State private var panelBackground = MACMenuBarPanelBackgroundLevel(MACPreferences.value(forKey: MACPreferences.menuBarPanelBackgroundKey))
 
     var body: some View {
-        @Bindable var manager = appearanceManager
-        @Bindable var langManager = languageManager
-
         Form {
             Section("Appearance") {
-                Picker("Appearance", selection: $manager.currentMode) {
+                Picker("Appearance", selection: $appearanceManager.currentMode) {
                     ForEach(AppearanceMode.allCases) { mode in
                         Label(mode.label, systemImage: mode.icon)
                             .tag(mode)
@@ -260,7 +262,7 @@ struct GeneralSettingsView: View {
             }
 
             Section("Language") {
-                Picker("Language", selection: $langManager.currentLanguage) {
+                Picker("Language", selection: $languageManager.currentLanguage) {
                     ForEach(AppLanguage.allCases) { language in
                         Text(language.displayName)
                             .tag(language)
@@ -270,6 +272,53 @@ struct GeneralSettingsView: View {
 
             Section("Helper Tool") {
                 HelperToolStatusView()
+            }
+
+            Section("Menu Bar") {
+                Toggle("Show Menu Bar Icon", isOn: $showMenuBarIcon)
+                    .disabled(!helperManager.isInstalled)
+                    .onChangeCompat(of: showMenuBarIcon) { newValue in
+                        MACPreferences.setFlag(newValue, forKey: MACPreferences.showMenuBarIconKey)
+                        DistributedNotificationCenter.default().postNotificationName(
+                            .MACMenuBarDidChange,
+                            object: nil,
+                            userInfo: nil,
+                            deliverImmediately: true
+                        )
+                    }
+
+                if !helperManager.isInstalled {
+                    HStack(spacing: 10) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.yellow)
+
+                        Text("The menu bar icon is provided by the Helper Tool. Install it above to use it.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Text("Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+
+                HStack(spacing: 12) {
+                    Text("Panel Background")
+                    Slider(value: $panelBackground, in: 0...1)
+                        .accessibilityLabel("Panel Background")
+                    Text(panelBackground, format: .percent.precision(.fractionLength(0)))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                        .frame(width: 44, alignment: .trailing)
+                }
+                .disabled(!helperManager.isInstalled || !showMenuBarIcon)
+                .onChangeCompat(of: panelBackground) { newValue in
+                    MACPreferences.set(NSNumber(value: newValue), forKey: MACPreferences.menuBarPanelBackgroundKey)
+                }
+
+                Text("Sets how see-through the menu bar panel is: the middle of the slider is the standard frosted glass, the minimum is clear, the maximum is solid.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
             }
 
             if let updater = updater {
@@ -321,10 +370,14 @@ struct GeneralSettingsView: View {
         } message: {
             Text("The language change will take effect after restarting MaCursor.")
         }
-        .onChange(of: languageManager.needsRestart) { _, needsRestart in
+        .onChangeCompat(of: languageManager.needsRestart) { needsRestart in
             if needsRestart {
                 showRestartAlert = true
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .cursorSettingsDidReset)) { _ in
+            showMenuBarIcon = MACPreferences.flag(MACPreferences.showMenuBarIconKey)
+            panelBackground = MACMenuBarPanelBackgroundLevel(nil)
         }
     }
 
@@ -338,6 +391,7 @@ struct GeneralSettingsView: View {
             MACPreferences.set(nil, forKey: key)
         }
         AutoSwitchConfig.notifyHelper()
+        FocusFollowsMouseConfig.notifyHelper()
 
         appearanceManager.currentMode = .system
         languageManager.currentLanguage = .system
@@ -363,7 +417,7 @@ struct GeneralSettingsView: View {
 }
 
 struct HelperToolStatusView: View {
-    @State private var helperManager = HelperToolManager.shared
+    @ObservedObject private var helperManager = HelperToolManager.shared
     @State private var errorMessage: String?
     @State private var isProcessing: Bool = false
 
@@ -372,7 +426,7 @@ struct HelperToolStatusView: View {
             VStack(alignment: .leading, spacing: 4) {
                 HStack(spacing: 6) {
                     Circle()
-                        .fill(helperManager.isInstalled ? .green : .secondary)
+                        .fill(helperManager.isRunning ? .green : (helperManager.isInstalled ? .orange : .secondary))
                         .frame(width: 8, height: 8)
 
                     Text(helperManager.statusDescription)

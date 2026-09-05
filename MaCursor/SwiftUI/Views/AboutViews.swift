@@ -173,11 +173,19 @@ private struct AboutWindowAccessor: NSViewRepresentable {
         let view = NSView()
         DispatchQueue.main.async {
             self.window = view.window
+            Self.lockWindowSize(view.window)
         }
         return view
     }
 
     func updateNSView(_ nsView: NSView, context: Context) {
         self.window = nsView.window
+        Self.lockWindowSize(nsView.window)
+    }
+
+    private static func lockWindowSize(_ window: NSWindow?) {
+        if #unavailable(macOS 15) {
+            window?.lockSizeAsLegacyAboutWindow()
+        }
     }
 }

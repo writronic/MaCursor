@@ -1,29 +1,34 @@
 import Foundation
 import AppKit
 import UniformTypeIdentifiers
-import Observation
+import Combine
 
 @MainActor
-@Observable
-class LibraryViewModel {
-    var cursorThemes: [CursorThemeModel] = []
-    var appliedThemeId: String?
+class LibraryViewModel: ObservableObject {
+    @Published var cursorThemes: [CursorThemeModel] = []
+    @Published var appliedThemeId: String?
+    @Published var favoriteThemeIds = Set(MACMenuBarFavoriteThemeIdentifiers(MACPreferences.value(forKey: MACPreferences.favoriteThemesKey)))
     let conversion = ThemeConversionCoordinator()
 
     private let backingController: LibraryController
+    private var conversionForwarder: AnyCancellable?
     private nonisolated(unsafe) var didSaveObserver: Any?
     private nonisolated(unsafe) var identifierChangeObserver: Any?
     private nonisolated(unsafe) var autoSwitchObserver: Any?
 
-    init() {
+    init(libraryDirectory: URL? = nil) {
         let cursorsPath = (try? FileManager.default.findOrCreateDirectory(
             .applicationSupportDirectory,
             in: .userDomainMask,
             appendPathComponent: "MaCursor/cursors"
         )) ?? ""
 
-        backingController = LibraryController(url: URL(fileURLWithPath: cursorsPath))
+        backingController = LibraryController(url: libraryDirectory ?? URL(fileURLWithPath: cursorsPath))
         reload()
+
+        conversionForwarder = conversion.objectWillChange.sink { [weak self] _ in
+            self?.objectWillChange.send()
+        }
 
         didSaveObserver = NotificationCenter.default.addObserver(
             forName: .cursorLibraryDidSave,
@@ -47,6 +52,10 @@ class LibraryViewModel {
                 if self?.appliedThemeId == oldId {
                     self?.appliedThemeId = newId
                 }
+                if let self, self.favoriteThemeIds.remove(oldId) != nil {
+                    self.favoriteThemeIds.insert(newId)
+                    self.saveFavorites()
+                }
             }
         }
 
@@ -65,6 +74,8 @@ class LibraryViewModel {
         let storedId = MACPreferences.value(forKey: MACPreferences.appliedCursorKey) as? String
         if let storedId, !storedId.isEmpty {
             backingController.appliedTheme = backingController.themes.first { $0.identifier == storedId }
+        } else {
+            backingController.appliedTheme = nil
         }
         reload()
     }
@@ -114,11 +125,28 @@ class LibraryViewModel {
         return cursorThemes.first { $0.id == id }
     }
 
+    func isFavorite(_ cursorTheme: CursorThemeModel) -> Bool {
+        favoriteThemeIds.contains(cursorTheme.id)
+    }
+
+    func toggleFavorite(_ cursorTheme: CursorThemeModel) {
+        if favoriteThemeIds.remove(cursorTheme.id) == nil {
+            favoriteThemeIds.insert(cursorTheme.id)
+        }
+        saveFavorites()
+    }
+
+    private func saveFavorites() {
+        MACPreferences.set(favoriteThemeIds.isEmpty ? nil : favoriteThemeIds.sorted() as NSArray,
+                           forKey: MACPreferences.favoriteThemesKey)
+    }
+
 
     func apply(_ cursorTheme: CursorThemeModel) {
         let success = CursorService.applyTheme(from: cursorTheme.backingLibrary)
         guard success else { return }
 
+        MACAutoSwitchClearAppOverride()
         backingController.appliedTheme = cursorTheme.backingLibrary
 
         for c in cursorThemes {
@@ -132,6 +160,7 @@ class LibraryViewModel {
         MACPreferences.setFlag(false, forKey: MACPreferences.handednessKey)
         MACPreferences.setFlag(false, forKey: MACPreferences.cursorShadowKey)
         CursorService.setScale(1.0)
+        MACAutoSwitchClearAppOverride()
         backingController.restoreTheme()
         for c in cursorThemes {
             c.isApplied = false
@@ -154,12 +183,17 @@ class LibraryViewModel {
         if appliedThemeId == cursorTheme.id {
             appliedThemeId = nil
         }
+        if favoriteThemeIds.remove(cursorTheme.id) != nil {
+            saveFavorites()
+        }
     }
 
     func removeAllThemes() {
         backingController.removeAllThemes()
         cursorThemes = []
         appliedThemeId = nil
+        favoriteThemeIds = []
+        saveFavorites()
     }
 
     @discardableResult
