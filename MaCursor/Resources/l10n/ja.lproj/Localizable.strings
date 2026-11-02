@@ -156,9 +156,6 @@
 /* Badge: high resolution */
 "HD" = "HD";
 
-/* Helper status: not found */
-"Helper Not Found" = "ヘルパーツールが見つかりません";
-
 /* Section: helper tool */
 "Helper Tool" = "ヘルパーツール";
 
@@ -1221,7 +1218,6 @@
 /* Cursor Gestures settings: switches; each row gets a reset button once it differs from its default */
 "Show the Line While You Draw" = "描いている間は線を表示";
 "Turn the Line Green When a Shape Matches" = "形が一致したら線を緑にする";
-"Show the Shape Name While You Draw" = "描いている間は形の名前を表示";
 "Repeat with a Left Click on a Mouse" = "マウスの左クリックで繰り返す";
 "Repeat with a Left Click on a Trackpad" = "トラックパッドの左クリックで繰り返す";
 /* Cursor Gestures settings: help tag of the two repeat switches */
@@ -1242,7 +1238,6 @@
 /* Cursor Gestures settings: picker of when an ignored app counts: only while it is in front, or whenever one of its windows is on screen */
 "Ignore When" = "無視するとき";
 "In Front" = "最前面のとき";
-"While It Has a Window" = "ウインドウがあるあいだ";
 /* Cursor Gestures settings: button and title of the alert that adds back the ready-made gestures */
 "Restore Ready-Made Gestures" = "既製のジェスチャを復元";
 "Ready-made gestures you deleted come back, unless one of your gestures already uses the same shape and trigger." = "削除した既製のジェスチャが戻ります。ただし、同じ形とトリガをすでに使っている自分のジェスチャがある場合は戻りません。";
@@ -1296,3 +1291,128 @@
 "Delay window focus for %@" = "%@後にフォーカスを移す";
 /* Menu bar panel: folded row under the Focus on Hover switch that holds the delay slider */
 "Focus Delay" = "フォーカスの遅延";
+/* Cursor Shaker: feature name in the Settings sidebar, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
+"Cursor Shaker" = "カーソルシェイカー";
+"Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool." = "「カーソルシェイカー」にはヘルパーツールが必要です。「一般」→「ヘルパーツール」からインストールできます。";
+/* Cursor Shaker: grey caption under its switch */
+"While you are away, the pointer moves one pixel and back, and the display stays on, so your apps keep showing you as active." = "離席中はポインタが1ピクセル動いて元に戻り、ディスプレイはオンのままです。そのため、アプリでは引き続きアクティブと表示されます。";
+/* Cursor Shaker: label of the picker for how long the user must be away before it starts; the choices are durations such as 1 min */
+"Start After" = "開始までの時間";
+/* Cursor Shaker: text of its Accessibility access window */
+"MaCursorHelper needs Accessibility access to move the pointer while you are away. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelperは、離席中にポインタを動かすためにアクセシビリティへのアクセス権を必要とします。「アクセシビリティを許可」を選択し、「プライバシーとセキュリティ」→「アクセシビリティ」でMaCursorHelperを許可してください。";
+/* Cursor Shaker: label of the picker for an optional click at the pointer while the user is away; the choices are Off, Left Click and Right Click */
+"Click" = "クリック";
+/* Cursor Shaker: picker choice that turns its click or its scroll off */
+"Off" = "オフ";
+/* Cursor Shaker: click picker choice, a left mouse click at the pointer */
+"Left Click" = "左クリック";
+/* Cursor Shaker: click picker choice, a right mouse click at the pointer */
+"Right Click" = "右クリック";
+/* Cursor Shaker: label of the picker for an optional short scroll at the pointer while the user is away; the choices are Off, Down and Down and Up */
+"Scroll" = "スクロール";
+/* Cursor Shaker: scroll picker choice, every scroll goes down */
+"Down" = "下へ";
+/* Cursor Shaker: scroll picker choice, one scroll goes down and the next goes up, in turn */
+"Down and Up" = "下と上を交互に";
+/* Cursor Shaker: label of the picker that turns Cursor Shaker off after a set time (15 min to 8 h, or Never); the system writes the times */
+"Stop After" = "停止までの時間";
+/* Cursor Shaker: Stop After picker choice, it never turns off by itself */
+"Never" = "しない";
+/* Cursor Shaker: switch that turns it off on battery power once the charge is at this percentage or lower; %@ is a percentage such as 20 % */
+"Stop on battery at %@ or less" = "バッテリー駆動時に残量%@以下で停止";
+/* Cursor Shaker: switch that also shows the next tab in the front app while you are away */
+"Switch Tabs" = "タブを切り替える";
+/* Cursor Shaker: switch that makes the display darker while you are away */
+"Dim the Screen" = "ディスプレイを暗くする";
+/* Cursor Shaker: caption under the Switch Tabs and Dim the Screen switches */
+"Switch Tabs shows the next tab in the front app, at most once a minute. Dim the Screen makes the display darker while you are away and brings it back when you return." = "「タブを切り替える」は、最前面のアプリで次のタブを表示します（1分に1回まで）。「ディスプレイを暗くする」は、離席中にディスプレイを暗くし、戻ったときに元の明るさに戻します。";
+/* Cursor Gestures settings: switch; while you draw, the name of the matching gesture and how well the stroke matches it in percent (for example “Mission Control · 92%”) show beside the pointer */
+"Show the Gesture Name and Match While You Draw" = "描いている間はジェスチャの名前と一致率を表示";
+/* Cursor Gestures: button in the Draw New Shape sheet; goes on to a screen where you draw the shape again to see whether it matches */
+"Next & Test" = "次へ・テスト";
+/* Cursor Gestures: hint in the empty drawing area of the test screen in the Draw New Shape sheet */
+"Draw the shape again to test it." = "テストするには、もう一度形を描いてください。";
+/* Cursor Gestures: result on the test screen when your test stroke would run the shape; the number is how well it matches in percent (for example “Matches · 88%”) */
+"Matches · %lld%%" = "一致 · %lld%%";
+/* Cursor Gestures: result on the test screen when your test stroke would not run the shape; the number is how well it matches in percent (for example “Does Not Match · 52%”) */
+"Does Not Match · %lld%%" = "不一致 · %lld%%";
+/* Cursor Gestures: result on the test screen when your test stroke is smaller than the Minimum Size setting */
+"Too small to match." = "小さすぎて一致しません。";
+/* Cursor Gestures: shape name for a short click of the middle button or a side button, with no stroke drawn; shown on its tile in the Shape step and the Shapes tab */
+"Short Click" = "短いクリック";
+/* Cursor Gestures: shape family that holds Short Click; a chip and a group heading after Letters */
+"Clicks" = "クリック";
+/* Cursor Gestures: label beside the pointer while you draw; %1$@ is the gesture name, %2$lld is how well the stroke matches in percent (for example “Mission Control · 88%”); write the percent the same way as in “Matches · %lld%%” */
+"%1$@ · %2$lld%%" = "%1$@ · %2$lld%%";
+"Under the Pointer" = "ポインタの下にあるとき";
+"Cursor Translator" = "カーソル翻訳";
+"Cursor Translator requires the Helper Tool. You can install it from General → Helper Tool." = "「カーソル翻訳」にはヘルパーツールが必要です。「一般」→「ヘルパーツール」からインストールできます。";
+"Click with the trigger to open a frame. The text inside it turns into your language and keeps up as it changes." = "トリガでクリックすると枠が開きます。枠の中のテキストはあなたの言語に翻訳され、変わるたびに更新されます。";
+"Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen & System Audio Recording." = "画面収録のアクセス権がありません。「プライバシーとセキュリティ」→「画面収録とシステムオーディオ録音」でMaCursorを許可してください。";
+"Translate to" = "翻訳先";
+/* Cursor Translator: the button that opens Language & Region in System Settings; use Apple’s own name for the Translation Languages button */
+"Translation Languages…" = "翻訳言語…";
+"Frame Colors" = "枠のカラー";
+"Screen Recording" = "画面収録";
+"Accessibility" = "アクセシビリティ";
+"Allow Screen Recording" = "画面収録を許可";
+"Download the languages you read in Language & Region → Translation Languages…, so Apple Translation can use them." = "読む言語を「言語と地域」→「翻訳言語…」でダウンロードすると、Appleの翻訳で使えるようになります。";
+"A Cursor Gestures trigger uses the same keys and button. Cursor Translator takes it." = "「カーソルジェスチャ」のトリガが同じキーとボタンを使っています。「カーソル翻訳」が優先されます。";
+"Hold a key with the right button, so normal right-clicks still work." = "通常の右クリックが使えるように、右ボタンと一緒にキーを押してください。";
+"MaCursorHelper needs Accessibility access to see the trigger click and to keep the right-click menu of the app closed. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelperは、トリガのクリックを検知し、アプリのコンテクストメニューを開かないようにするためにアクセシビリティへのアクセス権を必要とします。「アクセシビリティを許可」を選択し、「プライバシーとセキュリティ」→「アクセシビリティ」でMaCursorHelperを許可してください。";
+"MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "MaCursorは、枠の中のテキストを読むために画面収録のアクセス権を必要とします。何も保存されず、テキストは選択した翻訳サービスにのみ送信されます。「画面収録を許可」を選択し、「プライバシーとセキュリティ」→「画面収録とシステムオーディオ録音」でMaCursorを許可してください。";
+"Needs Screen Recording access" = "画面収録へのアクセスが必要です";
+/* Cursor Translator: short messages in the name tag above the frame */
+"Reading…" = "読み取り中…";
+"Needs Screen Recording" = "画面収録が必要です";
+"Cannot read the screen" = "画面を読み取れません";
+"Could not read the text. Trying again…" = "テキストを読み取れません。再試行中…";
+"Language not downloaded. Open Settings › Cursor Translator › Translation Languages…" = "言語がダウンロードされていません。「設定」›「カーソル翻訳」›「翻訳言語…」を開いてください。";
+"Translation is not available" = "翻訳を利用できません";
+"No text here" = "テキストがありません";
+/* Cursor Translator: name tag of the frame; %1$@ is the language of the text on screen, %2$@ the language it is translated to (for example “Japanese → English”) */
+"%1$@ → %2$@" = "%1$@ → %2$@";
+/* Cursor Translator: the Frame picker; Frame Stays keeps the frame where you put it, Follows the Pointer moves it with the pointer */
+"Frame" = "枠";
+"Frame Stays" = "枠を固定";
+"Follows the Pointer" = "ポインタに追従";
+"Draw a frame with the trigger, or click to drop one. Drag its name tag to move it and its corner to resize it." = "トリガでドラッグして枠を描くか、クリックして枠を置きます。名札をドラッグすると移動し、角をドラッグするとサイズを変更できます。";
+"Click with the trigger to open a frame that moves with the pointer. It reads when the pointer rests. Click again to close it." = "トリガでクリックすると、ポインタと一緒に動く枠が開きます。ポインタが止まるとテキストを読み取ります。もう一度クリックすると閉じます。";
+/* Cursor Translator: the Translation Service picker and the fields of an online service; DeepL, OpenAI, Google Gemini and Claude are names and stay as they are */
+"Translation Service" = "翻訳サービス";
+"Apple Translation" = "Appleの翻訳";
+"OpenAI-Compatible" = "OpenAI互換";
+"Claude-Compatible" = "Claude互換";
+"Apple Translation needs macOS 15 or later." = "Appleの翻訳にはmacOS 15以降が必要です。";
+"API Key" = "APIキー";
+"Model" = "モデル";
+"Server Address" = "サーバアドレス";
+"Not needed for a local server" = "ローカルサーバでは不要です";
+/* Cursor Translator: short messages in the name tag when an online service cannot translate; %@ is the service name, for example “DeepL refused the key” */
+"Add your %@ key in Settings › Cursor Translator" = "「設定」›「カーソル翻訳」で%@のキーを追加してください";
+"Add the server address in Settings › Cursor Translator" = "「設定」›「カーソル翻訳」でサーバアドレスを追加してください";
+"%@ refused the key" = "%@がキーを拒否しました";
+"No connection" = "接続されていません";
+"%@ could not translate" = "%@で翻訳できませんでした";
+"%@ sent a reply that cannot be read" = "%@から読み取れない応答が返されました";
+/* Cursor Translator: the size and line spacing of the translated text, and the last item of the Model menu, which shows a field for a model name that is not in the list */
+"Text Size" = "テキストサイズ";
+"Line Spacing" = "行間";
+"Custom Model" = "カスタムモデル";
+/* Cursor Translator on macOS 13: the same two Screen Recording texts, naming the macOS 13 pane “Screen Recording” in Privacy & Security */
+"Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen Recording." = "画面収録のアクセス権がありません。「プライバシーとセキュリティ」→「画面収録」でMaCursorを許可してください。";
+"MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "MaCursorは、枠の中のテキストを読むために画面収録のアクセス権を必要とします。何も保存されず、テキストは選択した翻訳サービスにのみ送信されます。「画面収録を許可」を選択し、「プライバシーとセキュリティ」→「画面収録」でMaCursorを許可してください。";
+
+/* Cursor Translator frame: no text was found, and this macOS version cannot read some languages (for example Arabic on macOS 14). %@ is a list of language names, such as “Arabic and Hindi”. */
+"No text found. This macOS version cannot read %@." = "テキストが見つかりません。このバージョンのmacOSでは次の言語を読み取れません：%@。";
+
+/* Cursor Translator frame: the name tag while macOS prepares its text reader, which can take a few minutes the first time or after macOS frees disk space */
+"Preparing…" = "準備中…";
+
+/* Cursor Translator: the page language, in Settings and on the frame's name tag. “Translate from” is the setting next to “Translate to”; “Detect Language” is its first choice and lets MaCursor find the page language; “Auto: %@” shows the language it found, for example “Auto: German” */
+"Translate from" = "翻訳元";
+"Detect Language" = "言語を検出";
+"Auto: %@" = "自動：%@";
+
+/* Cursor Translator: the first choice of “Translate to” in Settings. It follows the Mac's language; %@ is that language's name, for example “English (System Default)” */
+"%@ (System Default)" = "%@（システムのデフォルト）";

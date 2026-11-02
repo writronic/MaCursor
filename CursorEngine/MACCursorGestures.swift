@@ -34,6 +34,8 @@ struct CursorGestureTrigger: Codable, Hashable {
 
     var complete: Bool { keys != 0 || button != nil }
 
+    var clicks: Bool { (button ?? 0) >= 2 && !twoFinger }
+
     var label: String {
         let name: String? = switch button {
         case nil: nil
@@ -50,6 +52,10 @@ struct CursorGestureTrigger: Codable, Hashable {
 
 enum CursorGestureFilter: Hashable {
     case all, allApps, app(String)
+
+    var apps: [String] {
+        if case .app(let app) = self { [app] } else { [] }
+    }
 }
 
 struct CursorGestureGroup<Item>: Identifiable {
@@ -77,7 +83,7 @@ struct CursorGesture: Codable, Equatable, Identifiable {
 }
 
 enum CursorGestureFamily: String, Codable, CaseIterable {
-    case lines, diagonals, corners, returns, curves, letters
+    case lines, diagonals, corners, returns, curves, letters, clicks
 
     var title: String {
         switch self {
@@ -87,6 +93,7 @@ enum CursorGestureFamily: String, Codable, CaseIterable {
         case .returns: return String(localized: "Returns")
         case .curves: return String(localized: "Curves")
         case .letters: return String(localized: "Letters")
+        case .clicks: return String(localized: "Clicks")
         }
     }
 }
@@ -123,7 +130,6 @@ struct CursorGestureShape: Codable, Equatable, Identifiable {
     var points: [CGPoint] = []
     var directional = true
     var family: CursorGestureFamily?
-    var key: String?
 }
 
 enum CursorGestureCategory: String, Codable, CaseIterable {
@@ -172,6 +178,7 @@ struct CursorGestureAction: Codable, Equatable, Identifiable {
     var icon: String
     var category = CursorGestureCategory.custom
     var kind: CursorGestureKind
+    var key: String?
 
     var changesScreen: Bool {
         guard case .shortcut = kind else { return false }
@@ -289,7 +296,7 @@ struct CursorGesturesConfig: Codable, Equatable {
     func canSave(_ shape: CursorGestureShape) -> Bool {
         let name = shape.name.trimmingCharacters(in: .whitespaces)
         return shape.family == nil && !shape.points.isEmpty && !name.isEmpty &&
-            !(CursorGestures.shapes + shapes).contains { $0.id != shape.id && $0.name.localizedCaseInsensitiveCompare(name) == .orderedSame }
+            !allShapes.contains { $0.id != shape.id && $0.name.localizedCaseInsensitiveCompare(name) == .orderedSame }
     }
 
     mutating func put(_ shape: CursorGestureShape) {
@@ -328,17 +335,23 @@ struct CursorGesturesConfig: Codable, Equatable {
     var padTriggers: [NSEvent.ModifierFlags] { held(twoFinger: true) }
 
     var tapMask: CGEventMask {
-        let buttons: [CGEventType] = [.leftMouseDown, .leftMouseUp, .leftMouseDragged, .rightMouseDown, .rightMouseUp, .rightMouseDragged,
-                                      .otherMouseDown, .otherMouseUp, .otherMouseDragged]
+        let left: [CGEventType] = enabled ? [.leftMouseDown, .leftMouseUp, .leftMouseDragged] : []
+        let buttons = left + [.rightMouseDown, .rightMouseUp, .rightMouseDragged, .otherMouseDown, .otherMouseUp, .otherMouseDragged]
         return (padTriggers.isEmpty ? buttons : buttons + [.scrollWheel]).reduce(0) { $0 | 1 << $1.rawValue }
     }
 
-    func holds(_ trigger: CursorGestureTrigger, front: String?, windows: @autoclosure () -> Set<String> = []) -> Bool {
-        !wanting(trigger, front: front).isEmpty && !blocks(button: true, front: front, windows: windows())
+    func holds(_ trigger: CursorGestureTrigger, front: String?, pointer: @autoclosure () -> String? = nil) -> Bool {
+        !wanting(trigger, front: front).isEmpty && !blocks(button: true, front: front, pointer: pointer())
     }
 
     func wanting(_ trigger: CursorGestureTrigger, front: String?) -> [CursorGesture] {
         gestures.filter { $0.enabled && $0.triggers.contains(where: trigger.overlaps) && ($0.apps.isEmpty || $0.apps.contains(front ?? "")) }
+    }
+
+    func clicked(_ trigger: CursorGestureTrigger, front: String?) -> CursorGesture? {
+        guard trigger.clicks, front != MACAppBundleIdentifier else { return nil }
+        let found = wanting(trigger, front: front).filter { $0.shape == CursorGestures.clickShape.id }
+        return found.first { !$0.apps.isEmpty } ?? found.first
     }
 
     func accepts(source stateID: Int64) -> Bool {
@@ -355,12 +368,10 @@ struct CursorGesturesConfig: Codable, Equatable {
     }
 
     func shape(_ id: String) -> CursorGestureShape? {
-        CursorGestures.shapes.first { $0.id == id } ?? shapes.first { $0.id == id }
+        allShapes.first { $0.id == id }
     }
 
-    func shapeName(_ id: String, _ localized: (String) -> String) -> String? {
-        shape(id).map { $0.key.map(localized) ?? $0.name }
-    }
+    private var allShapes: [CursorGestureShape] { CursorGestures.shapes + [CursorGestures.clickShape] + shapes }
 
     func action(_ id: String) -> CursorGestureAction? {
         CursorGestures.actions.first { $0.id == id } ?? actions.first { $0.id == id } ??
@@ -371,8 +382,8 @@ struct CursorGesturesConfig: Codable, Equatable {
         raiseWindow ? pointer ?? front : front
     }
 
-    func gesture(for stroke: [CGPoint], trigger: CursorGestureTrigger, front: String?) -> CursorGesture? {
-        guard stroke.count > 2, CursorGestures.extent(stroke) >= minimumSize, let ink = CursorGestureTemplate(stroke) else { return nil }
+    func match(for stroke: [CGPoint], trigger: CursorGestureTrigger, front: String?) -> (gesture: CursorGesture, score: CGFloat)? {
+        guard let ink = self.ink(stroke) else { return nil }
         let candidates = wanting(trigger, front: front)
         func best(_ group: [CursorGesture]) -> (gesture: CursorGesture, score: CGFloat)? {
             var winner: (gesture: CursorGesture, distance: CGFloat)?
@@ -385,9 +396,18 @@ struct CursorGesturesConfig: Codable, Equatable {
             return (winner.gesture, 1 - winner.distance / .pi)
         }
         let scoped = best(candidates.filter { !$0.apps.isEmpty }), global = best(candidates.filter(\.apps.isEmpty))
-        guard let scoped else { return global?.gesture }
-        guard let global, global.score > scoped.score + CursorGestures.appMargin else { return scoped.gesture }
-        return global.gesture
+        guard let scoped else { return global }
+        guard let global, global.score > scoped.score + CursorGestures.appMargin else { return scoped }
+        return global
+    }
+
+    func score(_ canvas: [CGPoint], as shape: CursorGestureShape) -> CGFloat? {
+        guard let ink = self.ink(canvas.map { CGPoint(x: $0.x, y: -$0.y) }) else { return nil }
+        return 1 - (CursorGestureTemplate(shape.points, directional: shape.directional).flatMap(ink.distance(to:)) ?? .infinity) / .pi
+    }
+
+    private func ink(_ stroke: [CGPoint]) -> CursorGestureTemplate? {
+        stroke.count > 2 && CursorGestures.extent(stroke) >= minimumSize ? CursorGestureTemplate(stroke) : nil
     }
 
     func conflict(_ gesture: CursorGesture) -> CursorGesture? {
@@ -429,7 +449,7 @@ struct CursorGesturesConfig: Codable, Equatable {
     }
 
     func taken(by gesture: CursorGesture) -> Set<String> {
-        Set((CursorGestures.shapes + shapes).map(\.id).filter { id in
+        Set(allShapes.map(\.id).filter { id in
             var probe = gesture
             probe.shape = id
             return conflict(probe) != nil
@@ -437,7 +457,8 @@ struct CursorGesturesConfig: Codable, Equatable {
     }
 
     func canSave(_ gesture: CursorGesture) -> Bool {
-        shape(gesture.shape) != nil && !gesture.steps.isEmpty && !gesture.triggers.isEmpty && gesture.triggers.allSatisfy(\.complete)
+        shape(gesture.shape) != nil && !gesture.steps.isEmpty && !gesture.triggers.isEmpty && gesture.triggers.allSatisfy(\.complete) &&
+            (gesture.shape != CursorGestures.clickShape.id || gesture.triggers.allSatisfy(\.clicks))
     }
 
     func actions(_ gesture: CursorGesture, themes: [(id: String, name: String)] = []) -> [CursorGestureAction] {
@@ -445,8 +466,14 @@ struct CursorGesturesConfig: Codable, Equatable {
         return gesture.steps.filter(\.enabled).compactMap { step in catalogue.first { $0.id == step.action } }
     }
 
-    func title(_ gesture: CursorGesture, themes: [(id: String, name: String)] = []) -> String {
-        gesture.name.isEmpty ? actions(gesture, themes: themes).first?.name ?? "" : gesture.name
+    func title(_ gesture: CursorGesture, themes: [(id: String, name: String)] = [], localized: (String) -> String? = { _ in nil }) -> String {
+        guard gesture.name.isEmpty, let action = actions(gesture, themes: themes).first else { return gesture.name }
+        return action.key.flatMap(localized) ?? action.name
+    }
+
+    func label(_ match: (gesture: CursorGesture, score: CGFloat), themes: [(id: String, name: String)] = [], localized: (String) -> String) -> String? {
+        let title = title(match.gesture, themes: themes, localized: { localized($0) })
+        return title.isEmpty ? nil : String(format: localized("%1$@ · %2$lld%%"), title, CursorGestures.percent(match.score))
     }
 
     func summaryParts(_ gesture: CursorGesture, themes: [(id: String, name: String)] = [],
@@ -509,7 +536,7 @@ struct CursorGesturesConfig: Codable, Equatable {
 
     func shapeGroups(search: String = "") -> [CursorGestureGroup<CursorGestureShape>] {
         let search = search.trimmingCharacters(in: .whitespaces)
-        return CursorGestures.grouped((CursorGestures.shapes + shapes).filter { search.isEmpty || $0.name.localizedCaseInsensitiveContains(search) },
+        return CursorGestures.grouped(allShapes.filter { search.isEmpty || $0.name.localizedCaseInsensitiveContains(search) },
                                       by: \.family)
     }
 
@@ -530,10 +557,13 @@ struct CursorGesturesConfig: Codable, Equatable {
         if let index = ignored.firstIndex(where: { $0.app == app }) { ignored[index].block = .all }
     }
 
-    func blocks(button: Bool, front: String?, windows: Set<String> = []) -> Bool {
-        ignored.contains { entry in
-            (entry.block == .all || (entry.block == .buttons) == button) &&
-                (entry.app == front || !entry.frontOnly && windows.contains(entry.app))
+    func blocks(button: Bool, front: String?, pointer: @autoclosure () -> String? = nil) -> Bool {
+        var under: String??
+        return ignored.contains { entry in
+            guard entry.block == .all || (entry.block == .buttons) == button else { return false }
+            guard !entry.frontOnly else { return entry.app == front }
+            under = under ?? pointer()
+            return entry.app == under
         }
     }
 
@@ -739,8 +769,23 @@ enum CursorGestures {
         ]
     }()
 
+    static let clickShape = shape("click", "Short Click", .clicks, [])
+
     static func isAppWindow(_ info: [String: Any]) -> Bool {
         (info[kCGWindowLayer as String] as? NSNumber)?.intValue == 0 && ((info[kCGWindowAlpha as String] as? NSNumber)?.doubleValue ?? 0) > 0
+    }
+
+    static func owner(at point: CGPoint, in windows: [[String: Any]]) -> pid_t? {
+        let window = windows.first { info in
+            isAppWindow(info) && ((info[kCGWindowBounds as String] as? NSDictionary).flatMap { CGRect(dictionaryRepresentation: $0 as CFDictionary) }?.contains(point) ?? false)
+        }
+        return window?[kCGWindowOwnerPID as String] as? pid_t
+    }
+
+    static func app(at point: CGPoint) -> String? {
+        guard let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]],
+              let owner = owner(at: point, in: windows) else { return nil }
+        return NSRunningApplication(processIdentifier: owner)?.bundleIdentifier
     }
 
     static let templates: [String: CursorGestureTemplate] = Dictionary(uniqueKeysWithValues: shapes.compactMap { shape in
@@ -748,63 +793,63 @@ enum CursorGestures {
     })
 
     static let actions: [CursorGestureAction] = [
-        action("undo", String(localized: "Undo"), String(localized: "Take back your last change"), "arrow.uturn.backward", .general, key(6, "z", .command)),
-        action("redo", String(localized: "Redo"), String(localized: "Bring back what you took back"), "arrow.uturn.forward", .general, key(6, "z", [.shift, .command])),
-        action("switchApp", String(localized: "Switch to Last App"), String(localized: "Go to the app you used before this one"), "arrow.left.arrow.right", .general, key(48, nil, .command)),
-        action("back", String(localized: "Back"), String(localized: "Go to the page you saw before"), "chevron.backward", .browser, key(33, "[", .command)),
-        action("forward", String(localized: "Forward"), String(localized: "Go to the page you saw after this one"), "chevron.forward", .browser, key(30, "]", .command)),
-        action("pageTop", String(localized: "Top of Page"), String(localized: "Jump to the start of the page"), "arrow.up.to.line", .browser, key(126, nil, .command)),
-        action("pageBottom", String(localized: "Bottom of Page"), String(localized: "Jump to the end of the page"), "arrow.down.to.line", .browser, key(125, nil, .command)),
-        action("newTab", String(localized: "New Tab"), String(localized: "Open an empty tab"), "plus.square.on.square", .browser, key(17, "t", .command)),
-        action("closeTab", String(localized: "Close Tab"), String(localized: "Close the tab you are on"), "xmark.square", .browser, key(13, "w", .command)),
-        action("reload", String(localized: "Reload Page"), String(localized: "Load the page again"), "arrow.clockwise", .browser, key(15, "r", .command)),
-        action("reopenTab", String(localized: "Reopen Last Closed Tab"), String(localized: "Bring back the tab you closed"), "arrow.counterclockwise", .browser, key(17, "t", [.shift, .command])),
-        action("nextTab", String(localized: "Show Next Tab"), String(localized: "Move one tab to the right"), "arrow.right.square", .browser, key(124, nil, [.option, .command])),
-        action("previousTab", String(localized: "Show Previous Tab"), String(localized: "Move one tab to the left"), "arrow.left.square", .browser, key(123, nil, [.option, .command])),
-        action("copy", String(localized: "Copy"), String(localized: "Put the selection on the clipboard"), "doc.on.doc", .clipboard, key(8, "c", .command)),
-        action("cut", String(localized: "Cut"), String(localized: "Move the selection to the clipboard"), "scissors", .clipboard, key(7, "x", .command)),
-        action("paste", String(localized: "Paste"), String(localized: "Insert what is on the clipboard"), "doc.on.clipboard", .clipboard, key(9, "v", .command)),
-        snap(.leftHalf, String(localized: "Left Half"), "rectangle.lefthalf.filled"),
-        snap(.rightHalf, String(localized: "Right Half"), "rectangle.righthalf.filled"),
-        snap(.topHalf, String(localized: "Top Half"), "rectangle.tophalf.filled"),
-        snap(.bottomHalf, String(localized: "Bottom Half"), "rectangle.bottomhalf.filled"),
-        snap(.topLeftQuarter, String(localized: "Top Left Quarter"), "rectangle.split.2x2"),
-        snap(.topRightQuarter, String(localized: "Top Right Quarter"), "rectangle.split.2x2"),
-        snap(.bottomLeftQuarter, String(localized: "Bottom Left Quarter"), "rectangle.split.2x2"),
-        snap(.bottomRightQuarter, String(localized: "Bottom Right Quarter"), "rectangle.split.2x2"),
-        snap(.leftThird, String(localized: "Left Third"), "rectangle.split.3x1"),
-        snap(.centerThird, String(localized: "Center Third"), "rectangle.split.3x1"),
-        snap(.rightThird, String(localized: "Right Third"), "rectangle.split.3x1"),
-        snap(.leftTwoThirds, String(localized: "Left Two Thirds"), "rectangle.split.3x1"),
-        snap(.rightTwoThirds, String(localized: "Right Two Thirds"), "rectangle.split.3x1"),
-        snap(.maximize, String(localized: "Maximize"), "arrow.up.left.and.arrow.down.right"),
-        snap(.center, String(localized: "Center"), "rectangle.center.inset.filled"),
-        operation(.nextDisplay, String(localized: "Next Display"), String(localized: "Move the window to the next display"), "display.2", .windows),
-        operation(.restoreSize, String(localized: "Restore Size"), String(localized: "Put the window back where it was"), "arrow.uturn.backward.circle", .windows),
-        operation(.minimize, String(localized: "Minimize"), String(localized: "Send the window to the Dock"), "minus.rectangle", .windows),
-        operation(.closeWindow, String(localized: "Close Window"), String(localized: "Close the window under the pointer"), "xmark.rectangle", .windows),
-        action("fullScreen", String(localized: "Full Screen"), String(localized: "Fill the screen with the window, or go back"), "arrow.up.backward.and.arrow.down.forward", .windows, key(3, "f", [.control, .command])),
-        operation(.hideApp, String(localized: "Hide App"), String(localized: "Hide every window of the app"), "eye.slash", .windows),
-        action("missionControl", String(localized: "Mission Control"), String(localized: "See all open windows at once"), "rectangle.3.group", .system, key(126, nil, .control)),
-        action("appExpose", String(localized: "App Exposé"), String(localized: "See the windows of the app in front"), "square.stack.3d.up", .system, key(125, nil, .control)),
-        action("spaceLeft", String(localized: "Move Left a Space"), String(localized: "Go to the Space on the left"), "chevron.left.2", .system, key(123, nil, .control)),
-        action("spaceRight", String(localized: "Move Right a Space"), String(localized: "Go to the Space on the right"), "chevron.right.2", .system, key(124, nil, .control)),
-        action("showDesktop", String(localized: "Show Desktop"), String(localized: "Move every window aside"), "menubar.dock.rectangle", .system, key(103, nil, [])),
-        action("spotlight", String(localized: "Spotlight"), String(localized: "Search your Mac"), "magnifyingglass", .system, key(49, nil, .command)),
-        action("lockScreen", String(localized: "Lock Screen"), String(localized: "Lock the Mac right away"), "lock", .system, key(12, "q", [.control, .command])),
-        action("forceQuit", String(localized: "Force Quit Window"), String(localized: "Choose an app that is not responding"), "exclamationmark.octagon", .system, key(53, nil, [.option, .command])),
-        action("screenshot", String(localized: "Screenshot of the Screen"), String(localized: "Save a picture of the whole screen"), "camera", .system, key(20, nil, [.shift, .command])),
-        action("screenshotArea", String(localized: "Screenshot of an Area"), String(localized: "Save a picture of the part you choose"), "camera.viewfinder", .system, key(21, nil, [.shift, .command])),
-        action("screenshotOptions", String(localized: "Screenshot Options"), String(localized: "Open the screenshot tools"), "camera.aperture", .system, key(23, nil, [.shift, .command])),
-        operation(.volumeUp, String(localized: "Volume Up"), String(localized: "Make the sound louder"), "speaker.wave.3", .system),
-        operation(.volumeDown, String(localized: "Volume Down"), String(localized: "Make the sound quieter"), "speaker.wave.1", .system),
-        operation(.mute, String(localized: "Mute"), String(localized: "Turn the sound off or on"), "speaker.slash", .system),
-        operation(.brightnessUp, String(localized: "Brightness Up"), String(localized: "Make the display brighter"), "sun.max", .system),
-        operation(.brightnessDown, String(localized: "Brightness Down"), String(localized: "Make the display darker"), "sun.min", .system),
-        operation(.sleep, String(localized: "Sleep"), String(localized: "Put the Mac to sleep"), "moon", .system),
-        operation(.screenSaver, String(localized: "Start Screen Saver"), String(localized: "Show the screen saver now"), "sparkles.tv", .system),
-        operation(.nextFavoriteTheme, String(localized: "Next Favorite Theme"), String(localized: "Apply the next theme in your favorites"), "star", .macursor),
-        operation(.systemCursors, String(localized: "Use System Cursors"), String(localized: "Go back to the standard macOS cursors"), "cursorarrow", .macursor),
+        action("undo", "Undo", String(localized: "Take back your last change"), "arrow.uturn.backward", .general, key(6, "z", .command)),
+        action("redo", "Redo", String(localized: "Bring back what you took back"), "arrow.uturn.forward", .general, key(6, "z", [.shift, .command])),
+        action("switchApp", "Switch to Last App", String(localized: "Go to the app you used before this one"), "arrow.left.arrow.right", .general, key(48, nil, .command)),
+        action("back", "Back", String(localized: "Go to the page you saw before"), "chevron.backward", .browser, key(33, "[", .command)),
+        action("forward", "Forward", String(localized: "Go to the page you saw after this one"), "chevron.forward", .browser, key(30, "]", .command)),
+        action("pageTop", "Top of Page", String(localized: "Jump to the start of the page"), "arrow.up.to.line", .browser, key(126, nil, .command)),
+        action("pageBottom", "Bottom of Page", String(localized: "Jump to the end of the page"), "arrow.down.to.line", .browser, key(125, nil, .command)),
+        action("newTab", "New Tab", String(localized: "Open an empty tab"), "plus.square.on.square", .browser, key(17, "t", .command)),
+        action("closeTab", "Close Tab", String(localized: "Close the tab you are on"), "xmark.square", .browser, key(13, "w", .command)),
+        action("reload", "Reload Page", String(localized: "Load the page again"), "arrow.clockwise", .browser, key(15, "r", .command)),
+        action("reopenTab", "Reopen Last Closed Tab", String(localized: "Bring back the tab you closed"), "arrow.counterclockwise", .browser, key(17, "t", [.shift, .command])),
+        action("nextTab", "Show Next Tab", String(localized: "Move one tab to the right"), "arrow.right.square", .browser, key(124, nil, [.option, .command])),
+        action("previousTab", "Show Previous Tab", String(localized: "Move one tab to the left"), "arrow.left.square", .browser, key(123, nil, [.option, .command])),
+        action("copy", "Copy", String(localized: "Put the selection on the clipboard"), "doc.on.doc", .clipboard, key(8, "c", .command)),
+        action("cut", "Cut", String(localized: "Move the selection to the clipboard"), "scissors", .clipboard, key(7, "x", .command)),
+        action("paste", "Paste", String(localized: "Insert what is on the clipboard"), "doc.on.clipboard", .clipboard, key(9, "v", .command)),
+        snap(.leftHalf, "Left Half", "rectangle.lefthalf.filled"),
+        snap(.rightHalf, "Right Half", "rectangle.righthalf.filled"),
+        snap(.topHalf, "Top Half", "rectangle.tophalf.filled"),
+        snap(.bottomHalf, "Bottom Half", "rectangle.bottomhalf.filled"),
+        snap(.topLeftQuarter, "Top Left Quarter", "rectangle.split.2x2"),
+        snap(.topRightQuarter, "Top Right Quarter", "rectangle.split.2x2"),
+        snap(.bottomLeftQuarter, "Bottom Left Quarter", "rectangle.split.2x2"),
+        snap(.bottomRightQuarter, "Bottom Right Quarter", "rectangle.split.2x2"),
+        snap(.leftThird, "Left Third", "rectangle.split.3x1"),
+        snap(.centerThird, "Center Third", "rectangle.split.3x1"),
+        snap(.rightThird, "Right Third", "rectangle.split.3x1"),
+        snap(.leftTwoThirds, "Left Two Thirds", "rectangle.split.3x1"),
+        snap(.rightTwoThirds, "Right Two Thirds", "rectangle.split.3x1"),
+        snap(.maximize, "Maximize", "arrow.up.left.and.arrow.down.right"),
+        snap(.center, "Center", "rectangle.center.inset.filled"),
+        operation(.nextDisplay, "Next Display", String(localized: "Move the window to the next display"), "display.2", .windows),
+        operation(.restoreSize, "Restore Size", String(localized: "Put the window back where it was"), "arrow.uturn.backward.circle", .windows),
+        operation(.minimize, "Minimize", String(localized: "Send the window to the Dock"), "minus.rectangle", .windows),
+        operation(.closeWindow, "Close Window", String(localized: "Close the window under the pointer"), "xmark.rectangle", .windows),
+        action("fullScreen", "Full Screen", String(localized: "Fill the screen with the window, or go back"), "arrow.up.backward.and.arrow.down.forward", .windows, key(3, "f", [.control, .command])),
+        operation(.hideApp, "Hide App", String(localized: "Hide every window of the app"), "eye.slash", .windows),
+        action("missionControl", "Mission Control", String(localized: "See all open windows at once"), "rectangle.3.group", .system, key(126, nil, .control)),
+        action("appExpose", "App Exposé", String(localized: "See the windows of the app in front"), "square.stack.3d.up", .system, key(125, nil, .control)),
+        action("spaceLeft", "Move Left a Space", String(localized: "Go to the Space on the left"), "chevron.left.2", .system, key(123, nil, .control)),
+        action("spaceRight", "Move Right a Space", String(localized: "Go to the Space on the right"), "chevron.right.2", .system, key(124, nil, .control)),
+        action("showDesktop", "Show Desktop", String(localized: "Move every window aside"), "menubar.dock.rectangle", .system, key(103, nil, [])),
+        action("spotlight", "Spotlight", String(localized: "Search your Mac"), "magnifyingglass", .system, key(49, nil, .command)),
+        action("lockScreen", "Lock Screen", String(localized: "Lock the Mac right away"), "lock", .system, key(12, "q", [.control, .command])),
+        action("forceQuit", "Force Quit Window", String(localized: "Choose an app that is not responding"), "exclamationmark.octagon", .system, key(53, nil, [.option, .command])),
+        action("screenshot", "Screenshot of the Screen", String(localized: "Save a picture of the whole screen"), "camera", .system, key(20, nil, [.shift, .command])),
+        action("screenshotArea", "Screenshot of an Area", String(localized: "Save a picture of the part you choose"), "camera.viewfinder", .system, key(21, nil, [.shift, .command])),
+        action("screenshotOptions", "Screenshot Options", String(localized: "Open the screenshot tools"), "camera.aperture", .system, key(23, nil, [.shift, .command])),
+        operation(.volumeUp, "Volume Up", String(localized: "Make the sound louder"), "speaker.wave.3", .system),
+        operation(.volumeDown, "Volume Down", String(localized: "Make the sound quieter"), "speaker.wave.1", .system),
+        operation(.mute, "Mute", String(localized: "Turn the sound off or on"), "speaker.slash", .system),
+        operation(.brightnessUp, "Brightness Up", String(localized: "Make the display brighter"), "sun.max", .system),
+        operation(.brightnessDown, "Brightness Down", String(localized: "Make the display darker"), "sun.min", .system),
+        operation(.sleep, "Sleep", String(localized: "Put the Mac to sleep"), "moon", .system),
+        operation(.screenSaver, "Start Screen Saver", String(localized: "Show the screen saver now"), "sparkles.tv", .system),
+        operation(.nextFavoriteTheme, "Next Favorite Theme", String(localized: "Apply the next theme in your favorites"), "star", .macursor),
+        operation(.systemCursors, "Use System Cursors", String(localized: "Go back to the standard macOS cursors"), "cursorarrow", .macursor),
     ]
 
     static let readyMade: [CursorGesture] = {
@@ -878,6 +923,14 @@ enum CursorGestures {
             let t = span > 0 ? (distance - lengths[segment - 1]) / span : 0
             return CGPoint(x: start.x + (end.x - start.x) * t, y: start.y + (end.y - start.y) * t)
         }
+    }
+
+    static func percent(_ score: CGFloat) -> Int {
+        Int((min(max(score, 0), 1) * 100).rounded())
+    }
+
+    static func target(_ gesture: CursorGesture, _ window: MACFFMWindow?, front: String?) -> MACFFMWindow? {
+        gesture.shape != clickShape.id || front != nil && window?.owner.bundleIdentifier == front ? window : nil
     }
 
     static func extent(_ points: [CGPoint]) -> CGFloat {
@@ -999,8 +1052,7 @@ enum CursorGestures {
 
     private static func shape(_ id: String, _ name: String.LocalizationValue, _ family: CursorGestureFamily, _ points: [CGPoint],
                               directional: Bool = true) -> CursorGestureShape {
-        CursorGestureShape(id: id, name: String(localized: name), points: points, directional: directional, family: family,
-                           key: LocalizedStringResource(name).key)
+        CursorGestureShape(id: id, name: String(localized: name), points: points, directional: directional, family: family)
     }
 
     private static func letter(_ id: String, _ family: CursorGestureFamily, _ points: [CGPoint]) -> CursorGestureShape {
@@ -1011,17 +1063,18 @@ enum CursorGestures {
         .shortcut(CursorGestureShortcut(keyCode: keyCode, flags: flags.rawValue, character: character))
     }
 
-    private static func action(_ id: String, _ name: String, _ detail: String, _ icon: String, _ category: CursorGestureCategory,
+    private static func action(_ id: String, _ name: String.LocalizationValue, _ detail: String, _ icon: String, _ category: CursorGestureCategory,
                                _ kind: CursorGestureKind) -> CursorGestureAction {
-        CursorGestureAction(id: id, name: name, detail: detail, icon: icon, category: category, kind: kind)
+        CursorGestureAction(id: id, name: String(localized: name), detail: detail, icon: icon, category: category, kind: kind,
+                            key: LocalizedStringResource(name).key)
     }
 
-    private static func operation(_ operation: CursorGestureOperation, _ name: String, _ detail: String, _ icon: String,
+    private static func operation(_ operation: CursorGestureOperation, _ name: String.LocalizationValue, _ detail: String, _ icon: String,
                                   _ category: CursorGestureCategory) -> CursorGestureAction {
         action(operation.rawValue, name, detail, icon, category, .operation(operation))
     }
 
-    private static func snap(_ operation: CursorGestureOperation, _ name: String, _ icon: String) -> CursorGestureAction {
+    private static func snap(_ operation: CursorGestureOperation, _ name: String.LocalizationValue, _ icon: String) -> CursorGestureAction {
         self.operation(operation, name, String(localized: "Fit the window under the pointer to this place"), icon, .windows)
     }
 }
@@ -1173,7 +1226,7 @@ struct CursorGestureRepeat: Equatable {
 
     init?(_ drawn: [CGPoint], trigger: CursorGestureTrigger, started: TimeInterval, at now: TimeInterval,
           config: CursorGesturesConfig, front: String?) {
-        guard now - started >= Self.settle, let gesture = config.gesture(for: drawn, trigger: trigger, front: front) else { return nil }
+        guard now - started >= Self.settle, let gesture = config.match(for: drawn, trigger: trigger, front: front)?.gesture else { return nil }
         self.trigger = trigger
         self.gesture = gesture
         began = now
@@ -1181,11 +1234,11 @@ struct CursorGestureRepeat: Equatable {
     }
 
     static func holds(_ repeating: CursorGestureRepeat?, drawn: [CGPoint], trigger: CursorGestureTrigger, held: UInt, at now: TimeInterval,
-                      config: CursorGesturesConfig, front: String?, windows: @autoclosure () -> Set<String> = []) -> Bool {
+                      config: CursorGesturesConfig, front: String?, pointer: @autoclosure () -> String? = nil) -> Bool {
         guard config.repeats(on: trigger.device), trigger.button != nil || held == trigger.keys else { return false }
         let ready = repeating.map { now - $0.began <= limit }
-            ?? (CursorGestures.extent(drawn) >= CursorGesturePress.reach && config.gesture(for: drawn, trigger: trigger, front: front) != nil)
-        return ready && !config.blocks(button: true, front: front, windows: windows())
+            ?? (CursorGestures.extent(drawn) >= CursorGesturePress.reach && config.match(for: drawn, trigger: trigger, front: front) != nil)
+        return ready && !config.blocks(button: true, front: front, pointer: pointer())
     }
 
     mutating func click(_ drawn: [CGPoint], at now: TimeInterval, config: CursorGesturesConfig, front: String?) -> CursorGesture? {
@@ -1197,7 +1250,7 @@ struct CursorGestureRepeat: Equatable {
 
     func switched(_ drawn: [CGPoint], config: CursorGesturesConfig, front: String?) -> CursorGesture? {
         guard config.switchWhileRepeating, drawn.count >= Self.switchPoints, CursorGestures.extent(drawn) >= Self.switchSize,
-              let found = config.gesture(for: drawn, trigger: trigger, front: front), found.id != gesture.id else { return nil }
+              let found = config.match(for: drawn, trigger: trigger, front: front)?.gesture, found.id != gesture.id else { return nil }
         return found
     }
 }
@@ -1228,9 +1281,10 @@ struct CursorGestureScroll {
 struct CursorGestureSnapshot {
     var config = CursorGesturesConfig()
     var front: String?
-    var windows: Set<String> = []
     var height: CGFloat = 0
     var natural = true
+    var appAt: @Sendable (CGPoint) -> String? = CursorGestures.app(at:)
+    var translator: CursorGestureTrigger?
 }
 
 final class CursorGestureShared: @unchecked Sendable {
@@ -1246,6 +1300,7 @@ final class CursorGestureShared: @unchecked Sendable {
 enum CursorGestureNote {
     case update([CGPoint], CursorGestureTrigger, finished: Bool)
     case play(CursorGesture?)
+    case frame(CursorTranslatorNote)
 }
 
 struct CursorGestureInput {
@@ -1254,6 +1309,7 @@ struct CursorGestureInput {
     private(set) var stroke: CursorGestureStroke
     private(set) var pad: CursorGestureStroke
     private(set) var press: CursorGesturePress?
+    private(set) var framing: CursorTranslatorPress?
     private(set) var repeating: CursorGestureRepeat?
     private(set) var leftHeld = false
     private var leftSince: TimeInterval = 0
@@ -1264,6 +1320,7 @@ struct CursorGestureInput {
     private var unanswered: TimeInterval?
     private var failedOpen = false
     private var ownsScroll = false
+    private var swallowing: Set<Int> = []
     var notes: [CursorGestureNote] = []
     var clicks: [(button: Int, at: CGPoint, keys: UInt)] = []
 
@@ -1272,17 +1329,21 @@ struct CursorGestureInput {
         pad = CursorGestureStroke(triggers: config.padTriggers)
     }
 
-    var isDrawing: Bool { press != nil || stroke.phase == .drawing || pad.phase == .drawing }
+    var isDrawing: Bool { press != nil || framing != nil || stroke.phase == .drawing || pad.phase == .drawing }
 
     mutating func cancel(_ flags: NSEvent.ModifierFlags, at time: TimeInterval) {
         stroke.cancel(flags)
         if began <= time {
             pad.cancel(flags)
+            if let dropped = press { swallowing.insert(dropped.button) }
             press = nil
             if repeating?.trigger.button != nil { repeating = nil }
         }
         if let repeating, repeating.began <= time { self.repeating = nil }
-        if leftSince <= time { leftHeld = false }
+        if leftHeld, leftSince <= time {
+            leftHeld = false
+            swallowing.insert(0)
+        }
         update()
     }
 
@@ -1308,7 +1369,8 @@ struct CursorGestureInput {
         let starting = stroke.phase != .drawing
         let finished = stroke.moved(to: point, flags: flags, buttons: buttons)
         if starting, stroke.phase == .drawing { (self.device, began) = (device, now) }
-        if stroke.points.count == 1, snapshot.config.blocks(button: false, front: snapshot.front, windows: snapshot.windows) {
+        if stroke.points.count == 1,
+           snapshot.config.blocks(button: false, front: snapshot.front, pointer: snapshot.appAt(flip(point, snapshot))) {
             stroke.cancel(flags)
         }
         finish(finished, keyTrigger, snapshot)
@@ -1316,7 +1378,10 @@ struct CursorGestureInput {
 
     mutating func tapped(_ type: CGEventType, _ event: CGEvent, _ snapshot: CursorGestureSnapshot, at now: TimeInterval) -> Bool {
         guard type != .tapDisabledByTimeout, type != .tapDisabledByUserInput else {
+            for dropped in [press?.button, framing?.button, leftHeld ? 0 : nil] { if let dropped { swallowing.insert(dropped) } }
+            if let ended = framing, ended.drawing { notes.append(.frame(ended.released)) }
             press = nil
+            framing = nil
             if repeating?.trigger.button != nil { repeating = nil }
             leftHeld = false
             unanswered = nil
@@ -1325,48 +1390,82 @@ struct CursorGestureInput {
         }
         if event.getIntegerValueField(.eventSourceUserData) == CursorGestureKeys.marker { unanswered = nil }
         guard event.getIntegerValueField(.eventSourceUserData) != CursorGestureKeys.marker,
+              event.getIntegerValueField(.eventSourceUserData) != CursorShaker.marker,
               snapshot.config.accepts(source: event.getIntegerValueField(.eventSourceStateID)) else { return false }
         if let unanswered, now - unanswered > Self.echo { failedOpen = true }
         guard !failedOpen else {
+            for dropped in [press?.button, framing?.button, leftHeld ? 0 : nil] { if let dropped { swallowing.insert(dropped) } }
+            if let ended = framing, ended.drawing { notes.append(.frame(ended.released)) }
             press = nil
+            framing = nil
             leftHeld = false
             update()
-            return false
+            let button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
+            switch type {
+            case .leftMouseDown, .rightMouseDown, .otherMouseDown:
+                swallowing.remove(button)
+                return false
+            case .leftMouseDragged, .rightMouseDragged, .otherMouseDragged:
+                return swallowing.contains(button)
+            case .leftMouseUp, .rightMouseUp, .otherMouseUp:
+                return swallowing.remove(button) != nil
+            default:
+                return false
+            }
         }
         if type == .scrollWheel { return scrolled(event, snapshot, at: now) }
         let button = Int(event.getIntegerValueField(.mouseEventButtonNumber))
         let keys = NSEvent.ModifierFlags(rawValue: UInt(event.flags.rawValue)).intersection(CursorGestureStroke.keys)
-        let (config, front, windows) = (snapshot.config, snapshot.front, snapshot.windows)
+        let (config, front) = (snapshot.config, snapshot.front)
         switch type {
         case .leftMouseDown:
+            swallowing.remove(0)
             let live = current
             leftHeld = CursorGestureRepeat.holds(repeating, drawn: live.points, trigger: live.trigger, held: keys.rawValue,
-                                                 at: now, config: config, front: front, windows: windows)
+                                                 at: now, config: config, front: front, pointer: snapshot.appAt(event.location))
             leftSince = now
             return leftHeld
         case .leftMouseDragged:
-            return leftHeld
+            return leftHeld || swallowing.contains(0)
         case .leftMouseUp:
-            guard leftHeld else { return false }
+            guard leftHeld else { return swallowing.remove(0) != nil }
             leftHeld = false
             repeatClick(snapshot, at: now)
             return true
         case .rightMouseDown, .otherMouseDown:
+            swallowing.remove(button)
             let trigger = CursorGestureTrigger(keys: keys.rawValue, button: button,
                                                device: CursorGestureDevice(subtype: event.getIntegerValueField(.mouseEventSubtype)))
-            guard press == nil, config.holds(trigger, front: front, windows: windows) else { return false }
+            if framing == nil, press == nil, snapshot.translator?.overlaps(trigger) == true {
+                framing = CursorTranslatorPress(button: button, start: flip(event.location, snapshot))
+                return true
+            }
+            guard press == nil, config.holds(trigger, front: front, pointer: snapshot.appAt(event.location)) else { return false }
             stroke.cancel(keys)
             pad.cancel(keys)
             press = CursorGesturePress(button: button, start: flip(event.location, snapshot), trigger: trigger)
             began = now
             return true
         case .rightMouseDragged, .otherMouseDragged:
+            guard !swallowing.contains(button) else { return true }
+            if var moving = framing, moving.button == button {
+                moving.dragged(to: flip(event.location, snapshot))
+                framing = moving
+                if moving.drawing { notes.append(.frame(.drawing(moving.start, moving.end))) }
+                return true
+            }
             guard press?.button == button else { return false }
             let point = flip(event.location, snapshot)
             press?.dragged(to: point)
             update()
             return true
         default:
+            if swallowing.remove(button) != nil { return true }
+            if let ended = framing, ended.button == button {
+                framing = nil
+                notes.append(.frame(ended.released))
+                return true
+            }
             guard let ended = press, ended.button == button else { return false }
             press = nil
             released(ended, snapshot, at: now)
@@ -1386,7 +1485,7 @@ struct CursorGestureInput {
         guard event.getIntegerValueField(.scrollWheelEventMomentumPhase) == 0 else { return drawing }
         if !drawing {
             let trigger = CursorGestureTrigger(keys: flags.intersection(CursorGestureStroke.keys).rawValue, twoFinger: true, device: .trackpad)
-            guard !snapshot.config.blocks(button: false, front: snapshot.front, windows: snapshot.windows),
+            guard !snapshot.config.blocks(button: false, front: snapshot.front, pointer: snapshot.appAt(event.location)),
                   !snapshot.config.wanting(trigger, front: snapshot.front).isEmpty else { return false }
             stroke.cancel(flags)
             glide = CursorGestureScroll(at: flip(event.location, snapshot))
@@ -1401,6 +1500,7 @@ struct CursorGestureInput {
 
     private mutating func released(_ ended: CursorGesturePress, _ snapshot: CursorGestureSnapshot, at now: TimeInterval) {
         guard let point = ended.click else { return finish(ended.points, ended.trigger, snapshot) }
+        if let gesture = snapshot.config.clicked(ended.trigger, front: snapshot.front) { return play(gesture) }
         clicks.append((ended.button, flip(point, snapshot), ended.trigger.keys))
         unanswered = unanswered ?? now
         update()
@@ -1480,6 +1580,24 @@ enum CursorGestureKeys {
     private static let modifiers: [(NSEvent.ModifierFlags, String)] = [(.control, "⌃"), (.option, "⌥"), (.shift, "⇧"), (.command, "⌘")]
     private static let functionKeys = Set(names.keys).subtracting([36, 76, 48, 53, 49, 51])
 
+    static let systemHotKeyIDs = ["missionControl": 32, "appExpose": 33, "spaceLeft": 79, "spaceRight": 81, "showDesktop": 36]
+
+    static func systemHotKeys() -> [String: Any]? {
+        let domain = "com.apple.symbolichotkeys" as CFString
+        CFPreferencesAppSynchronize(domain)
+        return CFPreferencesCopyAppValue("AppleSymbolicHotKeys" as CFString, domain) as? [String: Any]
+    }
+
+    static func system(_ id: String, _ shortcut: CursorGestureShortcut,
+                       in hotKeys: @autoclosure () -> [String: Any]? = systemHotKeys()) -> CursorGestureShortcut? {
+        guard let number = systemHotKeyIDs[id], let entry = hotKeys()?[String(number)] as? [String: Any] else { return shortcut }
+        guard (entry["enabled"] as? NSNumber)?.boolValue != false else { return nil }
+        guard let parameters = (entry["value"] as? [String: Any])?["parameters"] as? [Int], parameters.count == 3,
+              let keyCode = UInt16(exactly: parameters[1]), let flags = UInt(exactly: parameters[2]) else { return shortcut }
+        guard keyCode != 0xFFFF else { return nil }
+        return CursorGestureShortcut(keyCode: keyCode, flags: NSEvent.ModifierFlags(rawValue: flags).intersection([.command, .option, .control, .shift]).rawValue)
+    }
+
     static func recordable(_ keyCode: UInt16, _ flags: NSEvent.ModifierFlags) -> Bool {
         names[keyCode] != nil || !flags.isDisjoint(with: [.command, .option, .control])
     }
@@ -1531,7 +1649,7 @@ enum CursorGestureKeys {
     }
 
     static func posted(_ event: NSEvent) -> Bool {
-        event.cgEvent?.getIntegerValueField(.eventSourceUserData) == marker
+        event.cgEvent?.getIntegerValueField(.eventSourceUserData) == marker || CursorShaker.posted(event)
     }
 
     @MainActor private static var table = shortcutLayout().map(keyCodes) ?? [:]

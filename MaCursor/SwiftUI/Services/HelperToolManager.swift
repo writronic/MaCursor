@@ -110,10 +110,8 @@ class HelperToolManager: ObservableObject {
             statusDescription = isRunning
                 ? String(localized: "Installed & Active")
                 : String(localized: "Installed, not running")
-        case .notRegistered:
+        case .notRegistered, .notFound:
             statusDescription = String(localized: "Not Installed")
-        case .notFound:
-            statusDescription = String(localized: "Helper Not Found")
         case .requiresApproval:
             statusDescription = String(localized: "Requires Approval in System Settings")
         @unknown default:
@@ -133,11 +131,11 @@ class HelperToolManager: ObservableObject {
     }
 
     private func migrateLegacyLoginItem() async {
-        let legacy = SMAppService.loginItem(identifier: Self.legacyHelperBundleIdentifier)
-        guard legacy.status != .notRegistered else { return }
-        let wasEnabled = legacy.status == .enabled
-        try? await legacy.unregister()
-        guard wasEnabled, service.status != .enabled else { return }
+        let legacyApps = NSRunningApplication.runningApplications(withBundleIdentifier: Self.legacyHelperBundleIdentifier)
+        let wasEnabled = !legacyApps.isEmpty
+        guard wasEnabled else { return }
+        legacyApps.forEach { $0.forceTerminate() }
+        guard service.status != .enabled else { return }
         registerBundledHelperWithLaunchServices()
         try? service.register()
         NSLog("MaCursor: Migrated the login item to %@", helperBundleIdentifier)

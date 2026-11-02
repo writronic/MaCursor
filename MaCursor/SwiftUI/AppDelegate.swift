@@ -6,6 +6,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private(set) var pendingImportURLs: [URL] = []
     private var accessRequestObserver: NSObjectProtocol?
     private var gesturesAccessRequestObserver: NSObjectProtocol?
+    private var shakerAccessRequestObserver: NSObjectProtocol?
+    private var translatorAccessRequestObserver: NSObjectProtocol?
 
     var isViewReady = false
 
@@ -19,6 +21,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         EditorTextShortcutCoordinator.shared.start()
         startFocusFollowsMouseAccessRequests()
         startCursorGesturesAccessRequests()
+        startCursorShakerAccessRequests()
+        startCursorTranslatorAccessRequests()
 
         MACCursorCapture.shared.capture(to: MACCursorCapture.systemDefaultPath)
 
@@ -119,6 +123,32 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard MACPreferences.flag(MACPreferences.pendingGesturesAccessWindowKey) else { return }
         MACPreferences.setFlag(false, forKey: MACPreferences.pendingGesturesAccessWindowKey)
         AccessWindowController.cursorGestures.present()
+    }
+
+    private func startCursorShakerAccessRequests() {
+        shakerAccessRequestObserver = DistributedNotificationCenter.default().addObserver(
+            forName: .MACCursorShakerShowAccessWindow,
+            object: nil,
+            queue: .main
+        ) { _ in
+            AccessWindowController.cursorShaker.present()
+        }
+        guard MACPreferences.flag(MACPreferences.pendingShakerAccessWindowKey) else { return }
+        MACPreferences.setFlag(false, forKey: MACPreferences.pendingShakerAccessWindowKey)
+        AccessWindowController.cursorShaker.present()
+    }
+
+    private func startCursorTranslatorAccessRequests() {
+        translatorAccessRequestObserver = DistributedNotificationCenter.default().addObserver(
+            forName: .MACCursorTranslatorShowAccessWindow,
+            object: nil,
+            queue: .main
+        ) { _ in
+            AccessWindowController.cursorTranslator.present()
+        }
+        guard MACPreferences.flag(MACPreferences.pendingTranslatorAccessWindowKey) else { return }
+        MACPreferences.setFlag(false, forKey: MACPreferences.pendingTranslatorAccessWindowKey)
+        AccessWindowController.cursorTranslator.present()
     }
 
 }

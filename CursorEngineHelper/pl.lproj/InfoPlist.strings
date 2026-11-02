@@ -1,1 +1,2 @@
 "NSAppleEventsUsageDescription" = "Dzięki temu przycisk MaCursor na pasku narzędzi Findera działa w folderach iCloud.";
+"NSScreenCaptureUsageDescription" = "Tłumacz kursora czyta tekst w ramce, aby go przetłumaczyć. Nic nie jest zapisywane, a tekst trafia tylko do wybranej usługi tłumaczenia.";

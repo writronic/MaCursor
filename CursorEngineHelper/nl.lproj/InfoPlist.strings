@@ -1,1 +1,2 @@
 "NSAppleEventsUsageDescription" = "Hiermee werkt de MaCursor-knop in de knoppenbalk van Finder ook in iCloud-mappen.";
+"NSScreenCaptureUsageDescription" = "De Cursorvertaler leest de tekst in het kader om die te vertalen. Er wordt niets bewaard, en de tekst gaat alleen naar de vertaaldienst die je kiest.";

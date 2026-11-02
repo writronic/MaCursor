@@ -1,1 +1,2 @@
 "NSAppleEventsUsageDescription" = "This lets the MaCursor button in the Finder toolbar work inside iCloud folders.";
+"NSScreenCaptureUsageDescription" = "Cursor Translator reads the text inside its frame to translate it. Nothing is saved, and the text goes only to the Translation Service you choose.";

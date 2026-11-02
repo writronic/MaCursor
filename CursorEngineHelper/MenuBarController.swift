@@ -46,6 +46,10 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         if popover != nil { MenuBarPanelModel.shared.reloadTrails() }
     }
 
+    func refreshShaker() {
+        if popover != nil { MenuBarPanelModel.shared.reloadShaker() }
+    }
+
     @objc private func statusItemClicked(_ sender: Any?) {
         if let event = NSApp.currentEvent, MACMenuBarClickIsSecondary(event.type, event.modifierFlags) {
             showContextMenu()
@@ -81,6 +85,7 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         let popover = panelPopover()
         let appearance = MACMenuBarAppearanceNameForMode(MACPreferences.value(forKey: MACPreferences.appearanceModeKey))
         popover.appearance = appearance.flatMap { NSAppearance(named: $0) }
+        MenuBarPanelModel.shared.isShown = true
         MenuBarPanelModel.shared.reload()
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         applyPanelGlassAlpha(popover.contentViewController?.view,
@@ -112,6 +117,7 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
 
     func popoverDidClose(_ notification: Notification) {
         closedAt = ProcessInfo.processInfo.systemUptime
+        MenuBarPanelModel.shared.isShown = false
         if let keyMonitor {
             NSEvent.removeMonitor(keyMonitor)
             self.keyMonitor = nil

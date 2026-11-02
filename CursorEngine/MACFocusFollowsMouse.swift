@@ -18,6 +18,8 @@ let MACFFMMessagingTimeout: Float = 0.5
 let MACFFMRaiseRetries = 3
 let MACFFMRaiseRetryInterval: TimeInterval = 0.05
 
+typealias MACFFMWindow = (window: AXUIElement, owner: NSRunningApplication)
+
 struct MACFFMDecisionInputs: Sendable {
     var disableModifierHeld = false
     var mouseButtonDown = false
@@ -155,6 +157,7 @@ final class MACFocusFollowsMouseController {
         var addMonitor: (@escaping @MainActor (Bool, CGPoint) -> Void) -> Any? = { handler in
             let events: NSEvent.EventTypeMask = [.mouseMoved, .scrollWheel]
             let forward: (NSEvent) -> Void = { event in
+                guard !CursorShaker.posted(event) else { return }
                 let scrolling = event.type == .scrollWheel
                 MainActor.assumeIsolated { handler(scrolling, NSEvent.mouseLocation) }
             }
@@ -203,6 +206,7 @@ final class MACFocusFollowsMouseController {
     var strokesEnabled: @MainActor () -> Bool = { false }
     var strokeInProgress: @MainActor () -> Bool = { false }
     var trustSynced: @MainActor (Bool) -> Void = { _ in }
+    var trustWillCheck: @MainActor () -> Void = {}
 
     init(trustCheck: @escaping @MainActor () -> Bool, effects: Effects = Effects()) {
         self.trustCheck = trustCheck
@@ -258,6 +262,7 @@ final class MACFocusFollowsMouseController {
     }
 
     func syncTrust() {
+        trustWillCheck()
         let trusted = trustCheck()
         lastTrusted = trusted
         effects.persistTrust(trusted)
@@ -365,7 +370,7 @@ final class MACFocusFollowsMouseController {
                                       copyAttribute(element, kAXSubroleAttribute) as? String) ? element : nil
     }
 
-    private func copyWindowFrame(_ window: AXUIElement) -> CGRect? {
+    func copyWindowFrame(_ window: AXUIElement) -> CGRect? {
         guard let position = copyAttribute(window, kAXPositionAttribute),
               let size = copyAttribute(window, kAXSizeAttribute),
               CFGetTypeID(position) == AXValueGetTypeID(), CFGetTypeID(size) == AXValueGetTypeID() else { return nil }
@@ -376,7 +381,7 @@ final class MACFocusFollowsMouseController {
         return CGRect(origin: origin, size: dimensions)
     }
 
-    func windowUnderPointer() -> (window: AXUIElement, owner: NSRunningApplication, frame: CGRect?)? {
+    func windowUnderPointer() -> MACFFMWindow? {
         guard let systemWideElement, let primary = NSScreen.screens.first else { return nil }
         let point = MACFFMConvertToAXPoint(NSEvent.mouseLocation, primary.frame.height)
         var hit: AXUIElement?
@@ -386,11 +391,10 @@ final class MACFocusFollowsMouseController {
               pid != ProcessInfo.processInfo.processIdentifier,
               let owner = NSRunningApplication(processIdentifier: pid),
               !MACFFMBundleListContains(MACFFMBuiltInIgnoreBundleIdentifiers(), owner.bundleIdentifier) else { return nil }
-        return (window, owner, copyWindowFrame(window))
+        return (window, owner)
     }
 
-    func raiseWindowUnderPointer() -> Bool {
-        guard let target = windowUnderPointer() else { return false }
+    func raise(_ target: MACFFMWindow) -> Bool {
         let switching = target.owner.processIdentifier != NSWorkspace.shared.frontmostApplication?.processIdentifier
         AXUIElementPerformAction(target.window, kAXRaiseAction as CFString)
         target.owner.activate(options: [])

@@ -15,6 +15,8 @@ extension Notification.Name {
     static let MACOpenSettingsRequested = Notification.Name("MACOpenSettingsRequested")
     static let MACFocusFollowsMouseShowAccessWindow = Notification.Name("MACFocusFollowsMouseShowAccessWindow")
     static let MACCursorGesturesShowAccessWindow = Notification.Name("MACCursorGesturesShowAccessWindow")
+    static let MACCursorShakerShowAccessWindow = Notification.Name("MACCursorShakerShowAccessWindow")
+    static let MACCursorTranslatorShowAccessWindow = Notification.Name("MACCursorTranslatorShowAccessWindow")
     static let MACCursorPreferencesDidChange = Notification.Name("MACCursorPreferencesDidChange")
 }
 
@@ -288,6 +290,34 @@ func shortcutKey(_ keyCode: UInt16, _ modifiers: NSEvent.ModifierFlags, _ layout
                        &deadKeyState, characters.count, &length, &characters)
     }
     return status == noErr ? String(utf16CodeUnits: characters, count: length) : nil
+}
+
+struct KeyboardShortcutData: Codable, Hashable, Equatable {
+    var keyCode: UInt16
+    var modifierFlagsRaw: UInt
+    var keyCharacter: String?
+
+    var modifierFlags: NSEvent.ModifierFlags {
+        NSEvent.ModifierFlags(rawValue: modifierFlagsRaw)
+    }
+
+    var displayString: String {
+        var parts: [String] = []
+        if modifierFlags.contains(.control) { parts.append("⌃") }
+        if modifierFlags.contains(.option) { parts.append("⌥") }
+        if modifierFlags.contains(.shift) { parts.append("⇧") }
+        if modifierFlags.contains(.command) { parts.append("⌘") }
+
+        let keyStr: String
+        if let char = keyCharacter, !char.isEmpty {
+            keyStr = char == " " ? "Space" : char.uppercased()
+        } else {
+            keyStr = "?"
+        }
+
+        parts.append(keyStr)
+        return parts.joined()
+    }
 }
 
 func MACShortcutIsAllowed(_ modifierFlagsRaw: UInt, _ keyCode: UInt16, _ layout: Data? = shortcutLayout()) -> Bool {

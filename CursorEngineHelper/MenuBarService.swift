@@ -18,6 +18,9 @@ enum MenuBarService {
         let accessibilityTrusted: Bool
         let cursorTrails: CursorTrailsConfig
         let cursorGestures: CursorGesturesConfig
+        let cursorShaker: CursorShakerConfig
+        let cursorTranslator: CursorTranslatorConfig
+        let screenRecording: Bool
         let cursorScale: Double
         let panelBackdropAlpha: Double
     }
@@ -29,12 +32,15 @@ enum MenuBarService {
         return bundle
     }
 
-    static func localized(_ key: String) -> String {
-        guard let parent = parentAppBundle() else { return key }
+    static func language() -> String? {
+        guard let parent = parentAppBundle() else { return nil }
         let stored = storedString(MACPreferences.languageKey)
-        let language = stored != "system" && stored != nil
+        return stored != "system" && stored != nil
             ? stored : Bundle.preferredLocalizations(from: parent.localizations).first
-        guard let language, let path = parent.path(forResource: language, ofType: "lproj"),
+    }
+
+    static func localized(_ key: String) -> String {
+        guard let parent = parentAppBundle(), let language = language(), let path = parent.path(forResource: language, ofType: "lproj"),
               let strings = Bundle(path: path) else { return key }
         return strings.localizedString(forKey: key, value: key, table: "Localizable")
     }
@@ -113,6 +119,9 @@ enum MenuBarService {
             accessibilityTrusted: HelperTrustProbe.isTrusted(),
             cursorTrails: CursorTrailsConfig.load(),
             cursorGestures: CursorGesturesConfig.load(),
+            cursorShaker: CursorShakerConfig.load(),
+            cursorTranslator: CursorTranslatorConfig.load(),
+            screenRecording: HelperTrustProbe.screenRecordingAllowed(),
             cursorScale: scale.map { MACMenuBarClampCursorScale($0.doubleValue) } ?? 1,
             panelBackdropAlpha: MACMenuBarPanelBackdropAlpha(panelBackgroundLevel())
         )
@@ -208,6 +217,10 @@ enum MenuBarService {
         config.save()
     }
 
+    static func setCursorShakerEnabled(_ enabled: Bool) {
+        CursorShakerConfig.setEnabled(enabled)
+    }
+
     static func openAccessibilitySettings() {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
             NSWorkspace.shared.open(url)
@@ -240,6 +253,24 @@ enum MenuBarService {
             MACPreferences.setFlag(true, forKey: MACPreferences.pendingGesturesAccessWindowKey)
         } else {
             postDistributed(.MACCursorGesturesShowAccessWindow)
+        }
+        launchParentAppThenPost(nil)
+    }
+
+    static func requestCursorShakerAccess() {
+        if NSRunningApplication.runningApplications(withBundleIdentifier: MACAppBundleIdentifier).isEmpty {
+            MACPreferences.setFlag(true, forKey: MACPreferences.pendingShakerAccessWindowKey)
+        } else {
+            postDistributed(.MACCursorShakerShowAccessWindow)
+        }
+        launchParentAppThenPost(nil)
+    }
+
+    static func requestCursorTranslatorAccess() {
+        if NSRunningApplication.runningApplications(withBundleIdentifier: MACAppBundleIdentifier).isEmpty {
+            MACPreferences.setFlag(true, forKey: MACPreferences.pendingTranslatorAccessWindowKey)
+        } else {
+            postDistributed(.MACCursorTranslatorShowAccessWindow)
         }
         launchParentAppThenPost(nil)
     }

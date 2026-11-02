@@ -12,6 +12,10 @@ enum SystemSettingsPane {
         if version.majorVersion > 15 || (version.majorVersion == 15 && version.minorVersion >= 2) { return .fileProviders }
         return .extensions
     }
+
+    static func screenRecordingHasAudio(on version: OperatingSystemVersion = ProcessInfo.processInfo.operatingSystemVersion) -> Bool {
+        version.majorVersion >= 14
+    }
 }
 
 extension View {

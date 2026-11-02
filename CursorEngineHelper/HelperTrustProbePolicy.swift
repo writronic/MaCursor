@@ -1,6 +1,8 @@
 import Foundation
 
 let MACFFMTrustProbeArgument = "--accessibility-probe"
+let MACTranslatorScreenProbeArgument = "--screen-recording-probe"
+let MACTranslatorReaderArgument = "--read-text"
 
 enum HelperTrustProbePolicy {
     enum WaitResult: Equatable, Sendable {
@@ -26,8 +28,15 @@ enum HelperTrustProbePolicy {
     }
 
     static func isTrusted(_ operations: Operations) -> Bool {
-        guard let path = operations.executablePath(),
-              let child = operations.spawn(path) else { return operations.fallback() }
+        finish(spawn(operations), operations)
+    }
+
+    static func spawn(_ operations: Operations) -> Int32? {
+        operations.executablePath().flatMap(operations.spawn)
+    }
+
+    static func finish(_ child: Int32?, _ operations: Operations) -> Bool {
+        guard let child else { return operations.fallback() }
         for _ in 0..<100 {
             switch operations.wait(child) {
             case .exited(let status):

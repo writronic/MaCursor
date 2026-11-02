@@ -27,9 +27,10 @@ Requires **macOS 13 Ventura** or later.
 ## Features
 
 - **80+ Ready-to-Apply Themes** — Browse and download curated cursor themes from the Theme Gallery
-- **Menu Bar Panel** — Your favorite themes, the cursor for the app in front, and the cursor scale, Cursor Shadow, Focus on Hover, Cursor Gestures and Cursor Trails controls, all in the menu bar without opening the window
+- **Menu Bar Panel** — Your favorite themes, the cursor for the app in front, and the cursor scale, Cursor Shadow, Focus on Hover, Cursor Shaker, Cursor Translator, Cursor Gestures and Cursor Trails controls, all in the menu bar without opening the window
 - **Right-Click Menu** — Get more from your right-click in Finder and on the Desktop: copy a path, make a new file, open files in the app you choose, and more
 - **Focus on Hover** — The window under your pointer becomes active after a short pause, without clicking
+- **Cursor Translator** — A frame over any text on your screen shows it in your language, and keeps up as the text changes
 - **Cursor Gestures** — Hold modifier keys or a mouse button and draw a shape to run an action, such as a keyboard shortcut, typed text, an app, a website or a window action
 - **Cursor Trails** — A smooth line follows your pointer and shrinks back into it when you stop, in ready-to-use styles
 - **Per-App Themes** — Each app can have its own cursor theme, and MaCursor switches to it when that app comes to the front
@@ -39,7 +40,7 @@ Requires **macOS 13 Ventura** or later.
 - **Left / Right Hand Mode** — Cursor orientation for left-handed or right-handed mouse use
 
 <details>
-<summary><b>Full feature list</b>: 13 more, including the editor tools, the app languages, and macOS Tahoe support</summary>
+<summary><b>Full feature list</b>: 14 more, including the editor tools, the app languages, and macOS Tahoe support</summary>
 
 ### Applying & Switching
 
@@ -65,6 +66,7 @@ Requires **macOS 13 Ventura** or later.
 - **Background Helper Tool** — Lightweight login item (`MaCursorHelper`) that keeps shortcuts active and reapplies your theme across user switches
 - **Auto-Updates** — Built-in Sparkle integration for over-the-air updates
 - **macOS Tahoe & Golden Gate Ready** — Full support for macOS 26 Tahoe and macOS 27 Golden Gate, including automatic handling of new S-variant cursor identifiers
+- **Cursor Shaker** — While you are away, your pointer moves one pixel and back, and the display stays on, so apps like Slack and Microsoft Teams keep showing you as active
 
 </details>
 
@@ -88,7 +90,7 @@ Browse `.cursor` theme files in the [Theme Gallery](https://github.com/writronic
 
 ### 3. Import & Apply
 
-Double-click any `.cursor` file, drag & drop it onto the MaCursor library window, or use **File → Import Theme**. Then select the theme and click **Apply**.
+Double-click any `.cursor` file, drag & drop it onto the MaCursor library window, or use **File → Import Theme…**. Then select the theme and click **Apply**.
 
 ### 4. Make It Permanent (Recommended)
 
@@ -129,7 +131,7 @@ Click the menu bar icon to open the panel:
 | **Header**         | **Current Cursor** and the theme in use, plus a ↺ button                                                                                                                             |
 | **Cursor Themes**  | Your favorites as thumbnails. Click one to apply it. The applied theme is outlined and check-marked                                                                                  |
 | **Active App**     | The app in front, with a **Cursor for this app** menu. Pick a theme there and that app gets its own cursor; if **Per-App Themes** was off, choosing a theme turns it on for you       |
-| **Quick Controls** | **Cursor Scale**, **Cursor Shadow**, **Focus on Hover** and **Cursor Gestures**, applied as you change them                                                                          |
+| **Quick Controls** | **Cursor Scale**, **Cursor Shadow**, **Focus on Hover**, **Cursor Gestures**, **Cursor Translator** and **Cursor Shaker**, applied as you change them                                                                        |
 | **Cursor Gestures** | The **Cursor Gestures** switch in Quick Controls turns gestures on or off. While they are on, **Ignore Cursor Gestures** in Active App turns them off for the app in front |
 | **Cursor Trails**  | The **Cursor Trails**, **Use Graphics Hardware**, **Fade** and **Glow when still** switches. Click the section title to show or hide them |
 
@@ -166,6 +168,29 @@ To change the menu, use the tabs in **MaCursor → Settings → Right-Click Menu
 
 You can also add a **MaCursor** button to the Finder toolbar. In Finder, choose **View → Customize Toolbar…** and drag the button in. Click it to get the items you see when you right-click empty space, for the folder you are in. Inside iCloud Drive folders, use this button.
 
+### Using Cursor Translator
+
+Read the text on your screen in your language:
+
+1. Open **MaCursor → Settings → Cursor Translator** and turn on **Cursor Translator**.
+2. Choose your language in **Translate to** and pick a **Translation Service**. Set up that service as shown below.
+3. Hold **⌥⌘** and right-click over some text.
+
+A frame opens around the pointer, and the text inside it turns into your language. When the text in the frame changes, the translation follows. Hold **⌥⌘** and right-click again to close the frame.
+
+**Translate from** starts at **Detect Language**, so MaCursor finds the language of the text for you. **Translate to** starts at your Mac's own language, for example **English (System Default)**. If MaCursor does not offer your Mac's language, it starts at English.
+
+With **Frame Stays**, the frame stays where you put it. Hold **⌥⌘** and drag with the right button to draw a frame of any size, drag its name tag to move it, and drag its corner to resize it. Click a language on the name tag to change it, and the frame translates again. With **Follows the Pointer**, the frame moves with your pointer and reads the text when the pointer stops. Its name tag shows the two languages, for example **Japanese → English**.
+
+**Trigger** changes the keys and the mouse button, and **Frame Colors** changes the color of the frame. **Text Size** and **Line Spacing** set the size of the translated text and the space between its lines.
+
+**Apple Translation** works on your Mac and needs macOS 15 or later. Click **Translation Languages…** to open Language & Region in System Settings. Click **Translation Languages** there, then click **Download** for each language you read.
+
+**DeepL**, **OpenAI**, **Google Gemini** and **Claude** need your own **API Key** from that service. **OpenAI-Compatible** and **Claude-Compatible** also take a **Server Address**, so you can use another service or a server on your Mac. Leave **API Key** empty if your server does not need one. For every online service except DeepL, pick a **Model** from the service's own list, or choose **Custom Model** and type its name. MaCursor keeps your key only in the macOS Keychain and sends the text inside the frame only to the service you pick. If you move MaCursor to the Trash, your keys stay in the Keychain, so clear each **API Key** field first to remove them.
+
+> [!IMPORTANT]
+> **Apple Translation** needs macOS 15 or later. On macOS 13 and 14, pick an online service instead, such as **DeepL** or **OpenAI**.
+
 ### Using Cursor Gestures
 
 Hold a trigger, draw a shape with your pointer and let go to run an action:
@@ -174,9 +199,13 @@ Hold a trigger, draw a shape with your pointer and let go to run an action:
 
 The first time you turn it on, MaCursor adds five ready-made gestures. Hold **⌥** and draw a line left for Back, right for Forward, up for the top of the page or down for the bottom. Draw a **C** with **⌥** or the right mouse button to copy. Because that gesture uses the right button, a right-click menu opens when you let go of the button, and a right-drag draws a gesture.
 
-A trigger is modifier keys, the right, middle or a side mouse button, or modifier keys with a two-finger swipe on a trackpad.
+A trigger is modifier keys, the right, middle or a side mouse button, or modifier keys with a two-finger swipe on a trackpad. With the **Short Click** shape, you click the trigger's middle or side mouse button instead of drawing. That click runs the gesture and does not reach the app.
+
+While you draw, a label next to the pointer shows the gesture that matches and how close the match is, for example **Back · 92%**. When no gesture matches, no label shows. To hide the label, turn off **Show the Gesture Name and Match While You Draw** in the **General** tab.
 
 In the **Gestures** tab, **New Gesture** makes your own gesture, and a click on a gesture edits it. **Draw New** in the **Shapes** tab adds a shape you draw yourself, and **New Custom Action** in the **Actions** tab adds a shortcut, text, app or website action. To keep gestures off in one app, add it under **Ignored Apps** in the **General** tab, or use **Ignore Cursor Gestures** in the menu bar panel.
+
+To try a new shape before you save it, click **Draw New** in the **Shapes** tab, draw the shape, give it a name and click **Next & Test**. Draw the shape again in the same window. You see **Matches** or **Does Not Match** and how close it is in percent. If you see **Too small to match.**, draw it bigger. **Strictness** in the **General** tab decides how close a match must be. The **Back** button shows your first drawing again, and **Save** keeps the shape and closes the window.
 
 ### Using Cursor Trails
 
@@ -230,9 +259,21 @@ Bring the window under your pointer to the front and give it the keyboard focus 
 
 1. Open **MaCursor → Settings → Cursor Control** and turn on **Focus on Hover**.
 
+### Using Cursor Shaker
+
+Keep your apps showing you as active while you are away:
+
+1. Open **MaCursor → Settings → Cursor Control** and turn on **Cursor Shaker**.
+
+While you are away, the pointer moves one pixel and back, and the display stays on. **Start After** sets how long you must be away before it starts.
+
+**Click** adds a **Left Click** or **Right Click** at the pointer, and **Scroll** adds a scroll **Down**, or **Down and Up**. **Switch Tabs** shows the next tab in the front app, at most once a minute. **Dim the Screen** makes the display darker while you are away and brings it back when you return.
+
+**Stop After** turns Cursor Shaker off after the time you pick. Choose **Never** to keep it on. **Stop on battery at 20% or less** turns it off when your Mac runs on battery and the charge falls that low. **Shortcut** turns Cursor Shaker on and off from any app.
+
 ### Importing Themes
 
-Import `.cursor` theme files by double-clicking, dragging onto the library window, or via **File → Import Theme**.
+Import `.cursor` theme files by double-clicking, dragging onto the library window, or via **File → Import Theme…**.
 
 ### Converting Windows, Linux & Mousecape Themes
 
@@ -319,11 +360,13 @@ These features need the Helper Tool (`MaCursorHelper`), which keeps them working
 
 - Menu Bar Panel
 - The MaCursor button in the Finder toolbar, inside iCloud Drive folders
+- Cursor Translator
 - Cursor Gestures
 - Cursor Trails
 - Theme Automation
 - Per-App Themes
 - Focus on Hover
+- Cursor Shaker
 - Global Shortcuts
 
 Install it in **MaCursor → Settings → General → Helper Tool**. Until you do, their settings are greyed out, and inside iCloud Drive folders the toolbar button shows *Not available in this location.*
@@ -332,8 +375,10 @@ Install it in **MaCursor → Settings → General → Helper Tool**. Until you d
 
 These features also need Accessibility access for **MaCursorHelper**:
 
+- Cursor Translator
 - Cursor Gestures
 - Focus on Hover
+- Cursor Shaker
 
 When you turn one on and MaCursorHelper is not allowed yet, the **Allow Accessibility Access** window appears:
 
@@ -341,8 +386,10 @@ When you turn one on and MaCursorHelper is not allowed yet, the **Allow Accessib
 2. Turn on **MaCursorHelper** in that list. Look for **MaCursorHelper**, not MaCursor: the helper is the part that needs the access.
 3. The window notices on its own and shows **Access granted**. Click **Let’s Go!**.
 
+Cursor Translator also needs Screen Recording access for **MaCursor**, to read the text inside the frame. Its window is called **Cursor Translator** and has two steps. After **Access granted**, click **Continue**, then **Allow Screen Recording**. Turn on **MaCursor** in **System Settings → Privacy & Security → Screen & System Audio Recording** (on macOS 13, **Screen Recording**). Look for **MaCursor** here, not MaCursorHelper: macOS gives this access to the app that holds the helper. If MaCursor is not in the list, click **+** and choose **MaCursor** in Applications. Then click **Let’s Go!**. If MaCursorHelper already has Accessibility access, the window starts at step 2.
+
 > [!IMPORTANT]
-> A switch reads on only while its feature is enabled, MaCursorHelper is allowed, and the helper is running. If it flips straight back off, check all three.
+> A switch reads on only while its feature is enabled, MaCursorHelper is allowed, and the helper is running. If it flips straight back off, check all three. Cursor Translator also needs Screen Recording access, so check that too.
 
 ### Checking the Helper Tool
 
@@ -354,7 +401,6 @@ When a feature that needs the Helper Tool is greyed out or quietly stops working
 | **Installed, not running**               | Quit MaCursor and open it again. It restarts the helper for you                                                         |
 | **Not Installed**                        | Click **Install**                                                                                                       |
 | **Requires Approval in System Settings** | macOS is holding the login item. Open **System Settings → General**, find MaCursor in the login items list, and allow it to run in the background |
-| **Helper Not Found**                     | macOS cannot find the bundled helper inside MaCursor. Reinstalling MaCursor is the fix                                   |
 
 ### Your Cursor Goes Back to the Default in Other Windows
 

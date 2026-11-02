@@ -1,1 +1,2 @@
 "NSAppleEventsUsageDescription" = "这样，Finder 工具栏中的 MaCursor 按钮便可在 iCloud 文件夹中使用。";
+"NSScreenCaptureUsageDescription" = "指针翻译会读取框内的文字以进行翻译。不会保存任何内容，文字只会发送给你选择的翻译服务。";

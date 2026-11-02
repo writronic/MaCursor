@@ -1,1 +1,2 @@
 "NSAppleEventsUsageDescription" = "Esto permite que el botón de MaCursor de la barra de herramientas del Finder funcione en las carpetas de iCloud.";
+"NSScreenCaptureUsageDescription" = "El Traductor del cursor lee el texto del marco para traducirlo. No se guarda nada, y el texto solo va al servicio de traducción que elijas.";

@@ -24,6 +24,9 @@ final class MenuBarPanelModel: ObservableObject {
     @Published private(set) var accessibilityTrusted = false
     @Published private(set) var cursorTrails = CursorTrailsConfig()
     @Published private(set) var cursorGestures = CursorGesturesConfig()
+    @Published private(set) var cursorShaker = CursorShakerConfig()
+    @Published private(set) var cursorTranslator = CursorTranslatorConfig()
+    @Published private(set) var screenRecording = false
     @Published private(set) var thumbnails: [String: NSImage] = [:]
     @Published private(set) var panelBackdropAlpha: Double = 0.0
     @Published var cursorScale: Double = 1.0
@@ -34,19 +37,21 @@ final class MenuBarPanelModel: ObservableObject {
     private let thumbnailLoader = MenuBarThumbnailLoader()
     private var thumbnailGeneration = 0
     private var observers: [NSObjectProtocol] = []
+    var isShown = false
 
     init() {
         let names: [Notification.Name] = [
             .MACAutoSwitchDidChange,
             .MACAutoSwitchAppliedThemeDidChange,
             .MACFocusFollowsMouseStatusDidChange,
+            .MACCursorTranslatorStatusDidChange,
             .MACCursorPreferencesDidChange,
         ]
         for name in names {
             observers.append(DistributedNotificationCenter.default().addObserver(
                 forName: name, object: nil, queue: .main
             ) { [weak self] _ in
-                Task { @MainActor [weak self] in self?.reload() }
+                Task { @MainActor [weak self] in guard let self, self.isShown else { return }; self.reload() }
             })
         }
     }
@@ -92,6 +97,9 @@ final class MenuBarPanelModel: ObservableObject {
         accessibilityTrusted = snapshot.accessibilityTrusted
         cursorTrails = snapshot.cursorTrails
         cursorGestures = snapshot.cursorGestures
+        cursorShaker = snapshot.cursorShaker
+        cursorTranslator = snapshot.cursorTranslator
+        screenRecording = snapshot.screenRecording
         cursorScale = snapshot.cursorScale
         ffmDelayMs = Double(snapshot.ffmDelayMs)
         panelBackdropAlpha = snapshot.panelBackdropAlpha
@@ -102,6 +110,10 @@ final class MenuBarPanelModel: ObservableObject {
 
     func reloadTrails() {
         cursorTrails = CursorTrailsConfig.load()
+    }
+
+    func reloadShaker() {
+        cursorShaker = CursorShakerConfig.load()
     }
 
     private func loadThumbnails(for identifiers: [String]) {
@@ -183,6 +195,29 @@ final class MenuBarPanelModel: ObservableObject {
         }
         MenuBarService.setCursorGestures { $0.turn(!cursorGestures.enabled) }
         reload()
+    }
+
+    func toggleCursorShaker() {
+        guard accessibilityTrusted else {
+            MenuBarService.requestCursorShakerAccess()
+            return
+        }
+        MenuBarService.setCursorShakerEnabled(!cursorShaker.enabled)
+        reload()
+    }
+
+    func toggleCursorTranslator() {
+        guard accessibilityTrusted, screenRecording else {
+            MenuBarService.requestCursorTranslatorAccess()
+            return
+        }
+        CursorTranslatorConfig.setEnabled(!cursorTranslator.enabled)
+        reload()
+    }
+
+    func setCursorShakerStopAfter(_ minutes: Int?) {
+        CursorShakerConfig.setStopAfter(minutes)
+        reloadShaker()
     }
 
     func ignoreFrontApp(_ ignored: Bool) {

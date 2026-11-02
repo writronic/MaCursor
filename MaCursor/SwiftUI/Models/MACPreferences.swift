@@ -35,6 +35,9 @@ enum MACPreferences {
     static let focusFollowsMouseKey      = "MACFocusFollowsMouse"
     static let cursorTrailsKey           = "MACCursorTrails"
     static let cursorGesturesKey         = "MACCursorGestures"
+    static let cursorShakerKey           = "MACCursorShaker"
+    static let cursorTranslatorKey       = "MACCursorTranslator"
+    static let cursorTranslatorScreenRecordingKey = "MACCursorTranslatorScreenRecording"
     static let ffmAccessibilityTrustedKey = "MACFFMAccessibilityTrusted"
     static let showMenuBarIconKey        = "MACShowMenuBarIcon"
     static let menuBarPanelBackgroundKey = "MACMenuBarPanelBackground"
@@ -42,6 +45,8 @@ enum MACPreferences {
     static let pendingOpenSettingsKey    = "MACPendingOpenSettings"
     static let pendingFFMAccessWindowKey = "MACPendingFFMAccessWindow"
     static let pendingGesturesAccessWindowKey = "MACPendingGesturesAccessWindow"
+    static let pendingShakerAccessWindowKey = "MACPendingShakerAccessWindow"
+    static let pendingTranslatorAccessWindowKey = "MACPendingTranslatorAccessWindow"
     static let fullDiskAccessAskedKey    = "MACFullDiskAccessAsked"
     static let helperBuildKey            = "MACHelperBuild"
 
@@ -63,6 +68,9 @@ enum MACPreferences {
         focusFollowsMouseKey,
         cursorTrailsKey,
         cursorGesturesKey,
+        cursorShakerKey,
+        cursorTranslatorKey,
+        cursorTranslatorScreenRecordingKey,
         showMenuBarIconKey,
         menuBarPanelBackgroundKey,
         favoriteThemesKey,

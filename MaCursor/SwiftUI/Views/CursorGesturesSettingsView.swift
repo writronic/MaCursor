@@ -158,7 +158,7 @@ struct CursorGesturesSettingsView: View {
                                         }
                                         divider
                                         row(\.showShapeName, resettable: false) {
-                                            Toggle("Show the Shape Name While You Draw", isOn: $gestures.showShapeName)
+                                            Toggle("Show the Gesture Name and Match While You Draw", isOn: $gestures.showShapeName)
                                         }
                                         divider
                                         row(\.repeatMouse, resettable: false) {
@@ -255,7 +255,7 @@ struct CursorGesturesSettingsView: View {
 
                                                 Picker("Ignore When", selection: ignored(entry.app, \.frontOnly)) {
                                                     Text("In Front").tag(true)
-                                                    Text("While It Has a Window").tag(false)
+                                                    Text("Under the Pointer").tag(false)
                                                 }
                                                 .labelsHidden()
                                                 .fixedSize()
@@ -299,7 +299,7 @@ struct CursorGesturesSettingsView: View {
                                             .frame(maxWidth: .infinity)
 
                                         Button("New Gesture") {
-                                            GestureEditorWindow.shared.edit(CursorGesture(), title: String(localized: "New Gesture"), themes: themes)
+                                            GestureEditorWindow.shared.edit(CursorGesture(apps: shown.apps), title: String(localized: "New Gesture"), themes: themes)
                                         }
                                     }
 
@@ -484,6 +484,7 @@ struct CursorGesturesSettingsView: View {
 
 struct GestureShapePicture: View {
     let points: [CGPoint]
+    var clicks = false
     let color: UInt32
 
     var body: some View {
@@ -505,6 +506,15 @@ struct GestureShapePicture: View {
             for (point, tint) in [(placed[placed.count - 1], 0xFFFFFF), (placed[0], color)] {
                 context.fill(Path(ellipseIn: CGRect(x: point.x - dot / 2, y: point.y - dot / 2, width: dot, height: dot)),
                              with: .color(Color(cgColor: CursorTrailsPalette.color(at: 0, stops: [tint], alpha: 1))))
+            }
+        }
+        .overlay {
+            if clicks {
+                Image(systemName: "cursorarrow.click")
+                    .resizable()
+                    .scaledToFit()
+                    .padding(12)
+                    .foregroundStyle(Color(cgColor: CursorTrailsPalette.color(at: 0, stops: [color], alpha: 1)))
             }
         }
         .shadow(color: .black.opacity(0.35), radius: 1)
@@ -628,7 +638,7 @@ private struct GestureCardFace: View {
     var body: some View {
         let actions = config.actions(gesture, themes: themes)
         HStack(alignment: .top, spacing: 10) {
-            GestureShapePicture(points: config.shape(gesture.shape)?.points ?? [], color: config.lineColor)
+            GestureShapePicture(points: config.shape(gesture.shape)?.points ?? [], clicks: gesture.shape == CursorGestures.clickShape.id, color: config.lineColor)
                 .frame(width: 52, height: 52)
                 .padding(6)
                 .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(Color.primary.opacity(0.05)))
@@ -753,7 +763,7 @@ private struct GestureShapeGallery: View {
                                       help: taken.contains(shape.id) ? String(localized: "Another gesture uses this shape with the same trigger.") : nil) {
                                 pick(shape.id)
                             } preview: {
-                                GestureShapePicture(points: shape.points, color: config.lineColor)
+                                GestureShapePicture(points: shape.points, clicks: shape.id == CursorGestures.clickShape.id, color: config.lineColor)
                                     .frame(height: 56)
                             }
                             .overlay(alignment: .topLeading) {
@@ -1393,6 +1403,7 @@ private struct GestureEditor: View {
 private struct GestureTriggerEditor: View {
     @Binding var trigger: CursorGestureTrigger
     let remove: (() -> Void)?
+    var buttonsOnly = false
 
     private static let keys: [(NSEvent.ModifierFlags, String)] = [(.function, "fn"), (.control, "⌃"), (.option, "⌥"), (.shift, "⇧"), (.command, "⌘")]
 
@@ -1435,11 +1446,15 @@ private struct GestureTriggerEditor: View {
                         if value == 4 { trigger.device = .trackpad }
                     }
                 )) {
-                    Text("Held Keys").tag(0)
+                    if !buttonsOnly {
+                        Text("Held Keys").tag(0)
+                    }
                     Text("Right Button").tag(1)
                     Text("Middle Button").tag(2)
                     Text("Side Button").tag(3)
-                    Text("Two Fingers").tag(4)
+                    if !buttonsOnly {
+                        Text("Two Fingers").tag(4)
+                    }
                 }
                 .lineLimit(1)
 
@@ -1547,6 +1562,7 @@ private struct GestureShapeRecorder: View {
     @Environment(\.dismiss) private var dismiss
     @State private var canvas: [CGPoint] = []
     @State private var drawing = false
+    @State private var testing = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -1557,7 +1573,11 @@ private struct GestureShapeRecorder: View {
                     .strokeBorder(Color.secondary.opacity(0.4))
                 Path { $0.addLines(canvas) }
                     .stroke(Color(cgColor: CursorTrailsPalette.color(at: 0, stops: [config.lineColor], alpha: 1)), style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
-                if canvas.isEmpty, shape.points.isEmpty {
+                if canvas.isEmpty, testing {
+                    Text("Draw the shape again to test it.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else if canvas.isEmpty, shape.points.isEmpty {
                     Text("Draw the shape here in one stroke.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -1579,6 +1599,7 @@ private struct GestureShapeRecorder: View {
                 }
                 .onEnded { _ in
                     drawing = false
+                    if testing { return }
                     if let points = CursorGestures.recorded(canvas) {
                         shape.points = points
                     } else {
@@ -1586,23 +1607,53 @@ private struct GestureShapeRecorder: View {
                     }
                 })
 
-            TextField("Shape Name", text: $shape.name)
+            if testing {
+                if !drawing, !canvas.isEmpty {
+                    if let score = config.score(canvas, as: shape) {
+                        if score >= config.strictness {
+                            Text("Matches · \(CursorGestures.percent(score))%")
+                                .foregroundStyle(Color.green)
+                        } else {
+                            Text("Does Not Match · \(CursorGestures.percent(score))%")
+                                .foregroundStyle(.secondary)
+                        }
+                    } else {
+                        Text("Too small to match.")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            } else {
+                TextField("Shape Name", text: $shape.name)
 
-            if !shape.points.isEmpty, !shape.name.trimmingCharacters(in: .whitespaces).isEmpty, !config.canSave(shape) {
-                Text("Another shape has this name.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                if !shape.points.isEmpty, !shape.name.trimmingCharacters(in: .whitespaces).isEmpty, !config.canSave(shape) {
+                    Text("Another shape has this name.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Toggle("Direction Counts", isOn: $shape.directional)
             }
-
-            Toggle("Direction Counts", isOn: $shape.directional)
 
             HStack {
                 Spacer()
 
-                Button("Cancel") {
-                    dismiss()
+                if testing {
+                    Button("Back") {
+                        canvas = []
+                        testing = false
+                    }
+                } else {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .keyboardShortcut(.cancelAction)
+
+                    Button("Next & Test") {
+                        canvas = []
+                        testing = true
+                    }
+                    .disabled(!config.canSave(shape))
                 }
-                .keyboardShortcut(.cancelAction)
 
                 Button("Save") {
                     save(shape)
@@ -1692,5 +1743,13 @@ private struct CursorGesturesAccessView: View {
     private func refresh() {
         CursorGesturesConfig.notifyHelper()
         trusted = FocusFollowsMouseConfig.accessibilityTrusted
+    }
+}
+
+struct TranslatorTriggerEditor: View {
+    @Binding var trigger: CursorGestureTrigger
+
+    var body: some View {
+        GestureTriggerEditor(trigger: $trigger, remove: nil, buttonsOnly: true)
     }
 }

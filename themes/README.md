@@ -6,7 +6,7 @@
 
 **Browse 80+ cursor themes — click any name to download, or grab them all from the [Releases page](https://github.com/writronic/MaCursor/releases/latest).**
 
-![Themes](https://img.shields.io/badge/Themes-83-brightgreen?style=flat-square)
+![Themes](https://img.shields.io/badge/Themes-87-brightgreen?style=flat-square)
 [![Contribute a Theme](https://img.shields.io/badge/Contribute%20a%20Theme-8A2BE2?style=flat-square)](https://github.com/writronic/MaCursor/blob/main/.github/CONTRIBUTING.md#submitting-a-theme-to-the-gallery)
 
 </div>
@@ -414,6 +414,30 @@
 ### [See](https://github.com/writronic/MaCursor/blob/main/themes/See.cursor)
 
 <img src="screenshots/See.png" alt="See">
+
+---
+
+### [SoftglowIceBlue](https://github.com/writronic/MaCursor/blob/main/themes/SoftglowIceBlue.cursor)
+
+<img src="screenshots/SoftglowIceBlue.png" alt="SoftglowIceBlue">
+
+*Created by Chinwen ([GitHub](https://github.com/Chinwen199/softglow-cursors)), modified for general use*
+
+---
+
+### [SoftglowSmokeGlass](https://github.com/writronic/MaCursor/blob/main/themes/SoftglowSmokeGlass.cursor)
+
+<img src="screenshots/SoftglowSmokeGlass.png" alt="SoftglowSmokeGlass">
+
+*Created by Chinwen ([GitHub](https://github.com/Chinwen199/softglow-cursors)), modified for general use*
+
+---
+
+### [SoftglowWhiteGlow](https://github.com/writronic/MaCursor/blob/main/themes/SoftglowWhiteGlow.cursor)
+
+<img src="screenshots/SoftglowWhiteGlow.png" alt="SoftglowWhiteGlow">
+
+*Created by Chinwen ([GitHub](https://github.com/Chinwen199/softglow-cursors)), modified for general use*
 
 ---
 

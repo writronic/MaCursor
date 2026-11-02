@@ -188,6 +188,8 @@ final class HelperRuntime {
     private let focusController = MACFocusFollowsMouseController(trustCheck: HelperTrustProbe.isTrusted)
     private let cursorTrails = CursorTrailsController()
     private lazy var cursorGestures = CursorGesturesController(overlay: cursorTrails)
+    private let cursorShaker = CursorShakerController()
+    private let cursorTranslator = CursorTranslatorController()
     private let autoSwitchSchedule = MACAutoSwitchScheduleTimer()
 
     func run() {
@@ -241,6 +243,8 @@ final class HelperRuntime {
         observeDistributed(Notification.Name.MACCursorTrailsDidChange.rawValue)
         observeDistributed(Notification.Name.MACAutoSwitchAppliedThemeDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorGesturesDidChange.rawValue)
+        observeDistributed(Notification.Name.MACCursorShakerDidChange.rawValue)
+        observeDistributed(Notification.Name.MACCursorTranslatorDidChange.rawValue)
         observeDistributed(inputSourceChanged)
         for name in RightClickMenuHandoff.requests.keys {
             CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), context, helperNotificationCallback, name as CFString, nil, .deliverImmediately)
@@ -267,11 +271,21 @@ final class HelperRuntime {
         MACMenuBarState.shared.noteForegroundBundleID(foregroundBundleID())
         MACAutoSwitchEffects.shared.handleFrontmostApp(foregroundBundleID())
         autoSwitchSchedule.start()
-        focusController.strokesEnabled = { [weak self] in self?.cursorGestures.wantsTrust ?? false }
+        focusController.strokesEnabled = { [weak self] in
+            (self?.cursorGestures.wantsTrust ?? false) || (self?.cursorShaker.wantsTrust ?? false) || (self?.cursorTranslator.wantsTrust ?? false)
+        }
         focusController.strokeInProgress = { [weak self] in self?.cursorGestures.isDrawing ?? false }
-        focusController.trustSynced = { [weak self] in self?.cursorGestures.sync(trusted: $0) }
-        cursorGestures.raiseWindow = { [weak self] in self?.focusController.raiseWindowUnderPointer() ?? false }
+        focusController.trustWillCheck = { [weak self] in self?.cursorTranslator.probeAhead() }
+        focusController.trustSynced = { [weak self] in
+            self?.cursorTranslator.sync(trusted: $0)
+            self?.cursorGestures.sync(trusted: $0)
+            self?.cursorShaker.sync(trusted: $0)
+        }
+        cursorGestures.translator = { [weak self] in self?.cursorTranslator.trigger }
+        cursorGestures.framed = { [weak self] in self?.cursorTranslator.received($0) }
+        cursorGestures.raiseWindow = { [weak self] in self?.focusController.raise($0) ?? false }
         cursorGestures.windowUnderPointer = { [weak self] in self?.focusController.windowUnderPointer() }
+        cursorGestures.windowFrame = { [weak self] in self?.focusController.copyWindowFrame($0) }
         focusController.start()
         focusController.syncTrust()
         cursorTrails.start()
@@ -314,6 +328,8 @@ final class HelperRuntime {
             focusController.stop()
             cursorGestures.stop()
             cursorTrails.stop()
+            cursorShaker.stop()
+            cursorTranslator.stop()
         }
     }
 
@@ -341,6 +357,7 @@ final class HelperRuntime {
         case Notification.Name.MACFocusFollowsMouseDidChange.rawValue:
             focusController.configDidChange()
         case Notification.Name.MACCursorGesturesDidChange.rawValue:
+            cursorGestures.reloadThemes()
             if focusController.lastTrusted, CursorGesturesConfig.load().enabled == cursorGestures.wantsTrust {
                 cursorGestures.sync(trusted: true)
             } else {
@@ -348,6 +365,22 @@ final class HelperRuntime {
             }
         case inputSourceChanged:
             CursorGestureKeys.rebuildLayout()
+        case Notification.Name.MACCursorShakerDidChange.rawValue:
+            if focusController.lastTrusted, CursorShakerConfig.load().enabled == cursorShaker.wantsTrust {
+                cursorShaker.sync(trusted: true)
+            } else {
+                focusController.syncTrust()
+            }
+            menuBarController?.refreshShaker()
+            unregisterHotKeys()
+            registerHotKeys()
+        case Notification.Name.MACCursorTranslatorDidChange.rawValue:
+            guard !cursorTranslator.configChanged() else { break }
+            if focusController.lastTrusted, CursorTranslatorConfig.load().enabled == cursorTranslator.wantsTrust {
+                focusController.trustSynced(true)
+            } else {
+                focusController.syncTrust()
+            }
         case Notification.Name.MACCursorTrailsDidChange.rawValue:
             cursorTrails.start()
             menuBarController?.refreshTrails()
@@ -388,8 +421,10 @@ final class HelperRuntime {
         guard running, let user else { return }
         if user == "loginwindow" {
             focusController.stop()
+            cursorTranslator.stop()
             cursorGestures.stop()
             cursorTrails.stop()
+            cursorShaker.stop()
             return
         }
         MACAutoSwitchEffects.shared.clearAppOverride()
@@ -401,6 +436,7 @@ final class HelperRuntime {
         focusController.start()
         cursorGestures.stop()
         cursorTrails.stop()
+        cursorShaker.stop()
         focusController.syncTrust()
         cursorTrails.start()
     }
@@ -449,6 +485,7 @@ final class HelperRuntime {
                 self.cursorTrails.stop()
                 self.cursorTrails.start()
                 self.cursorGestures.publish()
+                self.cursorTranslator.displaysChanged()
             }
         }
         displayTimer = timer
@@ -492,6 +529,14 @@ final class HelperRuntime {
             registeredThemes[shortcut.id] = shortcut.themeIdentifier
             hotKeyRefs.append(reference)
         }
+        if let shortcut = CursorShakerConfig.load().shortcut, MACShortcutIsAllowed(shortcut.modifierFlagsRaw, shortcut.keyCode) {
+            var reference: EventHotKeyRef?
+            let id = EventHotKeyID(signature: Self.hotKeySignature, id: CursorShaker.hotKeyID)
+            if RegisterEventHotKey(UInt32(shortcut.keyCode), HelperEventPolicy.carbonModifiers(shortcut.modifierFlagsRaw), id,
+                                   GetApplicationEventTarget(), 0, &reference) == noErr, let reference {
+                hotKeyRefs.append(reference)
+            }
+        }
     }
 
     private func unregisterHotKeys() {
@@ -504,6 +549,14 @@ final class HelperRuntime {
     }
 
     fileprivate func hotKeyPressed(signature: OSType, id: UInt32) -> OSStatus {
+        if running, signature == Self.hotKeySignature, id == CursorShaker.hotKeyID {
+            if HelperTrustProbe.isTrusted() {
+                MenuBarService.setCursorShakerEnabled(!CursorShakerConfig.load().enabled)
+            } else {
+                MenuBarService.requestCursorShakerAccess()
+            }
+            return noErr
+        }
         guard running, signature == Self.hotKeySignature, let identifier = registeredThemes[id] else {
             return OSStatus(eventNotHandledErr)
         }
@@ -529,17 +582,26 @@ final class CursorGesturesController {
     }()
     private unowned let overlay: CursorTrailsController
     private var config = CursorGesturesConfig()
+    private var themes: [(id: String, name: String)] = []
     private var current: (points: [CGPoint], trigger: CursorGestureTrigger) = ([], CursorGestureTrigger())
+    private var pending = false
+    private var strokeKeys: Set<UInt> = []
+    private var lastHeld: UInt?
     private var monitors: [Any] = []
     private var tap: CursorGestureTap?
     private var drawn = false
+    private var fades = 0
+    private(set) var onScreen = false
     private var savedFrames: [CFHashCode: CGRect] = [:]
     private var generation = 0
     private var playing = false
-    private var queued: [CursorGesture] = []
+    private var queued: [(gesture: CursorGesture, target: MACFFMWindow?)] = []
     private(set) var isDrawing = false
-    var raiseWindow: @MainActor () -> Bool = { false }
-    var windowUnderPointer: @MainActor () -> (window: AXUIElement, owner: NSRunningApplication, frame: CGRect?)? = { nil }
+    var raiseWindow: @MainActor (MACFFMWindow) -> Bool = { _ in false }
+    var windowUnderPointer: @MainActor () -> MACFFMWindow? = { nil }
+    var windowFrame: @MainActor (AXUIElement) -> CGRect? = { _ in nil }
+    var translator: @MainActor () -> CursorGestureTrigger? = { nil }
+    var framed: @MainActor (CursorTranslatorNote) -> Void = { _ in }
 
     init(overlay: CursorTrailsController) {
         self.overlay = overlay
@@ -549,28 +611,37 @@ final class CursorGesturesController {
     var wantsTrust: Bool { config.enabled }
     var isRunning: Bool { !monitors.isEmpty }
 
+    func reloadThemes() {
+        themes = MACMenuBarState.shared.catalog().map { ($0.id, $0.name) }
+    }
+
     func sync(trusted: Bool) {
-        let latest = CursorGesturesConfig.load()
-        let wanted = latest.enabled && trusted
-        let restart = wanted != isRunning || wanted && (latest.keyTriggers != config.keyTriggers || latest.padTriggers != config.padTriggers)
+        let stored = CursorGesturesConfig.load()
+        let latest = stored.enabled ? stored : CursorGesturesConfig()
+        let wanted = (latest.enabled || translator() != nil) && trusted
+        let restart = wanted != (tap != nil) || wanted && (latest.enabled != config.enabled || latest.keyTriggers != config.keyTriggers || latest.padTriggers != config.padTriggers)
         config = latest
+        strokeKeys = CursorGestureStroke(triggers: latest.keyTriggers).triggers
         guard restart else { return publish() }
+        reloadThemes()
         stop()
         if wanted {
             let session = CursorGestureTap(owner: self, config: config)
             tap = session
             publish()
-            monitors = [NSEvent.addGlobalMonitorForEvents(matching: Self.events) { [weak self] event in
-                            guard !CursorGestureKeys.posted(event) else { return }
-                            let (type, flags, time) = (event.type, event.modifierFlags, event.timestamp)
-                            MainActor.assumeIsolated { self?.handle(type, flags, at: time) }
-                        },
-                        NSEvent.addLocalMonitorForEvents(matching: Self.events) { [weak self] event in
-                            guard !CursorGestureKeys.posted(event) else { return event }
-                            let (type, flags, time) = (event.type, event.modifierFlags, event.timestamp)
-                            MainActor.assumeIsolated { self?.handle(type, flags, at: time) }
-                            return event
-                        }].compactMap { $0 }
+            if config.enabled {
+                monitors = [NSEvent.addGlobalMonitorForEvents(matching: Self.events) { [weak self] event in
+                                guard !CursorGestureKeys.posted(event) else { return }
+                                let (type, flags, time) = (event.type, event.modifierFlags, event.timestamp)
+                                MainActor.assumeIsolated { self?.handle(type, flags, at: time) }
+                            },
+                            NSEvent.addLocalMonitorForEvents(matching: Self.events) { [weak self] event in
+                                guard !CursorGestureKeys.posted(event) else { return event }
+                                let (type, flags, time) = (event.type, event.modifierFlags, event.timestamp)
+                                MainActor.assumeIsolated { self?.handle(type, flags, at: time) }
+                                return event
+                            }].compactMap { $0 }
+            }
             if let port = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap, eventsOfInterest: config.tapMask,
                                             callback: helperGestureTapCallback, userInfo: Unmanaged.passUnretained(session).toOpaque()) {
                 session.start(port)
@@ -580,8 +651,9 @@ final class CursorGesturesController {
     }
 
     func publish() {
-        tap?.shared.snapshot = CursorGestureSnapshot(config: config, front: MACMenuBarState.shared.lastForegroundBundleID, windows: windowApps(),
-                                                     height: NSScreen.screens.first?.frame.height ?? 0, natural: CursorGestureScroll.natural)
+        tap?.shared.snapshot = CursorGestureSnapshot(config: config, front: MACMenuBarState.shared.lastForegroundBundleID,
+                                                     height: NSScreen.screens.first?.frame.height ?? 0, natural: CursorGestureScroll.natural,
+                                                     translator: translator())
     }
 
     func stop() {
@@ -595,6 +667,7 @@ final class CursorGesturesController {
         queued = []
         playing = false
         current = ([], CursorGestureTrigger())
+        lastHeld = nil
         update()
     }
 
@@ -604,7 +677,9 @@ final class CursorGesturesController {
     }
 
     func moved(_ device: CursorGestureDevice, buttons: Int, flags: NSEvent.ModifierFlags) {
-        guard isRunning else { return }
+        let held = flags.intersection(CursorGestureStroke.keys).rawValue
+        guard isRunning, strokeKeys.contains(held) || held != lastHeld else { return }
+        lastHeld = held
         let (point, now) = (NSEvent.mouseLocation, ProcessInfo.processInfo.systemUptime)
         tap?.run { input, snapshot in input.moved(to: point, flags: flags, buttons: buttons, device: device, at: now, snapshot) }
     }
@@ -620,41 +695,63 @@ final class CursorGesturesController {
             switch note {
             case .update(let points, let trigger, let finished):
                 if finished {
+                    current = ([], trigger)
                     update((points, trigger))
                 } else {
                     current = (points, trigger)
-                    update()
+                    guard !pending else { continue }
+                    pending = true
+                    let fps = NSScreen.screens.map(\.maximumFramesPerSecond).max() ?? 0
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1 / Double(fps > 0 ? fps : 60)) { [weak self] in
+                        MainActor.assumeIsolated {
+                            guard let self else { return }
+                            self.pending = false
+                            self.update()
+                        }
+                    }
                 }
             case .play(let gesture):
+                current = ([], CursorGestureTrigger())
                 show([], matched: nil, fading: false)
-                if let gesture { perform(gesture, later: false) }
+                if let gesture { perform(gesture, later: false, target: CursorGestures.target(gesture, windowUnderPointer(), front: MACMenuBarState.shared.lastForegroundBundleID)) }
+            case .frame(let note):
+                framed(note)
             }
         }
     }
 
-    private func windowApps() -> Set<String> {
-        guard config.ignored.contains(where: { !$0.frontOnly }),
-              let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID) as? [[String: Any]] else { return [] }
-        return Set(Set(windows.filter(CursorGestures.isAppWindow).compactMap { $0[kCGWindowOwnerPID as String] as? pid_t }).compactMap { NSRunningApplication(processIdentifier: $0)?.bundleIdentifier })
-    }
-
     private func update(_ finished: (points: [CGPoint], trigger: CursorGestureTrigger)? = nil) {
         let (points, trigger) = finished ?? current
-        let pointer = finished == nil ? nil : windowUnderPointer()?.owner.bundleIdentifier
-        let gesture = points.isEmpty ? nil : config.gesture(for: points, trigger: trigger,
-                                                            front: config.scopeApp(front: MACMenuBarState.shared.lastForegroundBundleID, pointer: pointer))
+        let target = finished == nil ? nil : windowUnderPointer()
+        let match = points.isEmpty ? nil : config.match(for: points, trigger: trigger,
+                                                        front: config.scopeApp(front: MACMenuBarState.shared.lastForegroundBundleID, pointer: target?.owner.bundleIdentifier))
+        let gesture = match?.gesture
         let actions = gesture?.steps.filter(\.enabled).compactMap { config.action($0.action) } ?? []
         let hide = finished != nil && actions.first?.changesScreen == true
-        show(hide ? [] : points, matched: gesture, fading: finished != nil && !hide)
-        if finished != nil, let gesture { perform(gesture, later: hide || actions.contains(where: \.typesIntoWindow) && config.raiseWindow && raiseWindow()) }
+        show(hide ? [] : points, matched: match, fading: finished != nil && !hide)
+        if finished != nil, let gesture { perform(gesture, later: hide || actions.contains(where: \.typesIntoWindow) && config.raiseWindow && target.map { raiseWindow($0) } ?? false, target: target) }
     }
 
-    private func show(_ points: [CGPoint], matched: CursorGesture?, fading: Bool) {
-        let name = fading || !config.showShapeName ? nil : matched.flatMap { config.shapeName($0.shape, MenuBarL) }
+    private func show(_ points: [CGPoint], matched: (gesture: CursorGesture, score: CGFloat)?, fading: Bool) {
+        let name = fading || !config.showShapeName ? nil : matched.flatMap { config.label($0, themes: themes, localized: MenuBarL) }
         let tip = name == nil ? nil : points.last
         let points = config.showLine ? points : []
         guard drawn || !points.isEmpty || tip != nil else { return }
         drawn = (!points.isEmpty || tip != nil) && !fading
+        onScreen = drawn || fading
+        fades += 1
+        if fading {
+            let token = fades
+            DispatchQueue.main.asyncAfter(deadline: .now() + Self.fade.duration) { [weak self] in
+                MainActor.assumeIsolated {
+                    guard let self, self.fades == token else { return }
+                    self.onScreen = false
+                    self.overlay.order()
+                }
+            }
+        }
+        if onScreen { overlay.order() }
+        defer { overlay.order() }
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         for window in overlay.windows {
@@ -702,15 +799,15 @@ final class CursorGesturesController {
         return label
     }
 
-    private func perform(_ gesture: CursorGesture, later: Bool) {
-        guard !playing else { return queued.append(gesture) }
+    private func perform(_ gesture: CursorGesture, later: Bool, target: MACFFMWindow?) {
+        guard !playing else { return queued.append((gesture, target)) }
         playing = true
         let token = generation
         let play: @MainActor () -> Void = { [weak self] in
             CursorGestures.play(gesture.steps[...], wait: { milliseconds, next in
                 guard milliseconds > 0 else { return next() }
                 DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(milliseconds)) { MainActor.assumeIsolated(next) }
-            }, live: { self?.generation == token }, run: { self?.run($0) ?? false }, done: { self?.next() })
+            }, live: { self?.generation == token }, run: { self?.run($0, target: target) ?? false }, done: { self?.next() })
         }
         guard later else { return play() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { MainActor.assumeIsolated(play) }
@@ -719,13 +816,15 @@ final class CursorGesturesController {
     private func next() {
         playing = false
         guard !queued.isEmpty else { return }
-        perform(queued.removeFirst(), later: false)
+        let (gesture, target) = queued.removeFirst()
+        perform(gesture, later: false, target: target)
     }
 
-    private func run(_ id: String) -> Bool {
+    private func run(_ id: String, target: MACFFMWindow?) -> Bool {
         guard let action = config.action(id) else { return false }
         switch action.kind {
         case .shortcut(let shortcut):
+            guard let shortcut = CursorGestureKeys.system(id, shortcut) else { return false }
             CursorGestureKeys.press(shortcut)
         case .text(let text):
             CursorGestureKeys.type(text)
@@ -738,12 +837,12 @@ final class CursorGesturesController {
         case .theme(let identifier):
             return apply(identifier)
         case .operation(let operation):
-            return operate(operation)
+            return operate(operation, target: target)
         }
         return true
     }
 
-    private func operate(_ operation: CursorGestureOperation) -> Bool {
+    private func operate(_ operation: CursorGestureOperation, target: MACFFMWindow?) -> Bool {
         switch operation {
         case .nextFavoriteTheme:
             CFPreferencesSynchronize(MACPreferences.domain, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
@@ -759,14 +858,14 @@ final class CursorGesturesController {
             NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: "/System/Library/CoreServices/ScreenSaverEngine.app"),
                                                configuration: NSWorkspace.OpenConfiguration())
         default:
-            guard let key = CursorGestureKeys.mediaKey(for: operation) else { return arrange(operation) }
+            guard let key = CursorGestureKeys.mediaKey(for: operation) else { return arrange(operation, target: target) }
             CursorGestureKeys.pressMedia(key)
         }
         return true
     }
 
-    private func arrange(_ operation: CursorGestureOperation) -> Bool {
-        guard let target = windowUnderPointer(), let height = NSScreen.screens.first?.frame.height else { return false }
+    private func arrange(_ operation: CursorGestureOperation, target: MACFFMWindow?) -> Bool {
+        guard let target, let height = NSScreen.screens.first?.frame.height else { return false }
         switch operation {
         case .minimize:
             return AXUIElementSetAttributeValue(target.window, kAXMinimizedAttribute as CFString, kCFBooleanTrue) == .success
@@ -776,9 +875,9 @@ final class CursorGesturesController {
                   let button, CFGetTypeID(button) == AXUIElementGetTypeID() else { return false }
             return AXUIElementPerformAction(button as! AXUIElement, kAXPressAction as CFString) == .success
         case .hideApp:
-            return target.owner.hide()
+            return !target.owner.isTerminated && target.owner.hide()
         default:
-            guard let frame = target.frame,
+            guard let frame = windowFrame(target.window),
                   let moved = CursorGestureWindow.frame(operation, window: CursorGestureWindow.flip(frame, height),
                                                         screens: NSScreen.screens.map { ($0.frame, $0.visibleFrame) },
                                                         pointer: NSEvent.mouseLocation, saved: &savedFrames, key: CFHash(target.window)) else { return false }
@@ -811,6 +910,7 @@ final class CursorTrailsController {
     private var pauseTimer: DispatchSourceTimer?
     private var emitting = false
     private var drawn = false
+    private var shown = false
     private var glows: [CALayer] = []
     private var samples: [CursorTrailsSample] = []
     private var dots: [CursorTrailsDot] = []
@@ -823,14 +923,15 @@ final class CursorTrailsController {
         config = CursorTrailsConfig.load()
         guard config.enabled || strokes?.isRunning == true else { return stop() }
         refreshStops()
-        let renderer = config.useGPU && config.style == .line ? CursorTrailsMetal.shared : nil
-        if config.style != previous.style || config.useGPU != previous.useGPU { stop() }
+        let renderer = config.enabled && config.useGPU && config.style == .line ? CursorTrailsMetal.shared : nil
+        if config.style != previous.style || config.useGPU != previous.useGPU || config.enabled != previous.enabled { stop() }
         if !config.enabled { clock?.cancel(); clock = nil; samples = []; dots = []; show([]) }
         guard monitors.isEmpty else { return settle() }
         metal = renderer
         windows = NSScreen.screens.map { Self.overlay($0, layer: renderer?.layer() ?? (config.emits ? CAEmitterLayer() : CALayer())) }
         metal?.draw([], on: windows)
         monitors = [NSEvent.addGlobalMonitorForEvents(matching: Self.events) { [weak self] event in
+                        guard !CursorShaker.posted(event) else { return }
                         let device = CursorGestureDevice(subtype: Int64(event.subtype.rawValue))
                         let (buttons, flags) = (event.type == .mouseMoved ? 0 : 1, event.modifierFlags)
                         MainActor.assumeIsolated {
@@ -839,6 +940,7 @@ final class CursorTrailsController {
                         }
                     },
                     NSEvent.addLocalMonitorForEvents(matching: Self.events) { [weak self] event in
+                        guard !CursorShaker.posted(event) else { return event }
                         let device = CursorGestureDevice(subtype: Int64(event.subtype.rawValue))
                         let (buttons, flags) = (event.type == .mouseMoved ? 0 : 1, event.modifierFlags)
                         MainActor.assumeIsolated {
@@ -858,8 +960,19 @@ final class CursorTrailsController {
         samples = []
         dots = []
         drawn = false
+        shown = false
+        metal?.draw([], on: windows)
         windows.forEach { $0.close() }
         windows = []
+    }
+
+    func order() {
+        let needed = drawn || pauseTimer != nil || !glows.isEmpty || strokes?.onScreen == true
+        guard needed != shown else { return }
+        shown = needed
+        for window in windows {
+            if needed { window.orderFrontRegardless() } else { window.orderOut(nil) }
+        }
     }
 
     func themeChanged() {
@@ -914,6 +1027,8 @@ final class CursorTrailsController {
     private func show(_ pieces: [CursorTrailsPiece]) {
         guard drawn || !pieces.isEmpty else { return }
         drawn = !pieces.isEmpty
+        if drawn { order() }
+        defer { order() }
         if let metal { return metal.draw(CursorTrailsPiece.strip(pieces), on: windows) }
         paint { CursorTrailsPiece.picture(pieces, in: $0.frame, scale: $0.backingScaleFactor) }
     }
@@ -921,6 +1036,8 @@ final class CursorTrailsController {
     private func show(_ dots: [CursorTrailsDot], at now: TimeInterval) {
         guard drawn || !dots.isEmpty else { return }
         drawn = !dots.isEmpty
+        if drawn { order() }
+        defer { order() }
         paint { CursorTrailsDot.picture(dots, at: now, lifetime: config.lifetime, fade: config.fade, in: $0.frame, scale: $0.backingScaleFactor) }
     }
 
@@ -944,6 +1061,7 @@ final class CursorTrailsController {
             timer.setEventHandler { [weak self] in MainActor.assumeIsolated { self?.rest() } }
             timer.resume()
             pauseTimer = timer
+            order()
         }
         emitting = true
         pauseTimer?.schedule(deadline: .now() + CursorTrailsStyle.pause)
@@ -993,6 +1111,7 @@ final class CursorTrailsController {
             }
         }
         CATransaction.commit()
+        order()
     }
 
     private func emitters(_ change: (CAEmitterLayer, CGPoint) -> Void) {
@@ -1039,13 +1158,11 @@ final class CursorTrailsController {
         view.layer?.addSublayer(layer)
         window.contentView = view
         window.setFrame(screen.frame, display: false)
-        window.orderFrontRegardless()
         return window
     }
 }
 
-@MainActor
-final class CursorTrailsMetal {
+final class CursorTrailsMetal: @unchecked Sendable {
     static let shared = CursorTrailsMetal()
     private static let shaders = """
         #include <metal_stdlib>
@@ -1068,9 +1185,11 @@ final class CursorTrailsMetal {
     private let pipeline: MTLRenderPipelineState
     private let depth: MTLDepthStencilState
     private let samples: Int
+    private let work = DispatchQueue(label: "com.writronic.macursor.trails", qos: .userInteractive)
     private var targets: [SIMD2<Int>: (color: MTLTexture?, depth: MTLTexture)] = [:]
     private var buffer: MTLBuffer?
     private var last: MTLCommandBuffer?
+    @MainActor private var queued = 0
 
     private init?() {
         guard let device = MTLCopyAllDevices().first(where: { $0.isLowPower }) ?? MTLCreateSystemDefaultDevice(),
@@ -1112,7 +1231,19 @@ final class CursorTrailsMetal {
         return layer
     }
 
-    func draw(_ strip: [CursorTrailsVertex], on windows: [NSWindow]) {
+    @MainActor func draw(_ strip: [CursorTrailsVertex], on windows: [NSWindow]) {
+        guard strip.isEmpty || queued == 0 else { return }
+        queued += 1
+        nonisolated(unsafe) let windows = windows.compactMap { window in
+            (window.contentView?.layer?.sublayers?.first as? CAMetalLayer).map { (layer: $0, frame: window.frame, scale: window.backingScaleFactor) }
+        }
+        work.async {
+            self.render(strip, on: windows)
+            DispatchQueue.main.async { MainActor.assumeIsolated { self.queued -= 1 } }
+        }
+    }
+
+    private func render(_ strip: [CursorTrailsVertex], on windows: [(layer: CAMetalLayer, frame: CGRect, scale: CGFloat)]) {
         guard let commands = queue.makeCommandBuffer() else { return }
         let length = strip.count * MemoryLayout<CursorTrailsVertex>.stride
         last?.waitUntilCompleted()
@@ -1120,11 +1251,11 @@ final class CursorTrailsMetal {
         let vertices = strip.isEmpty ? nil : buffer
         if let vertices { strip.withUnsafeBytes { vertices.contents().copyMemory(from: $0.baseAddress!, byteCount: length) } }
         var drawables: [CAMetalDrawable] = []
+        var kept: [SIMD2<Int>: (color: MTLTexture?, depth: MTLTexture)] = [:]
         CATransaction.begin()
         CATransaction.setDisableActions(true)
         for window in windows {
-            guard let layer = window.contentView?.layer?.sublayers?.first as? CAMetalLayer else { continue }
-            let scale = window.backingScaleFactor
+            let layer = window.layer, scale = window.scale
             guard let vertices, let frame = CursorTrailsPiece.frame(strip, in: window.frame, scale: scale, atLeast: layer.frame.size) else {
                 layer.frame = .zero
                 continue
@@ -1135,6 +1266,7 @@ final class CursorTrailsMetal {
                 layer.frame = .zero
                 continue
             }
+            kept[SIMD2(drawable.texture.width, drawable.texture.height)] = target
             let pass = MTLRenderPassDescriptor()
             pass.colorAttachments[0].texture = target.color ?? drawable.texture
             pass.colorAttachments[0].resolveTexture = target.color == nil ? nil : drawable.texture
@@ -1156,6 +1288,7 @@ final class CursorTrailsMetal {
             layer.frame = frame
             drawables.append(drawable)
         }
+        targets = kept
         commands.commit()
         last = commands
         if !drawables.isEmpty { commands.waitUntilScheduled() }
@@ -1177,7 +1310,6 @@ final class CursorTrailsMetal {
         let color = samples > 1 ? texture(.bgra8Unorm) : nil
         guard let depth = texture(.depth32Float), samples == 1 || color != nil else { return nil }
         let target = (color: color, depth: depth)
-        if targets.count >= 8 { targets.removeAll() }
         targets[size] = target
         return target
     }

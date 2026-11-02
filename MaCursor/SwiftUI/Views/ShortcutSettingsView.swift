@@ -1,33 +1,5 @@
 import SwiftUI
 
-struct KeyboardShortcutData: Codable, Hashable, Equatable {
-    var keyCode: UInt16
-    var modifierFlagsRaw: UInt
-    var keyCharacter: String?
-
-    var modifierFlags: NSEvent.ModifierFlags {
-        NSEvent.ModifierFlags(rawValue: modifierFlagsRaw)
-    }
-
-    var displayString: String {
-        var parts: [String] = []
-        if modifierFlags.contains(.control) { parts.append("⌃") }
-        if modifierFlags.contains(.option) { parts.append("⌥") }
-        if modifierFlags.contains(.shift) { parts.append("⇧") }
-        if modifierFlags.contains(.command) { parts.append("⌘") }
-
-        let keyStr: String
-        if let char = keyCharacter, !char.isEmpty {
-            keyStr = char == " " ? "Space" : char.uppercased()
-        } else {
-            keyStr = "?"
-        }
-
-        parts.append(keyStr)
-        return parts.joined()
-    }
-}
-
 struct FavoriteCursorSlot: Identifiable, Codable, Hashable {
     let id: UUID
     var themeIdentifier: String?
@@ -284,7 +256,7 @@ private extension View {
     }
 }
 
-private struct KeyRecorderView: View {
+struct KeyRecorderView: View {
     @Binding var shortcut: KeyboardShortcutData?
     let isTaken: (KeyboardShortcutData) -> Bool
     let isShadowed: Bool

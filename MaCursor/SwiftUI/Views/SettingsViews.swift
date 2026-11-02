@@ -11,6 +11,7 @@ private class SettingsPanel: NSWindow {
 enum SettingsTab: String, CaseIterable, Identifiable {
     case general  = "General"
     case cursor   = "Cursor Control"
+    case cursorTranslator = "Cursor Translator"
     case cursorGestures = "Cursor Gestures"
     case cursorTrails = "Cursor Trails"
     case rightClickMenu   = "Right-Click Menu"
@@ -23,6 +24,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         switch self {
         case .general:  return String(localized: "General")
         case .cursor:   return String(localized: "Cursor Control")
+        case .cursorTranslator: return String(localized: "Cursor Translator")
         case .cursorGestures: return String(localized: "Cursor Gestures")
         case .cursorTrails: return String(localized: "Cursor Trails")
         case .rightClickMenu:   return String(localized: "Right-Click Menu")
@@ -35,6 +37,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         switch self {
         case .general:  return "gear"
         case .cursor:   return "cursorarrow"
+        case .cursorTranslator: return "character.bubble"
         case .cursorGestures: return "scribble.variable"
         case .cursorTrails: return "cursorarrow.motionlines"
         case .rightClickMenu:   return "contextualmenu.and.cursorarrow"
@@ -206,6 +209,8 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate {
             detailView = AnyView(GeneralSettingsView(updater: updater))
         case .cursor:
             detailView = AnyView(CursorSettingsView())
+        case .cursorTranslator:
+            detailView = AnyView(CursorTranslatorSettingsView())
         case .cursorGestures:
             detailView = AnyView(CursorGesturesSettingsView())
         case .cursorTrails:
@@ -414,10 +419,13 @@ struct GeneralSettingsView: View {
         for key in MACPreferences.resetKeys {
             MACPreferences.set(nil, forKey: key)
         }
+        CursorTranslatorService.allCases.forEach { CursorTranslatorKeychain.set("", for: $0) }
         AutoSwitchConfig.notifyHelper()
         FocusFollowsMouseConfig.notifyHelper()
         CursorTrailsConfig.notifyHelper()
         CursorGesturesConfig.notifyHelper()
+        CursorShakerConfig.notifyHelper()
+        CursorTranslatorConfig.notifyHelper()
         ShortcutManager.shared.notifyConfigChanged()
 
         do {

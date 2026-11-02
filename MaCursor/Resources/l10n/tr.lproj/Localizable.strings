@@ -156,9 +156,6 @@
 /* Badge: high resolution */
 "HD" = "HD";
 
-/* Helper status: not found */
-"Helper Not Found" = "Yardımcı Araç Bulunamadı";
-
 /* Section: helper tool */
 "Helper Tool" = "Yardımcı Araç";
 
@@ -1221,7 +1218,6 @@
 /* Cursor Gestures settings: switches; each row gets a reset button once it differs from its default */
 "Show the Line While You Draw" = "Çizerken Çizgiyi Göster";
 "Turn the Line Green When a Shape Matches" = "Şekil Eşleşince Çizgiyi Yeşil Yap";
-"Show the Shape Name While You Draw" = "Çizerken Şeklin Adını Göster";
 "Repeat with a Left Click on a Mouse" = "Farede Sol Tıklamayla Yinele";
 "Repeat with a Left Click on a Trackpad" = "İzleme Dörtgeninde Sol Tıklamayla Yinele";
 /* Cursor Gestures settings: help tag of the two repeat switches */
@@ -1242,7 +1238,6 @@
 /* Cursor Gestures settings: picker of when an ignored app counts: only while it is in front, or whenever one of its windows is on screen */
 "Ignore When" = "Ne Zaman Yok Sayılsın";
 "In Front" = "Öndeyken";
-"While It Has a Window" = "Bir Penceresi Açıkken";
 /* Cursor Gestures settings: button and title of the alert that adds back the ready-made gestures */
 "Restore Ready-Made Gestures" = "Hazır Hareketleri Geri Yükle";
 "Ready-made gestures you deleted come back, unless one of your gestures already uses the same shape and trigger." = "Sildiğiniz hazır hareketler geri gelir; ancak hareketlerinizden biri aynı şekli ve tetikleyiciyi zaten kullanıyorsa o hazır hareket gelmez.";
@@ -1296,3 +1291,128 @@
 "Delay window focus for %@" = "Odağı %@ sonra ver";
 /* Menu bar panel: folded row under the Focus on Hover switch that holds the delay slider */
 "Focus Delay" = "Odak Gecikmesi";
+/* Cursor Shaker: feature name in the Settings sidebar, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
+"Cursor Shaker" = "İmleç Sallayıcı";
+"Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool." = "İmleç Sallayıcı özelliği için Yardımcı Araç gereklidir. Genel → Yardımcı Araç bölümünden yükleyebilirsiniz.";
+/* Cursor Shaker: grey caption under its switch */
+"While you are away, the pointer moves one pixel and back, and the display stays on, so your apps keep showing you as active." = "Siz uzaktayken imleç bir piksel kayıp geri döner ve ekran açık kalır; böylece uygulamalarınız sizi etkin olarak göstermeye devam eder.";
+/* Cursor Shaker: label of the picker for how long the user must be away before it starts; the choices are durations such as 1 min */
+"Start After" = "Başlatma Süresi";
+/* Cursor Shaker: text of its Accessibility access window */
+"MaCursorHelper needs Accessibility access to move the pointer while you are away. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelper, siz uzaktayken imleci hareket ettirmek için Erişilebilirlik iznine ihtiyaç duyar. “Erişilebilirlik İçin İzin Ver” düğmesini seçin, ardından Gizlilik ve Güvenlik → Erişilebilirlik bölümünde MaCursorHelper’a izin verin.";
+/* Cursor Shaker: label of the picker for an optional click at the pointer while the user is away; the choices are Off, Left Click and Right Click */
+"Click" = "Tıklama";
+/* Cursor Shaker: picker choice that turns its click or its scroll off */
+"Off" = "Kapalı";
+/* Cursor Shaker: click picker choice, a left mouse click at the pointer */
+"Left Click" = "Sol Tıklama";
+/* Cursor Shaker: click picker choice, a right mouse click at the pointer */
+"Right Click" = "Sağ Tıklama";
+/* Cursor Shaker: label of the picker for an optional short scroll at the pointer while the user is away; the choices are Off, Down and Down and Up */
+"Scroll" = "Kaydırma";
+/* Cursor Shaker: scroll picker choice, every scroll goes down */
+"Down" = "Aşağı";
+/* Cursor Shaker: scroll picker choice, one scroll goes down and the next goes up, in turn */
+"Down and Up" = "Aşağı ve Yukarı";
+/* Cursor Shaker: label of the picker that turns Cursor Shaker off after a set time (15 min to 8 h, or Never); the system writes the times */
+"Stop After" = "Durdurma Süresi";
+/* Cursor Shaker: Stop After picker choice, it never turns off by itself */
+"Never" = "Hiçbir Zaman";
+/* Cursor Shaker: switch that turns it off on battery power once the charge is at this percentage or lower; %@ is a percentage such as 20 % */
+"Stop on battery at %@ or less" = "Pil gücünde %@ veya altında durdur";
+/* Cursor Shaker: switch that also shows the next tab in the front app while you are away */
+"Switch Tabs" = "Sekme Değiştir";
+/* Cursor Shaker: switch that makes the display darker while you are away */
+"Dim the Screen" = "Ekranı Karart";
+/* Cursor Shaker: caption under the Switch Tabs and Dim the Screen switches */
+"Switch Tabs shows the next tab in the front app, at most once a minute. Dim the Screen makes the display darker while you are away and brings it back when you return." = "Sekme Değiştir, öndeki uygulamada dakikada en fazla bir kez sonraki sekmeyi gösterir. Ekranı Karart, siz uzaktayken ekranı karartır ve döndüğünüzde eski hâline getirir.";
+/* Cursor Gestures settings: switch; while you draw, the name of the matching gesture and how well the stroke matches it in percent (for example “Mission Control · 92%”) show beside the pointer */
+"Show the Gesture Name and Match While You Draw" = "Çizerken Hareketin Adını ve Eşleşmesini Göster";
+/* Cursor Gestures: button in the Draw New Shape sheet; goes on to a screen where you draw the shape again to see whether it matches */
+"Next & Test" = "İleri ve Test Et";
+/* Cursor Gestures: hint in the empty drawing area of the test screen in the Draw New Shape sheet */
+"Draw the shape again to test it." = "Test etmek için şekli yeniden çizin.";
+/* Cursor Gestures: result on the test screen when your test stroke would run the shape; the number is how well it matches in percent (for example “Matches · 88%”) */
+"Matches · %lld%%" = "Eşleşiyor · %%%lld";
+/* Cursor Gestures: result on the test screen when your test stroke would not run the shape; the number is how well it matches in percent (for example “Does Not Match · 52%”) */
+"Does Not Match · %lld%%" = "Eşleşmiyor · %%%lld";
+/* Cursor Gestures: result on the test screen when your test stroke is smaller than the Minimum Size setting */
+"Too small to match." = "Eşleşmek için çok küçük.";
+/* Cursor Gestures: shape name for a short click of the middle button or a side button, with no stroke drawn; shown on its tile in the Shape step and the Shapes tab */
+"Short Click" = "Kısa Tıklama";
+/* Cursor Gestures: shape family that holds Short Click; a chip and a group heading after Letters */
+"Clicks" = "Tıklamalar";
+/* Cursor Gestures: label beside the pointer while you draw; %1$@ is the gesture name, %2$lld is how well the stroke matches in percent (for example “Mission Control · 88%”); write the percent the same way as in “Matches · %lld%%” */
+"%1$@ · %2$lld%%" = "%1$@ · %%%2$lld";
+"Under the Pointer" = "İmlecin Altındayken";
+"Cursor Translator" = "İmleç Çevirmeni";
+"Cursor Translator requires the Helper Tool. You can install it from General → Helper Tool." = "İmleç Çevirmeni özelliği için Yardımcı Araç gereklidir. Genel → Yardımcı Araç bölümünden yükleyebilirsiniz.";
+"Click with the trigger to open a frame. The text inside it turns into your language and keeps up as it changes." = "Çerçeve açmak için tetikleyiciyle tıklayın. İçindeki metin dilinize çevrilir ve değiştikçe güncel kalır.";
+"Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen & System Audio Recording." = "Ekran Kaydı izni eksik. Gizlilik ve Güvenlik → Ekran ve Sistem Sesi Kaydı bölümünde MaCursor’a izin verin.";
+"Translate to" = "Çevrilecek Dil";
+/* Cursor Translator: the button that opens Language & Region in System Settings; use Apple’s own name for the Translation Languages button */
+"Translation Languages…" = "Çeviri Dilleri…";
+"Frame Colors" = "Çerçeve Renkleri";
+"Screen Recording" = "Ekran Kaydı";
+"Accessibility" = "Erişilebilirlik";
+"Allow Screen Recording" = "Ekran Kaydına İzin Ver";
+"Download the languages you read in Language & Region → Translation Languages…, so Apple Translation can use them." = "Okuduğunuz dilleri Dil ve Bölge → Çeviri Dilleri… bölümünden indirin; böylece Apple Çeviri bunları kullanabilir.";
+"A Cursor Gestures trigger uses the same keys and button. Cursor Translator takes it." = "Bir İmleç Hareketleri tetikleyicisi aynı tuşları ve düğmeyi kullanıyor. Öncelik İmleç Çevirmeni’nde.";
+"Hold a key with the right button, so normal right-clicks still work." = "Sağ düğmeyle birlikte bir tuşu basılı tutun; böylece normal sağ tıklamalar çalışmaya devam eder.";
+"MaCursorHelper needs Accessibility access to see the trigger click and to keep the right-click menu of the app closed. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelper, tetikleyici tıklamasını görmek ve uygulamanın sağ tık menüsünü kapalı tutmak için Erişilebilirlik iznine ihtiyaç duyar. “Erişilebilirlik İçin İzin Ver” düğmesini seçin, ardından Gizlilik ve Güvenlik → Erişilebilirlik bölümünde MaCursorHelper’a izin verin.";
+"MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "MaCursor, çerçevedeki metni okumak için Ekran Kaydı iznine ihtiyaç duyar. Hiçbir şey saklanmaz; metin yalnızca seçtiğiniz Çeviri Hizmeti’ne gönderilir. “Ekran Kaydına İzin Ver” düğmesini seçin, ardından Gizlilik ve Güvenlik → Ekran ve Sistem Sesi Kaydı bölümünde MaCursor’a izin verin.";
+"Needs Screen Recording access" = "Ekran Kaydı izni gerekiyor";
+/* Cursor Translator: short messages in the name tag above the frame */
+"Reading…" = "Okunuyor…";
+"Needs Screen Recording" = "Ekran Kaydı gerekiyor";
+"Cannot read the screen" = "Ekran okunamıyor";
+"Could not read the text. Trying again…" = "Metin okunamadı. Yeniden deneniyor…";
+"Language not downloaded. Open Settings › Cursor Translator › Translation Languages…" = "Dil indirilmemiş. Ayarlar › İmleç Çevirmeni › Çeviri Dilleri… bölümünü açın.";
+"Translation is not available" = "Çeviri kullanılamıyor";
+"No text here" = "Burada metin yok";
+/* Cursor Translator: name tag of the frame; %1$@ is the language of the text on screen, %2$@ the language it is translated to (for example “Japanese → English”) */
+"%1$@ → %2$@" = "%1$@ → %2$@";
+/* Cursor Translator: the Frame picker; Frame Stays keeps the frame where you put it, Follows the Pointer moves it with the pointer */
+"Frame" = "Çerçeve";
+"Frame Stays" = "Çerçeve Sabit Kalır";
+"Follows the Pointer" = "İmleci Takip Eder";
+"Draw a frame with the trigger, or click to drop one. Drag its name tag to move it and its corner to resize it." = "Tetikleyiciyle sürükleyerek bir çerçeve çizin ya da tıklayarak bir çerçeve bırakın. Taşımak için ad etiketini, yeniden boyutlandırmak için köşesini sürükleyin.";
+"Click with the trigger to open a frame that moves with the pointer. It reads when the pointer rests. Click again to close it." = "İmleçle birlikte hareket eden bir çerçeve açmak için tetikleyiciyle tıklayın. İmleç durduğunda metni okur. Kapatmak için yeniden tıklayın.";
+/* Cursor Translator: the Translation Service picker and the fields of an online service; DeepL, OpenAI, Google Gemini and Claude are names and stay as they are */
+"Translation Service" = "Çeviri Hizmeti";
+"Apple Translation" = "Apple Çeviri";
+"OpenAI-Compatible" = "OpenAI Uyumlu";
+"Claude-Compatible" = "Claude Uyumlu";
+"Apple Translation needs macOS 15 or later." = "Apple Çeviri için macOS 15 veya üstü gerekir.";
+"API Key" = "API Anahtarı";
+"Model" = "Model";
+"Server Address" = "Sunucu Adresi";
+"Not needed for a local server" = "Yerel sunucu için gerekmez";
+/* Cursor Translator: short messages in the name tag when an online service cannot translate; %@ is the service name, for example “DeepL refused the key” */
+"Add your %@ key in Settings › Cursor Translator" = "%@ anahtarınızı Ayarlar › İmleç Çevirmeni bölümüne ekleyin";
+"Add the server address in Settings › Cursor Translator" = "Sunucu adresini Ayarlar › İmleç Çevirmeni bölümüne ekleyin";
+"%@ refused the key" = "%@ anahtarı reddetti";
+"No connection" = "Bağlantı yok";
+"%@ could not translate" = "%@ çeviri yapamadı";
+"%@ sent a reply that cannot be read" = "%@ okunamayan bir yanıt gönderdi";
+/* Cursor Translator: the size and line spacing of the translated text, and the last item of the Model menu, which shows a field for a model name that is not in the list */
+"Text Size" = "Metin Boyutu";
+"Line Spacing" = "Satır Aralığı";
+"Custom Model" = "Özel Model";
+/* Cursor Translator on macOS 13: the same two Screen Recording texts, naming the macOS 13 pane “Screen Recording” in Privacy & Security */
+"Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen Recording." = "Ekran Kaydı izni eksik. Gizlilik ve Güvenlik → Ekran Kaydı bölümünde MaCursor’a izin verin.";
+"MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "MaCursor, çerçevedeki metni okumak için Ekran Kaydı iznine ihtiyaç duyar. Hiçbir şey saklanmaz; metin yalnızca seçtiğiniz Çeviri Hizmeti’ne gönderilir. “Ekran Kaydına İzin Ver” düğmesini seçin, ardından Gizlilik ve Güvenlik → Ekran Kaydı bölümünde MaCursor’a izin verin.";
+
+/* Cursor Translator frame: no text was found, and this macOS version cannot read some languages (for example Arabic on macOS 14). %@ is a list of language names, such as “Arabic and Hindi”. */
+"No text found. This macOS version cannot read %@." = "Metin bulunamadı. Bu macOS sürümü şu dilleri okuyamaz: %@.";
+
+/* Cursor Translator frame: the name tag while macOS prepares its text reader, which can take a few minutes the first time or after macOS frees disk space */
+"Preparing…" = "Hazırlanıyor…";
+
+/* Cursor Translator: the page language, in Settings and on the frame's name tag. “Translate from” is the setting next to “Translate to”; “Detect Language” is its first choice and lets MaCursor find the page language; “Auto: %@” shows the language it found, for example “Auto: German” */
+"Translate from" = "Kaynak Dil";
+"Detect Language" = "Dili Algıla";
+"Auto: %@" = "Otomatik: %@";
+
+/* Cursor Translator: the first choice of “Translate to” in Settings. It follows the Mac's language; %@ is that language's name, for example “English (System Default)” */
+"%@ (System Default)" = "%@ (Sistem Varsayılanı)";

@@ -1,1 +1,2 @@
 "NSAppleEventsUsageDescription" = "これにより、FinderのツールバーにあるMaCursorボタンがiCloudフォルダ内で機能します。";
+"NSScreenCaptureUsageDescription" = "カーソル翻訳は、枠の中のテキストを翻訳するために読み取ります。何も保存されず、テキストは選択した翻訳サービスにのみ送信されます。";

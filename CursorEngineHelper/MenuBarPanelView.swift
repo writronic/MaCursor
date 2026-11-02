@@ -283,7 +283,29 @@ struct MenuBarPanelView: View {
                 Toggle(isOn: cursorGesturesBinding) {
                     Text(MenuBarL("Cursor Gestures")).frame(maxWidth: .infinity, alignment: .leading)
                 }
-                if (model.focusFollowsMouse || model.cursorGestures.enabled) && !model.accessibilityTrusted {
+                Toggle(isOn: cursorTranslatorBinding) {
+                    Text(MenuBarL("Cursor Translator")).frame(maxWidth: .infinity, alignment: .leading)
+                }
+                Toggle(isOn: cursorShakerBinding) {
+                    Text(MenuBarL("Cursor Shaker")).frame(maxWidth: .infinity, alignment: .leading)
+                }
+                if model.cursorShaker.enabled && model.accessibilityTrusted {
+                    HStack(spacing: 8) {
+                        Text(MenuBarL("Stop After"))
+                        Spacer(minLength: 8)
+                        Picker(MenuBarL("Stop After"), selection: Binding(get: { model.cursorShaker.stopAfter }, set: { model.setCursorShakerStopAfter($0) })) {
+                            Text(MenuBarL("Never")).tag(nil as Int?)
+                            ForEach(CursorShakerConfig.stopTimes, id: \.self) { minutes in
+                                Text(CursorShakerConfig.stopLabel(minutes)).tag(minutes as Int?)
+                            }
+                        }
+                        .labelsHidden()
+                        .pickerStyle(.menu)
+                        .controlSize(.small)
+                        .font(.system(size: 11))
+                    }
+                }
+                if (model.focusFollowsMouse || model.cursorGestures.enabled || model.cursorShaker.enabled || model.cursorTranslator.enabled) && !model.accessibilityTrusted {
                     HStack(spacing: 4) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundStyle(.orange)
@@ -291,6 +313,19 @@ struct MenuBarPanelView: View {
                             .foregroundStyle(.secondary)
                         Button(MenuBarL("Open System Settings")) {
                             model.openAccessibilitySettings()
+                        }
+                        .buttonStyle(.link)
+                    }
+                    .font(.system(size: 10))
+                }
+                if model.cursorTranslator.enabled && model.accessibilityTrusted && !model.screenRecording {
+                    HStack(spacing: 4) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                        Text(MenuBarL("Needs Screen Recording access"))
+                            .foregroundStyle(.secondary)
+                        Button(MenuBarL("Open System Settings")) {
+                            CursorTranslatorConfig.requestScreenRecording()
                         }
                         .buttonStyle(.link)
                     }
@@ -409,6 +444,20 @@ struct MenuBarPanelView: View {
         Binding(
             get: { model.cursorGestures.enabled && model.accessibilityTrusted },
             set: { _ in model.toggleCursorGestures() }
+        )
+    }
+
+    private var cursorTranslatorBinding: Binding<Bool> {
+        Binding(
+            get: { model.cursorTranslator.enabled && model.accessibilityTrusted && model.screenRecording },
+            set: { _ in model.toggleCursorTranslator() }
+        )
+    }
+
+    private var cursorShakerBinding: Binding<Bool> {
+        Binding(
+            get: { model.cursorShaker.enabled && model.accessibilityTrusted },
+            set: { _ in model.toggleCursorShaker() }
         )
     }
 }

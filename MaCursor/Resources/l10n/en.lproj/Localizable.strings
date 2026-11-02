@@ -156,9 +156,6 @@
 /* Badge: high resolution */
 "HD" = "HD";
 
-/* Helper status: not found */
-"Helper Not Found" = "Helper Not Found";
-
 /* Section: helper tool */
 "Helper Tool" = "Helper Tool";
 
@@ -1233,7 +1230,6 @@
 /* Cursor Gestures settings: switches; each row gets a reset button once it differs from its default */
 "Show the Line While You Draw" = "Show the Line While You Draw";
 "Turn the Line Green When a Shape Matches" = "Turn the Line Green When a Shape Matches";
-"Show the Shape Name While You Draw" = "Show the Shape Name While You Draw";
 "Repeat with a Left Click on a Mouse" = "Repeat with a Left Click on a Mouse";
 "Repeat with a Left Click on a Trackpad" = "Repeat with a Left Click on a Trackpad";
 /* Cursor Gestures settings: help tag of the two repeat switches */
@@ -1254,7 +1250,6 @@
 /* Cursor Gestures settings: picker of when an ignored app counts: only while it is in front, or whenever one of its windows is on screen */
 "Ignore When" = "Ignore When";
 "In Front" = "In Front";
-"While It Has a Window" = "While It Has a Window";
 /* Cursor Gestures settings: button and title of the alert that adds back the ready-made gestures */
 "Restore Ready-Made Gestures" = "Restore Ready-Made Gestures";
 "Ready-made gestures you deleted come back, unless one of your gestures already uses the same shape and trigger." = "Ready-made gestures you deleted come back, unless one of your gestures already uses the same shape and trigger.";
@@ -1308,3 +1303,128 @@
 "Delay window focus for %@" = "Delay window focus for %@";
 /* Menu bar panel: folded row under the Focus on Hover switch that holds the delay slider */
 "Focus Delay" = "Focus Delay";
+/* Cursor Shaker: feature name in the Settings sidebar, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
+"Cursor Shaker" = "Cursor Shaker";
+"Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool." = "Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool.";
+/* Cursor Shaker: grey caption under its switch */
+"While you are away, the pointer moves one pixel and back, and the display stays on, so your apps keep showing you as active." = "While you are away, the pointer moves one pixel and back, and the display stays on, so your apps keep showing you as active.";
+/* Cursor Shaker: label of the picker for how long the user must be away before it starts; the choices are durations such as 1 min */
+"Start After" = "Start After";
+/* Cursor Shaker: text of its Accessibility access window */
+"MaCursorHelper needs Accessibility access to move the pointer while you are away. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelper needs Accessibility access to move the pointer while you are away. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility.";
+/* Cursor Shaker: label of the picker for an optional click at the pointer while the user is away; the choices are Off, Left Click and Right Click */
+"Click" = "Click";
+/* Cursor Shaker: picker choice that turns its click or its scroll off */
+"Off" = "Off";
+/* Cursor Shaker: click picker choice, a left mouse click at the pointer */
+"Left Click" = "Left Click";
+/* Cursor Shaker: click picker choice, a right mouse click at the pointer */
+"Right Click" = "Right Click";
+/* Cursor Shaker: label of the picker for an optional short scroll at the pointer while the user is away; the choices are Off, Down and Down and Up */
+"Scroll" = "Scroll";
+/* Cursor Shaker: scroll picker choice, every scroll goes down */
+"Down" = "Down";
+/* Cursor Shaker: scroll picker choice, one scroll goes down and the next goes up, in turn */
+"Down and Up" = "Down and Up";
+/* Cursor Shaker: label of the picker that turns Cursor Shaker off after a set time (15 min to 8 h, or Never); the system writes the times */
+"Stop After" = "Stop After";
+/* Cursor Shaker: Stop After picker choice, it never turns off by itself */
+"Never" = "Never";
+/* Cursor Shaker: switch that turns it off on battery power once the charge is at this percentage or lower; %@ is a percentage such as 20 % */
+"Stop on battery at %@ or less" = "Stop on battery at %@ or less";
+/* Cursor Shaker: switch that also shows the next tab in the front app while you are away */
+"Switch Tabs" = "Switch Tabs";
+/* Cursor Shaker: switch that makes the display darker while you are away */
+"Dim the Screen" = "Dim the Screen";
+/* Cursor Shaker: caption under the Switch Tabs and Dim the Screen switches */
+"Switch Tabs shows the next tab in the front app, at most once a minute. Dim the Screen makes the display darker while you are away and brings it back when you return." = "Switch Tabs shows the next tab in the front app, at most once a minute. Dim the Screen makes the display darker while you are away and brings it back when you return.";
+/* Cursor Gestures settings: switch; while you draw, the name of the matching gesture and how well the stroke matches it in percent (for example “Mission Control · 92%”) show beside the pointer */
+"Show the Gesture Name and Match While You Draw" = "Show the Gesture Name and Match While You Draw";
+/* Cursor Gestures: button in the Draw New Shape sheet; goes on to a screen where you draw the shape again to see whether it matches */
+"Next & Test" = "Next & Test";
+/* Cursor Gestures: hint in the empty drawing area of the test screen in the Draw New Shape sheet */
+"Draw the shape again to test it." = "Draw the shape again to test it.";
+/* Cursor Gestures: result on the test screen when your test stroke would run the shape; the number is how well it matches in percent (for example “Matches · 88%”) */
+"Matches · %lld%%" = "Matches · %lld%%";
+/* Cursor Gestures: result on the test screen when your test stroke would not run the shape; the number is how well it matches in percent (for example “Does Not Match · 52%”) */
+"Does Not Match · %lld%%" = "Does Not Match · %lld%%";
+/* Cursor Gestures: result on the test screen when your test stroke is smaller than the Minimum Size setting */
+"Too small to match." = "Too small to match.";
+/* Cursor Gestures: shape name for a short click of the middle button or a side button, with no stroke drawn; shown on its tile in the Shape step and the Shapes tab */
+"Short Click" = "Short Click";
+/* Cursor Gestures: shape family that holds Short Click; a chip and a group heading after Letters */
+"Clicks" = "Clicks";
+/* Cursor Gestures: label beside the pointer while you draw; %1$@ is the gesture name, %2$lld is how well the stroke matches in percent (for example “Mission Control · 88%”); write the percent the same way as in “Matches · %lld%%” */
+"%1$@ · %2$lld%%" = "%1$@ · %2$lld%%";
+"Under the Pointer" = "Under the Pointer";
+"Cursor Translator" = "Cursor Translator";
+"Cursor Translator requires the Helper Tool. You can install it from General → Helper Tool." = "Cursor Translator requires the Helper Tool. You can install it from General → Helper Tool.";
+"Click with the trigger to open a frame. The text inside it turns into your language and keeps up as it changes." = "Click with the trigger to open a frame. The text inside it turns into your language and keeps up as it changes.";
+"Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen & System Audio Recording." = "Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen & System Audio Recording.";
+"Translate to" = "Translate to";
+/* Cursor Translator: the button that opens Language & Region in System Settings; use Apple’s own name for the Translation Languages button */
+"Translation Languages…" = "Translation Languages…";
+"Frame Colors" = "Frame Colors";
+"Screen Recording" = "Screen Recording";
+"Accessibility" = "Accessibility";
+"Allow Screen Recording" = "Allow Screen Recording";
+"Download the languages you read in Language & Region → Translation Languages…, so Apple Translation can use them." = "Download the languages you read in Language & Region → Translation Languages…, so Apple Translation can use them.";
+"A Cursor Gestures trigger uses the same keys and button. Cursor Translator takes it." = "A Cursor Gestures trigger uses the same keys and button. Cursor Translator takes it.";
+"Hold a key with the right button, so normal right-clicks still work." = "Hold a key with the right button, so normal right-clicks still work.";
+"MaCursorHelper needs Accessibility access to see the trigger click and to keep the right-click menu of the app closed. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelper needs Accessibility access to see the trigger click and to keep the right-click menu of the app closed. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility.";
+"MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording.";
+"Needs Screen Recording access" = "Needs Screen Recording access";
+/* Cursor Translator: short messages in the name tag above the frame */
+"Reading…" = "Reading…";
+"Needs Screen Recording" = "Needs Screen Recording";
+"Cannot read the screen" = "Cannot read the screen";
+"Could not read the text. Trying again…" = "Could not read the text. Trying again…";
+"Language not downloaded. Open Settings › Cursor Translator › Translation Languages…" = "Language not downloaded. Open Settings › Cursor Translator › Translation Languages…";
+"Translation is not available" = "Translation is not available";
+"No text here" = "No text here";
+/* Cursor Translator: name tag of the frame; %1$@ is the language of the text on screen, %2$@ the language it is translated to (for example “Japanese → English”) */
+"%1$@ → %2$@" = "%1$@ → %2$@";
+/* Cursor Translator: the Frame picker; Frame Stays keeps the frame where you put it, Follows the Pointer moves it with the pointer */
+"Frame" = "Frame";
+"Frame Stays" = "Frame Stays";
+"Follows the Pointer" = "Follows the Pointer";
+"Draw a frame with the trigger, or click to drop one. Drag its name tag to move it and its corner to resize it." = "Draw a frame with the trigger, or click to drop one. Drag its name tag to move it and its corner to resize it.";
+"Click with the trigger to open a frame that moves with the pointer. It reads when the pointer rests. Click again to close it." = "Click with the trigger to open a frame that moves with the pointer. It reads when the pointer rests. Click again to close it.";
+/* Cursor Translator: the Translation Service picker and the fields of an online service; DeepL, OpenAI, Google Gemini and Claude are names and stay as they are */
+"Translation Service" = "Translation Service";
+"Apple Translation" = "Apple Translation";
+"OpenAI-Compatible" = "OpenAI-Compatible";
+"Claude-Compatible" = "Claude-Compatible";
+"Apple Translation needs macOS 15 or later." = "Apple Translation needs macOS 15 or later.";
+"API Key" = "API Key";
+"Model" = "Model";
+"Server Address" = "Server Address";
+"Not needed for a local server" = "Not needed for a local server";
+/* Cursor Translator: short messages in the name tag when an online service cannot translate; %@ is the service name, for example “DeepL refused the key” */
+"Add your %@ key in Settings › Cursor Translator" = "Add your %@ key in Settings › Cursor Translator";
+"Add the server address in Settings › Cursor Translator" = "Add the server address in Settings › Cursor Translator";
+"%@ refused the key" = "%@ refused the key";
+"No connection" = "No connection";
+"%@ could not translate" = "%@ could not translate";
+"%@ sent a reply that cannot be read" = "%@ sent a reply that cannot be read";
+/* Cursor Translator: the size and line spacing of the translated text, and the last item of the Model menu, which shows a field for a model name that is not in the list */
+"Text Size" = "Text Size";
+"Line Spacing" = "Line Spacing";
+"Custom Model" = "Custom Model";
+/* Cursor Translator on macOS 13: the same two Screen Recording texts, naming the macOS 13 pane “Screen Recording” in Privacy & Security */
+"Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen Recording." = "Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen Recording.";
+"MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording.";
+
+/* Cursor Translator frame: no text was found, and this macOS version cannot read some languages (for example Arabic on macOS 14). %@ is a list of language names, such as “Arabic and Hindi”. */
+"No text found. This macOS version cannot read %@." = "No text found. This macOS version cannot read %@.";
+
+/* Cursor Translator frame: the name tag while macOS prepares its text reader, which can take a few minutes the first time or after macOS frees disk space */
+"Preparing…" = "Preparing…";
+
+/* Cursor Translator: the page language, in Settings and on the frame's name tag. “Translate from” is the setting next to “Translate to”; “Detect Language” is its first choice and lets MaCursor find the page language; “Auto: %@” shows the language it found, for example “Auto: German” */
+"Translate from" = "Translate from";
+"Detect Language" = "Detect Language";
+"Auto: %@" = "Auto: %@";
+
+/* Cursor Translator: the first choice of “Translate to” in Settings. It follows the Mac's language; %@ is that language's name, for example “English (System Default)” */
+"%@ (System Default)" = "%@ (System Default)";

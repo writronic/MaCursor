@@ -1,6 +1,7 @@
 import SwiftUI
 import AppKit
 import Combine
+import Security
 import UniformTypeIdentifiers
 
 struct CursorSettingsView: View {
@@ -288,6 +289,7 @@ struct CursorSettingsView: View {
             }
 
             focusFollowsMouseSection
+            CursorShakerSection()
         }
         .formStyle(.grouped)
         .navigationTitle("Cursor Control")
@@ -789,6 +791,419 @@ struct CursorTrailsSettingsView: View {
     }
 }
 
+struct CursorTranslatorSettingsView: View {
+    @ObservedObject private var helperManager = HelperToolManager.shared
+    @State private var translator = CursorTranslatorConfig.load()
+    @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
+    @State private var screenRecording = CursorTranslatorConfig.screenRecordingAllowed
+    @State private var gestures = CursorGesturesConfig.load()
+    @State private var key = ""
+    @State private var server = ""
+    @State private var models: [String] = []
+    @State private var modelsNote: CursorTranslatorStatus?
+    @State private var typingModel = false
+    @FocusState private var addressFocused: Bool
+
+    private static let customTag = ""
+    private static let session = URLSession(configuration: URLSessionConfiguration.ephemeral)
+
+    private var usable: Bool { trusted && screenRecording && helperManager.isRunning }
+
+    private var translatorOn: Bool { CursorTranslatorConfig.isOn(enabled: translator.enabled, usable: usable) }
+
+    private var serviceName: String { translator.service.title { String(localized: String.LocalizationValue($0)) } }
+
+    private var keyBinding: Binding<String> {
+        Binding(
+            get: { key },
+            set: {
+                key = $0
+                CursorTranslatorKeychain.set($0, for: translator.service)
+            }
+        )
+    }
+
+    private var modelBinding: Binding<String> {
+        Binding(
+            get: { translator.models[translator.service.rawValue] ?? translator.service.defaultModel },
+            set: {
+                typingModel = true
+                translator.models[translator.service.rawValue] = $0
+                translator.save()
+            }
+        )
+    }
+
+    private var modelChoices: [String] {
+        models.isEmpty ? [translator.model(for: translator.service)] : models
+    }
+
+    private var modelChoice: Binding<String> {
+        Binding(
+            get: {
+                let current = translator.model(for: translator.service)
+                return typingModel || !modelChoices.contains(current) ? Self.customTag : current
+            },
+            set: {
+                typingModel = $0 == Self.customTag
+                guard !typingModel else { return }
+                translator.models[translator.service.rawValue] = $0
+                translator.save()
+            }
+        )
+    }
+
+    private var addressBinding: Binding<String> {
+        Binding(
+            get: { translator.addresses[translator.service.rawValue] ?? "" },
+            set: {
+                translator.addresses[translator.service.rawValue] = $0
+                translator.save()
+            }
+        )
+    }
+
+    var body: some View {
+        Form {
+            Section {
+                Group {
+                    Toggle("Cursor Translator", isOn: Binding(
+                        get: { translatorOn },
+                        set: { _ in
+                            guard helperManager.isRunning else { return }
+                            switch FocusFollowsMouseConfig.toggleAction(enabled: translator.enabled,
+                                                                        helperInstalled: helperManager.isInstalled,
+                                                                        trusted: usable) {
+                            case .enable: CursorTranslatorConfig.setEnabled(true)
+                            case .requestAccess: AccessWindowController.cursorTranslator.present()
+                            case .disable: CursorTranslatorConfig.setEnabled(false)
+                            case .ignore: break
+                            }
+                        }
+                    ))
+
+                    if translator.enabled && !trusted {
+                        HStack(spacing: 10) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.orange)
+
+                            Text("Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                            Spacer(minLength: 6)
+
+                            Button("Open System Settings") {
+                                FocusFollowsMouseConfig.requestAccessibility()
+                            }
+                        }
+                    }
+
+                    if translator.enabled && !screenRecording {
+                        HStack(spacing: 10) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(.orange)
+
+                            Group {
+                                if SystemSettingsPane.screenRecordingHasAudio() {
+                                    Text("Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen & System Audio Recording.")
+                                } else {
+                                    Text("Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen Recording.")
+                                }
+                            }
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                            Spacer(minLength: 6)
+
+                            Button("Open System Settings") {
+                                CursorTranslatorConfig.requestScreenRecording()
+                            }
+                        }
+                    }
+                }
+                .disabled(!helperManager.isInstalled)
+
+                if !helperManager.isInstalled {
+                    HStack(spacing: 10) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.yellow)
+
+                        Text("Cursor Translator requires the Helper Tool. You can install it from General → Helper Tool.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Text("Click with the trigger to open a frame. The text inside it turns into your language and keeps up as it changes.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+
+            if translatorOn {
+                Section {
+                    LabeledContent("Trigger") {
+                        TranslatorTriggerEditor(trigger: Binding(
+                            get: { translator.trigger },
+                            set: {
+                                translator.trigger = $0
+                                translator.save()
+                            }
+                        ))
+                    }
+
+                    if !CursorTranslator.usable(translator.trigger) {
+                        Text("Hold a key with the right button, so normal right-clicks still work.")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                    } else if CursorTranslator.clashes(translator.trigger, with: gestures) {
+                        Text("A Cursor Gestures trigger uses the same keys and button. Cursor Translator takes it.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Picker("Frame", selection: Binding(
+                        get: { translator.mode },
+                        set: {
+                            translator.mode = $0
+                            translator.save()
+                        }
+                    )) {
+                        Text("Frame Stays").tag(CursorTranslatorMode.stays)
+                        Text("Follows the Pointer").tag(CursorTranslatorMode.follows)
+                    }
+                    .pickerStyle(.menu)
+
+                    Group {
+                        if translator.mode == .stays {
+                            Text("Draw a frame with the trigger, or click to drop one. Drag its name tag to move it and its corner to resize it.")
+                        } else {
+                            Text("Click with the trigger to open a frame that moves with the pointer. It reads when the pointer rests. Click again to close it.")
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                    Picker("Translate from", selection: Binding(
+                        get: { translator.source },
+                        set: {
+                            translator.source = $0
+                            translator.save()
+                        }
+                    )) {
+                        Text("Detect Language").tag(String?.none)
+                        Divider()
+                        ForEach(CursorTranslatorConfig.sortedLanguages(), id: \.self) { language in
+                            Text(CursorTranslatorConfig.name(language)).tag(Optional(language))
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    Picker("Translate to", selection: Binding(
+                        get: { translator.target },
+                        set: {
+                            translator.target = $0
+                            translator.save()
+                        }
+                    )) {
+                        Text("\(CursorTranslatorConfig.name(CursorTranslatorConfig.systemTarget)) (System Default)").tag(String?.none)
+                        Divider()
+                        ForEach(CursorTranslatorConfig.sortedLanguages(), id: \.self) { language in
+                            Text(CursorTranslatorConfig.name(language)).tag(Optional(language))
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    Picker("Translation Service", selection: Binding(
+                        get: { translator.service },
+                        set: {
+                            translator.service = $0
+                            translator.save()
+                            key = CursorTranslatorKeychain.key(for: $0) ?? ""
+                            server = translator.address(for: $0)
+                            typingModel = false
+                        }
+                    )) {
+                        ForEach(CursorTranslatorService.allCases.filter { $0.usable(appleTranslation: CursorTranslatorConfig.appleTranslation) }, id: \.self) { service in
+                            Text(verbatim: service.title { String(localized: String.LocalizationValue($0)) })
+                                .tag(service)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    if !CursorTranslatorConfig.appleTranslation {
+                        Text("Apple Translation needs macOS 15 or later.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if translator.service == .apple {
+                        HStack(spacing: 10) {
+                            Text("Download the languages you read in Language & Region → Translation Languages…, so Apple Translation can use them.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                            Spacer(minLength: 6)
+
+                            Button("Translation Languages…") {
+                                CursorTranslatorConfig.open(CursorTranslatorConfig.languageSettings)
+                            }
+                        }
+                    } else {
+                        SecureField("API Key", text: keyBinding, prompt: translator.service.custom ? Text("Not needed for a local server") : nil)
+                            .task(id: key) {
+                                try? await Task.sleep(nanoseconds: 700_000_000)
+                                guard !Task.isCancelled else { return }
+                                CursorTranslatorConfig.notifyHelper()
+                            }
+                            .onDisappear { CursorTranslatorConfig.notifyHelper() }
+
+                        if translator.service.custom {
+                            TextField("Server Address", text: addressBinding,
+                                      prompt: Text(verbatim: translator.service == .openaiCompatible ? "http://localhost:11434/v1" : "https://api.deepseek.com/anthropic"))
+                                .focused($addressFocused)
+                                .onSubmit { server = translator.address(for: translator.service) }
+                        }
+
+                        if !translator.service.defaultModel.isEmpty {
+                            Picker("Model", selection: modelChoice) {
+                                ForEach(modelChoices, id: \.self) { Text(verbatim: $0).tag($0) }
+                                Divider()
+                                Text("Custom Model").tag(Self.customTag)
+                            }
+                            .pickerStyle(.menu)
+                            .task(id: [translator.service.rawValue, key, server]) { await fetchModels() }
+
+                            if modelChoice.wrappedValue == Self.customTag {
+                                TextField("Custom Model", text: modelBinding, prompt: Text(verbatim: translator.service.defaultModel))
+                            }
+
+                            if let modelsNote {
+                                Text(verbatim: modelsNote.text { String(localized: String.LocalizationValue($0)) })
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+
+                    Slider(value: Binding(get: { translator.look.textSize }, set: { translator.look.textSize = $0 }),
+                           in: CursorTranslatorConfig.textSizes, step: 0.05) {
+                        Text("Text Size")
+                    } minimumValueLabel: {
+                        Image(systemName: "textformat.size.smaller")
+                    } maximumValueLabel: {
+                        Image(systemName: "textformat.size.larger")
+                    } onEditingChanged: {
+                        if !$0 { translator.save() }
+                    }
+
+                    Picker("Line Spacing", selection: Binding(
+                        get: { translator.look.lineSpacing },
+                        set: {
+                            translator.look.lineSpacing = $0
+                            translator.save()
+                        }
+                    )) {
+                        ForEach(CursorTranslatorConfig.lineSpacings, id: \.self) { spacing in
+                            Text(spacing, format: .number.precision(.fractionLength(1...2))).tag(spacing)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Frame Colors")
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
+                            ForEach(CursorTranslatorConfig.colors, id: \.self) { palette in
+                                ThemeCard(name: palette.title, isApplied: translator.color == palette) {
+                                    translator.color = palette
+                                    translator.save()
+                                } preview: {
+                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                        .fill(Color(cgColor: CursorTrailsPalette.color(at: 0, stops: [palette.frameColor], alpha: 1)))
+                                        .frame(height: 32)
+                                }
+                            }
+                        }
+                    }
+                }
+                .disabled(!helperManager.isInstalled)
+            }
+        }
+        .formStyle(.grouped)
+        .navigationTitle("Cursor Translator")
+        .onAppear {
+            helperManager.refreshStatus()
+            refresh()
+            server = translator.address(for: translator.service)
+            if helperManager.isInstalled {
+                CursorTranslatorConfig.notifyHelper()
+            }
+        }
+        .onChangeCompat(of: addressFocused) { focused in
+            if !focused { server = translator.address(for: translator.service) }
+        }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorTranslatorDidChange)) { _ in refresh() }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorTranslatorStatusDidChange)) { _ in refresh() }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACFocusFollowsMouseStatusDidChange)) { _ in refresh() }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorGesturesDidChange)) { _ in refresh() }
+    }
+
+    private func refresh() {
+        translator = CursorTranslatorConfig.load()
+        trusted = FocusFollowsMouseConfig.accessibilityTrusted
+        screenRecording = CursorTranslatorConfig.screenRecordingAllowed
+        gestures = CursorGesturesConfig.load()
+        key = translator.service.online ? CursorTranslatorKeychain.key(for: translator.service) ?? "" : ""
+    }
+
+    private func fetchModels() async {
+        models = []
+        modelsNote = nil
+        let service = translator.service
+        guard let request = CursorTranslator.modelsRequest(service, key: key, address: server) else { return }
+        try? await Task.sleep(nanoseconds: 700_000_000)
+        guard !Task.isCancelled else { return }
+        do {
+            let (data, response) = try await Self.session.data(for: request)
+            guard !Task.isCancelled else { return }
+            let status = (response as? HTTPURLResponse)?.statusCode ?? 0
+            if (200..<300).contains(status) {
+                models = CursorTranslator.models(data, from: service) ?? []
+            } else if CursorTranslator.failure(status: status, error: nil, service: serviceName, reply: data) == .keyRefused(serviceName) {
+                modelsNote = .keyRefused(serviceName)
+            }
+        } catch {
+            guard !Task.isCancelled, CursorTranslator.failure(status: nil, error: error, service: serviceName) == .noConnection else { return }
+            modelsNote = .noConnection
+        }
+    }
+}
+
+extension CursorTranslatorKeychain {
+    static func set(_ key: String, for service: CursorTranslatorService) {
+        let value = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !value.isEmpty else {
+            SecItemDelete(item(service) as CFDictionary)
+            return
+        }
+        let data = Data(value.utf8)
+        if SecItemUpdate(item(service) as CFDictionary, [kSecValueData as String: data] as CFDictionary) != errSecItemNotFound { return }
+        let helper = Bundle.main.bundleURL.appendingPathComponent("Contents/Library/LoginItems/\(MACHelperBundleName).app")
+        let label = "MaCursor \(service.key)"
+        var app: SecTrustedApplication?
+        var login: SecTrustedApplication?
+        var access: SecAccess?
+        guard SecTrustedApplicationCreateFromPath(nil, &app) == errSecSuccess, let app,
+              SecTrustedApplicationCreateFromPath(helper.path, &login) == errSecSuccess, let login,
+              SecAccessCreate(label as CFString, [app, login] as CFArray, &access) == errSecSuccess, let access else { return }
+        var added = item(service)
+        added[kSecValueData as String] = data
+        added[kSecAttrLabel as String] = label
+        added[kSecAttrAccess as String] = access
+        SecItemAdd(added as CFDictionary, nil)
+    }
+}
+
 private struct TimeOfDayField: View {
     @Binding var minutes: Int
     let use24Hour: Bool
@@ -948,5 +1363,385 @@ private struct FocusFollowsMouseAccessView: View {
         .onReceive(ModalWindowCoordinator.shared.activeModalDidChange) { _ in
             AccessWindowController.focusFollowsMouse.reanchor()
         }
+    }
+}
+
+private struct CursorShakerSection: View {
+    @ObservedObject private var helperManager = HelperToolManager.shared
+    @State private var shaker = CursorShakerConfig.load()
+    @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
+
+    private var usable: Bool { trusted && helperManager.isRunning }
+
+    private var shakerOn: Bool { FocusFollowsMouseConfig.isOn(enabled: shaker.enabled, trusted: usable) }
+
+    var body: some View {
+        Section {
+            Group {
+                Toggle("Cursor Shaker", isOn: Binding(
+                    get: { shakerOn },
+                    set: { _ in
+                        guard helperManager.isRunning else { return }
+                        switch FocusFollowsMouseConfig.toggleAction(enabled: shaker.enabled,
+                                                                    helperInstalled: helperManager.isInstalled,
+                                                                    trusted: usable) {
+                        case .enable: CursorShakerConfig.setEnabled(true)
+                        case .requestAccess: AccessWindowController.cursorShaker.present()
+                        case .disable: CursorShakerConfig.setEnabled(false)
+                        case .ignore: break
+                        }
+                    }
+                ))
+
+                if shaker.enabled && !trusted {
+                    HStack(spacing: 10) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+
+                        Text("Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Spacer(minLength: 6)
+
+                        Button("Open System Settings") {
+                            FocusFollowsMouseConfig.requestAccessibility()
+                        }
+                    }
+                }
+
+                if shakerOn {
+                    Picker("Start After", selection: Binding(
+                        get: { shaker.period },
+                        set: {
+                            shaker.period = $0
+                            shaker.save()
+                        }
+                    )) {
+                        ForEach(CursorShakerConfig.periods, id: \.self) { seconds in
+                            Text(Duration.seconds(seconds).formatted(.units(allowed: [.seconds, .minutes], width: .abbreviated))).tag(seconds)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    Picker("Click", selection: saving(\.click)) {
+                        Text("Off").tag(CursorShakerClick.off)
+                        Text("Left Click").tag(CursorShakerClick.left)
+                        Text("Right Click").tag(CursorShakerClick.right)
+                    }
+                    .pickerStyle(.menu)
+
+                    Picker("Scroll", selection: saving(\.scroll)) {
+                        Text("Off").tag(CursorShakerScroll.off)
+                        Text("Down").tag(CursorShakerScroll.down)
+                        Text("Down and Up").tag(CursorShakerScroll.downAndUp)
+                    }
+                    .pickerStyle(.menu)
+
+                    Toggle("Switch Tabs", isOn: saving(\.switchTabs))
+
+                    Toggle("Dim the Screen", isOn: saving(\.dim))
+
+                    Text("Switch Tabs shows the next tab in the front app, at most once a minute. Dim the Screen makes the display darker while you are away and brings it back when you return.")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+
+                    Picker("Stop After", selection: Binding(
+                        get: { shaker.stopAfter },
+                        set: { CursorShakerConfig.setStopAfter($0); shaker = CursorShakerConfig.load() }
+                    )) {
+                        Text("Never").tag(nil as Int?)
+                        ForEach(CursorShakerConfig.stopTimes, id: \.self) { minutes in
+                            Text(CursorShakerConfig.stopLabel(minutes)).tag(minutes as Int?)
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    Toggle("Stop on battery at \(0.2, format: .percent) or less", isOn: saving(\.batteryStop))
+
+                    LabeledContent("Shortcut") {
+                        KeyRecorderView(shortcut: Binding(
+                            get: { shaker.shortcut },
+                            set: {
+                                shaker.shortcut = $0
+                                shaker.save()
+                            }
+                        ), isTaken: slotHolds, isShadowed: shaker.shortcut.map(slotHolds) ?? false)
+                    }
+                }
+            }
+            .disabled(!helperManager.isInstalled)
+
+            if !helperManager.isInstalled {
+                HStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.yellow)
+
+                    Text("Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Text("While you are away, the pointer moves one pixel and back, and the display stays on, so your apps keep showing you as active.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .onAppear {
+            helperManager.refreshStatus()
+            shaker = CursorShakerConfig.load()
+            trusted = FocusFollowsMouseConfig.accessibilityTrusted
+        }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorShakerDidChange)) { _ in
+            shaker = CursorShakerConfig.load()
+        }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACFocusFollowsMouseStatusDidChange)) { _ in
+            trusted = FocusFollowsMouseConfig.accessibilityTrusted
+        }
+    }
+
+    private func saving<Value>(_ field: WritableKeyPath<CursorShakerConfig, Value>) -> Binding<Value> {
+        Binding(
+            get: { shaker[keyPath: field] },
+            set: {
+                shaker[keyPath: field] = $0
+                shaker.save()
+            }
+        )
+    }
+
+    private func slotHolds(_ candidate: KeyboardShortcutData) -> Bool {
+        let data = MACPreferences.value(forKey: MACPreferences.favoriteCursorsKey) as? Data
+        let slots = data.flatMap { try? JSONDecoder().decode([FavoriteCursorSlot].self, from: $0) } ?? []
+        return slots.filter { $0.themeIdentifier != nil }.compactMap(\.shortcut).contains {
+            MACShortcutsCollide($0.keyCode, $0.modifierFlagsRaw, candidate.keyCode, candidate.modifierFlagsRaw)
+        }
+    }
+}
+
+extension AccessWindowController {
+    static let cursorShaker = AccessWindowController(title: String(localized: "Cursor Shaker")) {
+        NSHostingController(rootView: CursorShakerAccessView())
+    }
+}
+
+private struct CursorShakerAccessView: View {
+    @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
+    @State private var didRequest = false
+    private let waitTicker = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        AccessDialog(title: Text("Allow Accessibility Access")) {
+            Text("MaCursorHelper needs Accessibility access to move the pointer while you are away. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if trusted {
+                Label("Access granted", systemImage: "checkmark.circle.fill")
+                    .font(.callout)
+                    .foregroundStyle(Color.green)
+
+                Button("Let’s Go!") {
+                    CursorShakerConfig.setEnabled(true)
+                    AccessWindowController.cursorShaker.dismiss()
+                }
+                .keyboardShortcut(.defaultAction)
+            } else {
+                if didRequest {
+                    Text("Waiting for access. This window updates as soon as MaCursorHelper is allowed.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                HStack(spacing: 12) {
+                    Button("Not Now") {
+                        CursorShakerConfig.setEnabled(false)
+                        AccessWindowController.cursorShaker.dismiss()
+                    }
+
+                    Button("Allow for Accessibility") {
+                        didRequest = true
+                        FocusFollowsMouseConfig.requestAccessibility()
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+        }
+        .onAppear(perform: refresh)
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACFocusFollowsMouseStatusDidChange)) { _ in
+            trusted = FocusFollowsMouseConfig.accessibilityTrusted
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
+            guard AccessWindowController.cursorShaker.window?.isVisible == true else { return }
+            refresh()
+        }
+        .onReceive(waitTicker) { _ in
+            guard !trusted, AccessWindowController.cursorShaker.window?.isVisible == true else { return }
+            refresh()
+        }
+        .onReceive(ModalWindowCoordinator.shared.activeModalDidChange) { _ in
+            AccessWindowController.cursorShaker.reanchor()
+        }
+    }
+
+    private func refresh() {
+        CursorShakerConfig.notifyHelper()
+        trusted = FocusFollowsMouseConfig.accessibilityTrusted
+    }
+}
+
+private enum CursorTranslatorAccessStep {
+    case accessibility, screenRecording
+
+    var title: String {
+        switch self {
+        case .accessibility: return String(localized: "Accessibility")
+        case .screenRecording: return String(localized: "Screen Recording")
+        }
+    }
+
+    var progress: String {
+        switch self {
+        case .accessibility: return String(localized: "Step 1 of 2")
+        case .screenRecording: return String(localized: "Step 2 of 2")
+        }
+    }
+}
+
+extension AccessWindowController {
+    static let cursorTranslator = AccessWindowController(title: String(localized: "Cursor Translator")) {
+        NSHostingController(rootView: CursorTranslatorAccessView())
+    }
+}
+
+private struct CursorTranslatorAccessView: View {
+    @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
+    @State private var screenRecording = CursorTranslatorConfig.screenRecordingAllowed
+    @State private var step: CursorTranslatorAccessStep = FocusFollowsMouseConfig.accessibilityTrusted ? .screenRecording : .accessibility
+    @State private var didRequest = false
+    private let waitTicker = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        let shown = trusted ? step : .accessibility
+        AccessDialog(title: Text("Cursor Translator")) {
+            VStack(spacing: 4) {
+                Text(shown.progress)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Text(shown.title)
+                    .font(.headline)
+            }
+
+            switch shown {
+            case .accessibility:
+                Text("MaCursorHelper needs Accessibility access to see the trigger click and to keep the right-click menu of the app closed. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if !trusted {
+                    waiting
+
+                    HStack(spacing: 12) {
+                        Button("Not Now") {
+                            CursorTranslatorConfig.setEnabled(false)
+                            AccessWindowController.cursorTranslator.dismiss()
+                        }
+
+                        Button("Allow for Accessibility") {
+                            didRequest = true
+                            FocusFollowsMouseConfig.requestAccessibility()
+                        }
+                        .keyboardShortcut(.defaultAction)
+                    }
+                } else {
+                    granted
+
+                    Button("Continue") {
+                        didRequest = false
+                        step = .screenRecording
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            case .screenRecording:
+                Group {
+                    if SystemSettingsPane.screenRecordingHasAudio() {
+                        Text("MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording.")
+                    } else {
+                        Text("MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording.")
+                    }
+                }
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+                if !screenRecording {
+                    waiting
+
+                    HStack(spacing: 12) {
+                        Button("Not Now") {
+                            CursorTranslatorConfig.setEnabled(false)
+                            AccessWindowController.cursorTranslator.dismiss()
+                        }
+
+                        Button("Allow Screen Recording") {
+                            didRequest = true
+                            CursorTranslatorConfig.requestScreenRecording()
+                        }
+                        .keyboardShortcut(.defaultAction)
+                    }
+                } else {
+                    granted
+
+                    Button("Let’s Go!") {
+                        CursorTranslatorConfig.setEnabled(true)
+                        AccessWindowController.cursorTranslator.dismiss()
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+        }
+        .onAppear(perform: refresh)
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACFocusFollowsMouseStatusDidChange)) { _ in read() }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorTranslatorStatusDidChange)) { _ in read() }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
+            guard AccessWindowController.cursorTranslator.window?.isVisible == true else { return }
+            refresh()
+        }
+        .onReceive(waitTicker) { _ in
+            guard !(trusted && screenRecording), AccessWindowController.cursorTranslator.window?.isVisible == true else { return }
+            refresh()
+        }
+        .onReceive(ModalWindowCoordinator.shared.activeModalDidChange) { _ in
+            AccessWindowController.cursorTranslator.reanchor()
+        }
+    }
+
+    @ViewBuilder
+    private var waiting: some View {
+        if didRequest {
+            Text("Waiting for access. This window updates as soon as MaCursorHelper is allowed.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var granted: some View {
+        Label("Access granted", systemImage: "checkmark.circle.fill")
+            .font(.callout)
+            .foregroundStyle(Color.green)
+    }
+
+    private func refresh() {
+        CursorTranslatorConfig.notifyHelper()
+        read()
+    }
+
+    private func read() {
+        trusted = FocusFollowsMouseConfig.accessibilityTrusted
+        screenRecording = CursorTranslatorConfig.screenRecordingAllowed
     }
 }

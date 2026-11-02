@@ -1,1 +1,2 @@
 "NSAppleEventsUsageDescription" = "يتيح هذا لزر MaCursor في شريط أدوات Finder العمل داخل مجلدات iCloud.";
+"NSScreenCaptureUsageDescription" = "يقرأ «مترجم المؤشر» النص داخل الإطار لترجمته. لا يُحفظ أي شيء، ويُرسَل النص فقط إلى خدمة الترجمة التي تختارها.";

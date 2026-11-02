@@ -26,9 +26,16 @@ enum HelperEventPolicy {
         }
     }
 
-    static func route(arguments: [String], probe: () -> Int32, runtime: () -> Void) -> Int32 {
+    static func route(arguments: [String], probe: () -> Int32, screenProbe: () -> Int32 = { EXIT_FAILURE }, reader: () -> Int32 = { EXIT_FAILURE },
+                      runtime: () -> Void) -> Int32 {
         if arguments.dropFirst().first == MACFFMTrustProbeArgument {
             return probe()
+        }
+        if arguments.dropFirst().first == MACTranslatorScreenProbeArgument {
+            return screenProbe()
+        }
+        if arguments.dropFirst().first == MACTranslatorReaderArgument {
+            return reader()
         }
         runtime()
         return EXIT_SUCCESS
