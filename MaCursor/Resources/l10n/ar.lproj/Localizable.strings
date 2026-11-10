@@ -375,9 +375,6 @@
 /* Toggle: cursor drop shadow */
 "Cursor Shadow" = "ظل المؤشر";
 
-/* Caption explaining the cursor shadow toggle */
-"When enabled, a soft drop shadow is drawn under the cursor, similar to the pointer shadow on Windows. The shadow appears while a cursor theme is applied." = "عند التفعيل، يُرسم ظل ناعم أسفل المؤشر، مشابه لظل المؤشر في Windows. يظهر الظل أثناء تطبيق سمة مؤشر.";
-
 /* Section: software updates */
 "Software Updates" = "تحديثات البرامج";
 
@@ -616,7 +613,7 @@
 "The menu bar icon is provided by the Helper Tool. Install it above to use it." = "يتم توفير رمز شريط القوائم بواسطة الأداة المساعدة. قم بتثبيتها أعلاه لاستخدامها.";
 
 /* Caption under the Show Menu Bar Icon toggle */
-"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "يُظهر رمز MaCursor في شريط القوائم لتبديل سمات المؤشر وقواعد كل تطبيق. إذا لم يظهر، فافتح «إعدادات النظام» وابحث في قسم «شريط القوائم».";
+"Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section." = "يُظهر رمز MaCursor في شريط القوائم للوصول السريع. إذا لم يظهر، فافتح «إعدادات النظام» وابحث في قسم «شريط القوائم».";
 
 /* Menu bar panel */
 
@@ -667,6 +664,18 @@
 /* Menu bar panel: caption under the favorites placeholder */
 "Mark themes as favorites in MaCursor to show them here." = "ضع علامة على السمات كمفضلة في MaCursor لعرضها هنا.";
 
+/* Menu bar panel: row that reads the text in a box on the screen. CleanShot X calls it Capture Text (OCR) in its menu */
+"Capture Text (OCR)" = "التقاط النص (OCR)";
+
+/* Menu bar panel: row that opens a picture from a file in the editor. CleanShot X calls it Open... in its menu */
+"Open..." = "فتح…";
+
+/* Menu bar panel: row that opens the picture on the clipboard in the editor. Dim when the clipboard has no picture */
+"Open from Clipboard" = "فتح من الحافظة";
+
+/* Menu bar panel: row that picks a picture file and floats it on the screen. CleanShot X calls it Pin to the Screen... in its menu */
+"Pin to the Screen..." = "تثبيت على الشاشة…";
+
 /* Helper status: installed but not running */
 "Installed, not running" = "مُثبَّتة، غير قيد التشغيل";
 
@@ -693,6 +702,30 @@
 
 /* Button that closes that window once access was granted */
 "Let’s Go!" = "هيا بنا!";
+
+/* Welcome window: window title and heading of the first page */
+"Welcome to MaCursor" = "مرحبًا بك في MaCursor";
+
+/* Welcome window: main button on the middle pages */
+"Next" = "التالي";
+
+/* Welcome window: heading of the last page */
+"You’re All Set" = "كل شيء جاهز";
+
+/* Welcome window: text of the last page */
+"You can change any of this later in Settings." = "يمكنك تغيير كل ذلك لاحقًا من «الإعدادات».";
+
+/* Welcome window: text of the Helper Tool page */
+"The Helper Tool starts when you log in. It keeps your cursors after a restart and runs most features on the next pages. Install it now, or later in Settings → General." = "تبدأ الأداة المساعدة عند تسجيل الدخول. فهي تحتفظ بمؤشراتك بعد إعادة التشغيل وتشغّل معظم الميزات في الصفحات التالية. ثبّتها الآن أو لاحقًا من «الإعدادات» ← «عام».";
+
+/* Welcome window: line under the switches while the Helper Tool is not installed */
+"Install the Helper Tool to use the switches on this page." = "ثبّت الأداة المساعدة لاستخدام مفاتيح التبديل في هذه الصفحة.";
+
+/* Welcome window: title of the warning shown before the window closes */
+"Are you sure you want to close this window?" = "هل تريد بالتأكيد إغلاق هذه النافذة؟";
+
+/* Welcome window: text of the warning shown before the window closes */
+"You can change these features in Settings. This window opens again only after Reset All Settings." = "يمكنك تغيير هذه الميزات من «الإعدادات». لن تُفتح هذه النافذة مجددًا إلا بعد إعادة تعيين جميع الإعدادات.";
 
 /* Empty search result in the Edit Theme sidebar; %@ is the search text */
 "No Results for “%@”" = "لا توجد نتائج لـ «%@»";
@@ -1235,7 +1268,7 @@
 "Triggers to Ignore" = "المُشغِّلات المتجاهلة";
 "Every Trigger" = "كل المُشغِّلات";
 "Mouse Buttons" = "أزرار الماوس";
-/* Cursor Gestures settings: picker of when an ignored app counts: only while it is in front, or whenever one of its windows is on screen */
+/* Cursor Gestures settings: picker of when an ignored app counts: In Front (only while it is the front app) or Under the Pointer (only when a gesture starts over one of its windows) */
 "Ignore When" = "التجاهل عندما";
 "In Front" = "في المقدمة";
 /* Cursor Gestures settings: button and title of the alert that adds back the ready-made gestures */
@@ -1291,7 +1324,7 @@
 "Delay window focus for %@" = "منح التركيز بعد %@";
 /* Menu bar panel: folded row under the Focus on Hover switch that holds the delay slider */
 "Focus Delay" = "تأخير التركيز";
-/* Cursor Shaker: feature name in the Settings sidebar, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
+/* Cursor Shaker: feature name in Settings → Cursor Control, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
 "Cursor Shaker" = "هزّاز المؤشر";
 "Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool." = "تتطلب ميزة «هزّاز المؤشر» الأداة المساعدة. يمكنك تثبيتها من «عام» ← «الأداة المساعدة».";
 /* Cursor Shaker: grey caption under its switch */
@@ -1416,3 +1449,355 @@
 
 /* Cursor Translator: the first choice of “Translate to” in Settings. It follows the Mac's language; %@ is that language's name, for example “English (System Default)” */
 "%@ (System Default)" = "%@ (افتراضي النظام)";
+
+/* Cursor Capture: the Settings tab that takes a picture of the screen with a shortcut */
+"Cursor Capture" = "التقاط المؤشر";
+"Cursor Capture requires the Helper Tool. You can install it from General → Helper Tool." = "تتطلب ميزة «التقاط المؤشر» الأداة المساعدة. يمكنك تثبيتها من «عام» ← «الأداة المساعدة».";
+"Choose…" = "اختيار…";
+"Desktop" = "سطح المكتب";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "يحتاج MaCursor إلى «تسجيل الشاشة» لالتقاط صورة لشاشتك. تبقى الصورة على جهاز Mac الخاص بك. اختر «السماح بتسجيل الشاشة»، ثم اسمح لـ MaCursor في «الخصوصية والأمن» ← «تسجيل الشاشة وصوت النظام».";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "يحتاج MaCursor إلى «تسجيل الشاشة» لالتقاط صورة لشاشتك. تبقى الصورة على جهاز Mac الخاص بك. اختر «السماح بتسجيل الشاشة»، ثم اسمح لـ MaCursor في «الخصوصية والأمن» ← «تسجيل الشاشة».";
+"Waiting for access. This window updates as soon as MaCursor is allowed." = "في انتظار الإذن. سيتم تحديث هذه النافذة فور السماح لـ MaCursor.";
+
+/* Settings, General, Menu Bar: the label above the list of the panel's items */
+"Panel Items" = "عناصر اللوحة";
+"Drag an item to change its place in the panel. Turning an item off hides it from the panel, and its feature keeps working." = "اسحب عنصرًا لتغيير مكانه في اللوحة. عند إيقاف عنصر يُخفى من اللوحة وتبقى ميزته تعمل.";
+
+/* Cursor Capture editor: the tools that draw on the picture. Box draws an empty rectangle. Pixelate turns what it covers into coloured blocks */
+"Arrow" = "سهم";
+"Box" = "مربع";
+"Pixelate" = "بكسلة";
+
+/* Cursor Capture editor: more tools. Text types words on the picture. Number places the next number in a circle. Highlight is a marker pen. Crop cuts the picture smaller */
+"Text" = "نص";
+"Number" = "رقم";
+"Highlight" = "تمييز";
+"Crop" = "قص";
+
+/* Settings > Cursor Capture: the switch card line, the Shortcuts tab, and the Capture Text rows */
+"Take a picture of your screen, with your cursor in it if you want." = "التقط صورة لشاشتك، مع المؤشر إذا أردت.";
+"Shortcuts" = "الاختصارات";
+"Capture Text" = "التقاط النص";
+"Copy Text" = "نسخ النص";
+"Text Copied" = "تم نسخ النص";
+"No Text Found" = "لم يتم العثور على نص";
+"Drag a box, and the text in it goes to your clipboard. No picture is saved." = "اسحب مربعًا، وسينتقل النص الموجود فيه إلى الحافظة. لا يتم حفظ أي صورة.";
+"Filled Box" = "مربع معبأ";
+"Oval" = "شكل بيضاوي";
+"Pen" = "قلم";
+"Select" = "تحديد";
+"Add Image" = "إضافة صورة";
+"Background" = "الخلفية";
+"Color" = "اللون";
+"Size" = "الحجم";
+"Save as…" = "حفظ باسم…";
+"Done Editing" = "تم";
+"Zoom" = "تكبير/تصغير";
+"Zoom In" = "تكبير";
+"Zoom Out" = "تصغير";
+"Fit Canvas" = "ملاءمة اللوحة";
+"Drag Me" = "اسحبني";
+"Share" = "مشاركة";
+"Pin" = "تثبيت";
+"Don't Save" = "عدم الحفظ";
+"Format:" = "التنسيق:";
+"JPEG Image" = "صورة JPEG";
+"PNG Image" = "صورة PNG";
+"HEIC Image" = "صورة HEIC";
+"WebP Image" = "صورة WebP";
+"%lld pt" = "%lld نقطة";
+"%lld%%" = "%lld%%";
+"Hex" = "سداسي عشري";
+"Alpha" = "ألفا";
+"Hue" = "تدرج اللون";
+"R" = "R";
+"G" = "G";
+"B" = "B";
+"Add to My Colors" = "إضافة إلى ألواني";
+"My Colors" = "ألواني";
+"More Colors" = "ألوان أخرى";
+"Fewer Colors" = "ألوان أقل";
+"Pick a Color" = "اختيار لون";
+"Black" = "أسود";
+"Red" = "أحمر";
+"Orange" = "برتقالي";
+"Yellow" = "أصفر";
+"Green" = "أخضر";
+"Teal" = "أزرق مخضر";
+"Blue" = "أزرق";
+"Purple" = "بنفسجي";
+"Pink" = "وردي";
+"White" = "أبيض";
+"Arrow Style" = "نمط السهم";
+"Text Style" = "نمط النص";
+"Spotlight Shape" = "شكل Spotlight";
+"Pixelate Style" = "نمط البكسلة";
+"Number Settings" = "إعدادات الرقم";
+"Unlock Canvas" = "فتح قفل اللوحة";
+"Lock Canvas" = "قفل اللوحة";
+"Spotlight Opacity" = "عتامة Spotlight";
+"Pixelate Strength" = "قوة البكسلة";
+"Emoji" = "رموز تعبيرية";
+"Starting Number:" = "رقم البداية:";
+"Standard" = "قياسي";
+"Fancy" = "مزخرف";
+"Curved" = "منحني";
+"Double" = "مزدوج";
+"Rectangle" = "مستطيل";
+"Rounded Rectangle" = "مستطيل مستدير الزوايا";
+"Secure Blur" = "تمويه آمن";
+"Blur" = "تمويه";
+"Black Out" = "تعتيم أسود";
+"Rounded" = "مستدير";
+"Outlined" = "محدد";
+"Mono" = "أحادي";
+"Mono Box" = "مربع أحادي";
+"Rounded Box" = "مربع مستدير";
+"Freeform" = "حر";
+"Custom Ratio" = "نسبة مخصصة";
+"Original Ratio" = "النسبة الأصلية";
+"1 : 1 (Square)" = "1 : 1 (مربع)";
+"Ratio" = "النسبة";
+"Ratio Width" = "عرض النسبة";
+"Ratio Height" = "ارتفاع النسبة";
+"Swap Width and Height" = "تبديل العرض والارتفاع";
+"Fill Color" = "لون التعبئة";
+"Transparent" = "شفاف";
+"Auto" = "تلقائي";
+"Gray" = "رمادي";
+"Custom Color…" = "لون مخصص…";
+"Rotate" = "تدوير";
+"Flip" = "قلب";
+"Image size:" = "حجم الصورة:";
+"%lld × %lld px" = "%1$lld × %2$lld px";
+"Snap to edges" = "المحاذاة إلى الحواف";
+"Hold ⌘ to turn snapping on." = "اضغط مطولًا على ⌘ لتشغيل المحاذاة.";
+"Revert to Original" = "العودة إلى الأصل";
+"Rotate image?" = "هل تريد تدوير الصورة؟";
+"Flip image?" = "هل تريد قلب الصورة؟";
+"Flatten and Rotate" = "دمج وتدوير";
+"Flatten and Flip" = "دمج وقلب";
+"This burns every mark into the picture, so you can no longer edit them. You cannot undo this." = "سيتم دمج كل العلامات في الصورة ولن تتمكن من تعديلها بعد ذلك. لا يمكن التراجع عن هذا.";
+"Don't ask again" = "عدم السؤال مرة أخرى";
+"Width:" = "العرض:";
+"Height:" = "الارتفاع:";
+"pixels" = "بكسل";
+"percent" = "بالمئة";
+"Flatten Marks" = "دمج العلامات";
+"(Cannot be undone)" = "(لا يمكن التراجع)";
+"Resize" = "تغيير الحجم";
+"Keep Proportions" = "الحفاظ على التناسب";
+"Take Screenshot" = "التقاط لقطة شاشة";
+"Paste From Clipboard" = "لصق من الحافظة";
+"Choose From File…" = "اختيار من ملف…";
+"Open" = "فتح";
+"Top" = "أعلى";
+"Bottom" = "أسفل";
+"Left" = "اليسار";
+"Right" = "اليمين";
+"Add New Preset…" = "إضافة إعداد مسبق جديد…";
+"Add wallpaper" = "إضافة خلفية";
+"Alignment" = "المحاذاة";
+"Apply Previous Settings" = "تطبيق الإعدادات السابقة";
+"Auto Balance" = "موازنة تلقائية";
+"Automatically apply preset to all screenshots:" = "تطبيق الإعداد المسبق تلقائيًا على كل لقطات الشاشة:";
+"Blurred desktop" = "سطح مكتب ضبابي";
+"Blurred picture" = "صورة ضبابية";
+"Bottom left" = "أسفل اليسار";
+"Bottom right" = "أسفل اليمين";
+"Clean" = "نظيف";
+"Dark blur" = "ضبابية داكنة";
+"Dark gray" = "رمادي داكن";
+"Default Preset" = "الإعداد المسبق الافتراضي";
+"Delete Preset" = "حذف الإعداد المسبق";
+"Delete this preset?" = "هل تريد حذف هذا الإعداد المسبق؟";
+"Desktop picture" = "صورة سطح المكتب";
+"Dusk" = "الغسق";
+"Gradients" = "التدرجات";
+"Inset" = "هامش داخلي";
+"Light gray" = "رمادي فاتح";
+"Mint" = "نعناع";
+"Mist" = "ضباب";
+"My preset" = "إعدادي المسبق";
+"Night" = "ليل";
+"Padding" = "الهامش";
+"Pale blue" = "أزرق باهت";
+"Pale green" = "أخضر باهت";
+"Pale orange" = "برتقالي باهت";
+"Pale red" = "أحمر باهت";
+"Pale violet" = "بنفسجي باهت";
+"Pale yellow" = "أصفر باهت";
+"Preset options" = "خيارات الإعداد المسبق";
+"Presets" = "الإعدادات المسبقة";
+"Remove wallpaper" = "إزالة الخلفية";
+"Rose" = "وردي";
+"Sand" = "رملي";
+"Save as new preset" = "حفظ كإعداد مسبق جديد";
+"Save changes" = "حفظ التغييرات";
+"Shadow" = "الظل";
+"Soft" = "ناعم";
+"Top left" = "أعلى اليسار";
+"Top right" = "أعلى اليمين";
+"Violet" = "بنفسجي";
+"Wallpaper" = "خلفية";
+"Wallpapers" = "الخلفيات";
+"Hold Command ⌘ to disable snapping." = "اضغط مطولًا على Command ⌘ لإيقاف المحاذاة.";
+
+/* Settings > Cursor Capture, in CleanShot X's order: the tabs, the section headings and the rows. Auto-close is a switch; Interval is the time menu under it. Position on screen says where the card sits. Self-Timer interval is the wait before the picture. OCR is the section that holds Capture Text */
+"Quick Access" = "الوصول السريع";
+"Screenshots" = "لقطات الشاشة";
+"Advanced" = "متقدم";
+"Sounds" = "الأصوات";
+"Export" = "التصدير";
+"After Capture" = "بعد الالتقاط";
+"Behavior" = "السلوك";
+"Capture" = "الالتقاط";
+"Window Screenshots" = "لقطات النوافذ";
+"OCR" = "التعرف على النص";
+"Play sounds" = "تشغيل الأصوات";
+"Export location" = "موقع التصدير";
+"Show Quick Access Overlay" = "إظهار طبقة الوصول السريع";
+"Position on screen" = "الموضع على الشاشة";
+"Auto-close" = "الإغلاق التلقائي";
+"Interval" = "الفاصل الزمني";
+"Self-Timer interval" = "مدة المؤقت الذاتي";
+"Show cursor on screenshots" = "إظهار المؤشر في لقطات الشاشة";
+"Capture Area" = "التقاط منطقة";
+"Capture Previous Area" = "التقاط المنطقة السابقة";
+"Capture Fullscreen" = "التقاط الشاشة كاملة";
+"Set the default save location used when saving from the Quick Access Overlay, After Capture, and other Save actions across the app." = "حدّد موقع الحفظ الافتراضي المستخدم عند الحفظ من طبقة الوصول السريع و«بعد الالتقاط» وإجراءات الحفظ الأخرى في التطبيق.";
+"Decide what should happen after taking a screenshot." = "حدّد ما يجب أن يحدث بعد التقاط لقطة شاشة.";
+"After the Capture Area shortcut, press Space to pick a window. Press Space again to draw an area." = "بعد اختصار «التقاط منطقة»، اضغط مفتاح المسافة لاختيار نافذة. اضغط مفتاح المسافة مرة أخرى لتحديد منطقة.";
+"Action" = "الإجراء";
+"Screenshot" = "لقطة الشاشة";
+"Copy file to clipboard" = "نسخ الملف إلى الحافظة";
+"Open Annotate tool" = "فتح أداة التعليقات التوضيحية";
+"Pin to the screen" = "تثبيت على الشاشة";
+"Output" = "الإخراج";
+"File format" = "تنسيق الملف";
+"Convert to sRGB profile" = "التحويل إلى ملف تعريف sRGB";
+"Scale Retina screenshots to 1x" = "تغيير حجم لقطات شاشة Retina إلى 1x";
+"Add 1px border to all screenshots" = "إضافة إطار بعرض 1 بكسل إلى كل لقطات الشاشة";
+"Background preset" = "الإعداد المسبق للخلفية";
+"Apply Background Tool preset to all screenshots. You can create presets in the editor. Hold ⇧ Shift while capturing a screenshot to disable this option." = "يطبّق الإعداد المسبق لأداة الخلفية على كل لقطات الشاشة. يمكنك إنشاء الإعدادات المسبقة في المحرر. اضغط مع الاستمرار على ⇧ Shift أثناء التقاط لقطة الشاشة لإيقاف هذا الخيار.";
+"2 Seconds" = "2 ثانية";
+"5 Seconds" = "5 ثوانٍ";
+"10 Seconds" = "10 ثوانٍ";
+"15 Seconds" = "15 ثانية";
+"Self-Timer" = "المؤقت الذاتي";
+"This works in Fullscreen or Self-Timer modes only." = "يعمل هذا في وضعَي «الشاشة كاملة» أو «المؤقت الذاتي» فقط.";
+"Freeze screen when taking a screenshot" = "تجميد الشاشة عند التقاط لقطة شاشة";
+"With wallpaper" = "مع صورة سطح المكتب";
+"Capture window shadow" = "التقاط ظل النافذة";
+"Hold ⇧ Shift while taking a screenshot to capture the window with wallpaper." = "اضغط مع الاستمرار على ⇧ Shift أثناء التقاط لقطة الشاشة لالتقاط النافذة مع صورة سطح المكتب.";
+"Crosshair" = "خطوط التصويب";
+"Crosshair Mode" = "وضع خطوط التصويب";
+"Always enabled" = "مفعّل دائمًا";
+"When ⌘ Command is pressed" = "عند الضغط على Command ⌘";
+"Disabled" = "معطّل";
+"Show magnifier" = "إظهار المكبّر";
+"To enable magnifier, you must enable Crosshair Mode first." = "لتفعيل المكبّر، يجب تفعيل «وضع خطوط التصويب» أولًا.";
+"File Name" = "اسم الملف";
+"Ask for name after every capture" = "طلب اسم بعد كل التقاط";
+"File name format" = "تنسيق اسم الملف";
+"Customize…" = "تخصيص…";
+"Add “@2x” suffix to Retina screenshots" = "إضافة اللاحقة «@2x» إلى لقطات شاشة Retina";
+"This option improves compatibility with displaying Retina screenshots in third-party apps." = "يحسّن هذا الخيار التوافق عند عرض لقطات شاشة Retina في تطبيقات الجهات الخارجية.";
+"Type text and drag elements to create a custom format:" = "اكتب نصًا واسحب العناصر لإنشاء تنسيق مخصص:";
+"Year" = "السنة";
+"Month (numeric)" = "الشهر (رقم)";
+"Day" = "اليوم";
+"Window title" = "عنوان النافذة";
+"App name" = "اسم التطبيق";
+"Minutes" = "الدقائق";
+"Seconds" = "الثواني";
+"Auto-increment" = "ترقيم تلقائي";
+"Remove illegal characters" = "إزالة الأحرف غير المسموح بها";
+"Restore Defaults" = "استعادة الإعدادات الافتراضية";
+"Next number" = "الرقم التالي";
+"Name this screenshot" = "سمِّ لقطة الشاشة هذه";
+"Use Default Name" = "استخدام الاسم الافتراضي";
+"Copy to clipboard" = "نسخ إلى الحافظة";
+"File & Image (default)" = "ملف وصورة (افتراضي)";
+"Image only" = "صورة فقط";
+"File only" = "ملف فقط";
+"Adjust this option if you've encountered any issues with pasting from clipboard or clipboard managers." = "غيّر هذا الخيار إذا واجهت مشكلات في اللصق من الحافظة أو من مديري الحافظة.";
+"Text Recognition" = "التعرّف على النص";
+"Automatically Detect Language" = "اكتشاف اللغة تلقائيًا";
+"Keep line breaks" = "الإبقاء على فواصل الأسطر";
+"Detect links" = "اكتشاف الروابط";
+"Arabic (Najdi)" = "العربية (النجدية)";
+"Chinese (Simplified)" = "الصينية (المبسطة)";
+"Chinese (Traditional)" = "الصينية (التقليدية)";
+"Norwegian (Bokmål)" = "النرويجية (بوكمال)";
+"Norwegian (Nynorsk)" = "النرويجية (نينورسك)";
+"Do you want to open this link?" = "هل تريد فتح هذا الرابط؟";
+"Open Link in Browser" = "فتح الرابط في المتصفح";
+"Never open links" = "عدم فتح الروابط أبدًا";
+"Area Selection" = "تحديد المنطقة";
+"Remember last selection" = "تذكّر آخر تحديد";
+"Keep styling" = "الإبقاء على التنسيق";
+"Date" = "التاريخ";
+"Capture History" = "سجل الالتقاطات";
+"Keep history" = "الاحتفاظ بالسجل";
+"1 day" = "يوم واحد";
+"3 days" = "3 أيام";
+"1 week" = "أسبوع واحد";
+"1 month" = "شهر واحد";
+"You can restore old files with “Capture History” option from the menu bar." = "يمكنك استعادة الملفات القديمة من خيار «سجل الالتقاطات» في شريط القوائم.";
+"Capture History..." = "سجل الالتقاطات…";
+"Capture History is disabled." = "سجل الالتقاطات معطّل.";
+"No files to restore..." = "لا توجد ملفات لاستعادتها…";
+"Clear History..." = "مسح السجل…";
+"Are you sure you want to delete all files from history?" = "هل تريد بالتأكيد حذف كل الملفات من السجل؟";
+
+/* Settings > Cursor Capture > Quick Access: the Appearance and Behavior rows, the Auto-close interval choices, and the card with no heading. Overlay is the small card shown after a capture. ⌥ is the Option key. "Export location" names the row on the General tab */
+"Move to active screen" = "النقل إلى الشاشة النشطة";
+"Active screen is the screen where your cursor is pointing." = "الشاشة النشطة هي الشاشة التي يشير إليها المؤشر.";
+"Overlay size" = "حجم الطبقة";
+"Save and Close" = "حفظ وإغلاق";
+"5 seconds" = "5 ثوانٍ";
+"10 seconds" = "10 ثوانٍ";
+"15 seconds" = "15 ثانية";
+"30 seconds" = "30 ثانية";
+"1 minute" = "1 دقيقة";
+"2 minutes" = "2 دقيقة";
+"5 minutes" = "5 دقائق";
+"10 minutes" = "10 دقائق";
+"Close after dragging" = "الإغلاق بعد السحب";
+"Hold ⌥ (option) to keep the item on Overlay after dragging." = "اضغط مع الاستمرار على ⌥ Option لإبقاء العنصر على الطبقة بعد السحب.";
+"Hold ⌥ (option) to close the item from Overlay after dragging." = "اضغط مع الاستمرار على ⌥ Option لإغلاق العنصر من الطبقة بعد السحب.";
+"Save button behavior" = "سلوك زر الحفظ";
+"Save to \"Export location\"" ="الحفظ في «موقع التصدير»";
+"Ask for destination" = "السؤال عن الوجهة";
+"Press with ⌥ (option) to choose the destination." = "انقر مع الضغط على ⌥ Option لاختيار الوجهة.";
+"Press with ⌥ (option) to use 'Export Location' without asking." = "انقر مع الضغط على ⌥ Option لاستخدام «موقع التصدير» دون سؤال.";
+"Search Themes" = "بحث في السمات";
+
+/* Welcome window, version 2 */
+"MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them." = "يمنحك MaCursor التحكم في مؤشرات النظام على macOS. في الصفحات التالية يمكنك تشغيل ميزات إضافية أو تخطيها.";
+"Cursor Look" = "مظهر المؤشر";
+"When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "عند التفعيل، يُرسم ظل ناعم أسفل المؤشر. يظهر الظل أثناء تطبيق سمة مؤشر.";
+"Install the Helper Tool on the first page to use Cursor Trails." = "ثبّت الأداة المساعدة في الصفحة الأولى لاستخدام أثر المؤشر.";
+"Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "تحتاج الميزات في هذه الصفحة إلى إذن تسهيلات الاستخدام لـ MaCursorHelper. إذا كان مفقودًا، فاختر «منح الإذن» لفتح إعدادات النظام.";
+"Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "تحتاج الميزات في هذه الصفحة إلى إذن تسجيل الشاشة لـ MaCursor. ويحتاج مترجم المؤشر أيضًا إلى إذن تسهيلات الاستخدام لـ MaCursorHelper. إذا كان الإذن مفقودًا، فاختر «منح الإذن» لفتح إعدادات النظام.";
+"Press the shortcut to take a picture of your screen." = "اضغط على الاختصار لالتقاط صورة لشاشتك.";
+"This feature needs the Finder extension and Full Disk Access for MaCursor. If either is missing, choose Grant Permission to open System Settings." = "تحتاج هذه الميزة إلى ملحق Finder وإذن الوصول الكامل إلى القرص لـ MaCursor. إذا كان أي منهما مفقودًا، فاختر «منح الإذن» لفتح إعدادات النظام.";
+"Help Writronic keep growing" = "ساعد Writronic على مواصلة النمو";
+"If you would like to support development, you can donate on the Writronic website." = "إذا كنت ترغب في دعم التطوير، يمكنك التبرع على موقع Writronic الإلكتروني.";
+"Thank you for being here." = "شكرًا لوجودك هنا.";
+"A star on GitHub also helps more people find MaCursor, and it means a lot." = "تساعد النجمة على GitHub أيضًا المزيد من الأشخاص في العثور على MaCursor، وهي تعني لنا الكثير.";
+"Give a Star" = "امنح نجمة";
+/* Welcome window: button at the end of an access line whose dot is red; it opens System Settings at that access */
+"Grant Permission" = "منح الإذن";
+/* Welcome window: what VoiceOver reads after the name of an access whose dot is red */
+"Access not granted" = "لم يتم منح الإذن";
+
+/* Welcome window: line under the cards on pages 2 to 4 while the Helper Tool is installed but not running. MaCursor starts it again when it opens. */
+"The Helper Tool is not running. Quit and reopen MaCursor to start it." = "الأداة المساعدة ليست قيد التشغيل. قم بإنهاء MaCursor وفتحه من جديد لتشغيلها.";
+
+"Hide desktop icons while capturing" = "إخفاء أيقونات سطح المكتب أثناء الالتقاط";
+
+"Left Button" = "الزر الأيسر";
+"Hold a key with the left or right button, so normal clicks still work." = "اضغط مع الاستمرار على مفتاح مع الزر الأيسر أو الأيمن، لكي تبقى النقرات العادية تعمل.";
+"A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "يستخدم اختصار في «التقاط المؤشر» المفاتيح والزر نفسها. تكون الأولوية لـ «التقاط المؤشر».";

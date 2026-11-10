@@ -82,7 +82,7 @@ struct CursorTranslatorConfig: Codable, Equatable {
     static let textSizes = 0.75...2.0
     static let lineSpacings = [1.0, 1.25, 1.5, 2.0]
     static let languages = ["ar", "zh-Hans", "zh-Hant", "nl", "en", "fr", "de", "hi", "id", "it", "ja", "ko", "pl", "pt-BR", "ru", "es", "th", "tr", "uk", "vi"]
-    static let defaultTrigger = CursorGestureTrigger(keys: NSEvent.ModifierFlags([.command, .option]).rawValue, button: 1)
+    static let defaultTrigger = CursorGestureTrigger(keys: NSEvent.ModifierFlags([.command, .shift]).rawValue, button: 1)
     static let colors = CursorTrailsPalette.allCases.filter { $0 != .match && $0 != .prism }
     static let screenRecordingSettings = "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture"
     static let languageSettings = "x-apple.systempreferences:com.apple.Localization-Settings.extension"
@@ -906,7 +906,7 @@ enum CursorTranslator {
     }
 
     static func usable(_ trigger: CursorGestureTrigger) -> Bool {
-        trigger.button != nil && !trigger.twoFinger && (trigger.keys != 0 || trigger.button != 1)
+        trigger.button != nil && !trigger.twoFinger && (trigger.keys != 0 || (trigger.button ?? 0) >= 2)
     }
 
     static func clashes(_ trigger: CursorGestureTrigger, with gestures: CursorGesturesConfig) -> Bool {

@@ -21,7 +21,7 @@ MaCursor gives you control over system cursors on macOS. You can replace macOS c
 Requires **macOS 13 Ventura** or later.
 
 <p align="center">
-  <img src="screenshot.png" alt="MaCursor Screenshot">
+  <img src="docs/screenshot.png" alt="MaCursor Screenshot">
 </p>
 
 ## Features
@@ -30,6 +30,7 @@ Requires **macOS 13 Ventura** or later.
 - **Menu Bar Panel** — Your favorite themes, the cursor for the app in front, and the cursor scale, Cursor Shadow, Focus on Hover, Cursor Shaker, Cursor Translator, Cursor Gestures and Cursor Trails controls, all in the menu bar without opening the window
 - **Right-Click Menu** — Get more from your right-click in Finder and on the Desktop: copy a path, make a new file, open files in the app you choose, and more
 - **Focus on Hover** — The window under your pointer becomes active after a short pause, without clicking
+- **Cursor Capture** — Press a shortcut to take a picture of your screen, an area or a window, with your cursor in it if you want. Mark it up in an editor, or copy the text in it
 - **Cursor Translator** — A frame over any text on your screen shows it in your language, and keeps up as the text changes
 - **Cursor Gestures** — Hold modifier keys or a mouse button and draw a shape to run an action, such as a keyboard shortcut, typed text, an app, a website or a window action
 - **Cursor Trails** — A smooth line follows your pointer and shrinks back into it when you stop, in ready-to-use styles
@@ -84,15 +85,19 @@ Or install it with [Homebrew](https://brew.sh):
 brew install --cask writronic/tap/macursor
 ```
 
-### 2. Get Themes
+### 2. Welcome Window
+
+The first time you open MaCursor, the Welcome window walks you through the setup. Install the Helper Tool on its first page, and choose **Grant Permission** wherever a feature needs access. If you quit before you finish, it opens again the next time you launch the app.
+
+### 3. Get Themes
 
 Browse `.cursor` theme files in the [Theme Gallery](https://github.com/writronic/MaCursor/blob/main/themes/README.md) or grab them all from the [Releases page](https://github.com/writronic/MaCursor/releases/latest). Already have a Windows or Linux cursor theme? Use **File → Convert Theme…** instead.
 
-### 3. Import & Apply
+### 4. Import & Apply
 
 Double-click any `.cursor` file, drag & drop it onto the MaCursor library window, or use **File → Import Theme…**. Then select the theme and click **Apply**.
 
-### 4. Make It Permanent (Recommended)
+### 5. Make It Permanent (Recommended)
 
 Without the helper tool, cursors reset after a restart or user switch. To keep your theme active permanently:
 
@@ -108,6 +113,8 @@ Without the helper tool, cursors reset after a restart or user switch. To keep y
 Download the latest `.dmg` from the [Releases page](https://github.com/writronic/MaCursor/releases/latest). The app ships as a **universal binary** (Apple Silicon + Intel). Every release is **code-signed, notarized, and stapled** by Apple.
 
 ## Usage
+
+The Welcome window walks you through the setup page by page: **Welcome to MaCursor**, **Cursor Look**, **Accessibility**, **Screen Recording**, **Right-Click Menu**, **Menu Bar** (once the menu bar icon is on) and **You’re All Set**. Install the Helper Tool on the first page. On the **Accessibility**, **Screen Recording** and **Right-Click Menu** pages, a feature that is missing an access shows **Grant Permission**. Choose it to open System Settings and allow the access there. The feature's switch works once its access is given. On macOS 15.0 and 15.1, the Finder extension shows **Copy Command** instead: run the copied command in Terminal. Use **Back** and **Next**, then **Let’s Go!** on the last page. After you close it, it opens again only after **Reset All Settings**: choose **Reset** in **Settings → General**. That also removes your themes.
 
 ### Applying a Theme
 
@@ -131,6 +138,7 @@ Click the menu bar icon to open the panel:
 | **Header**         | **Current Cursor** and the theme in use, plus a ↺ button                                                                                                                             |
 | **Cursor Themes**  | Your favorites as thumbnails. Click one to apply it. The applied theme is outlined and check-marked                                                                                  |
 | **Active App**     | The app in front, with a **Cursor for this app** menu. Pick a theme there and that app gets its own cursor; if **Per-App Themes** was off, choosing a theme turns it on for you       |
+| **Cursor Capture** | **Capture Area**, **Capture Previous Area**, **Capture Fullscreen**, **Self-Timer**, **Capture Text (OCR)**, **Open…**, **Open from Clipboard**, **Pin to the Screen…** and **Capture History…**. It shows while **Cursor Capture** is on                                                                 |
 | **Quick Controls** | **Cursor Scale**, **Cursor Shadow**, **Focus on Hover**, **Cursor Gestures**, **Cursor Translator** and **Cursor Shaker**, applied as you change them                                                                        |
 | **Cursor Gestures** | The **Cursor Gestures** switch in Quick Controls turns gestures on or off. While they are on, **Ignore Cursor Gestures** in Active App turns them off for the app in front |
 | **Cursor Trails**  | The **Cursor Trails**, **Use Graphics Hardware**, **Fade** and **Glow when still** switches. Click the section title to show or hide them |
@@ -168,19 +176,56 @@ To change the menu, use the tabs in **MaCursor → Settings → Right-Click Menu
 
 You can also add a **MaCursor** button to the Finder toolbar. In Finder, choose **View → Customize Toolbar…** and drag the button in. Click it to get the items you see when you right-click empty space, for the folder you are in. Inside iCloud Drive folders, use this button.
 
+### Using Cursor Capture
+
+Take a picture of your screen with a shortcut:
+
+1. Open **MaCursor → Settings → Cursor Capture** and turn on **Cursor Capture**.
+2. Hold **⌥⌘** and right-click for the whole screen, or hold **⌘** and right-click for a part of it.
+
+**Capture Fullscreen** takes the display your pointer is on. In the **General** tab, **After Capture** sets what happens to each picture: **Show Quick Access Overlay**, **Copy file to clipboard**, **Save**, **Open Annotate tool** and **Pin to the screen**. **Save** saves each picture to the **Export location**. Click **Choose…** to pick another folder. A saved file is named like `MaCursor 11-04-2026 at 02.30.12 PM.png`, with the date and time in your Mac's format. If the picture cannot be saved, you hear the system beep. Turn on **Play sounds** to hear the macOS capture sound.
+
+**Hide desktop icons while capturing** in the **General** tab leaves your desktop icons and widgets out of pictures of the screen and of an area. The wallpaper, the Dock and your windows stay.
+
+After you start **Capture Area**, the screen freezes and dims. Drag a box and let go. The box shows its size in pixels. Press **Space** to pick a window instead, and **Space** again to draw a box. Press **Esc** or right-click to cancel. Record a shortcut for **Capture Previous Area** to take the same box again without dragging. Turn off **Freeze screen when taking a screenshot** in the **Screenshots** tab to keep the screen live while you drag.
+
+Record a shortcut for **Capture Text**, press it and drag a box. The text in the box goes to your clipboard, and no picture is saved. A notice says **Text Copied** or **No Text Found**. In the **Advanced** tab, **Text Recognition** sets the language, **Keep line breaks**, **Keep styling** and **Detect links**.
+
+Record a shortcut for **Self-Timer**, press it and draw a box or pick a window, as with **Capture Area**. A countdown shows on screen, then the picture is taken. **Self-Timer interval** in the **Screenshots** tab sets the wait to 2, 5, 10 or 15 seconds. Press the same shortcut again to cancel.
+
+The **Shortcuts** tab lists **Capture Area**, **Capture Previous Area**, **Capture Fullscreen**, **Self-Timer** and **Capture Text**. Each row takes a key, or a mouse click. A left or right click needs a modifier key held, so normal clicks keep working.
+
+Turn on **Show Quick Access Overlay** and a small card appears in a corner of your screen after each picture. The card shows the picture, with these rows: **Copy**, **Save**, **Edit**, **Copy Text** and **Close**. **Save** saves a picture that is not saved yet, and then reads **Show in Finder**. Double-click the picture to open the editor, or drag it into another app. In the **Quick Access** tab, **Position on screen** puts the card on the **Left** or **Right**, and **Overlay size** makes the card smaller or larger. **Auto-close** closes the card after the **Interval**. The card waits while your pointer is on it. **Action** sets what happens then: **Save and Close** saves the picture first, and **Close** only closes the card.
+
+The editor opens in its own window. The top bar has **Crop**, **Add Image** and **Background**, then the tools **Select**, **Box**, **Filled Box**, **Oval**, **Line**, **Arrow**, **Pen**, **Text**, **Pixelate**, **Spotlight**, **Highlight** and **Number**, with Undo and Redo, then colour, size, **Save as…** and **Done**. **Pixelate** can use **Secure Blur**, **Blur** or **Black Out**. **Add Image** takes a new capture, the clipboard or a file. **Crop** has a ratio menu, rotate and flip. **Background** puts the picture on a colour, a gradient, your desktop picture, a wallpaper you add, or a blurred copy of your desktop picture or of the capture, with padding, corners and a shadow. You can save your look as a preset, and pick one to apply to every new picture. Hold **⇧** when you take a picture to skip that preset.
+
+The bottom bar has **Zoom**, **Drag Me**, **Share**, **Pin** and **Copy**. **Drag Me** drags the picture into another app. **Pin** keeps it floating on your screen. **Save as…** can write PNG, JPEG and WebP, and HEIC when your Mac can. **Done** asks first if you have unsaved marks.
+
+In the **Screenshots** tab, **File format** can be **PNG**, **JPEG** or **WEBP**. Set **Crosshair Mode** to **Always enabled** or **When ⌘ Command is pressed** to draw guide lines through your pointer. **Show magnifier** adds a magnifier. Under **Window Screenshots**, choose **Transparent** or **With wallpaper** for a window picture. **Capture window shadow** keeps the window's shadow on macOS 14 and later.
+
+A picture carries your screen's DPI: 144 on a Retina screen and 72 on a normal one. With **Scale Retina screenshots to 1x** on in the **Screenshots** tab, it carries 72. Either way, apps that read the DPI show the picture at the size it had on your screen. WebP pictures carry no DPI. A file you open in the editor keeps its own DPI.
+
+**Show cursor on screenshots** in the **Screenshots** tab puts your cursor in the picture, as it looks on your screen. It works for **Capture Fullscreen** and **Self-Timer** only.
+
+In the **Advanced** tab, **File Name** can ask for a name after every capture and change the name with **Customize…**. **Copy to clipboard** chooses **File & Image (default)**, **Image only** or **File only**. **Remember last selection** shows your last box again when you start **Capture Area**. Press **Return** or double-click it to take that picture.
+
+**Capture History** keeps a copy of each picture. Open **Capture History…** in the menu bar panel to bring one back. **Keep history** in the **Advanced** tab sets how long: **Disabled**, **1 day**, **3 days**, **1 week** or **1 month**.
+
+The first time you save, macOS may ask you to allow MaCursor to use your Desktop folder, or the folder you chose. If you say no, the picture is not saved, but the clipboard copy still works. You can change your answer in **System Settings → Privacy & Security → Files & Folders**.
+
 ### Using Cursor Translator
 
 Read the text on your screen in your language:
 
 1. Open **MaCursor → Settings → Cursor Translator** and turn on **Cursor Translator**.
 2. Choose your language in **Translate to** and pick a **Translation Service**. Set up that service as shown below.
-3. Hold **⌥⌘** and right-click over some text.
+3. Hold **⇧⌘** and right-click over some text.
 
-A frame opens around the pointer, and the text inside it turns into your language. When the text in the frame changes, the translation follows. Hold **⌥⌘** and right-click again to close the frame.
+A frame opens around the pointer, and the text inside it turns into your language. When the text in the frame changes, the translation follows. Hold **⇧⌘** and right-click again to close the frame.
 
 **Translate from** starts at **Detect Language**, so MaCursor finds the language of the text for you. **Translate to** starts at your Mac's own language, for example **English (System Default)**. If MaCursor does not offer your Mac's language, it starts at English.
 
-With **Frame Stays**, the frame stays where you put it. Hold **⌥⌘** and drag with the right button to draw a frame of any size, drag its name tag to move it, and drag its corner to resize it. Click a language on the name tag to change it, and the frame translates again. With **Follows the Pointer**, the frame moves with your pointer and reads the text when the pointer stops. Its name tag shows the two languages, for example **Japanese → English**.
+With **Frame Stays**, the frame stays where you put it. Hold **⇧⌘** and drag with the right button to draw a frame of any size, drag its name tag to move it, and drag its corner to resize it. Click a language on the name tag to change it, and the frame translates again. With **Follows the Pointer**, the frame moves with your pointer and reads the text when the pointer stops. Its name tag shows the two languages, for example **Japanese → English**.
 
 **Trigger** changes the keys and the mouse button, and **Frame Colors** changes the color of the frame. **Text Size** and **Line Spacing** set the size of the translated text and the space between its lines.
 
@@ -360,6 +405,7 @@ These features need the Helper Tool (`MaCursorHelper`), which keeps them working
 
 - Menu Bar Panel
 - The MaCursor button in the Finder toolbar, inside iCloud Drive folders
+- Cursor Capture
 - Cursor Translator
 - Cursor Gestures
 - Cursor Trails
@@ -375,6 +421,7 @@ Install it in **MaCursor → Settings → General → Helper Tool**. Until you d
 
 These features also need Accessibility access for **MaCursorHelper**:
 
+- Cursor Capture
 - Cursor Translator
 - Cursor Gestures
 - Focus on Hover
@@ -388,8 +435,10 @@ When you turn one on and MaCursorHelper is not allowed yet, the **Allow Accessib
 
 Cursor Translator also needs Screen Recording access for **MaCursor**, to read the text inside the frame. Its window is called **Cursor Translator** and has two steps. After **Access granted**, click **Continue**, then **Allow Screen Recording**. Turn on **MaCursor** in **System Settings → Privacy & Security → Screen & System Audio Recording** (on macOS 13, **Screen Recording**). Look for **MaCursor** here, not MaCursorHelper: macOS gives this access to the app that holds the helper. If MaCursor is not in the list, click **+** and choose **MaCursor** in Applications. Then click **Let’s Go!**. If MaCursorHelper already has Accessibility access, the window starts at step 2.
 
+Cursor Capture needs the same Screen Recording access for **MaCursor**, to take the picture. Its window is called **Cursor Capture**. Click **Allow Screen Recording**, turn on **MaCursor** in the same list, then click **Let’s Go!**. Its click shortcuts also need Accessibility access for **MaCursorHelper**. If it is missing, the **Shortcuts** tab says so. It does not use the **Allow Accessibility Access** window. The warning in the **Shortcuts** tab has an **Open System Settings** button.
+
 > [!IMPORTANT]
-> A switch reads on only while its feature is enabled, MaCursorHelper is allowed, and the helper is running. If it flips straight back off, check all three. Cursor Translator also needs Screen Recording access, so check that too.
+> A switch reads on only while its feature is enabled, MaCursorHelper is allowed, and the helper is running. If it flips straight back off, check all three. Cursor Translator and Cursor Capture also need Screen Recording access, so check that too.
 
 ### Checking the Helper Tool
 

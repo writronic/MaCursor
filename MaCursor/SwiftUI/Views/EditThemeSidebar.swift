@@ -118,18 +118,31 @@ final class EditorTextShortcutCoordinator {
 
     private var eventMonitor: Any?
     private static var recorders: [AnyObject] = []
+    private static var stopOpenRecorder: (() -> Void)?
+    static var postRecording: (Notification.Name) -> Void = { name in
+        DistributedNotificationCenter.default().postNotificationName(name, object: nil, userInfo: nil, deliverImmediately: true)
+    }
 
     var isMonitoring: Bool { eventMonitor != nil }
 
-    static func addRecorder(_ handler: @escaping (NSEvent) -> NSEvent?) -> Any? {
+    static func addRecorder(stop: (() -> Void)? = nil, _ handler: @escaping (NSEvent) -> NSEvent?) -> Any? {
         let monitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown, handler: handler)
-        if let monitor { recorders.append(monitor as AnyObject) }
+        if let monitor {
+            recorders.append(monitor as AnyObject)
+            if recorders.count == 1 { postRecording(.MACShortcutRecordingDidStart) }
+        }
+        let older = stopOpenRecorder
+        stopOpenRecorder = stop
+        older?()
         return monitor
     }
 
     static func removeRecorder(_ monitor: Any) {
         NSEvent.removeMonitor(monitor)
+        let wasRecording = !recorders.isEmpty
         recorders.removeAll { $0 === monitor as AnyObject }
+        if recorders.isEmpty { stopOpenRecorder = nil }
+        if wasRecording, recorders.isEmpty { postRecording(.MACShortcutRecordingDidStop) }
     }
 
     static func editingSelector(
@@ -193,9 +206,14 @@ final class EditorTextShortcutCoordinator {
 struct SearchFieldView: NSViewRepresentable {
     @Binding var text: String
     let prompt: String
+    var focusToken: Int? = nil
+    var onDismiss: (() -> Void)? = nil
 
     func makeNSView(context: Context) -> NSSearchField {
-        let field = NSSearchField()
+        let field = FocusingSearchField()
+        field.focusesWhenShown = focusToken != nil
+        context.coordinator.focusToken = focusToken
+        context.coordinator.onDismiss = onDismiss
         field.placeholderString = prompt
         field.delegate = context.coordinator
         field.target = context.coordinator
@@ -208,11 +226,18 @@ struct SearchFieldView: NSViewRepresentable {
 
     func updateNSView(_ nsView: NSSearchField, context: Context) {
         context.coordinator.text = $text
+        context.coordinator.onDismiss = onDismiss
         if nsView.stringValue != text {
             nsView.stringValue = text
         }
         if nsView.placeholderString != prompt {
             nsView.placeholderString = prompt
+        }
+        if context.coordinator.focusToken != focusToken {
+            context.coordinator.focusToken = focusToken
+            if focusToken != nil, nsView.currentEditor() == nil {
+                nsView.window?.makeFirstResponder(nsView)
+            }
         }
     }
 
@@ -220,9 +245,25 @@ struct SearchFieldView: NSViewRepresentable {
         Coordinator(text: $text)
     }
 
+    final class FocusingSearchField: NSSearchField {
+        var focusesWhenShown = false
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            guard focusesWhenShown, window != nil else { return }
+            focusesWhenShown = false
+            DispatchQueue.main.async { [weak self] in
+                guard let self, let window = self.window else { return }
+                window.makeFirstResponder(self)
+            }
+        }
+    }
+
     @MainActor
     final class Coordinator: NSObject, NSSearchFieldDelegate {
         var text: Binding<String>
+        var onDismiss: (() -> Void)?
+        var focusToken: Int?
 
         init(text: Binding<String>) {
             self.text = text
@@ -239,11 +280,20 @@ struct SearchFieldView: NSViewRepresentable {
 
         func control(_ control: NSControl, textView: NSTextView,
                      doCommandBy commandSelector: Selector) -> Bool {
-            guard commandSelector == #selector(NSResponder.cancelOperation(_:)),
-                  !control.stringValue.isEmpty else { return false }
+            guard commandSelector == #selector(NSResponder.cancelOperation(_:)) else { return false }
+            if control.stringValue.isEmpty {
+                guard let onDismiss else { return false }
+                onDismiss()
+                return true
+            }
             control.stringValue = ""
             push("")
             return true
+        }
+
+        func controlTextDidEndEditing(_ obj: Notification) {
+            guard let field = obj.object as? NSSearchField, field.stringValue.isEmpty else { return }
+            onDismiss?()
         }
 
         private func push(_ value: String) {

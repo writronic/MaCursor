@@ -313,6 +313,9 @@ struct KeyRecorderView: View {
                                                         object: SettingsWindowController.shared.window)) { _ in
             stopRecording()
         }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
+            stopRecording()
+        }
         .onDisappear {
             stopRecording()
         }
@@ -321,7 +324,7 @@ struct KeyRecorderView: View {
     private func startRecording() {
         isRecording = true
 
-        eventMonitor = EditorTextShortcutCoordinator.addRecorder { event in
+        eventMonitor = EditorTextShortcutCoordinator.addRecorder(stop: stopRecording) { event in
             let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
 
             if event.keyCode == 53 {

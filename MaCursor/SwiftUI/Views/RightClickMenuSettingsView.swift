@@ -634,17 +634,26 @@ struct RightClickMenuSettingsView: View {
     }
 
     private func toggle() {
+        requestTask = AccessWindowController.tapRightClickMenu(save: { save($0) }) ?? requestTask
+    }
+}
+
+extension AccessWindowController {
+    @discardableResult
+    static func tapRightClickMenu(save: (() throws -> Void) -> Void) -> Task<Void, Never>? {
+        let manager = FinderExtensionManager.shared
         switch RightClickMenuState.toggleAction(settings: manager.settings, election: manager.election) {
         case .enable:
             save { try manager.setEnabled(true) }
         case .disable:
             save { try manager.setEnabled(false) }
         case .requestAccess:
-            requestTask = Task {
+            return Task {
                 await manager.prepareAccessRequest()
                 guard !Task.isCancelled else { return }
                 AccessWindowController.rightClickMenu.present()
             }
         }
+        return nil
     }
 }

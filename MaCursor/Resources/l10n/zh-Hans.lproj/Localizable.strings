@@ -375,9 +375,6 @@
 /* Toggle: cursor drop shadow */
 "Cursor Shadow" = "指针阴影";
 
-/* Caption explaining the cursor shadow toggle */
-"When enabled, a soft drop shadow is drawn under the cursor, similar to the pointer shadow on Windows. The shadow appears while a cursor theme is applied." = "启用后，会在指针下方绘制柔和的投影，类似于 Windows 的指针阴影。该阴影在应用指针主题时显示。";
-
 /* Section: software updates */
 "Software Updates" = "软件更新";
 
@@ -616,7 +613,7 @@
 "The menu bar icon is provided by the Helper Tool. Install it above to use it." = "菜单栏图标由辅助工具提供。请在上方安装后使用。";
 
 /* Caption under the Show Menu Bar Icon toggle */
-"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "在菜单栏中显示 MaCursor 图标，用于切换指针主题和按应用设置的规则。如果未显示，请打开“系统设置”并查看“菜单栏”部分。";
+"Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section." = "在菜单栏中显示 MaCursor 图标，方便快速访问。如果未显示，请打开“系统设置”并查看“菜单栏”部分。";
 
 /* Menu bar panel */
 
@@ -667,6 +664,18 @@
 /* Menu bar panel: caption under the favorites placeholder */
 "Mark themes as favorites in MaCursor to show them here." = "在 MaCursor 中将主题标记为收藏，即可在此处显示。";
 
+/* Menu bar panel: row that reads the text in a box on the screen. CleanShot X calls it Capture Text (OCR) in its menu */
+"Capture Text (OCR)" = "截取文本（OCR）";
+
+/* Menu bar panel: row that opens a picture from a file in the editor. CleanShot X calls it Open... in its menu */
+"Open..." = "打开…";
+
+/* Menu bar panel: row that opens the picture on the clipboard in the editor. Dim when the clipboard has no picture */
+"Open from Clipboard" = "从剪贴板打开";
+
+/* Menu bar panel: row that picks a picture file and floats it on the screen. CleanShot X calls it Pin to the Screen... in its menu */
+"Pin to the Screen..." = "固定到屏幕…";
+
 /* Helper status: installed but not running */
 "Installed, not running" = "已安装，未运行";
 
@@ -693,6 +702,30 @@
 
 /* Button that closes that window once access was granted */
 "Let’s Go!" = "开始吧！";
+
+/* Welcome window: window title and heading of the first page */
+"Welcome to MaCursor" = "欢迎使用 MaCursor";
+
+/* Welcome window: main button on the middle pages */
+"Next" = "下一步";
+
+/* Welcome window: heading of the last page */
+"You’re All Set" = "一切就绪";
+
+/* Welcome window: text of the last page */
+"You can change any of this later in Settings." = "你可以稍后在“设置”中更改这些内容。";
+
+/* Welcome window: text of the Helper Tool page */
+"The Helper Tool starts when you log in. It keeps your cursors after a restart and runs most features on the next pages. Install it now, or later in Settings → General." = "“辅助工具”会在你登录时启动。它会在重新启动后保留你的指针，并运行接下来页面中的大多数功能。你可以现在安装，也可以稍后在“设置”→“通用”中安装。";
+
+/* Welcome window: line under the switches while the Helper Tool is not installed */
+"Install the Helper Tool to use the switches on this page." = "请安装“辅助工具”以使用此页面上的开关。";
+
+/* Welcome window: title of the warning shown before the window closes */
+"Are you sure you want to close this window?" = "确定要关闭此窗口吗？";
+
+/* Welcome window: text of the warning shown before the window closes */
+"You can change these features in Settings. This window opens again only after Reset All Settings." = "你可以在“设置”中更改这些功能。只有在重置所有设置后，此窗口才会再次打开。";
 
 /* Empty search result in the Edit Theme sidebar; %@ is the search text */
 "No Results for “%@”" = "未找到“%@”的相关结果";
@@ -1235,7 +1268,7 @@
 "Triggers to Ignore" = "要忽略的触发方式";
 "Every Trigger" = "所有触发方式";
 "Mouse Buttons" = "鼠标按键";
-/* Cursor Gestures settings: picker of when an ignored app counts: only while it is in front, or whenever one of its windows is on screen */
+/* Cursor Gestures settings: picker of when an ignored app counts: In Front (only while it is the front app) or Under the Pointer (only when a gesture starts over one of its windows) */
 "Ignore When" = "忽略时机";
 "In Front" = "位于最前面时";
 /* Cursor Gestures settings: button and title of the alert that adds back the ready-made gestures */
@@ -1291,7 +1324,7 @@
 "Delay window focus for %@" = "%@ 后给予焦点";
 /* Menu bar panel: folded row under the Focus on Hover switch that holds the delay slider */
 "Focus Delay" = "聚焦延迟";
-/* Cursor Shaker: feature name in the Settings sidebar, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
+/* Cursor Shaker: feature name in Settings → Cursor Control, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
 "Cursor Shaker" = "指针摇动器";
 "Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool." = "“指针摇动器”需要“辅助工具”。你可以从“通用”→“辅助工具”中安装。";
 /* Cursor Shaker: grey caption under its switch */
@@ -1416,3 +1449,355 @@
 
 /* Cursor Translator: the first choice of “Translate to” in Settings. It follows the Mac's language; %@ is that language's name, for example “English (System Default)” */
 "%@ (System Default)" = "%@（系统默认）";
+
+/* Cursor Capture: the Settings tab that takes a picture of the screen with a shortcut */
+"Cursor Capture" = "指针截屏";
+"Cursor Capture requires the Helper Tool. You can install it from General → Helper Tool." = "“指针截屏”需要“辅助工具”。你可以从“通用”→“辅助工具”中安装。";
+"Choose…" = "选取…";
+"Desktop" = "桌面";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "MaCursor 需要录屏权限，才能拍摄屏幕图片。图片只留在你的 Mac 上。请选择“允许录屏”，然后在“隐私与安全性”→“录屏与系统录音”中允许 MaCursor。";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "MaCursor 需要录屏权限，才能拍摄屏幕图片。图片只留在你的 Mac 上。请选择“允许录屏”，然后在“隐私与安全性”→“屏幕录制”中允许 MaCursor。";
+"Waiting for access. This window updates as soon as MaCursor is allowed." = "正在等待权限。一旦允许 MaCursor，此窗口会立即更新。";
+
+/* Settings, General, Menu Bar: the label above the list of the panel's items */
+"Panel Items" = "面板项目";
+"Drag an item to change its place in the panel. Turning an item off hides it from the panel, and its feature keeps working." = "拖移项目可更改其在面板中的位置。关闭项目后，它会从面板中隐藏，但其功能仍会继续运行。";
+
+/* Cursor Capture editor: the tools that draw on the picture. Box draws an empty rectangle. Pixelate turns what it covers into coloured blocks */
+"Arrow" = "箭头";
+"Box" = "方框";
+"Pixelate" = "像素化";
+
+/* Cursor Capture editor: more tools. Text types words on the picture. Number places the next number in a circle. Highlight is a marker pen. Crop cuts the picture smaller */
+"Text" = "文本";
+"Number" = "编号";
+"Highlight" = "高亮标记";
+"Crop" = "裁剪";
+
+/* Settings > Cursor Capture: the switch card line, the Shortcuts tab, and the Capture Text rows */
+"Take a picture of your screen, with your cursor in it if you want." = "拍摄屏幕图片，也可以让指针出现在图片中。";
+"Shortcuts" = "快捷键";
+"Capture Text" = "截取文本";
+"Copy Text" = "拷贝文本";
+"Text Copied" = "文本已拷贝";
+"No Text Found" = "未找到文本";
+"Drag a box, and the text in it goes to your clipboard. No picture is saved." = "拖移出一个框，框内的文本会进入剪贴板。不会保存图片。";
+"Filled Box" = "填充方框";
+"Oval" = "椭圆";
+"Pen" = "钢笔";
+"Select" = "选择";
+"Add Image" = "添加图像";
+"Background" = "背景";
+"Color" = "颜色";
+"Size" = "大小";
+"Save as…" = "保存为…";
+"Done Editing" = "完成";
+"Zoom" = "缩放";
+"Zoom In" = "放大";
+"Zoom Out" = "缩小";
+"Fit Canvas" = "适合画布";
+"Drag Me" = "拖动我";
+"Share" = "共享";
+"Pin" = "固定";
+"Don't Save" = "不保存";
+"Format:" = "格式：";
+"JPEG Image" = "JPEG 图像";
+"PNG Image" = "PNG 图像";
+"HEIC Image" = "HEIC 图像";
+"WebP Image" = "WebP 图像";
+"%lld pt" = "%lld pt";
+"%lld%%" = "%lld%%";
+"Hex" = "十六进制";
+"Alpha" = "透明度";
+"Hue" = "色相";
+"R" = "R";
+"G" = "G";
+"B" = "B";
+"Add to My Colors" = "添加到我的颜色";
+"My Colors" = "我的颜色";
+"More Colors" = "更多颜色";
+"Fewer Colors" = "更少颜色";
+"Pick a Color" = "选取颜色";
+"Black" = "黑色";
+"Red" = "红色";
+"Orange" = "橙色";
+"Yellow" = "黄色";
+"Green" = "绿色";
+"Teal" = "青色";
+"Blue" = "蓝色";
+"Purple" = "紫色";
+"Pink" = "粉色";
+"White" = "白色";
+"Arrow Style" = "箭头样式";
+"Text Style" = "文本样式";
+"Spotlight Shape" = "聚焦形状";
+"Pixelate Style" = "像素化样式";
+"Number Settings" = "编号设置";
+"Unlock Canvas" = "解锁画布";
+"Lock Canvas" = "锁定画布";
+"Spotlight Opacity" = "聚焦不透明度";
+"Pixelate Strength" = "像素化强度";
+"Emoji" = "表情符号";
+"Starting Number:" = "起始编号：";
+"Standard" = "标准";
+"Fancy" = "花式";
+"Curved" = "弯曲";
+"Double" = "双向";
+"Rectangle" = "矩形";
+"Rounded Rectangle" = "圆角矩形";
+"Secure Blur" = "安全模糊";
+"Blur" = "模糊";
+"Black Out" = "涂黑";
+"Rounded" = "圆体";
+"Outlined" = "描边";
+"Mono" = "等宽";
+"Mono Box" = "等宽方框";
+"Rounded Box" = "圆角方框";
+"Freeform" = "自由";
+"Custom Ratio" = "自定比例";
+"Original Ratio" = "原始比例";
+"1 : 1 (Square)" = "1 : 1（正方形）";
+"Ratio" = "比例";
+"Ratio Width" = "比例宽度";
+"Ratio Height" = "比例高度";
+"Swap Width and Height" = "交换宽度和高度";
+"Fill Color" = "填充颜色";
+"Transparent" = "透明";
+"Auto" = "自动";
+"Gray" = "灰色";
+"Custom Color…" = "自定颜色…";
+"Rotate" = "旋转";
+"Flip" = "翻转";
+"Image size:" = "图像大小：";
+"%lld × %lld px" = "%1$lld × %2$lld px";
+"Snap to edges" = "吸附到边缘";
+"Hold ⌘ to turn snapping on." = "按住 ⌘ 可打开吸附。";
+"Revert to Original" = "还原为原始图像";
+"Rotate image?" = "要旋转图像吗？";
+"Flip image?" = "要翻转图像吗？";
+"Flatten and Rotate" = "合并并旋转";
+"Flatten and Flip" = "合并并翻转";
+"This burns every mark into the picture, so you can no longer edit them. You cannot undo this." = "所有标记都会合并到图像中，之后无法再编辑。此操作无法撤销。";
+"Don't ask again" = "不再询问";
+"Width:" = "宽度：";
+"Height:" = "高度：";
+"pixels" = "像素";
+"percent" = "百分比";
+"Flatten Marks" = "合并标记";
+"(Cannot be undone)" = "（无法撤销）";
+"Resize" = "调整大小";
+"Keep Proportions" = "保持比例";
+"Take Screenshot" = "截屏";
+"Paste From Clipboard" = "从剪贴板粘贴";
+"Choose From File…" = "从文件选取…";
+"Open" = "打开";
+"Top" = "顶部";
+"Bottom" = "底部";
+"Left" = "左侧";
+"Right" = "右侧";
+"Add New Preset…" = "添加新预设…";
+"Add wallpaper" = "添加墙纸";
+"Alignment" = "对齐";
+"Apply Previous Settings" = "应用上次设置";
+"Auto Balance" = "自动平衡";
+"Automatically apply preset to all screenshots:" = "自动将预设应用到所有截图：";
+"Blurred desktop" = "模糊桌面";
+"Blurred picture" = "模糊图片";
+"Bottom left" = "左下";
+"Bottom right" = "右下";
+"Clean" = "简洁";
+"Dark blur" = "深色模糊";
+"Dark gray" = "深灰色";
+"Default Preset" = "默认预设";
+"Delete Preset" = "删除预设";
+"Delete this preset?" = "要删除此预设吗？";
+"Desktop picture" = "桌面图片";
+"Dusk" = "黄昏";
+"Gradients" = "渐变";
+"Inset" = "内边距";
+"Light gray" = "浅灰色";
+"Mint" = "薄荷";
+"Mist" = "薄雾";
+"My preset" = "我的预设";
+"Night" = "夜晚";
+"Padding" = "边距";
+"Pale blue" = "淡蓝色";
+"Pale green" = "淡绿色";
+"Pale orange" = "淡橙色";
+"Pale red" = "淡红色";
+"Pale violet" = "淡紫色";
+"Pale yellow" = "淡黄色";
+"Preset options" = "预设选项";
+"Presets" = "预设";
+"Remove wallpaper" = "移除墙纸";
+"Rose" = "玫瑰";
+"Sand" = "沙色";
+"Save as new preset" = "保存为新预设";
+"Save changes" = "保存更改";
+"Shadow" = "阴影";
+"Soft" = "柔和";
+"Top left" = "左上";
+"Top right" = "右上";
+"Violet" = "紫色";
+"Wallpaper" = "墙纸";
+"Wallpapers" = "墙纸";
+"Hold Command ⌘ to disable snapping." = "按住 Command ⌘ 可关闭吸附。";
+
+/* Settings > Cursor Capture, in CleanShot X's order: the tabs, the section headings and the rows. Auto-close is a switch; Interval is the time menu under it. Position on screen says where the card sits. Self-Timer interval is the wait before the picture. OCR is the section that holds Capture Text */
+"Quick Access" = "快速访问";
+"Screenshots" = "截屏";
+"Advanced" = "高级";
+"Sounds" = "声音";
+"Export" = "导出";
+"After Capture" = "拍摄后";
+"Behavior" = "行为";
+"Capture" = "拍摄";
+"Window Screenshots" = "窗口截屏";
+"OCR" = "文字识别";
+"Play sounds" = "播放声音";
+"Export location" = "导出位置";
+"Show Quick Access Overlay" = "显示快速访问浮层";
+"Position on screen" = "屏幕上的位置";
+"Auto-close" = "自动关闭";
+"Interval" = "间隔";
+"Self-Timer interval" = "定时器间隔";
+"Show cursor on screenshots" = "在截屏中显示指针";
+"Capture Area" = "截取区域";
+"Capture Previous Area" = "截取上次的区域";
+"Capture Fullscreen" = "截取整个屏幕";
+"Set the default save location used when saving from the Quick Access Overlay, After Capture, and other Save actions across the app." = "设定从快速访问浮层、“拍摄后”以及应用中其他保存操作进行保存时使用的默认保存位置。";
+"Decide what should happen after taking a screenshot." = "选择截屏后要执行的操作。";
+"After the Capture Area shortcut, press Space to pick a window. Press Space again to draw an area." = "按下“截取区域”快捷键后，按空格键选择窗口。再次按空格键框选区域。";
+"Action" = "操作";
+"Screenshot" = "截屏";
+"Copy file to clipboard" = "将文件拷贝到剪贴板";
+"Open Annotate tool" = "打开标注工具";
+"Pin to the screen" = "固定到屏幕";
+"Output" = "输出";
+"File format" = "文件格式";
+"Convert to sRGB profile" = "转换为 sRGB 描述文件";
+"Scale Retina screenshots to 1x" = "将 Retina 截屏缩放为 1x";
+"Add 1px border to all screenshots" = "为所有截屏添加 1 像素边框";
+"Background preset" = "背景预设";
+"Apply Background Tool preset to all screenshots. You can create presets in the editor. Hold ⇧ Shift while capturing a screenshot to disable this option." = "将背景工具的预设应用于所有截屏。你可以在编辑器中创建预设。截屏时按住 ⇧ Shift 可停用此选项。";
+"2 Seconds" = "2 秒";
+"5 Seconds" = "5 秒";
+"10 Seconds" = "10 秒";
+"15 Seconds" = "15 秒";
+"Self-Timer" = "定时器";
+"This works in Fullscreen or Self-Timer modes only." = "仅在“全屏”或“定时器”模式下有效。";
+"Freeze screen when taking a screenshot" = "截屏时冻结屏幕";
+"With wallpaper" = "带墙纸";
+"Capture window shadow" = "捕捉窗口阴影";
+"Hold ⇧ Shift while taking a screenshot to capture the window with wallpaper." = "截屏时按住 ⇧ Shift 可连同墙纸捕捉窗口。";
+"Crosshair" = "十字线";
+"Crosshair Mode" = "十字线模式";
+"Always enabled" = "始终启用";
+"When ⌘ Command is pressed" = "按住 Command ⌘ 时";
+"Disabled" = "停用";
+"Show magnifier" = "显示放大镜";
+"To enable magnifier, you must enable Crosshair Mode first." = "要启用放大镜，必须先启用“十字线模式”。";
+"File Name" = "文件名";
+"Ask for name after every capture" = "每次捕捉后询问名称";
+"File name format" = "文件名格式";
+"Customize…" = "自定…";
+"Add “@2x” suffix to Retina screenshots" = "为 Retina 截屏添加“@2x”后缀";
+"This option improves compatibility with displaying Retina screenshots in third-party apps." = "此选项可提升在第三方应用中显示 Retina 截屏时的兼容性。";
+"Type text and drag elements to create a custom format:" = "输入文本并拖移元素来创建自定格式：";
+"Year" = "年";
+"Month (numeric)" = "月（数字）";
+"Day" = "日";
+"Window title" = "窗口标题";
+"App name" = "应用名称";
+"Minutes" = "分钟";
+"Seconds" = "秒";
+"Auto-increment" = "自动递增编号";
+"Remove illegal characters" = "移除不允许的字符";
+"Restore Defaults" = "恢复默认设置";
+"Next number" = "下一个编号";
+"Name this screenshot" = "为此截屏命名";
+"Use Default Name" = "使用默认名称";
+"Copy to clipboard" = "拷贝到剪贴板";
+"File & Image (default)" = "文件和图像（默认）";
+"Image only" = "仅图像";
+"File only" = "仅文件";
+"Adjust this option if you've encountered any issues with pasting from clipboard or clipboard managers." = "如果从剪贴板或剪贴板管理器粘贴时遇到问题，请调整此选项。";
+"Text Recognition" = "文本识别";
+"Automatically Detect Language" = "自动检测语言";
+"Keep line breaks" = "保留换行";
+"Detect links" = "检测链接";
+"Arabic (Najdi)" = "阿拉伯语（内志）";
+"Chinese (Simplified)" = "中文（简体）";
+"Chinese (Traditional)" = "中文（繁体）";
+"Norwegian (Bokmål)" = "挪威语（书面挪威语）";
+"Norwegian (Nynorsk)" = "挪威语（新挪威语）";
+"Do you want to open this link?" = "要打开此链接吗？";
+"Open Link in Browser" = "在浏览器中打开链接";
+"Never open links" = "永不打开链接";
+"Area Selection" = "区域选择";
+"Remember last selection" = "记住上次的选择";
+"Keep styling" = "保留格式";
+"Date" = "日期";
+"Capture History" = "截屏历史";
+"Keep history" = "保留历史";
+"1 day" = "1 天";
+"3 days" = "3 天";
+"1 week" = "1 周";
+"1 month" = "1 个月";
+"You can restore old files with “Capture History” option from the menu bar." = "你可以通过菜单栏中的“截屏历史”选项恢复旧文件。";
+"Capture History..." = "截屏历史…";
+"Capture History is disabled." = "截屏历史已停用。";
+"No files to restore..." = "没有可恢复的文件…";
+"Clear History..." = "清除历史…";
+"Are you sure you want to delete all files from history?" = "确定要删除历史中的所有文件吗？";
+
+/* Settings > Cursor Capture > Quick Access: the Appearance and Behavior rows, the Auto-close interval choices, and the card with no heading. Overlay is the small card shown after a capture. ⌥ is the Option key. "Export location" names the row on the General tab */
+"Move to active screen" = "移到活跃屏幕";
+"Active screen is the screen where your cursor is pointing." = "活跃屏幕是指针所在的屏幕。";
+"Overlay size" = "浮层大小";
+"Save and Close" = "保存并关闭";
+"5 seconds" = "5 秒";
+"10 seconds" = "10 秒";
+"15 seconds" = "15 秒";
+"30 seconds" = "30 秒";
+"1 minute" = "1 分钟";
+"2 minutes" = "2 分钟";
+"5 minutes" = "5 分钟";
+"10 minutes" = "10 分钟";
+"Close after dragging" = "拖移后关闭";
+"Hold ⌥ (option) to keep the item on Overlay after dragging." = "按住 ⌥ Option 可在拖移后将项目保留在浮层上。";
+"Hold ⌥ (option) to close the item from Overlay after dragging." = "按住 ⌥ Option 可在拖移后从浮层关闭项目。";
+"Save button behavior" = "“保存”按钮行为";
+"Save to \"Export location\"" ="保存到“导出位置”";
+"Ask for destination" = "询问目标位置";
+"Press with ⌥ (option) to choose the destination." = "按住 ⌥ Option 点按可选择目标位置。";
+"Press with ⌥ (option) to use 'Export Location' without asking." = "按住 ⌥ Option 点按可不经询问直接使用“导出位置”。";
+"Search Themes" = "搜索主题";
+
+/* Welcome window, version 2 */
+"MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them." = "MaCursor 让你掌控 macOS 的系统指针。你可以在接下来的页面中启用其他功能，也可以跳过。";
+"Cursor Look" = "指针外观";
+"When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "启用后，会在指针下方绘制柔和的投影。该阴影在应用指针主题时显示。";
+"Install the Helper Tool on the first page to use Cursor Trails." = "请在第一页安装“辅助工具”以使用指针轨迹。";
+"Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "此页面上的功能需要 MaCursorHelper 的辅助功能权限。如果缺少该权限，请选择“授予权限”以打开“系统设置”。";
+"Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "此页面上的功能需要 MaCursor 的录屏权限。指针翻译还需要 MaCursorHelper 的辅助功能权限。如果缺少权限，请选择“授予权限”以打开“系统设置”。";
+"Press the shortcut to take a picture of your screen." = "按下快捷键即可拍摄屏幕图片。";
+"This feature needs the Finder extension and Full Disk Access for MaCursor. If either is missing, choose Grant Permission to open System Settings." = "此功能需要 Finder 扩展以及 MaCursor 的完全磁盘访问权限。如果缺少其中之一，请选择“授予权限”以打开“系统设置”。";
+"Help Writronic keep growing" = "帮助 Writronic 持续成长";
+"If you would like to support development, you can donate on the Writronic website." = "如果你想支持开发，可以在 Writronic 网站上捐赠。";
+"Thank you for being here." = "感谢你来到这里。";
+"A star on GitHub also helps more people find MaCursor, and it means a lot." = "在 GitHub 上点个星标也能帮助更多人找到 MaCursor，这对我们意义重大。";
+"Give a Star" = "点个星标";
+/* Welcome window: button at the end of an access line whose dot is red; it opens System Settings at that access */
+"Grant Permission" = "授予权限";
+/* Welcome window: what VoiceOver reads after the name of an access whose dot is red */
+"Access not granted" = "未获得权限";
+
+/* Welcome window: line under the cards on pages 2 to 4 while the Helper Tool is installed but not running. MaCursor starts it again when it opens. */
+"The Helper Tool is not running. Quit and reopen MaCursor to start it." = "“辅助工具”未在运行。请退出并重新打开 MaCursor 以启动它。";
+
+"Hide desktop icons while capturing" = "拍摄时隐藏桌面图标";
+
+"Left Button" = "左键";
+"Hold a key with the left or right button, so normal clicks still work." = "请在按左键或右键的同时按住一个按键，这样普通的点按仍可正常使用。";
+"A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "某个“指针截屏”快捷键使用了相同的按键和按钮。“指针截屏”优先。";

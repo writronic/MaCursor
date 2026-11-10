@@ -102,12 +102,10 @@ struct CursorSettingsView: View {
 
                 Toggle("Cursor Shadow", isOn: $cursorShadow)
                     .onChangeCompat(of: cursorShadow) { newValue in
-                        guard newValue != MACPreferences.flag(MACPreferences.cursorShadowKey) else { return }
-                        MACPreferences.setFlag(newValue, forKey: MACPreferences.cursorShadowKey)
-                        reapplyActiveThemeIfNeeded()
+                        CursorSettingsView.setCursorShadow(newValue, library: library)
                     }
 
-                Text("When enabled, a soft drop shadow is drawn under the cursor, similar to the pointer shadow on Windows. The shadow appears while a cursor theme is applied.")
+                Text("When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied.")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
             }
@@ -362,19 +360,7 @@ struct CursorSettingsView: View {
                                              trusted: ffmUsable)
             },
             set: { _ in
-                guard helperManager.isRunning else { return }
-                switch FocusFollowsMouseConfig.toggleAction(enabled: focusFollowsMouse.enabled,
-                                                            helperInstalled: helperManager.isInstalled,
-                                                            trusted: ffmUsable) {
-                case .enable:
-                    FocusFollowsMouseConfig.setEnabled(true)
-                case .requestAccess:
-                    AccessWindowController.focusFollowsMouse.present()
-                case .disable:
-                    FocusFollowsMouseConfig.setEnabled(false)
-                case .ignore:
-                    break
-                }
+                AccessWindowController.tapFocusFollowsMouse(enabled: focusFollowsMouse.enabled, trusted: ffmUsable)
             }
         )
     }
@@ -527,6 +513,14 @@ struct CursorSettingsView: View {
         )
     }
 
+    static func setCursorShadow(_ on: Bool, library: LibraryViewModel) {
+        guard on != MACPreferences.flag(MACPreferences.cursorShadowKey) else { return }
+        MACPreferences.setFlag(on, forKey: MACPreferences.cursorShadowKey)
+        if let appliedTheme = library.cursorThemes.first(where: { $0.isApplied }) {
+            library.apply(appliedTheme)
+        }
+    }
+
     private func reapplyActiveThemeIfNeeded() {
         if let appliedTheme = library.cursorThemes.first(where: { $0.isApplied }) {
             library.apply(appliedTheme)
@@ -613,6 +607,18 @@ extension CursorTrailsStyle {
     }
 }
 
+extension CursorTrailsConfig {
+    @MainActor
+    static func tap(_ trails: inout CursorTrailsConfig) {
+        let helperManager = HelperToolManager.shared
+        guard let enabled = CursorTrailsConfig.toggledValue(enabled: trails.enabled,
+                                                            helperInstalled: helperManager.isInstalled,
+                                                            running: helperManager.isRunning) else { return }
+        trails.enabled = enabled
+        trails.save()
+    }
+}
+
 struct CursorTrailsSettingsView: View {
     @ObservedObject private var helperManager = HelperToolManager.shared
     @State private var trails = CursorTrailsConfig.load()
@@ -627,13 +633,7 @@ struct CursorTrailsSettingsView: View {
                 Group {
                     Toggle("Cursor Trails", isOn: Binding(
                         get: { cursorTrailsOn },
-                        set: { _ in
-                            guard let enabled = CursorTrailsConfig.toggledValue(enabled: trails.enabled,
-                                                                                helperInstalled: helperManager.isInstalled,
-                                                                                running: helperManager.isRunning) else { return }
-                            trails.enabled = enabled
-                            trails.save()
-                        }
+                        set: { _ in CursorTrailsConfig.tap(&trails) }
                     ))
                 }
                 .disabled(!helperManager.isInstalled)
@@ -791,12 +791,587 @@ struct CursorTrailsSettingsView: View {
     }
 }
 
+enum CursorScreenshotTab: CaseIterable {
+    case general
+    case shortcuts
+    case quickAccess
+    case screenshots
+    case advanced
+
+    @MainActor static var selected = CursorScreenshotTab.general
+
+    var title: String {
+        switch self {
+        case .general: return String(localized: "General")
+        case .shortcuts: return String(localized: "Shortcuts")
+        case .quickAccess: return String(localized: "Quick Access")
+        case .screenshots: return String(localized: "Screenshots")
+        case .advanced: return String(localized: "Advanced")
+        }
+    }
+}
+
+struct CursorScreenshotSettingsView: View {
+    @ObservedObject private var helperManager = HelperToolManager.shared
+    @State private var screenshot = CursorScreenshotConfig.load()
+    @State private var screenRecording = CursorTranslatorConfig.screenRecordingAllowed
+    @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
+    @State private var tab = CursorScreenshotTab.selected
+    @State private var customizingName = false
+
+    private var usable: Bool { screenRecording && helperManager.isRunning }
+
+    private var screenshotOn: Bool { CursorScreenshotConfig.isOn(enabled: screenshot.enabled, usable: usable) }
+
+    var body: some View {
+        GeometryReader { pane in
+            let column = RightClickMenuLayout.tableWidth(contentWidth: pane.size.width - 2 * RightClickMenuLayout.pageMargin)
+            VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: RightClickMenuLayout.blockSpacing) {
+                    switchCard
+
+                    if screenshotOn {
+                        TabBar(
+                            titles: CursorScreenshotTab.allCases.map(\.title),
+                            label: String(localized: "Cursor Capture"),
+                            selection: Binding(
+                                get: { CursorScreenshotTab.allCases.firstIndex(of: tab) ?? 0 },
+                                set: { tab = CursorScreenshotTab.allCases[$0]; CursorScreenshotTab.selected = tab }
+                            )
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+                .frame(width: column)
+                .padding(.leading, (pane.size.width - column) / 2)
+                .padding(.top, RightClickMenuLayout.pageMargin)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                if screenshotOn {
+                    Form {
+                        switch tab {
+                        case .general: generalPart
+                        case .shortcuts: shortcutsPart
+                        case .quickAccess: quickAccessPart
+                        case .screenshots: screenshotsPart
+                        case .advanced: advancedPart
+                        }
+                    }
+                    .formStyle(.grouped)
+                }
+            }
+        }
+        .navigationTitle("Cursor Capture")
+        .onAppear(perform: recheck)
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in recheck() }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorScreenshotDidChange)) { _ in refresh() }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorTranslatorStatusDidChange)) { _ in refresh() }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACFocusFollowsMouseStatusDidChange)) { _ in refresh() }
+    }
+
+    @ViewBuilder private var switchCard: some View {
+        Group {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Cursor Capture")
+                    Text("Take a picture of your screen, with your cursor in it if you want.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Toggle("Cursor Capture", isOn: Binding(
+                    get: { screenshotOn },
+                    set: { _ in AccessWindowController.tapCursorScreenshot(enabled: screenshot.enabled, usable: usable) }
+                ))
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .controlSize(.mini)
+            }
+            .padding(RightClickMenuLayout.inset)
+            .frame(minHeight: RightClickMenuLayout.twoLineRowHeight)
+            .rightClickMenuCard()
+
+            if screenshot.enabled && !screenRecording {
+                HStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+
+                    Group {
+                        if SystemSettingsPane.screenRecordingHasAudio() {
+                            Text("Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen & System Audio Recording.")
+                        } else {
+                            Text("Screen Recording access is missing. Allow MaCursor in Privacy & Security → Screen Recording.")
+                        }
+                    }
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                    Spacer(minLength: 6)
+
+                    Button("Open System Settings") {
+                        CursorTranslatorConfig.requestScreenRecording()
+                    }
+                }
+                .padding(.horizontal, RightClickMenuLayout.inset)
+            }
+        }
+        .disabled(!helperManager.isInstalled)
+
+        if !helperManager.isInstalled {
+            HStack(spacing: 10) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.yellow)
+
+                Text("Cursor Capture requires the Helper Tool. You can install it from General → Helper Tool.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, RightClickMenuLayout.inset)
+        }
+    }
+
+    @ViewBuilder private var generalPart: some View {
+        Section("Sounds") {
+            Toggle("Play sounds", isOn: saving(\.playsSound))
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Export") {
+            LabeledContent("Export location") {
+                HStack {
+                    Label {
+                        if screenshot.folder.isEmpty {
+                            Text("Desktop")
+                        } else {
+                            Text(verbatim: FileManager.default.displayName(atPath: screenshot.folder))
+                        }
+                    } icon: {
+                        Image(systemName: "folder")
+                    }
+
+                    Button("Choose…", action: chooseFolder)
+                }
+            }
+
+            Text("Set the default save location used when saving from the Quick Access Overlay, After Capture, and other Save actions across the app.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("After Capture") {
+            Text("Decide what should happen after taking a screenshot.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+
+            Grid(alignment: .leading, horizontalSpacing: 20, verticalSpacing: 8) {
+                GridRow {
+                    Text("Action")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Text("Screenshot")
+                        .gridColumnAlignment(.center)
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+                afterCaptureRow("Show Quick Access Overlay", \.showsPreview)
+                afterCaptureRow("Copy file to clipboard", \.copies)
+                afterCaptureRow("Save", \.saves)
+                afterCaptureRow("Open Annotate tool", \.annotates)
+                afterCaptureRow("Pin to the screen", \.pins)
+            }
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Capture") {
+            Toggle("Hide desktop icons while capturing", isOn: saving(\.hidesDesktopIcons))
+        }
+        .disabled(!helperManager.isInstalled)
+    }
+
+    private func afterCaptureRow(_ action: LocalizedStringKey, _ field: WritableKeyPath<CursorScreenshotConfig, Bool>) -> some View {
+        GridRow {
+            Text(action)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Toggle(action, isOn: saving(field))
+                .labelsHidden()
+                .toggleStyle(.checkbox)
+        }
+    }
+
+    @ViewBuilder private var shortcutsPart: some View {
+        Section("Screenshots") {
+            if !screenshot.clicks.isEmpty && !trusted {
+                HStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+
+                    Text("Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Spacer(minLength: 6)
+
+                    Button("Open System Settings") {
+                        FocusFollowsMouseConfig.requestAccessibility()
+                    }
+                }
+            }
+
+            LabeledContent("Capture Area") { shortcut(\.areaShortcut, \.areaClick) }
+
+            LabeledContent("Capture Previous Area") { shortcut(\.repeatShortcut, \.repeatClick) }
+
+            LabeledContent("Capture Fullscreen") { shortcut(\.wholeScreenShortcut, \.wholeScreenClick) }
+
+            LabeledContent("Self-Timer") { shortcut(\.selfTimerShortcut, \.selfTimerClick) }
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("OCR") {
+            LabeledContent("Capture Text") { shortcut(\.textShortcut, \.textClick) }
+
+            Text("Drag a box, and the text in it goes to your clipboard. No picture is saved.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .disabled(!helperManager.isInstalled)
+    }
+
+    @ViewBuilder private var quickAccessPart: some View {
+        Section("Appearance") {
+            Picker("Position on screen", selection: saving(\.previewCorner)) {
+                Text("Left").tag(CursorScreenshotCorner.bottomLeft)
+                Text("Right").tag(CursorScreenshotCorner.bottomRight)
+            }
+
+            Toggle("Move to active screen", isOn: saving(\.movesToActiveScreen))
+
+            Text("Active screen is the screen where your cursor is pointing.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+
+            Slider(value: saving(\.previewScale), in: 0.75...1.5, step: 0.25) {
+                Text("Overlay size")
+            }
+            .accessibilityValue(Text(screenshot.previewScale, format: .percent))
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Behavior") {
+            Toggle("Auto-close", isOn: saving(\.closesAfter))
+
+            Picker("Action", selection: saving(\.closeAction)) {
+                Text("Save and Close").tag(CursorScreenshotCloseAction.saveAndClose)
+                Text("Close").tag(CursorScreenshotCloseAction.close)
+            }
+            .disabled(!screenshot.closesAfter)
+
+            Picker("Interval", selection: saving(\.previewSeconds)) {
+                Text("5 seconds").tag(5)
+                Text("10 seconds").tag(10)
+                Text("15 seconds").tag(15)
+                Text("30 seconds").tag(30)
+                Text("1 minute").tag(60)
+                Text("2 minutes").tag(120)
+                Text("5 minutes").tag(300)
+                Text("10 minutes").tag(600)
+            }
+            .disabled(!screenshot.closesAfter)
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section {
+            Toggle("Close after dragging", isOn: saving(\.closesAfterDrag))
+
+            Group {
+                if screenshot.closesAfterDrag {
+                    Text("Hold ⌥ (option) to keep the item on Overlay after dragging.")
+                } else {
+                    Text("Hold ⌥ (option) to close the item from Overlay after dragging.")
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.tertiary)
+
+            Picker("Save button behavior", selection: saving(\.saveButton)) {
+                Text("Save to \"Export location\"").tag(CursorScreenshotSaveButton.exportLocation)
+                Text("Ask for destination").tag(CursorScreenshotSaveButton.askForDestination)
+            }
+
+            Group {
+                if screenshot.saveButton == .exportLocation {
+                    Text("Press with ⌥ (option) to choose the destination.")
+                } else {
+                    Text("Press with ⌥ (option) to use 'Export Location' without asking.")
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.tertiary)
+        }
+        .disabled(!helperManager.isInstalled)
+    }
+
+    @ViewBuilder private var screenshotsPart: some View {
+        Section("Output") {
+            Picker("File format", selection: saving(\.output.format)) {
+                ForEach(CursorScreenshotFormat.outputChoices, id: \.self) { format in
+                    Text(verbatim: format.label).tag(format)
+                }
+            }
+
+            Toggle("Convert to sRGB profile", isOn: saving(\.output.convertsToSRGB))
+
+            Toggle("Scale Retina screenshots to 1x", isOn: saving(\.output.scalesTo1x))
+
+            Toggle("Add 1px border to all screenshots", isOn: saving(\.output.addsBorder))
+
+            Picker("Background preset", selection: saving(\.background.defaultPreset)) {
+                Text("None").tag(String?.none)
+                ForEach(screenshot.background.presets, id: \.id) { preset in
+                    Group {
+                        switch preset.id {
+                        case "clean": Text("Clean")
+                        case "soft": Text("Soft")
+                        case "wide": Text("Wide")
+                        default: Text(verbatim: preset.name)
+                        }
+                    }
+                    .tag(Optional(preset.id))
+                }
+            }
+
+            Text("Apply Background Tool preset to all screenshots. You can create presets in the editor. Hold ⇧ Shift while capturing a screenshot to disable this option.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Capture") {
+            Picker("Self-Timer interval", selection: saving(\.delay)) {
+                Text("2 Seconds").tag(2)
+                Text("5 Seconds").tag(5)
+                Text("10 Seconds").tag(10)
+                Text("15 Seconds").tag(15)
+            }
+
+            Toggle("Show cursor on screenshots", isOn: saving(\.showsCursor))
+
+            Text("This works in Fullscreen or Self-Timer modes only.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+
+            Toggle("Freeze screen when taking a screenshot", isOn: saving(\.freezesScreen))
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Window Screenshots") {
+            LabeledContent("Background") {
+                HStack(spacing: 12) {
+                    CursorScreenshotWindowBackgroundChoice(title: "With wallpaper", value: .wallpaper, choice: saving(\.windowShot.background))
+                    CursorScreenshotWindowBackgroundChoice(title: "Transparent", value: .transparent, choice: saving(\.windowShot.background))
+                }
+            }
+
+            Text("Hold ⇧ Shift while taking a screenshot to capture the window with wallpaper.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+
+            if ScreenCaptureSupport.controlsWindowShadow() {
+                Toggle("Capture window shadow", isOn: saving(\.windowShot.shadow))
+            }
+
+            Text("After the Capture Area shortcut, press Space to pick a window. Press Space again to draw an area.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Crosshair") {
+            Picker("Crosshair Mode", selection: saving(\.crosshair.mode)) {
+                Text("Always enabled").tag(CursorScreenshotCrosshairMode.always)
+                Text("When ⌘ Command is pressed").tag(CursorScreenshotCrosshairMode.command)
+                Text("Disabled").tag(CursorScreenshotCrosshairMode.disabled)
+            }
+
+            Toggle("Show magnifier", isOn: saving(\.crosshair.showsMagnifier))
+                .disabled(screenshot.crosshair.mode == .disabled)
+
+            if screenshot.crosshair.mode == .disabled {
+                Text("To enable magnifier, you must enable Crosshair Mode first.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .disabled(!helperManager.isInstalled)
+    }
+
+    @ViewBuilder private var advancedPart: some View {
+        Section("File Name") {
+            Toggle("Ask for name after every capture", isOn: saving(\.naming.asksForName))
+
+            LabeledContent("File name format") {
+                Button("Customize…") { customizingName = true }
+            }
+
+            Toggle("Add “@2x” suffix to Retina screenshots", isOn: saving(\.naming.addsRetinaSuffix))
+
+            Text("This option improves compatibility with displaying Retina screenshots in third-party apps.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .disabled(!helperManager.isInstalled)
+        .sheet(isPresented: $customizingName, onDismiss: refresh) {
+            CursorScreenshotNameSheet(opened: CursorScreenshotConfig.load().naming)
+        }
+
+        Section("Clipboard") {
+            Picker("Copy to clipboard", selection: saving(\.clipboard)) {
+                Text("File & Image (default)").tag(CursorScreenshotClipboardMode.fileAndImage)
+                Text("Image only").tag(CursorScreenshotClipboardMode.imageOnly)
+                Text("File only").tag(CursorScreenshotClipboardMode.fileOnly)
+            }
+
+            Text("Adjust this option if you've encountered any issues with pasting from clipboard or clipboard managers.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Capture History") {
+            Picker("Keep history", selection: saving(\.keepHistory)) {
+                Text("Disabled").tag(CursorScreenshotHistoryKeep.disabled)
+                Text("1 day").tag(CursorScreenshotHistoryKeep.day)
+                Text("3 days").tag(CursorScreenshotHistoryKeep.threeDays)
+                Text("1 week").tag(CursorScreenshotHistoryKeep.week)
+                Text("1 month").tag(CursorScreenshotHistoryKeep.month)
+            }
+
+            Text("You can restore old files with “Capture History” option from the menu bar.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Text Recognition") {
+            Picker("Language", selection: saving(\.textRecognition.language)) {
+                Text("Automatically Detect Language").tag(String?.none)
+                Divider()
+                ForEach(recognitionLanguages, id: \.self) { code in
+                    Text(verbatim: recognitionName(code)).tag(Optional(code))
+                }
+            }
+
+            Toggle("Keep line breaks", isOn: saving(\.textRecognition.keepsLineBreaks))
+
+            Toggle("Keep styling", isOn: saving(\.textRecognition.keepsStyling))
+
+            Toggle("Detect links", isOn: saving(\.textRecognition.detectsLinks))
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Area Selection") {
+            Toggle("Remember last selection", isOn: saving(\.remembersSelection))
+        }
+        .disabled(!helperManager.isInstalled)
+    }
+
+    private var recognitionLanguages: [String] {
+        CursorScreenshot.recognitionLanguages.sorted { recognitionName($0).localizedStandardCompare(recognitionName($1)) == .orderedAscending }
+    }
+
+    private func recognitionName(_ code: String) -> String {
+        switch code {
+        case "ars": return String(localized: "Arabic (Najdi)")
+        case "zh-Hans": return String(localized: "Chinese (Simplified)")
+        case "zh-Hant": return String(localized: "Chinese (Traditional)")
+        case "nb": return String(localized: "Norwegian (Bokmål)")
+        case "nn": return String(localized: "Norwegian (Nynorsk)")
+        default: return CursorTranslatorConfig.name(code)
+        }
+    }
+
+    private func saving<Value>(_ field: WritableKeyPath<CursorScreenshotConfig, Value>) -> Binding<Value> {
+        Binding(
+            get: { screenshot[keyPath: field] },
+            set: {
+                screenshot = CursorScreenshotConfig.load()
+                screenshot[keyPath: field] = $0
+                screenshot.save()
+            }
+        )
+    }
+
+    private func shortcut(_ key: WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?>, _ click: WritableKeyPath<CursorScreenshotConfig, CursorGestureTrigger>) -> some View {
+        VStack(alignment: .trailing, spacing: 8) {
+            recorder(key)
+
+            TranslatorTriggerEditor(trigger: Binding(
+                get: { screenshot[keyPath: click] },
+                set: { chosen in
+                    guard !CursorScreenshot.refuses(chosen, held: screenshot.clicks(besides: click)) else { return NSSound.beep() }
+                    saving(click).wrappedValue = chosen
+                }
+            ), clicks: true)
+
+            if screenshot[keyPath: click].button != nil && !CursorTranslator.usable(screenshot[keyPath: click]) {
+                Text("Hold a key with the left or right button, so normal clicks still work.")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+            }
+        }
+    }
+
+    private func recorder(_ field: WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?>) -> some View {
+        KeyRecorderView(shortcut: saving(field), isTaken: { heldElsewhere($0, besides: field) },
+                        isShadowed: screenshot[keyPath: field].map { heldElsewhere($0, besides: field) } ?? false)
+    }
+
+    private func heldElsewhere(_ candidate: KeyboardShortcutData, besides field: WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?>) -> Bool {
+        let data = MACPreferences.value(forKey: MACPreferences.favoriteCursorsKey) as? Data
+        let slots = data.flatMap { try? JSONDecoder().decode([FavoriteCursorSlot].self, from: $0) } ?? []
+        let held = slots.filter { $0.themeIdentifier != nil }.compactMap(\.shortcut) + [CursorShakerConfig.load().shortcut].compactMap { $0 } + screenshot.keys(besides: field)
+        return CursorScreenshot.refuses(candidate, held: held)
+    }
+
+    private func chooseFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.directoryURL = screenshot.folderURL
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        screenshot = CursorScreenshotConfig.load()
+        screenshot.folder = url.path
+        screenshot.save()
+    }
+
+    private func recheck() {
+        helperManager.refreshStatus()
+        refresh()
+        if helperManager.isInstalled {
+            CursorScreenshotConfig.notifyHelper()
+        }
+    }
+
+    private func refresh() {
+        screenshot = CursorScreenshotConfig.load()
+        screenRecording = CursorTranslatorConfig.screenRecordingAllowed
+        trusted = FocusFollowsMouseConfig.accessibilityTrusted
+    }
+}
+
 struct CursorTranslatorSettingsView: View {
     @ObservedObject private var helperManager = HelperToolManager.shared
     @State private var translator = CursorTranslatorConfig.load()
     @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
     @State private var screenRecording = CursorTranslatorConfig.screenRecordingAllowed
     @State private var gestures = CursorGesturesConfig.load()
+    @State private var capture = CursorScreenshotConfig.load()
     @State private var key = ""
     @State private var server = ""
     @State private var models: [String] = []
@@ -869,17 +1444,7 @@ struct CursorTranslatorSettingsView: View {
                 Group {
                     Toggle("Cursor Translator", isOn: Binding(
                         get: { translatorOn },
-                        set: { _ in
-                            guard helperManager.isRunning else { return }
-                            switch FocusFollowsMouseConfig.toggleAction(enabled: translator.enabled,
-                                                                        helperInstalled: helperManager.isInstalled,
-                                                                        trusted: usable) {
-                            case .enable: CursorTranslatorConfig.setEnabled(true)
-                            case .requestAccess: AccessWindowController.cursorTranslator.present()
-                            case .disable: CursorTranslatorConfig.setEnabled(false)
-                            case .ignore: break
-                            }
-                        }
+                        set: { _ in AccessWindowController.tapCursorTranslator(enabled: translator.enabled, usable: usable) }
                     ))
 
                     if translator.enabled && !trusted {
@@ -956,6 +1521,10 @@ struct CursorTranslatorSettingsView: View {
                         Text("Hold a key with the right button, so normal right-clicks still work.")
                             .font(.caption)
                             .foregroundStyle(.orange)
+                    } else if capture.clicks.contains(where: { $0.trigger.overlaps(translator.trigger) }) {
+                        Text("A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     } else if CursorTranslator.clashes(translator.trigger, with: gestures) {
                         Text("A Cursor Gestures trigger uses the same keys and button. Cursor Translator takes it.")
                             .font(.caption)
@@ -1146,6 +1715,7 @@ struct CursorTranslatorSettingsView: View {
         .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorTranslatorStatusDidChange)) { _ in refresh() }
         .onReceive(DistributedNotificationCenter.default().publisher(for: .MACFocusFollowsMouseStatusDidChange)) { _ in refresh() }
         .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorGesturesDidChange)) { _ in refresh() }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorScreenshotDidChange)) { _ in refresh() }
     }
 
     private func refresh() {
@@ -1153,6 +1723,7 @@ struct CursorTranslatorSettingsView: View {
         trusted = FocusFollowsMouseConfig.accessibilityTrusted
         screenRecording = CursorTranslatorConfig.screenRecordingAllowed
         gestures = CursorGesturesConfig.load()
+        capture = CursorScreenshotConfig.load()
         key = translator.service.online ? CursorTranslatorKeychain.key(for: translator.service) ?? "" : ""
     }
 
@@ -1298,6 +1869,25 @@ extension AccessWindowController {
     }
 }
 
+extension AccessWindowController {
+    static func tapFocusFollowsMouse(enabled: Bool, trusted: Bool) {
+        let helperManager = HelperToolManager.shared
+        guard helperManager.isRunning else { return }
+        switch FocusFollowsMouseConfig.toggleAction(enabled: enabled,
+                                                    helperInstalled: helperManager.isInstalled,
+                                                    trusted: trusted) {
+        case .enable:
+            FocusFollowsMouseConfig.setEnabled(true)
+        case .requestAccess:
+            AccessWindowController.focusFollowsMouse.present()
+        case .disable:
+            FocusFollowsMouseConfig.setEnabled(false)
+        case .ignore:
+            break
+        }
+    }
+}
+
 private struct FocusFollowsMouseAccessView: View {
     @State private var trusted: Bool = FocusFollowsMouseConfig.accessibilityTrusted
     @State private var didRequest = false
@@ -1380,17 +1970,7 @@ private struct CursorShakerSection: View {
             Group {
                 Toggle("Cursor Shaker", isOn: Binding(
                     get: { shakerOn },
-                    set: { _ in
-                        guard helperManager.isRunning else { return }
-                        switch FocusFollowsMouseConfig.toggleAction(enabled: shaker.enabled,
-                                                                    helperInstalled: helperManager.isInstalled,
-                                                                    trusted: usable) {
-                        case .enable: CursorShakerConfig.setEnabled(true)
-                        case .requestAccess: AccessWindowController.cursorShaker.present()
-                        case .disable: CursorShakerConfig.setEnabled(false)
-                        case .ignore: break
-                        }
-                    }
+                    set: { _ in AccessWindowController.tapCursorShaker(enabled: shaker.enabled, usable: usable) }
                 ))
 
                 if shaker.enabled && !trusted {
@@ -1525,6 +2105,21 @@ extension AccessWindowController {
     }
 }
 
+extension AccessWindowController {
+    static func tapCursorShaker(enabled: Bool, usable: Bool) {
+        let helperManager = HelperToolManager.shared
+        guard helperManager.isRunning else { return }
+        switch FocusFollowsMouseConfig.toggleAction(enabled: enabled,
+                                                    helperInstalled: helperManager.isInstalled,
+                                                    trusted: usable) {
+        case .enable: CursorShakerConfig.setEnabled(true)
+        case .requestAccess: AccessWindowController.cursorShaker.present()
+        case .disable: CursorShakerConfig.setEnabled(false)
+        case .ignore: break
+        }
+    }
+}
+
 private struct CursorShakerAccessView: View {
     @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
     @State private var didRequest = false
@@ -1613,6 +2208,21 @@ private enum CursorTranslatorAccessStep {
 extension AccessWindowController {
     static let cursorTranslator = AccessWindowController(title: String(localized: "Cursor Translator")) {
         NSHostingController(rootView: CursorTranslatorAccessView())
+    }
+}
+
+extension AccessWindowController {
+    static func tapCursorTranslator(enabled: Bool, usable: Bool) {
+        let helperManager = HelperToolManager.shared
+        guard helperManager.isRunning else { return }
+        switch FocusFollowsMouseConfig.toggleAction(enabled: enabled,
+                                                    helperInstalled: helperManager.isInstalled,
+                                                    trusted: usable) {
+        case .enable: CursorTranslatorConfig.setEnabled(true)
+        case .requestAccess: AccessWindowController.cursorTranslator.present()
+        case .disable: CursorTranslatorConfig.setEnabled(false)
+        case .ignore: break
+        }
     }
 }
 
@@ -1743,5 +2353,147 @@ private struct CursorTranslatorAccessView: View {
     private func read() {
         trusted = FocusFollowsMouseConfig.accessibilityTrusted
         screenRecording = CursorTranslatorConfig.screenRecordingAllowed
+    }
+}
+
+extension AccessWindowController {
+    static let cursorScreenshot = AccessWindowController(title: String(localized: "Cursor Capture")) {
+        NSHostingController(rootView: CursorScreenshotAccessView())
+    }
+}
+
+extension AccessWindowController {
+    static func tapCursorScreenshot(enabled: Bool, usable: Bool) {
+        let helperManager = HelperToolManager.shared
+        guard helperManager.isRunning else { return }
+        switch FocusFollowsMouseConfig.toggleAction(enabled: enabled,
+                                                    helperInstalled: helperManager.isInstalled,
+                                                    trusted: usable) {
+        case .enable: CursorScreenshotConfig.setEnabled(true)
+        case .requestAccess: AccessWindowController.cursorScreenshot.present()
+        case .disable: CursorScreenshotConfig.setEnabled(false)
+        case .ignore: break
+        }
+    }
+}
+
+private struct CursorScreenshotAccessView: View {
+    @State private var screenRecording = CursorTranslatorConfig.screenRecordingAllowed
+    @State private var didRequest = false
+    private let waitTicker = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        AccessDialog(title: Text("Cursor Capture")) {
+            Text("Screen Recording")
+                .font(.headline)
+
+            Group {
+                if SystemSettingsPane.screenRecordingHasAudio() {
+                    Text("MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording.")
+                } else {
+                    Text("MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording.")
+                }
+            }
+            .font(.callout)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+
+            if screenRecording {
+                Label("Access granted", systemImage: "checkmark.circle.fill")
+                    .font(.callout)
+                    .foregroundStyle(Color.green)
+
+                Button("Let’s Go!") {
+                    CursorScreenshotConfig.setEnabled(true)
+                    AccessWindowController.cursorScreenshot.dismiss()
+                }
+                .keyboardShortcut(.defaultAction)
+            } else {
+                if didRequest {
+                    Text("Waiting for access. This window updates as soon as MaCursor is allowed.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                HStack(spacing: 12) {
+                    Button("Not Now") {
+                        CursorScreenshotConfig.setEnabled(false)
+                        AccessWindowController.cursorScreenshot.dismiss()
+                    }
+
+                    Button("Allow Screen Recording") {
+                        didRequest = true
+                        CursorTranslatorConfig.requestScreenRecording()
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+        }
+        .onAppear(perform: refresh)
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorTranslatorStatusDidChange)) { _ in read() }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
+            guard AccessWindowController.cursorScreenshot.window?.isVisible == true else { return }
+            refresh()
+        }
+        .onReceive(waitTicker) { _ in
+            guard !screenRecording, AccessWindowController.cursorScreenshot.window?.isVisible == true else { return }
+            refresh()
+        }
+        .onReceive(ModalWindowCoordinator.shared.activeModalDidChange) { _ in
+            AccessWindowController.cursorScreenshot.reanchor()
+        }
+    }
+
+    private func refresh() {
+        CursorScreenshotConfig.notifyHelper()
+        read()
+    }
+
+    private func read() {
+        screenRecording = CursorTranslatorConfig.screenRecordingAllowed
+    }
+}
+
+private struct CursorScreenshotWindowBackgroundChoice: View {
+    let title: LocalizedStringKey
+    let value: CursorScreenshotWindowBackground
+    @Binding var choice: CursorScreenshotWindowBackground
+
+    private var tile: RoundedRectangle { RoundedRectangle(cornerRadius: 6, style: .continuous) }
+
+    @ViewBuilder private var backdrop: some View {
+        if value == .wallpaper {
+            LinearGradient(colors: [Color(red: 0.36, green: 0.55, blue: 0.95), Color(red: 0.72, green: 0.42, blue: 0.86)], startPoint: .topLeading, endPoint: .bottomTrailing)
+        } else {
+            Canvas { context, size in
+                let side: CGFloat = 6
+                for row in 0..<Int((size.height / side).rounded(.up)) {
+                    for column in 0..<Int((size.width / side).rounded(.up)) where (row + column).isMultiple(of: 2) {
+                        context.fill(Path(CGRect(x: CGFloat(column) * side, y: CGFloat(row) * side, width: side, height: side)), with: .color(.secondary.opacity(0.25)))
+                    }
+                }
+            }
+        }
+    }
+
+    var body: some View {
+        Button {
+            choice = value
+        } label: {
+            VStack(spacing: 6) {
+                backdrop
+                    .overlay(RoundedRectangle(cornerRadius: 3, style: .continuous).fill(Color(nsColor: .windowBackgroundColor)).frame(width: 40, height: 26).shadow(radius: 1))
+                    .frame(width: 72, height: 46)
+                    .clipShape(tile)
+                    .overlay(tile.strokeBorder(choice == value ? Color.accentColor : Color.secondary.opacity(0.3), lineWidth: choice == value ? 2 : 1))
+                Text(title)
+                    .font(.caption)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(Text(title))
+        .accessibilityAddTraits(choice == value ? .isSelected : [])
     }
 }

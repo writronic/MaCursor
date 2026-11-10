@@ -120,8 +120,29 @@ final class ModalWindowCoordinator: ObservableObject {
     private weak var mainWindow: NSWindow?
     private var eventMonitor: Any?
     private var isReassertingOrder = false
+    private weak var heldMainWindow: NSWindow?
+
+    lazy var holdsMainWindow = WelcomePage.showsAtLaunch()
 
     init() {}
+
+    func holdMainWindowIfNeeded(_ window: NSWindow) -> Bool {
+        guard holdsMainWindow else { return false }
+        heldMainWindow = window
+        window.alphaValue = 0
+        window.ignoresMouseEvents = true
+        window.styleMask.remove(.closable)
+        return true
+    }
+
+    func releaseMainWindow() {
+        holdsMainWindow = false
+        guard let window = heldMainWindow else { return }
+        heldMainWindow = nil
+        window.styleMask.insert(.closable)
+        window.ignoresMouseEvents = false
+        window.alphaValue = 1
+    }
 
 
     private func refreshBlockedState() {

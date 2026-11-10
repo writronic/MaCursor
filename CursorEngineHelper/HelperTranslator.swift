@@ -632,12 +632,12 @@ final class CursorTranslatorOutlines: NSView {
 final class CursorTranslatorStreamShot: NSObject, SCStreamOutput, @unchecked Sendable {
     private let once = CursorTranslatorOnce<CGImage>()
 
-    static func capture(_ filter: SCContentFilter, _ configuration: SCStreamConfiguration) async throws -> CGImage {
+    static func capture(_ filter: SCContentFilter, _ configuration: SCStreamConfiguration, limit: TimeInterval = 2) async throws -> CGImage {
         let shot = CursorTranslatorStreamShot()
         let stream = SCStream(filter: filter, configuration: configuration, delegate: nil)
         try stream.addStreamOutput(shot, type: .screen, sampleHandlerQueue: DispatchQueue.global(qos: .userInitiated))
         defer { stream.stopCapture { _ in } }
-        return try await shot.once.wait(2, else: CocoaError(.featureUnsupported)) {
+        return try await shot.once.wait(limit, else: CocoaError(.featureUnsupported)) {
             stream.startCapture { error in
                 if let error { shot.once.finish(.failure(error)) }
             }

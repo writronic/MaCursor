@@ -65,17 +65,7 @@ struct CursorGesturesSettingsView: View {
                             Spacer(minLength: 0)
                             Toggle("Cursor Gestures", isOn: Binding(
                                 get: { FocusFollowsMouseConfig.isOn(enabled: gestures.enabled, trusted: usable) },
-                                set: { _ in
-                                    guard helperManager.isRunning else { return }
-                                    switch FocusFollowsMouseConfig.toggleAction(enabled: gestures.enabled,
-                                                                                helperInstalled: helperManager.isInstalled,
-                                                                                trusted: usable) {
-                                    case .enable: CursorGesturesConfig.setEnabled(true)
-                                    case .requestAccess: AccessWindowController.cursorGestures.present()
-                                    case .disable: CursorGesturesConfig.setEnabled(false)
-                                    case .ignore: break
-                                    }
-                                }
+                                set: { _ in AccessWindowController.tapCursorGestures(enabled: gestures.enabled, usable: usable) }
                             ))
                             .labelsHidden()
                             .toggleStyle(.switch)
@@ -1043,11 +1033,12 @@ private struct GestureShortcutRecorder: View {
         }
         .onDisappear(perform: stop)
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { _ in stop() }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in stop() }
         .onReceive(DistributedNotificationCenter.default().publisher(for: .inputSourceChanged)) { _ in layout = shortcutLayout() }
     }
 
     private func start() {
-        monitor = EditorTextShortcutCoordinator.addRecorder { event in
+        monitor = EditorTextShortcutCoordinator.addRecorder(stop: stop) { event in
             switch CursorGestureKeys.recorded(event.keyCode, event.modifierFlags) {
             case .cancel:
                 stop()
@@ -1404,6 +1395,7 @@ private struct GestureTriggerEditor: View {
     @Binding var trigger: CursorGestureTrigger
     let remove: (() -> Void)?
     var buttonsOnly = false
+    var clicks = false
 
     private static let keys: [(NSEvent.ModifierFlags, String)] = [(.function, "fn"), (.control, "⌃"), (.option, "⌥"), (.shift, "⇧"), (.command, "⌘")]
 
@@ -1439,13 +1431,21 @@ private struct GestureTriggerEditor: View {
                 }
 
                 Picker("Draw With", selection: Binding(
-                    get: { trigger.twoFinger ? 4 : min(trigger.button ?? 0, 3) },
+                    get: { trigger.twoFinger ? 4 : trigger.button == 0 ? 5 : min(trigger.button ?? 0, 3) },
                     set: { value in
-                        trigger.button = value == 3 ? max(trigger.button ?? 3, 3) : (1...2).contains(value) ? value : nil
+                        if clicks, value == 0 {
+                            trigger = CursorGestureTrigger()
+                            return
+                        }
+                        trigger.button = value == 5 ? 0 : value == 3 ? max(trigger.button ?? 3, 3) : (1...2).contains(value) ? value : nil
                         trigger.twoFinger = value == 4
                         if value == 4 { trigger.device = .trackpad }
                     }
                 )) {
+                    if clicks {
+                        Text("None").tag(0)
+                        Text("Left Button").tag(5)
+                    }
                     if !buttonsOnly {
                         Text("Held Keys").tag(0)
                     }
@@ -1679,6 +1679,21 @@ extension AccessWindowController {
     }
 }
 
+extension AccessWindowController {
+    static func tapCursorGestures(enabled: Bool, usable: Bool) {
+        let helperManager = HelperToolManager.shared
+        guard helperManager.isRunning else { return }
+        switch FocusFollowsMouseConfig.toggleAction(enabled: enabled,
+                                                    helperInstalled: helperManager.isInstalled,
+                                                    trusted: usable) {
+        case .enable: CursorGesturesConfig.setEnabled(true)
+        case .requestAccess: AccessWindowController.cursorGestures.present()
+        case .disable: CursorGesturesConfig.setEnabled(false)
+        case .ignore: break
+        }
+    }
+}
+
 private struct CursorGesturesAccessView: View {
     @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
     @State private var didRequest = false
@@ -1748,8 +1763,9 @@ private struct CursorGesturesAccessView: View {
 
 struct TranslatorTriggerEditor: View {
     @Binding var trigger: CursorGestureTrigger
+    var clicks = false
 
     var body: some View {
-        GestureTriggerEditor(trigger: $trigger, remove: nil, buttonsOnly: true)
+        GestureTriggerEditor(trigger: $trigger, remove: nil, buttonsOnly: true, clicks: clicks)
     }
 }

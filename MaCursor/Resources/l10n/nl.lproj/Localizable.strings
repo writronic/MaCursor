@@ -375,9 +375,6 @@
 /* Toggle: cursor drop shadow */
 "Cursor Shadow" = "Cursorschaduw";
 
-/* Caption explaining the cursor shadow toggle */
-"When enabled, a soft drop shadow is drawn under the cursor, similar to the pointer shadow on Windows. The shadow appears while a cursor theme is applied." = "Wanneer ingeschakeld wordt een zachte slagschaduw onder de cursor getekend, vergelijkbaar met de aanwijzerschaduw in Windows. De schaduw verschijnt zolang er een cursorthema is toegepast.";
-
 /* Section: software updates */
 "Software Updates" = "Software-updates";
 
@@ -616,7 +613,7 @@
 "The menu bar icon is provided by the Helper Tool. Install it above to use it." = "Het menubalkpictogram wordt geleverd door het Hulpprogramma. Installeer dat hierboven om het te gebruiken.";
 
 /* Caption under the Show Menu Bar Icon toggle */
-"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "Toont een MaCursor-pictogram in de menubalk om cursorthema’s en regels per app te wisselen. Als het niet verschijnt, open Systeeminstellingen en kijk bij Menubalk.";
+"Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section." = "Toont een MaCursor-pictogram in de menubalk voor snelle toegang. Als het niet verschijnt, open Systeeminstellingen en kijk bij Menubalk.";
 
 /* Menu bar panel */
 
@@ -667,6 +664,18 @@
 /* Menu bar panel: caption under the favorites placeholder */
 "Mark themes as favorites in MaCursor to show them here." = "Markeer thema’s als favoriet in MaCursor om ze hier te tonen.";
 
+/* Menu bar panel: row that reads the text in a box on the screen. CleanShot X calls it Capture Text (OCR) in its menu */
+"Capture Text (OCR)" = "Tekst vastleggen (OCR)";
+
+/* Menu bar panel: row that opens a picture from a file in the editor. CleanShot X calls it Open... in its menu */
+"Open..." = "Open…";
+
+/* Menu bar panel: row that opens the picture on the clipboard in the editor. Dim when the clipboard has no picture */
+"Open from Clipboard" = "Open vanaf klembord";
+
+/* Menu bar panel: row that picks a picture file and floats it on the screen. CleanShot X calls it Pin to the Screen... in its menu */
+"Pin to the Screen..." = "Zet vast op scherm…";
+
 /* Helper status: installed but not running */
 "Installed, not running" = "Geïnstalleerd, draait niet";
 
@@ -693,6 +702,30 @@
 
 /* Button that closes that window once access was granted */
 "Let’s Go!" = "Aan de slag!";
+
+/* Welcome window: window title and heading of the first page */
+"Welcome to MaCursor" = "Welkom bij MaCursor";
+
+/* Welcome window: main button on the middle pages */
+"Next" = "Volgende";
+
+/* Welcome window: heading of the last page */
+"You’re All Set" = "Alles is klaar";
+
+/* Welcome window: text of the last page */
+"You can change any of this later in Settings." = "Je kunt dit later allemaal wijzigen in de instellingen.";
+
+/* Welcome window: text of the Helper Tool page */
+"The Helper Tool starts when you log in. It keeps your cursors after a restart and runs most features on the next pages. Install it now, or later in Settings → General." = "Het Hulpprogramma start wanneer je inlogt. Het behoudt je cursors na een herstart en voert de meeste functies op de volgende pagina’s uit. Installeer het nu of later via Instellingen → Algemeen.";
+
+/* Welcome window: line under the switches while the Helper Tool is not installed */
+"Install the Helper Tool to use the switches on this page." = "Installeer het Hulpprogramma om de schakelaars op deze pagina te gebruiken.";
+
+/* Welcome window: title of the warning shown before the window closes */
+"Are you sure you want to close this window?" = "Weet je zeker dat je dit venster wilt sluiten?";
+
+/* Welcome window: text of the warning shown before the window closes */
+"You can change these features in Settings. This window opens again only after Reset All Settings." = "Je kunt deze functies wijzigen in de instellingen. Dit venster opent alleen opnieuw nadat je alle instellingen hebt hersteld.";
 
 /* Empty search result in the Edit Theme sidebar; %@ is the search text */
 "No Results for “%@”" = "Geen resultaten voor “%@”";
@@ -1235,7 +1268,7 @@
 "Triggers to Ignore" = "Te negeren triggers";
 "Every Trigger" = "Elke trigger";
 "Mouse Buttons" = "Muisknoppen";
-/* Cursor Gestures settings: picker of when an ignored app counts: only while it is in front, or whenever one of its windows is on screen */
+/* Cursor Gestures settings: picker of when an ignored app counts: In Front (only while it is the front app) or Under the Pointer (only when a gesture starts over one of its windows) */
 "Ignore When" = "Negeer wanneer";
 "In Front" = "Vooraan";
 /* Cursor Gestures settings: button and title of the alert that adds back the ready-made gestures */
@@ -1291,7 +1324,7 @@
 "Delay window focus for %@" = "Focus na %@ geven";
 /* Menu bar panel: folded row under the Focus on Hover switch that holds the delay slider */
 "Focus Delay" = "Focusvertraging";
-/* Cursor Shaker: feature name in the Settings sidebar, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
+/* Cursor Shaker: feature name in Settings → Cursor Control, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
 "Cursor Shaker" = "Cursorschudder";
 "Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool." = "Voor “Cursorschudder” is het Hulpprogramma vereist. Je kunt dit installeren via Algemeen → Hulpprogramma.";
 /* Cursor Shaker: grey caption under its switch */
@@ -1416,3 +1449,355 @@
 
 /* Cursor Translator: the first choice of “Translate to” in Settings. It follows the Mac's language; %@ is that language's name, for example “English (System Default)” */
 "%@ (System Default)" = "%@ (Systeemstandaard)";
+
+/* Cursor Capture: the Settings tab that takes a picture of the screen with a shortcut */
+"Cursor Capture" = "Cursoropname";
+"Cursor Capture requires the Helper Tool. You can install it from General → Helper Tool." = "Voor “Cursoropname” is het Hulpprogramma vereist. Je kunt dit installeren via Algemeen → Hulpprogramma.";
+"Choose…" = "Kies…";
+"Desktop" = "Bureaublad";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "MaCursor heeft toegang tot schermopname nodig om een afbeelding van je scherm te maken. De afbeelding blijft op je Mac. Kies “Schermopname toestaan” en schakel MaCursor daarna in via Privacy en beveiliging → Scherm- en systeemaudio-opname.";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "MaCursor heeft toegang tot schermopname nodig om een afbeelding van je scherm te maken. De afbeelding blijft op je Mac. Kies “Schermopname toestaan” en schakel MaCursor daarna in via Privacy en beveiliging → Schermopname.";
+"Waiting for access. This window updates as soon as MaCursor is allowed." = "Wachten op toegang. Dit venster wordt bijgewerkt zodra MaCursor is toegestaan.";
+
+/* Settings, General, Menu Bar: the label above the list of the panel's items */
+"Panel Items" = "Paneelonderdelen";
+"Drag an item to change its place in the panel. Turning an item off hides it from the panel, and its feature keeps working." = "Sleep een onderdeel om de plaats ervan in het paneel te wijzigen. Als je een onderdeel uitschakelt, verdwijnt het uit het paneel en blijft de functie werken.";
+
+/* Cursor Capture editor: the tools that draw on the picture. Box draws an empty rectangle. Pixelate turns what it covers into coloured blocks */
+"Arrow" = "Pijl";
+"Box" = "Kader";
+"Pixelate" = "Pixeleer";
+
+/* Cursor Capture editor: more tools. Text types words on the picture. Number places the next number in a circle. Highlight is a marker pen. Crop cuts the picture smaller */
+"Text" = "Tekst";
+"Number" = "Nummer";
+"Highlight" = "Tekstmarkering";
+"Crop" = "Snij bij";
+
+/* Settings > Cursor Capture: the switch card line, the Shortcuts tab, and the Capture Text rows */
+"Take a picture of your screen, with your cursor in it if you want." = "Maak een afbeelding van je scherm, desgewenst met je cursor erin.";
+"Shortcuts" = "Sneltoetsen";
+"Capture Text" = "Tekst vastleggen";
+"Copy Text" = "Kopieer tekst";
+"Text Copied" = "Tekst gekopieerd";
+"No Text Found" = "Geen tekst gevonden";
+"Drag a box, and the text in it goes to your clipboard. No picture is saved." = "Sleep een kader, en de tekst erin gaat naar je klembord. Er wordt geen afbeelding bewaard.";
+"Filled Box" = "Gevuld kader";
+"Oval" = "Ovaal";
+"Pen" = "Pen";
+"Select" = "Selecteer";
+"Add Image" = "Voeg afbeelding toe";
+"Background" = "Achtergrond";
+"Color" = "Kleur";
+"Size" = "Grootte";
+"Save as…" = "Bewaar als…";
+"Done Editing" = "Gereed";
+"Zoom" = "Zoom";
+"Zoom In" = "Zoom in";
+"Zoom Out" = "Zoom uit";
+"Fit Canvas" = "Pas aan canvas aan";
+"Drag Me" = "Sleep mij";
+"Share" = "Deel";
+"Pin" = "Zet vast";
+"Don't Save" = "Bewaar niet";
+"Format:" = "Formaat:";
+"JPEG Image" = "JPEG-afbeelding";
+"PNG Image" = "PNG-afbeelding";
+"HEIC Image" = "HEIC-afbeelding";
+"WebP Image" = "WebP-afbeelding";
+"%lld pt" = "%lld pt";
+"%lld%%" = "%lld%%";
+"Hex" = "Hex";
+"Alpha" = "Alfa";
+"Hue" = "Tint";
+"R" = "R";
+"G" = "G";
+"B" = "B";
+"Add to My Colors" = "Zet bij mijn kleuren";
+"My Colors" = "Mijn kleuren";
+"More Colors" = "Meer kleuren";
+"Fewer Colors" = "Minder kleuren";
+"Pick a Color" = "Kies een kleur";
+"Black" = "Zwart";
+"Red" = "Rood";
+"Orange" = "Oranje";
+"Yellow" = "Geel";
+"Green" = "Groen";
+"Teal" = "Blauwgroen";
+"Blue" = "Blauw";
+"Purple" = "Paars";
+"Pink" = "Roze";
+"White" = "Wit";
+"Arrow Style" = "Pijlstijl";
+"Text Style" = "Tekststijl";
+"Spotlight Shape" = "Spotlight-vorm";
+"Pixelate Style" = "Pixelstijl";
+"Number Settings" = "Nummerinstellingen";
+"Unlock Canvas" = "Ontgrendel canvas";
+"Lock Canvas" = "Vergrendel canvas";
+"Spotlight Opacity" = "Spotlight-dekking";
+"Pixelate Strength" = "Pixelsterkte";
+"Emoji" = "Emoji";
+"Starting Number:" = "Startnummer:";
+"Standard" = "Standaard";
+"Fancy" = "Sierlijk";
+"Curved" = "Gebogen";
+"Double" = "Dubbel";
+"Rectangle" = "Rechthoek";
+"Rounded Rectangle" = "Afgeronde rechthoek";
+"Secure Blur" = "Veilige vervaging";
+"Blur" = "Vervaging";
+"Black Out" = "Zwart maken";
+"Rounded" = "Afgerond";
+"Outlined" = "Omlijnd";
+"Mono" = "Mono";
+"Mono Box" = "Monokader";
+"Rounded Box" = "Afgerond kader";
+"Freeform" = "Vrij";
+"Custom Ratio" = "Eigen verhouding";
+"Original Ratio" = "Originele verhouding";
+"1 : 1 (Square)" = "1 : 1 (vierkant)";
+"Ratio" = "Verhouding";
+"Ratio Width" = "Breedte van verhouding";
+"Ratio Height" = "Hoogte van verhouding";
+"Swap Width and Height" = "Breedte en hoogte wisselen";
+"Fill Color" = "Opvulkleur";
+"Transparent" = "Transparant";
+"Auto" = "Automatisch";
+"Gray" = "Grijs";
+"Custom Color…" = "Eigen kleur…";
+"Rotate" = "Draai";
+"Flip" = "Spiegel";
+"Image size:" = "Afbeeldingsgrootte:";
+"%lld × %lld px" = "%1$lld × %2$lld px";
+"Snap to edges" = "Uitlijnen op randen";
+"Hold ⌘ to turn snapping on." = "Houd ⌘ ingedrukt om uitlijnen aan te zetten.";
+"Revert to Original" = "Terug naar origineel";
+"Rotate image?" = "Afbeelding draaien?";
+"Flip image?" = "Afbeelding spiegelen?";
+"Flatten and Rotate" = "Samenvoegen en draaien";
+"Flatten and Flip" = "Samenvoegen en spiegelen";
+"This burns every mark into the picture, so you can no longer edit them. You cannot undo this." = "Alle markeringen worden vast in de afbeelding gezet, zodat je ze niet meer kunt bewerken. Dit kun je niet ongedaan maken.";
+"Don't ask again" = "Niet meer vragen";
+"Width:" = "Breedte:";
+"Height:" = "Hoogte:";
+"pixels" = "pixels";
+"percent" = "procent";
+"Flatten Marks" = "Markeringen samenvoegen";
+"(Cannot be undone)" = "(Kan niet ongedaan worden gemaakt)";
+"Resize" = "Formaat wijzigen";
+"Keep Proportions" = "Verhoudingen behouden";
+"Take Screenshot" = "Maak schermafbeelding";
+"Paste From Clipboard" = "Plak vanaf klembord";
+"Choose From File…" = "Kies uit bestand…";
+"Open" = "Open";
+"Top" = "Boven";
+"Bottom" = "Onder";
+"Left" = "Links";
+"Right" = "Rechts";
+"Add New Preset…" = "Nieuwe voorinstelling toevoegen…";
+"Add wallpaper" = "Achtergrond toevoegen";
+"Alignment" = "Uitlijning";
+"Apply Previous Settings" = "Vorige instellingen toepassen";
+"Auto Balance" = "Automatisch balanceren";
+"Automatically apply preset to all screenshots:" = "Voorinstelling automatisch op alle schermafbeeldingen toepassen:";
+"Blurred desktop" = "Wazig bureaublad";
+"Blurred picture" = "Wazige afbeelding";
+"Bottom left" = "Linksonder";
+"Bottom right" = "Rechtsonder";
+"Clean" = "Strak";
+"Dark blur" = "Donker wazig";
+"Dark gray" = "Donkergrijs";
+"Default Preset" = "Standaardvoorinstelling";
+"Delete Preset" = "Voorinstelling verwijderen";
+"Delete this preset?" = "Deze voorinstelling verwijderen?";
+"Desktop picture" = "Bureaubladafbeelding";
+"Dusk" = "Schemering";
+"Gradients" = "Verlopen";
+"Inset" = "Inzet";
+"Light gray" = "Lichtgrijs";
+"Mint" = "Munt";
+"Mist" = "Mist";
+"My preset" = "Mijn voorinstelling";
+"Night" = "Nacht";
+"Padding" = "Opvulling";
+"Pale blue" = "Bleekblauw";
+"Pale green" = "Bleekgroen";
+"Pale orange" = "Bleekoranje";
+"Pale red" = "Bleekrood";
+"Pale violet" = "Bleekviolet";
+"Pale yellow" = "Bleekgeel";
+"Preset options" = "Voorinstellingsopties";
+"Presets" = "Voorinstellingen";
+"Remove wallpaper" = "Achtergrond verwijderen";
+"Rose" = "Roos";
+"Sand" = "Zand";
+"Save as new preset" = "Bewaar als nieuwe voorinstelling";
+"Save changes" = "Wijzigingen bewaren";
+"Shadow" = "Schaduw";
+"Soft" = "Zacht";
+"Top left" = "Linksboven";
+"Top right" = "Rechtsboven";
+"Violet" = "Violet";
+"Wallpaper" = "Achtergrond";
+"Wallpapers" = "Achtergronden";
+"Hold Command ⌘ to disable snapping." = "Houd Command ⌘ ingedrukt om uitlijnen uit te zetten.";
+
+/* Settings > Cursor Capture, in CleanShot X's order: the tabs, the section headings and the rows. Auto-close is a switch; Interval is the time menu under it. Position on screen says where the card sits. Self-Timer interval is the wait before the picture. OCR is the section that holds Capture Text */
+"Quick Access" = "Snelle toegang";
+"Screenshots" = "Schermafbeeldingen";
+"Advanced" = "Geavanceerd";
+"Sounds" = "Geluiden";
+"Export" = "Exporteren";
+"After Capture" = "Na vastleggen";
+"Behavior" = "Gedrag";
+"Capture" = "Vastleggen";
+"Window Screenshots" = "Vensterafbeeldingen";
+"OCR" = "Tekstherkenning";
+"Play sounds" = "Speel geluiden af";
+"Export location" = "Exportlocatie";
+"Show Quick Access Overlay" = "Toon overlay voor snelle toegang";
+"Position on screen" = "Positie op scherm";
+"Auto-close" = "Sluit automatisch";
+"Interval" = "Interval";
+"Self-Timer interval" = "Interval zelfontspanner";
+"Show cursor on screenshots" = "Toon cursor in schermafbeeldingen";
+"Capture Area" = "Gebied vastleggen";
+"Capture Previous Area" = "Vorig gebied vastleggen";
+"Capture Fullscreen" = "Hele scherm vastleggen";
+"Set the default save location used when saving from the Quick Access Overlay, After Capture, and other Save actions across the app." = "Stel de standaardlocatie in die wordt gebruikt bij bewaren vanuit de overlay voor snelle toegang, “Na vastleggen” en andere bewaaracties in de app.";
+"Decide what should happen after taking a screenshot." = "Kies wat er moet gebeuren na het maken van een schermafbeelding.";
+"After the Capture Area shortcut, press Space to pick a window. Press Space again to draw an area." = "Druk na de sneltoets “Gebied vastleggen” op de spatiebalk om een venster te kiezen. Druk nogmaals op de spatiebalk om een gebied te tekenen.";
+"Action" = "Actie";
+"Screenshot" = "Schermafbeelding";
+"Copy file to clipboard" = "Kopieer bestand naar klembord";
+"Open Annotate tool" = "Open annotatietool";
+"Pin to the screen" = "Zet vast op scherm";
+"Output" = "Uitvoer";
+"File format" = "Bestandsformaat";
+"Convert to sRGB profile" = "Zet om naar sRGB-profiel";
+"Scale Retina screenshots to 1x" = "Schaal Retina-schermafbeeldingen naar 1x";
+"Add 1px border to all screenshots" = "Voeg een rand van 1 px toe aan alle schermafbeeldingen";
+"Background preset" = "Voorinstelling voor achtergrond";
+"Apply Background Tool preset to all screenshots. You can create presets in the editor. Hold ⇧ Shift while capturing a screenshot to disable this option." = "Past de voorinstelling van het achtergrondgereedschap toe op alle schermafbeeldingen. Je kunt voorinstellingen maken in de editor. Houd ⇧ Shift ingedrukt tijdens het maken van een schermafbeelding om deze optie uit te schakelen.";
+"2 Seconds" = "2 seconden";
+"5 Seconds" = "5 seconden";
+"10 Seconds" = "10 seconden";
+"15 Seconds" = "15 seconden";
+"Self-Timer" = "Zelfontspanner";
+"This works in Fullscreen or Self-Timer modes only." = "Dit werkt alleen in de modus “Volledig scherm” of “Zelfontspanner”.";
+"Freeze screen when taking a screenshot" = "Scherm bevriezen bij het maken van een schermafbeelding";
+"With wallpaper" = "Met bureaubladafbeelding";
+"Capture window shadow" = "Vensterschaduw vastleggen";
+"Hold ⇧ Shift while taking a screenshot to capture the window with wallpaper." = "Houd ⇧ Shift ingedrukt tijdens het maken van een schermafbeelding om het venster met de bureaubladafbeelding vast te leggen.";
+"Crosshair" = "Dradenkruis";
+"Crosshair Mode" = "Dradenkruismodus";
+"Always enabled" = "Altijd aan";
+"When ⌘ Command is pressed" = "Als Command ⌘ ingedrukt is";
+"Disabled" = "Uitgeschakeld";
+"Show magnifier" = "Vergrootglas tonen";
+"To enable magnifier, you must enable Crosshair Mode first." = "Om het vergrootglas aan te zetten, moet je eerst “Dradenkruismodus” aanzetten.";
+"File Name" = "Bestandsnaam";
+"Ask for name after every capture" = "Vraag na elke opname om een naam";
+"File name format" = "Opmaak van bestandsnaam";
+"Customize…" = "Pas aan…";
+"Add “@2x” suffix to Retina screenshots" = "Voeg het achtervoegsel “@2x” toe aan Retina-schermafbeeldingen";
+"This option improves compatibility with displaying Retina screenshots in third-party apps." = "Deze optie verbetert de compatibiliteit bij het tonen van Retina-schermafbeeldingen in apps van derden.";
+"Type text and drag elements to create a custom format:" = "Typ tekst en sleep elementen om een eigen opmaak te maken:";
+"Year" = "Jaar";
+"Month (numeric)" = "Maand (getal)";
+"Day" = "Dag";
+"Window title" = "Venstertitel";
+"App name" = "Appnaam";
+"Minutes" = "Minuten";
+"Seconds" = "Seconden";
+"Auto-increment" = "Automatisch nummer";
+"Remove illegal characters" = "Verwijder ongeldige tekens";
+"Restore Defaults" = "Herstel standaardwaarden";
+"Next number" = "Volgend nummer";
+"Name this screenshot" = "Geef deze schermafbeelding een naam";
+"Use Default Name" = "Gebruik standaardnaam";
+"Copy to clipboard" = "Kopieer naar klembord";
+"File & Image (default)" = "Bestand en afbeelding (standaard)";
+"Image only" = "Alleen afbeelding";
+"File only" = "Alleen bestand";
+"Adjust this option if you've encountered any issues with pasting from clipboard or clipboard managers." = "Pas deze optie aan als je problemen hebt met plakken vanaf het klembord of vanuit klembordbeheerders.";
+"Text Recognition" = "Tekstherkenning";
+"Automatically Detect Language" = "Taal automatisch detecteren";
+"Keep line breaks" = "Regeleinden behouden";
+"Detect links" = "Links detecteren";
+"Arabic (Najdi)" = "Arabisch (Nadjdi)";
+"Chinese (Simplified)" = "Chinees (vereenvoudigd)";
+"Chinese (Traditional)" = "Chinees (traditioneel)";
+"Norwegian (Bokmål)" = "Noors (Bokmål)";
+"Norwegian (Nynorsk)" = "Noors (Nynorsk)";
+"Do you want to open this link?" = "Wil je deze link openen?";
+"Open Link in Browser" = "Open link in browser";
+"Never open links" = "Open nooit links";
+"Area Selection" = "Gebiedsselectie";
+"Remember last selection" = "Laatste selectie onthouden";
+"Keep styling" = "Opmaak behouden";
+"Date" = "Datum";
+"Capture History" = "Opnamegeschiedenis";
+"Keep history" = "Bewaar geschiedenis";
+"1 day" = "1 dag";
+"3 days" = "3 dagen";
+"1 week" = "1 week";
+"1 month" = "1 maand";
+"You can restore old files with “Capture History” option from the menu bar." = "Je kunt oude bestanden herstellen met de optie “Opnamegeschiedenis” in de menubalk.";
+"Capture History..." = "Opnamegeschiedenis…";
+"Capture History is disabled." = "Opnamegeschiedenis is uitgeschakeld.";
+"No files to restore..." = "Geen bestanden om te herstellen…";
+"Clear History..." = "Wis geschiedenis…";
+"Are you sure you want to delete all files from history?" = "Weet je zeker dat je alle bestanden uit de geschiedenis wilt verwijderen?";
+
+/* Settings > Cursor Capture > Quick Access: the Appearance and Behavior rows, the Auto-close interval choices, and the card with no heading. Overlay is the small card shown after a capture. ⌥ is the Option key. "Export location" names the row on the General tab */
+"Move to active screen" = "Verplaats naar actief scherm";
+"Active screen is the screen where your cursor is pointing." = "Het actieve scherm is het scherm waar je cursor naar wijst.";
+"Overlay size" = "Grootte van overlay";
+"Save and Close" = "Bewaar en sluit";
+"5 seconds" = "5 seconden";
+"10 seconds" = "10 seconden";
+"15 seconds" = "15 seconden";
+"30 seconds" = "30 seconden";
+"1 minute" = "1 minuut";
+"2 minutes" = "2 minuten";
+"5 minutes" = "5 minuten";
+"10 minutes" = "10 minuten";
+"Close after dragging" = "Sluit na slepen";
+"Hold ⌥ (option) to keep the item on Overlay after dragging." = "Houd ⌥ Option ingedrukt om het onderdeel na het slepen op de overlay te houden.";
+"Hold ⌥ (option) to close the item from Overlay after dragging." = "Houd ⌥ Option ingedrukt om het onderdeel na het slepen van de overlay te sluiten.";
+"Save button behavior" = "Gedrag van bewaarknop";
+"Save to \"Export location\"" ="Bewaar in “Exportlocatie”";
+"Ask for destination" = "Vraag om bestemming";
+"Press with ⌥ (option) to choose the destination." = "Klik met ⌥ Option ingedrukt om de bestemming te kiezen.";
+"Press with ⌥ (option) to use 'Export Location' without asking." = "Klik met ⌥ Option ingedrukt om “Exportlocatie” te gebruiken zonder te vragen.";
+"Search Themes" = "Thema’s zoeken";
+
+/* Welcome window, version 2 */
+"MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them." = "Met MaCursor heb je de systeemcursors van macOS in de hand. Op de volgende pagina’s kun je extra functies inschakelen of overslaan.";
+"Cursor Look" = "Cursoruiterlijk";
+"When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "Wanneer ingeschakeld wordt een zachte slagschaduw onder de cursor getekend. De schaduw verschijnt zolang er een cursorthema is toegepast.";
+"Install the Helper Tool on the first page to use Cursor Trails." = "Installeer het Hulpprogramma op de eerste pagina om Cursorsporen te gebruiken.";
+"Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "Functies op deze pagina hebben toegankelijkheidstoegang voor MaCursorHelper nodig. Als die ontbreekt, kies je “Geef toestemming” om Systeeminstellingen te openen.";
+"Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "Functies op deze pagina hebben toegang tot schermopname voor MaCursor nodig. Cursorvertaler heeft ook toegankelijkheidstoegang voor MaCursorHelper nodig. Als toegang ontbreekt, kies je “Geef toestemming” om Systeeminstellingen te openen.";
+"Press the shortcut to take a picture of your screen." = "Druk op de sneltoets om een afbeelding van je scherm te maken.";
+"This feature needs the Finder extension and Full Disk Access for MaCursor. If either is missing, choose Grant Permission to open System Settings." = "Deze functie heeft de Finder-extensie en volledige schijftoegang voor MaCursor nodig. Als een van beide ontbreekt, kies je “Geef toestemming” om Systeeminstellingen te openen.";
+"Help Writronic keep growing" = "Help Writronic verder te groeien";
+"If you would like to support development, you can donate on the Writronic website." = "Wil je de ontwikkeling steunen, dan kun je doneren op de website van Writronic.";
+"Thank you for being here." = "Bedankt dat je er bent.";
+"A star on GitHub also helps more people find MaCursor, and it means a lot." = "Een ster op GitHub helpt ook meer mensen MaCursor te vinden, en het betekent veel.";
+"Give a Star" = "Geef een ster";
+/* Welcome window: button at the end of an access line whose dot is red; it opens System Settings at that access */
+"Grant Permission" = "Geef toestemming";
+/* Welcome window: what VoiceOver reads after the name of an access whose dot is red */
+"Access not granted" = "Toegang niet verleend";
+
+/* Welcome window: line under the cards on pages 2 to 4 while the Helper Tool is installed but not running. MaCursor starts it again when it opens. */
+"The Helper Tool is not running. Quit and reopen MaCursor to start it." = "Het Hulpprogramma draait niet. Stop MaCursor en open het opnieuw om het Hulpprogramma te starten.";
+
+"Hide desktop icons while capturing" = "Bureaubladsymbolen verbergen tijdens het vastleggen";
+
+"Left Button" = "Linkerknop";
+"Hold a key with the left or right button, so normal clicks still work." = "Houd een toets ingedrukt bij de linker- of rechterknop, zodat gewone klikken blijven werken.";
+"A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "Een sneltoets van Cursoropname gebruikt dezelfde toetsen en knop. Cursoropname gaat voor.";

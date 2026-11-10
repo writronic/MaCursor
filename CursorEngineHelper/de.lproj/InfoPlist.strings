@@ -1,2 +1,3 @@
 "NSAppleEventsUsageDescription" = "Damit funktioniert die MaCursor-Taste in der Finder-Symbolleiste auch in iCloud-Ordnern.";
-"NSScreenCaptureUsageDescription" = "Der Cursorübersetzer liest den Text im Rahmen, um ihn zu übersetzen. Nichts wird gespeichert, und der Text geht nur an den Übersetzungsdienst, den Sie wählen.";
+"NSScreenCaptureUsageDescription" = "Der Cursorübersetzer liest den Text im Rahmen, und der Text geht nur an den Übersetzungsdienst, den Sie wählen. Die Cursoraufnahme macht auf Ihren Wunsch ein Bild Ihres Bildschirms, und das Bild bleibt auf Ihrem Mac.";
+"NSDesktopFolderUsageDescription" = "Die Cursoraufnahme sichert Ihre Bilder auf Wunsch auf Ihrem Schreibtisch.";

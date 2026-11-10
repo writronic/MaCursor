@@ -173,6 +173,7 @@ final class HelperRuntime {
     private static let hotKeySignature: OSType = 0x4D414352
     private var registeredThemes: [UInt32: String] = [:]
     private var hotKeyRefs: [EventHotKeyRef] = []
+    private var shortcutRecording = false
     private var eventHandler: EventHandlerRef?
     private var store: SCDynamicStore?
     private var consoleSource: CFRunLoopSource?
@@ -190,6 +191,8 @@ final class HelperRuntime {
     private lazy var cursorGestures = CursorGesturesController(overlay: cursorTrails)
     private let cursorShaker = CursorShakerController()
     private let cursorTranslator = CursorTranslatorController()
+    private let cursorScreenshot = CursorScreenshotController()
+    private var captureClicks = CursorScreenshotConfig.load().clicks
     private let autoSwitchSchedule = MACAutoSwitchScheduleTimer()
 
     func run() {
@@ -216,6 +219,7 @@ final class HelperRuntime {
 
         let application = NSApplication.shared
         application.setActivationPolicy(.accessory)
+        applyAppearance()
         appearanceObservation = application.observe(\.effectiveAppearance) { [weak self] _, _ in
             DispatchQueue.main.async { self?.systemAppearanceChanged() }
         }
@@ -235,8 +239,15 @@ final class HelperRuntime {
             let bundleID = (note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication)?.bundleIdentifier
             MainActor.assumeIsolated { self?.appActivated(bundleID) }
         })
+        workspaceObservers.append(center.addObserver(forName: NSWorkspace.didTerminateApplicationNotification,
+                                                       object: nil, queue: .main) { [weak self] note in
+            let bundleID = (note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication)?.bundleIdentifier
+            MainActor.assumeIsolated { if bundleID == MACAppBundleIdentifier { self?.shortcutRecordingStopped() } }
+        })
         registerHotKeys()
         observeDistributed("MACShortcutsDidChange")
+        observeDistributed(Notification.Name.MACShortcutRecordingDidStart.rawValue)
+        observeDistributed(Notification.Name.MACShortcutRecordingDidStop.rawValue)
         observeDistributed(Notification.Name.MACAutoSwitchDidChange.rawValue)
         observeDistributed(Notification.Name.MACMenuBarDidChange.rawValue)
         observeDistributed(Notification.Name.MACFocusFollowsMouseDidChange.rawValue)
@@ -245,6 +256,8 @@ final class HelperRuntime {
         observeDistributed(Notification.Name.MACCursorGesturesDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorShakerDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorTranslatorDidChange.rawValue)
+        observeDistributed(Notification.Name.MACCursorScreenshotDidChange.rawValue)
+        observeDistributed(Notification.Name.MACAppearanceDidChange.rawValue)
         observeDistributed(inputSourceChanged)
         for name in RightClickMenuHandoff.requests.keys {
             CFNotificationCenterAddObserver(CFNotificationCenterGetDarwinNotifyCenter(), context, helperNotificationCallback, name as CFString, nil, .deliverImmediately)
@@ -273,6 +286,7 @@ final class HelperRuntime {
         autoSwitchSchedule.start()
         focusController.strokesEnabled = { [weak self] in
             (self?.cursorGestures.wantsTrust ?? false) || (self?.cursorShaker.wantsTrust ?? false) || (self?.cursorTranslator.wantsTrust ?? false)
+                || !(self?.captureClicks.isEmpty ?? true)
         }
         focusController.strokeInProgress = { [weak self] in self?.cursorGestures.isDrawing ?? false }
         focusController.trustWillCheck = { [weak self] in self?.cursorTranslator.probeAhead() }
@@ -283,13 +297,29 @@ final class HelperRuntime {
         }
         cursorGestures.translator = { [weak self] in self?.cursorTranslator.trigger }
         cursorGestures.framed = { [weak self] in self?.cursorTranslator.received($0) }
+        cursorGestures.captures = { [weak self] in self?.captureClicks ?? [] }
+        cursorGestures.capturing = { [weak self] in self?.cursorScreenshot.isOpen ?? false }
+        cursorGestures.captured = { [weak self] in _ = self?.hotKeyPressed(signature: Self.hotKeySignature, id: $0, clicked: true) }
+        cursorScreenshot.opened = { [weak self] in self?.cursorGestures.publish() }
         cursorGestures.raiseWindow = { [weak self] in self?.focusController.raise($0) ?? false }
         cursorGestures.windowUnderPointer = { [weak self] in self?.focusController.windowUnderPointer() }
         cursorGestures.windowFrame = { [weak self] in self?.focusController.copyWindowFrame($0) }
         focusController.start()
         focusController.syncTrust()
         cursorTrails.start()
+        cursorScreenshot.warmReader()
+        CursorScreenshotEditor.imageSource = { [weak self] done in
+            guard let self else { return done(nil) }
+            self.cursorScreenshot.takeImage(allowed: {
+                self.cursorTranslator.probe()
+                return self.cursorTranslator.screenRecording
+            }, done: done)
+        }
         menuBarController = MenuBarController()
+        menuBarController?.captureHandler = { [weak self] item in
+            _ = self?.hotKeyPressed(signature: Self.hotKeySignature, id: item.hotKeyID)
+        }
+        menuBarController?.historyHandler = { [weak self] in self?.cursorScreenshot.showHistory() }
         menuBarController?.applyVisibility()
         CFRunLoopAddSource(CFRunLoopGetMain(), source, .defaultMode)
         application.run()
@@ -298,6 +328,7 @@ final class HelperRuntime {
     private func stop() {
         let wasRunning = running
         running = false
+        cursorScreenshot.closeOverlay()
         displayTimer?.cancel()
         activationTimer?.cancel()
         displayTimer = nil
@@ -344,10 +375,17 @@ final class HelperRuntime {
         switch name {
         case "AppleInterfaceThemeChangedNotification":
             DispatchQueue.main.async { [weak self] in self?.systemAppearanceChanged() }
+        case Notification.Name.MACAppearanceDidChange.rawValue:
+            applyAppearance()
         case "MACShortcutsDidChange":
             CFPreferencesSynchronize(MACPreferences.domain, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
             unregisterHotKeys()
             registerHotKeys()
+        case Notification.Name.MACShortcutRecordingDidStart.rawValue:
+            shortcutRecording = true
+            unregisterHotKeys()
+        case Notification.Name.MACShortcutRecordingDidStop.rawValue:
+            shortcutRecordingStopped()
         case Notification.Name.MACAutoSwitchDidChange.rawValue:
             applyAutoSwitchAndRefresh()
             MACAutoSwitchEffects.shared.handleFrontmostApp(foregroundBundleID())
@@ -381,6 +419,18 @@ final class HelperRuntime {
             } else {
                 focusController.syncTrust()
             }
+        case Notification.Name.MACCursorScreenshotDidChange.rawValue:
+            cursorTranslator.probe()
+            cursorScreenshot.warmReader()
+            CursorScreenshotHistory.clean()
+            unregisterHotKeys()
+            registerHotKeys()
+            captureClicks = CursorScreenshotConfig.load().clicks
+            if focusController.lastTrusted {
+                cursorGestures.sync(trusted: true)
+            } else {
+                focusController.syncTrust()
+            }
         case Notification.Name.MACCursorTrailsDidChange.rawValue:
             cursorTrails.start()
             menuBarController?.refreshTrails()
@@ -395,6 +445,11 @@ final class HelperRuntime {
                                                                                     reportFailure: { _ in NSSound.beep() }) },
                                         fail: { _ in NSSound.beep() })
         }
+    }
+
+    private func applyAppearance() {
+        CFPreferencesSynchronize(MACPreferences.domain, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
+        MACApplyAppearanceMode(MACPreferences.value(forKey: MACPreferences.appearanceModeKey), to: NSApplication.shared)
     }
 
     private func systemAppearanceChanged() {
@@ -443,6 +498,7 @@ final class HelperRuntime {
 
     private func appActivated(_ bundleID: String?) {
         guard running else { return }
+        if bundleID != MACAppBundleIdentifier { shortcutRecordingStopped() }
         HelperEventPolicy.handleActivation(
             bundleID: bundleID, consumeRecentRaise: focusController.consumeRecentRaise,
             noteForeground: MACMenuBarState.shared.noteForegroundBundleID, cancelDwell: focusController.cancelPendingRaise,
@@ -468,6 +524,7 @@ final class HelperRuntime {
 
     fileprivate func displayChanged() {
         guard running else { return }
+        cursorScreenshot.closeOverlay()
         displayTimer?.cancel()
         let deadline = displayDebounce.replaceDeadline(at: .now())
         let timer = DispatchSource.makeTimerSource(queue: .main)
@@ -510,7 +567,15 @@ final class HelperRuntime {
         cursorTrails.start()
     }
 
+    private func shortcutRecordingStopped() {
+        guard shortcutRecording else { return }
+        shortcutRecording = false
+        unregisterHotKeys()
+        registerHotKeys()
+    }
+
     private func registerHotKeys() {
+        guard !shortcutRecording else { return }
         if eventHandler == nil {
             var eventType = EventTypeSpec(eventClass: OSType(kEventClassKeyboard), eventKind: UInt32(kEventHotKeyPressed))
             let result = InstallEventHandler(GetApplicationEventTarget(), helperHotKeyCallback, 1, &eventType,
@@ -537,6 +602,21 @@ final class HelperRuntime {
                 hotKeyRefs.append(reference)
             }
         }
+        let screenshot = CursorScreenshotConfig.load()
+        let screenshotKeys = [(CursorScreenshot.wholeScreenHotKeyID, screenshot.wholeScreenShortcut),
+                              (CursorScreenshot.areaHotKeyID, screenshot.areaShortcut),
+                              (CursorScreenshot.repeatHotKeyID, screenshot.repeatShortcut),
+                              (CursorScreenshot.textHotKeyID, screenshot.textShortcut),
+                              (CursorScreenshot.selfTimerHotKeyID, screenshot.selfTimerShortcut)]
+        for (keyID, key) in screenshotKeys where screenshot.enabled {
+            guard let shortcut = key, MACShortcutIsAllowed(shortcut.modifierFlagsRaw, shortcut.keyCode) else { continue }
+            var reference: EventHotKeyRef?
+            let id = EventHotKeyID(signature: Self.hotKeySignature, id: keyID)
+            if RegisterEventHotKey(UInt32(shortcut.keyCode), HelperEventPolicy.carbonModifiers(shortcut.modifierFlagsRaw), id,
+                                   GetApplicationEventTarget(), 0, &reference) == noErr, let reference {
+                hotKeyRefs.append(reference)
+            }
+        }
     }
 
     private func unregisterHotKeys() {
@@ -548,12 +628,27 @@ final class HelperRuntime {
         registeredThemes.removeAll()
     }
 
-    fileprivate func hotKeyPressed(signature: OSType, id: UInt32) -> OSStatus {
+    fileprivate func hotKeyPressed(signature: OSType, id: UInt32, clicked: Bool = false) -> OSStatus {
         if running, signature == Self.hotKeySignature, id == CursorShaker.hotKeyID {
             if HelperTrustProbe.isTrusted() {
                 MenuBarService.setCursorShakerEnabled(!CursorShakerConfig.load().enabled)
             } else {
                 MenuBarService.requestCursorShakerAccess()
+            }
+            return noErr
+        }
+        if running, signature == Self.hotKeySignature,
+           [CursorScreenshot.wholeScreenHotKeyID, CursorScreenshot.areaHotKeyID, CursorScreenshot.repeatHotKeyID, CursorScreenshot.textHotKeyID, CursorScreenshot.selfTimerHotKeyID].contains(id) {
+            let allowed: () -> Bool = { [self] in
+                cursorTranslator.probe()
+                return cursorTranslator.screenRecording
+            }
+            switch id {
+            case CursorScreenshot.areaHotKeyID: cursorScreenshot.takeArea(allowed: allowed)
+            case CursorScreenshot.repeatHotKeyID: cursorScreenshot.repeatArea(allowed: allowed, clicked: clicked)
+            case CursorScreenshot.textHotKeyID: cursorScreenshot.takeText(allowed: allowed)
+            case CursorScreenshot.selfTimerHotKeyID: cursorScreenshot.takeSelfTimer(allowed: allowed)
+            default: cursorScreenshot.takeWholeScreen(allowed: allowed, clicked: clicked)
             }
             return noErr
         }
@@ -602,6 +697,10 @@ final class CursorGesturesController {
     var windowFrame: @MainActor (AXUIElement) -> CGRect? = { _ in nil }
     var translator: @MainActor () -> CursorGestureTrigger? = { nil }
     var framed: @MainActor (CursorTranslatorNote) -> Void = { _ in }
+    var captures: @MainActor () -> [(id: UInt32, trigger: CursorGestureTrigger)] = { [] }
+    var capturing: @MainActor () -> Bool = { false }
+    var captured: @MainActor (UInt32) -> Void = { _ in }
+    private var clicksLeft = false
 
     init(overlay: CursorTrailsController) {
         self.overlay = overlay
@@ -618,9 +717,13 @@ final class CursorGesturesController {
     func sync(trusted: Bool) {
         let stored = CursorGesturesConfig.load()
         let latest = stored.enabled ? stored : CursorGesturesConfig()
-        let wanted = (latest.enabled || translator() != nil) && trusted
-        let restart = wanted != (tap != nil) || wanted && (latest.enabled != config.enabled || latest.keyTriggers != config.keyTriggers || latest.padTriggers != config.padTriggers)
+        let clicks = captures()
+        let left = clicks.contains { $0.trigger.button == 0 }
+        let wanted = (latest.enabled || translator() != nil || !clicks.isEmpty) && trusted
+        let restart = wanted != (tap != nil) || wanted && (latest.enabled != config.enabled || latest.keyTriggers != config.keyTriggers || latest.padTriggers != config.padTriggers
+            || left != clicksLeft)
         config = latest
+        clicksLeft = left
         strokeKeys = CursorGestureStroke(triggers: latest.keyTriggers).triggers
         guard restart else { return publish() }
         reloadThemes()
@@ -642,7 +745,7 @@ final class CursorGesturesController {
                                 return event
                             }].compactMap { $0 }
             }
-            if let port = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap, eventsOfInterest: config.tapMask,
+            if let port = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap, eventsOfInterest: config.tapMask(clicksLeft: left),
                                             callback: helperGestureTapCallback, userInfo: Unmanaged.passUnretained(session).toOpaque()) {
                 session.start(port)
             }
@@ -653,7 +756,7 @@ final class CursorGesturesController {
     func publish() {
         tap?.shared.snapshot = CursorGestureSnapshot(config: config, front: MACMenuBarState.shared.lastForegroundBundleID,
                                                      height: NSScreen.screens.first?.frame.height ?? 0, natural: CursorGestureScroll.natural,
-                                                     translator: translator())
+                                                     translator: translator(), captures: capturing() ? [] : captures())
     }
 
     func stop() {
@@ -716,6 +819,8 @@ final class CursorGesturesController {
                 if let gesture { perform(gesture, later: false, target: CursorGestures.target(gesture, windowUnderPointer(), front: MACMenuBarState.shared.lastForegroundBundleID)) }
             case .frame(let note):
                 framed(note)
+            case .capture(let id):
+                captured(id)
             }
         }
     }

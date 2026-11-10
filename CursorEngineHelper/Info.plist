@@ -20,7 +20,9 @@
 	<key>NSAppleEventsUsageDescription</key>
 	<string>This lets the MaCursor button in the Finder toolbar work inside iCloud folders.</string>
 	<key>NSScreenCaptureUsageDescription</key>
-	<string>Cursor Translator reads the text inside its frame to translate it. Nothing is saved, and the text goes only to the Translation Service you choose.</string>
+	<string>Cursor Translator reads the text inside its frame, and the text goes only to the Translation Service you choose. Cursor Capture takes a picture of your screen when you ask, and the picture stays on your Mac.</string>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>Cursor Capture saves your pictures to your Desktop when you ask.</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2026 Writronic. All rights reserved.</string>
 </dict>

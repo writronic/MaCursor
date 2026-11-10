@@ -375,9 +375,6 @@
 /* Toggle: cursor drop shadow */
 "Cursor Shadow" = "Тень курсора";
 
-/* Caption explaining the cursor shadow toggle */
-"When enabled, a soft drop shadow is drawn under the cursor, similar to the pointer shadow on Windows. The shadow appears while a cursor theme is applied." = "Когда включено, под курсором отрисовывается мягкая тень, похожая на тень указателя в Windows. Тень отображается, пока применена тема курсора.";
-
 /* Section: software updates */
 "Software Updates" = "Обновления ПО";
 
@@ -616,7 +613,7 @@
 "The menu bar icon is provided by the Helper Tool. Install it above to use it." = "Значок в строке меню предоставляется Вспомогательным инструментом. Установите его выше, чтобы использовать.";
 
 /* Caption under the Show Menu Bar Icon toggle */
-"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "Показывает значок MaCursor в строке меню для переключения тем курсора и правил для отдельных приложений. Если он не появился, откройте Системные настройки и посмотрите раздел «Строка меню».";
+"Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section." = "Показывает значок MaCursor в строке меню для быстрого доступа. Если он не появился, откройте Системные настройки и посмотрите раздел «Строка меню».";
 
 /* Menu bar panel */
 
@@ -667,6 +664,18 @@
 /* Menu bar panel: caption under the favorites placeholder */
 "Mark themes as favorites in MaCursor to show them here." = "Отметьте темы как избранные в MaCursor, чтобы они отображались здесь.";
 
+/* Menu bar panel: row that reads the text in a box on the screen. CleanShot X calls it Capture Text (OCR) in its menu */
+"Capture Text (OCR)" = "Захват текста (OCR)";
+
+/* Menu bar panel: row that opens a picture from a file in the editor. CleanShot X calls it Open... in its menu */
+"Open..." = "Открыть…";
+
+/* Menu bar panel: row that opens the picture on the clipboard in the editor. Dim when the clipboard has no picture */
+"Open from Clipboard" = "Открыть из буфера обмена";
+
+/* Menu bar panel: row that picks a picture file and floats it on the screen. CleanShot X calls it Pin to the Screen... in its menu */
+"Pin to the Screen..." = "Закрепить на экране…";
+
 /* Helper status: installed but not running */
 "Installed, not running" = "Установлен, не запущен";
 
@@ -693,6 +702,30 @@
 
 /* Button that closes that window once access was granted */
 "Let’s Go!" = "Приступим!";
+
+/* Welcome window: window title and heading of the first page */
+"Welcome to MaCursor" = "Добро пожаловать в MaCursor";
+
+/* Welcome window: main button on the middle pages */
+"Next" = "Далее";
+
+/* Welcome window: heading of the last page */
+"You’re All Set" = "Всё готово";
+
+/* Welcome window: text of the last page */
+"You can change any of this later in Settings." = "Всё это можно изменить позже в настройках.";
+
+/* Welcome window: text of the Helper Tool page */
+"The Helper Tool starts when you log in. It keeps your cursors after a restart and runs most features on the next pages. Install it now, or later in Settings → General." = "Вспомогательный инструмент запускается при входе в систему. Он сохраняет ваши курсоры после перезагрузки и обеспечивает работу большинства функций на следующих страницах. Установите его сейчас или позже в разделе «Настройки» → «Основные».";
+
+/* Welcome window: line under the switches while the Helper Tool is not installed */
+"Install the Helper Tool to use the switches on this page." = "Установите Вспомогательный инструмент, чтобы использовать переключатели на этой странице.";
+
+/* Welcome window: title of the warning shown before the window closes */
+"Are you sure you want to close this window?" = "Вы действительно хотите закрыть это окно?";
+
+/* Welcome window: text of the warning shown before the window closes */
+"You can change these features in Settings. This window opens again only after Reset All Settings." = "Эти функции можно изменить в настройках. Это окно откроется снова только после сброса всех настроек.";
 
 /* Empty search result in the Edit Theme sidebar; %@ is the search text */
 "No Results for “%@”" = "Нет результатов по запросу «%@»";
@@ -1235,7 +1268,7 @@
 "Triggers to Ignore" = "Игнорируемые триггеры";
 "Every Trigger" = "Все триггеры";
 "Mouse Buttons" = "Кнопки мыши";
-/* Cursor Gestures settings: picker of when an ignored app counts: only while it is in front, or whenever one of its windows is on screen */
+/* Cursor Gestures settings: picker of when an ignored app counts: In Front (only while it is the front app) or Under the Pointer (only when a gesture starts over one of its windows) */
 "Ignore When" = "Когда игнорировать";
 "In Front" = "На переднем плане";
 /* Cursor Gestures settings: button and title of the alert that adds back the ready-made gestures */
@@ -1291,7 +1324,7 @@
 "Delay window focus for %@" = "Передавать фокус через %@";
 /* Menu bar panel: folded row under the Focus on Hover switch that holds the delay slider */
 "Focus Delay" = "Задержка фокуса";
-/* Cursor Shaker: feature name in the Settings sidebar, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
+/* Cursor Shaker: feature name in Settings → Cursor Control, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
 "Cursor Shaker" = "Встряска курсора";
 "Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool." = "Для функции «Встряска курсора» требуется Вспомогательный инструмент. Его можно установить в разделе «Основные» → «Вспомогательный инструмент».";
 /* Cursor Shaker: grey caption under its switch */
@@ -1416,3 +1449,355 @@
 
 /* Cursor Translator: the first choice of “Translate to” in Settings. It follows the Mac's language; %@ is that language's name, for example “English (System Default)” */
 "%@ (System Default)" = "%@ (Системный язык)";
+
+/* Cursor Capture: the Settings tab that takes a picture of the screen with a shortcut */
+"Cursor Capture" = "Снимок курсора";
+"Cursor Capture requires the Helper Tool. You can install it from General → Helper Tool." = "Для функции «Снимок курсора» требуется Вспомогательный инструмент. Его можно установить в разделе «Основные» → «Вспомогательный инструмент».";
+"Choose…" = "Выбрать…";
+"Desktop" = "Рабочий стол";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "Программе MaCursor нужна «Запись экрана», чтобы делать снимки экрана. Снимок остаётся на вашем Mac. Выберите «Разрешить запись экрана», затем включите MaCursor в разделе «Конфиденциальность и безопасность» → «Запись экрана и системного звука».";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "Программе MaCursor нужна «Запись экрана», чтобы делать снимки экрана. Снимок остаётся на вашем Mac. Выберите «Разрешить запись экрана», затем включите MaCursor в разделе «Конфиденциальность и безопасность» → «Запись экрана».";
+"Waiting for access. This window updates as soon as MaCursor is allowed." = "Ожидание доступа. Это окно обновится, как только MaCursor получит разрешение.";
+
+/* Settings, General, Menu Bar: the label above the list of the panel's items */
+"Panel Items" = "Пункты панели";
+"Drag an item to change its place in the panel. Turning an item off hides it from the panel, and its feature keeps working." = "Перетащите пункт, чтобы изменить его место на панели. Если выключить пункт, он будет скрыт с панели, а его функция продолжит работать.";
+
+/* Cursor Capture editor: the tools that draw on the picture. Box draws an empty rectangle. Pixelate turns what it covers into coloured blocks */
+"Arrow" = "Стрелка";
+"Box" = "Рамка";
+"Pixelate" = "Пикселизация";
+
+/* Cursor Capture editor: more tools. Text types words on the picture. Number places the next number in a circle. Highlight is a marker pen. Crop cuts the picture smaller */
+"Text" = "Текст";
+"Number" = "Номер";
+"Highlight" = "Выделить";
+"Crop" = "Обрезать";
+
+/* Settings > Cursor Capture: the switch card line, the Shortcuts tab, and the Capture Text rows */
+"Take a picture of your screen, with your cursor in it if you want." = "Сделайте снимок экрана — с курсором, если хотите.";
+"Shortcuts" = "Сочетания клавиш";
+"Capture Text" = "Захват текста";
+"Copy Text" = "Скопировать текст";
+"Text Copied" = "Текст скопирован";
+"No Text Found" = "Текст не найден";
+"Drag a box, and the text in it goes to your clipboard. No picture is saved." = "Обведите область рамкой, и текст из неё попадёт в буфер обмена. Снимок не сохраняется.";
+"Filled Box" = "Заполненная рамка";
+"Oval" = "Овал";
+"Pen" = "Перо";
+"Select" = "Выбрать";
+"Add Image" = "Добавить изображение";
+"Background" = "Фон";
+"Color" = "Цвет";
+"Size" = "Размер";
+"Save as…" = "Сохранить как…";
+"Done Editing" = "Готово";
+"Zoom" = "Масштаб";
+"Zoom In" = "Увеличить";
+"Zoom Out" = "Уменьшить";
+"Fit Canvas" = "По размеру холста";
+"Drag Me" = "Перетащите";
+"Share" = "Поделиться";
+"Pin" = "Закрепить";
+"Don't Save" = "Не сохранять";
+"Format:" = "Формат:";
+"JPEG Image" = "Изображение JPEG";
+"PNG Image" = "Изображение PNG";
+"HEIC Image" = "Изображение HEIC";
+"WebP Image" = "Изображение WebP";
+"%lld pt" = "%lld пт";
+"%lld%%" = "%lld %%";
+"Hex" = "Hex";
+"Alpha" = "Альфа";
+"Hue" = "Оттенок";
+"R" = "R";
+"G" = "G";
+"B" = "B";
+"Add to My Colors" = "Добавить в мои цвета";
+"My Colors" = "Мои цвета";
+"More Colors" = "Другие цвета";
+"Fewer Colors" = "Меньше цветов";
+"Pick a Color" = "Выбрать цвет";
+"Black" = "Чёрный";
+"Red" = "Красный";
+"Orange" = "Оранжевый";
+"Yellow" = "Жёлтый";
+"Green" = "Зелёный";
+"Teal" = "Бирюзовый";
+"Blue" = "Синий";
+"Purple" = "Фиолетовый";
+"Pink" = "Розовый";
+"White" = "Белый";
+"Arrow Style" = "Стиль стрелки";
+"Text Style" = "Стиль текста";
+"Spotlight Shape" = "Форма Spotlight";
+"Pixelate Style" = "Стиль пикселизации";
+"Number Settings" = "Настройки номера";
+"Unlock Canvas" = "Разблокировать холст";
+"Lock Canvas" = "Заблокировать холст";
+"Spotlight Opacity" = "Непрозрачность Spotlight";
+"Pixelate Strength" = "Сила пикселизации";
+"Emoji" = "Эмодзи";
+"Starting Number:" = "Начальный номер:";
+"Standard" = "Стандартный";
+"Fancy" = "Изящный";
+"Curved" = "Изогнутый";
+"Double" = "Двойной";
+"Rectangle" = "Прямоугольник";
+"Rounded Rectangle" = "Скруглённый прямоугольник";
+"Secure Blur" = "Надёжное размытие";
+"Blur" = "Размытие";
+"Black Out" = "Чёрная заливка";
+"Rounded" = "Скруглённый";
+"Outlined" = "С контуром";
+"Mono" = "Моно";
+"Mono Box" = "Моно-рамка";
+"Rounded Box" = "Скруглённая рамка";
+"Freeform" = "Произвольно";
+"Custom Ratio" = "Своё соотношение";
+"Original Ratio" = "Исходное соотношение";
+"1 : 1 (Square)" = "1 : 1 (квадрат)";
+"Ratio" = "Соотношение";
+"Ratio Width" = "Ширина соотношения";
+"Ratio Height" = "Высота соотношения";
+"Swap Width and Height" = "Поменять ширину и высоту";
+"Fill Color" = "Цвет заливки";
+"Transparent" = "Прозрачный";
+"Auto" = "Авто";
+"Gray" = "Серый";
+"Custom Color…" = "Свой цвет…";
+"Rotate" = "Повернуть";
+"Flip" = "Отразить";
+"Image size:" = "Размер изображения:";
+"%lld × %lld px" = "%1$lld × %2$lld px";
+"Snap to edges" = "Привязка к краям";
+"Hold ⌘ to turn snapping on." = "Удерживайте ⌘, чтобы включить привязку.";
+"Revert to Original" = "Вернуть оригинал";
+"Rotate image?" = "Повернуть изображение?";
+"Flip image?" = "Отразить изображение?";
+"Flatten and Rotate" = "Объединить и повернуть";
+"Flatten and Flip" = "Объединить и отразить";
+"This burns every mark into the picture, so you can no longer edit them. You cannot undo this." = "Все пометки будут впечатаны в изображение, и их больше нельзя будет изменить. Это действие нельзя отменить.";
+"Don't ask again" = "Больше не спрашивать";
+"Width:" = "Ширина:";
+"Height:" = "Высота:";
+"pixels" = "пикселей";
+"percent" = "процентов";
+"Flatten Marks" = "Объединить пометки";
+"(Cannot be undone)" = "(Нельзя отменить)";
+"Resize" = "Изменить размер";
+"Keep Proportions" = "Сохранять пропорции";
+"Take Screenshot" = "Сделать снимок экрана";
+"Paste From Clipboard" = "Вставить из буфера обмена";
+"Choose From File…" = "Выбрать из файла…";
+"Open" = "Открыть";
+"Top" = "Сверху";
+"Bottom" = "Снизу";
+"Left" = "Слева";
+"Right" = "Справа";
+"Add New Preset…" = "Добавить новый набор…";
+"Add wallpaper" = "Добавить обои";
+"Alignment" = "Выравнивание";
+"Apply Previous Settings" = "Применить прежние настройки";
+"Auto Balance" = "Автобаланс";
+"Automatically apply preset to all screenshots:" = "Автоматически применять набор ко всем снимкам:";
+"Blurred desktop" = "Размытый рабочий стол";
+"Blurred picture" = "Размытое изображение";
+"Bottom left" = "Снизу слева";
+"Bottom right" = "Снизу справа";
+"Clean" = "Чистый";
+"Dark blur" = "Тёмное размытие";
+"Dark gray" = "Тёмно-серый";
+"Default Preset" = "Набор по умолчанию";
+"Delete Preset" = "Удалить набор";
+"Delete this preset?" = "Удалить этот набор?";
+"Desktop picture" = "Картинка рабочего стола";
+"Dusk" = "Сумерки";
+"Gradients" = "Градиенты";
+"Inset" = "Внутренний отступ";
+"Light gray" = "Светло-серый";
+"Mint" = "Мята";
+"Mist" = "Туман";
+"My preset" = "Мой набор";
+"Night" = "Ночь";
+"Padding" = "Отступ";
+"Pale blue" = "Бледно-синий";
+"Pale green" = "Бледно-зелёный";
+"Pale orange" = "Бледно-оранжевый";
+"Pale red" = "Бледно-красный";
+"Pale violet" = "Бледно-фиолетовый";
+"Pale yellow" = "Бледно-жёлтый";
+"Preset options" = "Параметры набора";
+"Presets" = "Наборы";
+"Remove wallpaper" = "Удалить обои";
+"Rose" = "Роза";
+"Sand" = "Песок";
+"Save as new preset" = "Сохранить как новый набор";
+"Save changes" = "Сохранить изменения";
+"Shadow" = "Тень";
+"Soft" = "Мягкий";
+"Top left" = "Сверху слева";
+"Top right" = "Сверху справа";
+"Violet" = "Фиолетовый";
+"Wallpaper" = "Обои";
+"Wallpapers" = "Обои";
+"Hold Command ⌘ to disable snapping." = "Удерживайте Command ⌘, чтобы выключить привязку.";
+
+/* Settings > Cursor Capture, in CleanShot X's order: the tabs, the section headings and the rows. Auto-close is a switch; Interval is the time menu under it. Position on screen says where the card sits. Self-Timer interval is the wait before the picture. OCR is the section that holds Capture Text */
+"Quick Access" = "Быстрый доступ";
+"Screenshots" = "Снимки";
+"Advanced" = "Дополнительно";
+"Sounds" = "Звуки";
+"Export" = "Экспорт";
+"After Capture" = "После снимка";
+"Behavior" = "Поведение";
+"Capture" = "Съёмка";
+"Window Screenshots" = "Снимки окон";
+"OCR" = "Распознавание текста";
+"Play sounds" = "Воспроизводить звуки";
+"Export location" = "Папка для экспорта";
+"Show Quick Access Overlay" = "Показывать панель быстрого доступа";
+"Position on screen" = "Положение на экране";
+"Auto-close" = "Автозакрытие";
+"Interval" = "Интервал";
+"Self-Timer interval" = "Интервал таймера";
+"Show cursor on screenshots" = "Показывать курсор на снимках экрана";
+"Capture Area" = "Снять область";
+"Capture Previous Area" = "Снять предыдущую область";
+"Capture Fullscreen" = "Снять весь экран";
+"Set the default save location used when saving from the Quick Access Overlay, After Capture, and other Save actions across the app." = "Укажите место сохранения по умолчанию для сохранения из панели быстрого доступа, раздела «После снимка» и других действий «Сохранить» в приложении.";
+"Decide what should happen after taking a screenshot." = "Выберите, что должно происходить после снимка экрана.";
+"After the Capture Area shortcut, press Space to pick a window. Press Space again to draw an area." = "После сочетания клавиш «Снять область» нажмите пробел, чтобы выбрать окно. Нажмите пробел ещё раз, чтобы выделить область.";
+"Action" = "Действие";
+"Screenshot" = "Снимок";
+"Copy file to clipboard" = "Скопировать файл в буфер обмена";
+"Open Annotate tool" = "Открыть инструмент аннотаций";
+"Pin to the screen" = "Закрепить на экране";
+"Output" = "Вывод";
+"File format" = "Формат файла";
+"Convert to sRGB profile" = "Преобразовать в профиль sRGB";
+"Scale Retina screenshots to 1x" = "Масштабировать снимки Retina до 1x";
+"Add 1px border to all screenshots" = "Добавлять рамку 1 пикс. ко всем снимкам";
+"Background preset" = "Набор фона";
+"Apply Background Tool preset to all screenshots. You can create presets in the editor. Hold ⇧ Shift while capturing a screenshot to disable this option." = "Применяет набор инструмента «Фон» ко всем снимкам. Наборы можно создать в редакторе. Чтобы отключить этот параметр, удерживайте ⇧ Shift во время снимка экрана.";
+"2 Seconds" = "2 секунды";
+"5 Seconds" = "5 секунд";
+"10 Seconds" = "10 секунд";
+"15 Seconds" = "15 секунд";
+"Self-Timer" = "Таймер";
+"This works in Fullscreen or Self-Timer modes only." = "Работает только в режимах «Весь экран» и «Таймер».";
+"Freeze screen when taking a screenshot" = "Замораживать экран при создании снимка";
+"With wallpaper" = "С обоями";
+"Capture window shadow" = "Снимать тень окна";
+"Hold ⇧ Shift while taking a screenshot to capture the window with wallpaper." = "Чтобы снять окно с обоями, удерживайте ⇧ Shift во время снимка экрана.";
+"Crosshair" = "Перекрестие";
+"Crosshair Mode" = "Режим перекрестия";
+"Always enabled" = "Всегда включено";
+"When ⌘ Command is pressed" = "Пока нажата Command ⌘";
+"Disabled" = "Выключено";
+"Show magnifier" = "Показывать лупу";
+"To enable magnifier, you must enable Crosshair Mode first." = "Чтобы включить лупу, сначала включите «Режим перекрестия».";
+"File Name" = "Имя файла";
+"Ask for name after every capture" = "Спрашивать имя после каждого снимка";
+"File name format" = "Формат имени файла";
+"Customize…" = "Настроить…";
+"Add “@2x” suffix to Retina screenshots" = "Добавлять суффикс «@2x» к снимкам Retina";
+"This option improves compatibility with displaying Retina screenshots in third-party apps." = "Этот параметр улучшает совместимость при показе снимков Retina в сторонних приложениях.";
+"Type text and drag elements to create a custom format:" = "Введите текст и перетащите элементы, чтобы создать свой формат:";
+"Year" = "Год";
+"Month (numeric)" = "Месяц (число)";
+"Day" = "День";
+"Window title" = "Заголовок окна";
+"App name" = "Имя приложения";
+"Minutes" = "Минуты";
+"Seconds" = "Секунды";
+"Auto-increment" = "Автонумерация";
+"Remove illegal characters" = "Удалять недопустимые символы";
+"Restore Defaults" = "Восстановить настройки по умолчанию";
+"Next number" = "Следующий номер";
+"Name this screenshot" = "Назовите этот снимок";
+"Use Default Name" = "Имя по умолчанию";
+"Copy to clipboard" = "Скопировать в буфер обмена";
+"File & Image (default)" = "Файл и изображение (по умолчанию)";
+"Image only" = "Только изображение";
+"File only" = "Только файл";
+"Adjust this option if you've encountered any issues with pasting from clipboard or clipboard managers." = "Измените этот параметр, если возникают проблемы со вставкой из буфера обмена или из менеджеров буфера обмена.";
+"Text Recognition" = "Распознавание текста";
+"Automatically Detect Language" = "Определять язык автоматически";
+"Keep line breaks" = "Сохранять переносы строк";
+"Detect links" = "Распознавать ссылки";
+"Arabic (Najdi)" = "арабский (недждийский)";
+"Chinese (Simplified)" = "китайский (упрощенный)";
+"Chinese (Traditional)" = "китайский (традиционный)";
+"Norwegian (Bokmål)" = "норвежский (букмол)";
+"Norwegian (Nynorsk)" = "норвежский (нюнорск)";
+"Do you want to open this link?" = "Открыть эту ссылку?";
+"Open Link in Browser" = "Открыть ссылку в браузере";
+"Never open links" = "Никогда не открывать ссылки";
+"Area Selection" = "Выбор области";
+"Remember last selection" = "Запоминать последнее выделение";
+"Keep styling" = "Сохранять форматирование";
+"Date" = "Дата";
+"Capture History" = "История снимков";
+"Keep history" = "Хранить историю";
+"1 day" = "1 день";
+"3 days" = "3 дня";
+"1 week" = "1 неделя";
+"1 month" = "1 месяц";
+"You can restore old files with “Capture History” option from the menu bar." = "Старые файлы можно восстановить с помощью пункта «История снимков» в строке меню.";
+"Capture History..." = "История снимков…";
+"Capture History is disabled." = "История снимков выключена.";
+"No files to restore..." = "Нет файлов для восстановления…";
+"Clear History..." = "Очистить историю…";
+"Are you sure you want to delete all files from history?" = "Вы действительно хотите удалить все файлы из истории?";
+
+/* Settings > Cursor Capture > Quick Access: the Appearance and Behavior rows, the Auto-close interval choices, and the card with no heading. Overlay is the small card shown after a capture. ⌥ is the Option key. "Export location" names the row on the General tab */
+"Move to active screen" = "Перемещать на активный экран";
+"Active screen is the screen where your cursor is pointing." = "Активный экран — это экран, на который указывает ваш курсор.";
+"Overlay size" = "Размер панели";
+"Save and Close" = "Сохранить и закрыть";
+"5 seconds" = "5 секунд";
+"10 seconds" = "10 секунд";
+"15 seconds" = "15 секунд";
+"30 seconds" = "30 секунд";
+"1 minute" = "1 минута";
+"2 minutes" = "2 минуты";
+"5 minutes" = "5 минут";
+"10 minutes" = "10 минут";
+"Close after dragging" = "Закрывать после перетаскивания";
+"Hold ⌥ (option) to keep the item on Overlay after dragging." = "Удерживайте ⌥ Option, чтобы после перетаскивания объект остался на панели.";
+"Hold ⌥ (option) to close the item from Overlay after dragging." = "Удерживайте ⌥ Option, чтобы после перетаскивания объект закрылся на панели.";
+"Save button behavior" = "Действие кнопки «Сохранить»";
+"Save to \"Export location\"" ="Сохранять в «Папка для экспорта»";
+"Ask for destination" = "Спрашивать, куда сохранить";
+"Press with ⌥ (option) to choose the destination." = "Нажмите с ⌥ Option, чтобы выбрать, куда сохранить.";
+"Press with ⌥ (option) to use 'Export Location' without asking." = "Нажмите с ⌥ Option, чтобы сохранить в «Папка для экспорта» без вопроса.";
+"Search Themes" = "Поиск тем";
+
+/* Welcome window, version 2 */
+"MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them." = "MaCursor даёт вам контроль над системными курсорами macOS. На следующих страницах можно включить дополнительные функции или пропустить их.";
+"Cursor Look" = "Вид курсора";
+"When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "Когда включено, под курсором отрисовывается мягкая тень. Тень отображается, пока применена тема курсора.";
+"Install the Helper Tool on the first page to use Cursor Trails." = "Установите Вспомогательный инструмент на первой странице, чтобы использовать «След курсора».";
+"Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "Функциям на этой странице нужно разрешение «Универсальный доступ» для MaCursorHelper. Если его нет, нажмите «Дать разрешение», чтобы открыть Системные настройки.";
+"Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "Функциям на этой странице нужно разрешение «Запись экрана» для MaCursor. Переводчику курсора также нужно разрешение «Универсальный доступ» для MaCursorHelper. Если разрешения нет, нажмите «Дать разрешение», чтобы открыть Системные настройки.";
+"Press the shortcut to take a picture of your screen." = "Нажмите сочетание клавиш, чтобы сделать снимок экрана.";
+"This feature needs the Finder extension and Full Disk Access for MaCursor. If either is missing, choose Grant Permission to open System Settings." = "Для этой функции нужны расширение Finder и полный доступ к диску для MaCursor. Если чего-то не хватает, нажмите «Дать разрешение», чтобы открыть Системные настройки.";
+"Help Writronic keep growing" = "Помогите Writronic расти";
+"If you would like to support development, you can donate on the Writronic website." = "Если вы хотите поддержать разработку, вы можете сделать пожертвование на сайте Writronic.";
+"Thank you for being here." = "Спасибо, что вы с нами.";
+"A star on GitHub also helps more people find MaCursor, and it means a lot." = "Звезда на GitHub также помогает большему числу людей найти MaCursor, и это очень много значит.";
+"Give a Star" = "Поставить звезду";
+/* Welcome window: button at the end of an access line whose dot is red; it opens System Settings at that access */
+"Grant Permission" = "Дать разрешение";
+/* Welcome window: what VoiceOver reads after the name of an access whose dot is red */
+"Access not granted" = "Доступ не предоставлен";
+
+/* Welcome window: line under the cards on pages 2 to 4 while the Helper Tool is installed but not running. MaCursor starts it again when it opens. */
+"The Helper Tool is not running. Quit and reopen MaCursor to start it." = "Вспомогательный инструмент не запущен. Чтобы запустить его, завершите работу MaCursor и откройте его снова.";
+
+"Hide desktop icons while capturing" = "Скрывать значки рабочего стола при съёмке";
+
+"Left Button" = "Левая кнопка";
+"Hold a key with the left or right button, so normal clicks still work." = "Удерживайте клавишу вместе с левой или правой кнопкой, чтобы обычные щелчки продолжали работать.";
+"A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "Сочетание «Снимка курсора» использует те же клавиши и кнопку. Приоритет у «Снимка курсора».";

@@ -1,2 +1,3 @@
 "NSAppleEventsUsageDescription" = "Dzięki temu przycisk MaCursor na pasku narzędzi Findera działa w folderach iCloud.";
-"NSScreenCaptureUsageDescription" = "Tłumacz kursora czyta tekst w ramce, aby go przetłumaczyć. Nic nie jest zapisywane, a tekst trafia tylko do wybranej usługi tłumaczenia.";
+"NSScreenCaptureUsageDescription" = "Tłumacz kursora czyta tekst w ramce, a tekst trafia tylko do wybranej usługi tłumaczenia. Zrzut kursora robi obraz ekranu na Twoje polecenie, a obraz pozostaje na Twoim Macu.";
+"NSDesktopFolderUsageDescription" = "Zrzut kursora zachowuje Twoje obrazy na biurku na Twoje polecenie.";

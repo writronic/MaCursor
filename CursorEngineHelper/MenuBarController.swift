@@ -8,6 +8,10 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
     private var keyMonitor: Any?
     private var previousApp: NSRunningApplication?
     private var closedAt: TimeInterval = 0
+    private var pendingCapture: MACMenuBarCaptureItem?
+    private var pendingFile: MACMenuBarFileItem?
+    var captureHandler: (@MainActor (MACMenuBarCaptureItem) -> Void)?
+    var historyHandler: (@MainActor () -> Void)?
 
     private func install() {
         guard statusItem == nil else { return }
@@ -67,6 +71,14 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         let host = NSHostingController(rootView: MenuBarPanelView(model: MenuBarPanelModel.shared))
         host.sizingOptions = [.preferredContentSize]
         popover.contentViewController = host
+        MenuBarPanelModel.shared.onCapture = { [weak self] item in
+            self?.pendingCapture = item
+            self?.closePanel()
+        }
+        MenuBarPanelModel.shared.onOpen = { [weak self] item in
+            self?.pendingFile = item
+            self?.closePanel()
+        }
         self.popover = popover
         return popover
     }
@@ -122,10 +134,35 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
             NSEvent.removeMonitor(keyMonitor)
             self.keyMonitor = nil
         }
+        var back: NSRunningApplication?
         if NSApp.isActive, let previousApp, !previousApp.isTerminated {
             previousApp.activate(options: [])
+            back = previousApp
         }
         previousApp = nil
+        if let file = pendingFile {
+            pendingFile = nil
+            Task { [weak self, back] in
+                if let back { await CursorScreenshotController.waited { back.isActive } }
+                self?.run(file)
+            }
+            return
+        }
+        guard let item = pendingCapture else { return }
+        pendingCapture = nil
+        Task { [weak self, back] in
+            if let back { await CursorScreenshotController.waited { back.isActive } }
+            self?.captureHandler?(item)
+        }
+    }
+
+    private func run(_ item: MACMenuBarFileItem) {
+        switch item {
+        case .open: CursorScreenshotEditor.openFile()
+        case .openClipboard: CursorScreenshotEditor.openClipboard()
+        case .pin: CursorScreenshotEditor.pinFile()
+        case .history: historyHandler?()
+        }
     }
 
     private func showContextMenu() {
@@ -138,8 +175,8 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         DispatchQueue.main.async { [weak self] in self?.statusItem?.menu = nil }
     }
 
-    private func item(_ title: String, action: Selector) -> NSMenuItem {
-        let item = NSMenuItem(title: MenuBarService.localized(title), action: action, keyEquivalent: "")
+    private func item(_ title: String, action: Selector, key: String = "") -> NSMenuItem {
+        let item = NSMenuItem(title: MenuBarService.localized(title), action: action, keyEquivalent: key)
         item.target = self
         return item
     }
@@ -147,7 +184,7 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
     private func contextMenu() -> NSMenu {
         let menu = NSMenu()
         menu.addItem(item("Open MaCursor", action: #selector(openMainApp(_:))))
-        menu.addItem(item("Settings...", action: #selector(openSettings(_:))))
+        menu.addItem(item("Settings...", action: #selector(openSettings(_:)), key: ","))
         menu.addItem(.separator())
         menu.addItem(item("Quit MaCursor", action: #selector(quit(_:))))
         return menu
@@ -163,6 +200,7 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
     }
 
     @objc private func quit(_ sender: NSMenuItem) {
+        guard CursorScreenshotEditor.closeThen({ [weak self] in self?.quit(sender) }) else { return }
         for app in NSRunningApplication.runningApplications(withBundleIdentifier: MACAppBundleIdentifier) {
             app.terminate()
         }

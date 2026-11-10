@@ -32,6 +32,10 @@ All data stays on your device:
 | Login item | Managed by macOS via `SMAppService` | Optionally apply themes at startup |
 | Right-Click Menu settings | `~/Library/Group Containers/SP495GG2KZ.com.writronic.macursor/` | Share your Right-Click Menu choices with the Finder extension and the helper |
 | Translation service keys | macOS Keychain | Let MaCursor and its helper use the online service you choose in Cursor Translator. Sent only to that service |
+| Cursor Capture pictures | Your Desktop or the folder you choose | Keep the pictures you save with Cursor Capture |
+| Cursor Capture history | `~/Library/Application Support/MaCursor/CursorScreenshotHistory/` | Bring back a recent picture from Capture History. MaCursor deletes each picture after the time you choose |
+| Cursor Capture wallpapers | `~/Library/Application Support/MaCursor/CursorScreenshotWallpapers/` | Keep the wallpapers you add in the editor's Background panel |
+| Cursor Capture temporary copies | `~/Library/Group Containers/SP495GG2KZ.com.writronic.macursor/` | Hand a picture to another app when you copy it, drag it or use Share. MaCursor deletes them later |
 
 ---
 
@@ -57,6 +61,17 @@ The optional Cursor Shaker feature uses the same Accessibility access:
 
 - Requested only when you turn the feature on, and used only while it stays on
 - Nothing is logged or transmitted
+
+The optional Cursor Capture feature uses Screen Recording access to take a picture of your screen when you use its shortcut:
+
+- Requested only when you turn the feature on, and used only while it stays on
+- A click shortcut uses the same Accessibility access, and only while it is set
+- The picture stays on your Mac: on the clipboard and, when you save it, in your Desktop or the folder you choose. Nothing is logged or transmitted
+- Capture History keeps a copy of each picture on your Mac for 1 week. You can choose another time, or turn it off, in the Cursor Capture settings
+- Capture Text reads the text in the box you draw on your Mac. The text goes only to your clipboard, and no picture is saved
+- The editor works on your Mac. A picture leaves it only if you choose Share and pick a service in the macOS share sheet
+- The editor's blurred desktop background is made on your Mac from your desktop picture file, not from a picture of your screen
+- macOS may ask you to allow MaCursor to use that folder, such as your Desktop. If you say no, the picture is not saved
 
 ---
 

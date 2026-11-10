@@ -11,6 +11,7 @@ private class SettingsPanel: NSWindow {
 enum SettingsTab: String, CaseIterable, Identifiable {
     case general  = "General"
     case cursor   = "Cursor Control"
+    case cursorScreenshot = "Cursor Capture"
     case cursorTranslator = "Cursor Translator"
     case cursorGestures = "Cursor Gestures"
     case cursorTrails = "Cursor Trails"
@@ -24,6 +25,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         switch self {
         case .general:  return String(localized: "General")
         case .cursor:   return String(localized: "Cursor Control")
+        case .cursorScreenshot: return String(localized: "Cursor Capture")
         case .cursorTranslator: return String(localized: "Cursor Translator")
         case .cursorGestures: return String(localized: "Cursor Gestures")
         case .cursorTrails: return String(localized: "Cursor Trails")
@@ -37,6 +39,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         switch self {
         case .general:  return "gear"
         case .cursor:   return "cursorarrow"
+        case .cursorScreenshot: return "camera.viewfinder"
         case .cursorTranslator: return "character.bubble"
         case .cursorGestures: return "scribble.variable"
         case .cursorTrails: return "cursorarrow.motionlines"
@@ -209,6 +212,8 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate {
             detailView = AnyView(GeneralSettingsView(updater: updater))
         case .cursor:
             detailView = AnyView(CursorSettingsView())
+        case .cursorScreenshot:
+            detailView = AnyView(CursorScreenshotSettingsView())
         case .cursorTranslator:
             detailView = AnyView(CursorTranslatorSettingsView())
         case .cursorGestures:
@@ -301,13 +306,7 @@ struct GeneralSettingsView: View {
                 Toggle("Show Menu Bar Icon", isOn: $showMenuBarIcon)
                     .disabled(!helperManager.isInstalled)
                     .onChangeCompat(of: showMenuBarIcon) { newValue in
-                        MACPreferences.setFlag(newValue, forKey: MACPreferences.showMenuBarIconKey)
-                        DistributedNotificationCenter.default().postNotificationName(
-                            .MACMenuBarDidChange,
-                            object: nil,
-                            userInfo: nil,
-                            deliverImmediately: true
-                        )
+                        GeneralSettingsView.setShowMenuBarIcon(newValue)
                     }
 
                 if !helperManager.isInstalled {
@@ -321,9 +320,16 @@ struct GeneralSettingsView: View {
                     }
                 }
 
-                Text("Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section.")
+                Text("Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section.")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
+
+                if showMenuBarIcon && helperManager.isInstalled {
+                    MenuBarItemsSettingsView()
+                    MenuBarItemsSettingsView.caption
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
 
                 HStack(spacing: 12) {
                     Text("Panel Background")
@@ -405,6 +411,16 @@ struct GeneralSettingsView: View {
     }
 
 
+    static func setShowMenuBarIcon(_ shown: Bool) {
+        MACPreferences.setFlag(shown, forKey: MACPreferences.showMenuBarIconKey)
+        DistributedNotificationCenter.default().postNotificationName(
+            .MACMenuBarDidChange,
+            object: nil,
+            userInfo: nil,
+            deliverImmediately: true
+        )
+    }
+
     private func performFullReset() {
         do {
             try library.removeAllThemes()
@@ -420,11 +436,14 @@ struct GeneralSettingsView: View {
             MACPreferences.set(nil, forKey: key)
         }
         CursorTranslatorService.allCases.forEach { CursorTranslatorKeychain.set("", for: $0) }
+        CursorScreenshot.removeCopiedFiles(support: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first,
+                                           group: FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: RightClickMenuSettings.appGroupIdentifier))
         AutoSwitchConfig.notifyHelper()
         FocusFollowsMouseConfig.notifyHelper()
         CursorTrailsConfig.notifyHelper()
         CursorGesturesConfig.notifyHelper()
         CursorShakerConfig.notifyHelper()
+        CursorScreenshotConfig.notifyHelper()
         CursorTranslatorConfig.notifyHelper()
         ShortcutManager.shared.notifyConfigChanged()
 
@@ -463,6 +482,11 @@ struct HelperToolStatusView: View {
     @ObservedObject private var helperManager = HelperToolManager.shared
     @State private var errorMessage: String?
     @State private var isProcessing: Bool = false
+    private let showsUninstall: Bool
+
+    init(showsUninstall: Bool = true) {
+        self.showsUninstall = showsUninstall
+    }
 
     var body: some View {
         HStack {
@@ -485,20 +509,22 @@ struct HelperToolStatusView: View {
 
             Spacer()
 
-            Button(helperManager.isInstalled ? "Uninstall" : "Install") {
-                Task {
-                    isProcessing = true
-                    defer { isProcessing = false }
-                    do {
-                        try await helperManager.toggle()
-                        errorMessage = nil
-                    } catch {
-                        errorMessage = error.localizedDescription
+            if showsUninstall || !helperManager.isInstalled {
+                Button(helperManager.isInstalled ? "Uninstall" : "Install") {
+                    Task {
+                        isProcessing = true
+                        defer { isProcessing = false }
+                        do {
+                            try await helperManager.toggle()
+                            errorMessage = nil
+                        } catch {
+                            errorMessage = error.localizedDescription
+                        }
                     }
                 }
+                .controlSize(.small)
+                .disabled(isProcessing)
             }
-            .controlSize(.small)
-            .disabled(isProcessing)
         }
         .onAppear {
             helperManager.refreshStatus()

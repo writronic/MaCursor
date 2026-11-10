@@ -22,6 +22,7 @@ struct MaCursorApp: App {
     var body: some Scene {
         WindowGroup("MaCursor") {
             LibraryView()
+                .background(MainWindowHoldAccessor { WelcomeWindowController.shared.presentAtLaunchIfNeeded(library: library) })
                 .environmentObject(library)
                 .environmentObject(appearanceManager)
                 .environmentObject(languageManager)
@@ -75,6 +76,10 @@ struct MaCursorApp: App {
             }
 
             CommandGroup(replacing: .pasteboard) { }
+
+            CommandGroup(before: .textEditing) {
+                LibraryFindCommand()
+            }
 
             CommandGroup(replacing: .help) {
                 Button("MaCursor Help") {
@@ -163,5 +168,17 @@ private struct LibraryFileCommands: View {
         }
         .keyboardShortcut("o", modifiers: [.command, .shift])
         .disabled(coordinator.isMainWindowBlocked)
+    }
+}
+
+private struct LibraryFindCommand: View {
+    @FocusedValue(\.librarySearch) private var search
+
+    @ObservedObject private var coordinator = ModalWindowCoordinator.shared
+
+    var body: some View {
+        Button("Search Themes") { search?() }
+            .keyboardShortcut("f")
+            .disabled(search == nil || coordinator.isMainWindowBlocked)
     }
 }

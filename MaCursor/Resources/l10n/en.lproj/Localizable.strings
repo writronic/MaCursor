@@ -467,9 +467,6 @@
 /* Toggle: cursor drop shadow */
 "Cursor Shadow" = "Cursor Shadow";
 
-/* Caption explaining the cursor shadow toggle */
-"When enabled, a soft drop shadow is drawn under the cursor, similar to the pointer shadow on Windows. The shadow appears while a cursor theme is applied." = "When enabled, a soft drop shadow is drawn under the cursor, similar to the pointer shadow on Windows. The shadow appears while a cursor theme is applied.";
-
 /* --- Convert Theme results, failures, and the Help menu --- */
 /* Help menu: opens the project page */
 "MaCursor Help" = "MaCursor Help";
@@ -628,7 +625,7 @@
 "The menu bar icon is provided by the Helper Tool. Install it above to use it." = "The menu bar icon is provided by the Helper Tool. Install it above to use it.";
 
 /* Caption under the Show Menu Bar Icon toggle */
-"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section.";
+"Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section." = "Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section.";
 
 /* Menu bar panel */
 
@@ -679,6 +676,18 @@
 /* Menu bar panel: caption under the favorites placeholder */
 "Mark themes as favorites in MaCursor to show them here." = "Mark themes as favorites in MaCursor to show them here.";
 
+/* Menu bar panel: row that reads the text in a box on the screen. CleanShot X calls it Capture Text (OCR) in its menu */
+"Capture Text (OCR)" = "Capture Text (OCR)";
+
+/* Menu bar panel: row that opens a picture from a file in the editor. CleanShot X calls it Open... in its menu */
+"Open..." = "Open…";
+
+/* Menu bar panel: row that opens the picture on the clipboard in the editor. Dim when the clipboard has no picture */
+"Open from Clipboard" = "Open from Clipboard";
+
+/* Menu bar panel: row that picks a picture file and floats it on the screen. CleanShot X calls it Pin to the Screen... in its menu */
+"Pin to the Screen..." = "Pin to the Screen…";
+
 /* Helper status: installed but not running */
 "Installed, not running" = "Installed, not running";
 
@@ -708,6 +717,30 @@
 
 /* Button that closes that window once access was granted */
 "Let’s Go!" = "Let’s Go!";
+
+/* Welcome window: window title and heading of the first page */
+"Welcome to MaCursor" = "Welcome to MaCursor";
+
+/* Welcome window: main button on the middle pages */
+"Next" = "Next";
+
+/* Welcome window: heading of the last page */
+"You’re All Set" = "You’re All Set";
+
+/* Welcome window: text of the last page */
+"You can change any of this later in Settings." = "You can change any of this later in Settings.";
+
+/* Welcome window: text of the Helper Tool page */
+"The Helper Tool starts when you log in. It keeps your cursors after a restart and runs most features on the next pages. Install it now, or later in Settings → General." = "The Helper Tool starts when you log in. It keeps your cursors after a restart and runs most features on the next pages. Install it now, or later in Settings → General.";
+
+/* Welcome window: line under the switches while the Helper Tool is not installed */
+"Install the Helper Tool to use the switches on this page." = "Install the Helper Tool to use the switches on this page.";
+
+/* Welcome window: title of the warning shown before the window closes */
+"Are you sure you want to close this window?" = "Are you sure you want to close this window?";
+
+/* Welcome window: text of the warning shown before the window closes */
+"You can change these features in Settings. This window opens again only after Reset All Settings." = "You can change these features in Settings. This window opens again only after Reset All Settings.";
 
 /* Alert title when a chosen or dropped file cannot become a cursor or slot image */
 "Could Not Use File" = "Could Not Use File";
@@ -1247,7 +1280,7 @@
 "Triggers to Ignore" = "Triggers to Ignore";
 "Every Trigger" = "Every Trigger";
 "Mouse Buttons" = "Mouse Buttons";
-/* Cursor Gestures settings: picker of when an ignored app counts: only while it is in front, or whenever one of its windows is on screen */
+/* Cursor Gestures settings: picker of when an ignored app counts: In Front (only while it is the front app) or Under the Pointer (only when a gesture starts over one of its windows) */
 "Ignore When" = "Ignore When";
 "In Front" = "In Front";
 /* Cursor Gestures settings: button and title of the alert that adds back the ready-made gestures */
@@ -1303,7 +1336,7 @@
 "Delay window focus for %@" = "Delay window focus for %@";
 /* Menu bar panel: folded row under the Focus on Hover switch that holds the delay slider */
 "Focus Delay" = "Focus Delay";
-/* Cursor Shaker: feature name in the Settings sidebar, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
+/* Cursor Shaker: feature name in Settings → Cursor Control, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
 "Cursor Shaker" = "Cursor Shaker";
 "Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool." = "Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool.";
 /* Cursor Shaker: grey caption under its switch */
@@ -1428,3 +1461,355 @@
 
 /* Cursor Translator: the first choice of “Translate to” in Settings. It follows the Mac's language; %@ is that language's name, for example “English (System Default)” */
 "%@ (System Default)" = "%@ (System Default)";
+
+/* Cursor Capture: the Settings tab that takes a picture of the screen with a shortcut */
+"Cursor Capture" = "Cursor Capture";
+"Cursor Capture requires the Helper Tool. You can install it from General → Helper Tool." = "Cursor Capture requires the Helper Tool. You can install it from General → Helper Tool.";
+"Choose…" = "Choose…";
+"Desktop" = "Desktop";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording.";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording.";
+"Waiting for access. This window updates as soon as MaCursor is allowed." = "Waiting for access. This window updates as soon as MaCursor is allowed.";
+
+/* Settings, General, Menu Bar: the label above the list of the panel's items */
+"Panel Items" = "Panel Items";
+"Drag an item to change its place in the panel. Turning an item off hides it from the panel, and its feature keeps working." = "Drag an item to change its place in the panel. Turning an item off hides it from the panel, and its feature keeps working.";
+
+/* Cursor Capture editor: the tools that draw on the picture. Box draws an empty rectangle. Pixelate turns what it covers into coloured blocks */
+"Arrow" = "Arrow";
+"Box" = "Box";
+"Pixelate" = "Pixelate";
+
+/* Cursor Capture editor: more tools. Text types words on the picture. Number places the next number in a circle. Highlight is a marker pen. Crop cuts the picture smaller */
+"Text" = "Text";
+"Number" = "Number";
+"Highlight" = "Highlight";
+"Crop" = "Crop";
+
+/* Settings > Cursor Capture: the switch card line, the Shortcuts tab, and the Capture Text rows */
+"Take a picture of your screen, with your cursor in it if you want." = "Take a picture of your screen, with your cursor in it if you want.";
+"Shortcuts" = "Shortcuts";
+"Capture Text" = "Capture Text";
+"Copy Text" = "Copy Text";
+"Text Copied" = "Text Copied";
+"No Text Found" = "No Text Found";
+"Drag a box, and the text in it goes to your clipboard. No picture is saved." = "Drag a box, and the text in it goes to your clipboard. No picture is saved.";
+"Filled Box" = "Filled Box";
+"Oval" = "Oval";
+"Pen" = "Pen";
+"Select" = "Select";
+"Add Image" = "Add Image";
+"Background" = "Background";
+"Color" = "Color";
+"Size" = "Size";
+"Save as…" = "Save as…";
+"Done Editing" = "Done";
+"Zoom" = "Zoom";
+"Zoom In" = "Zoom In";
+"Zoom Out" = "Zoom Out";
+"Fit Canvas" = "Fit Canvas";
+"Drag Me" = "Drag Me";
+"Share" = "Share";
+"Pin" = "Pin";
+"Don't Save" = "Don't Save";
+"Format:" = "Format:";
+"JPEG Image" = "JPEG Image";
+"PNG Image" = "PNG Image";
+"HEIC Image" = "HEIC Image";
+"WebP Image" = "WebP Image";
+"%lld pt" = "%lld pt";
+"%lld%%" = "%lld%%";
+"Hex" = "Hex";
+"Alpha" = "Alpha";
+"Hue" = "Hue";
+"R" = "R";
+"G" = "G";
+"B" = "B";
+"Add to My Colors" = "Add to My Colors";
+"My Colors" = "My Colors";
+"More Colors" = "More Colors";
+"Fewer Colors" = "Fewer Colors";
+"Pick a Color" = "Pick a Color";
+"Black" = "Black";
+"Red" = "Red";
+"Orange" = "Orange";
+"Yellow" = "Yellow";
+"Green" = "Green";
+"Teal" = "Teal";
+"Blue" = "Blue";
+"Purple" = "Purple";
+"Pink" = "Pink";
+"White" = "White";
+"Arrow Style" = "Arrow Style";
+"Text Style" = "Text Style";
+"Spotlight Shape" = "Spotlight Shape";
+"Pixelate Style" = "Pixelate Style";
+"Number Settings" = "Number Settings";
+"Unlock Canvas" = "Unlock Canvas";
+"Lock Canvas" = "Lock Canvas";
+"Spotlight Opacity" = "Spotlight Opacity";
+"Pixelate Strength" = "Pixelate Strength";
+"Emoji" = "Emoji";
+"Starting Number:" = "Starting Number:";
+"Standard" = "Standard";
+"Fancy" = "Fancy";
+"Curved" = "Curved";
+"Double" = "Double";
+"Rectangle" = "Rectangle";
+"Rounded Rectangle" = "Rounded Rectangle";
+"Secure Blur" = "Secure Blur";
+"Blur" = "Blur";
+"Black Out" = "Black Out";
+"Rounded" = "Rounded";
+"Outlined" = "Outlined";
+"Mono" = "Mono";
+"Mono Box" = "Mono Box";
+"Rounded Box" = "Rounded Box";
+"Freeform" = "Freeform";
+"Custom Ratio" = "Custom Ratio";
+"Original Ratio" = "Original Ratio";
+"1 : 1 (Square)" = "1 : 1 (Square)";
+"Ratio" = "Ratio";
+"Ratio Width" = "Ratio Width";
+"Ratio Height" = "Ratio Height";
+"Swap Width and Height" = "Swap Width and Height";
+"Fill Color" = "Fill Color";
+"Transparent" = "Transparent";
+"Auto" = "Auto";
+"Gray" = "Gray";
+"Custom Color…" = "Custom Color…";
+"Rotate" = "Rotate";
+"Flip" = "Flip";
+"Image size:" = "Image size:";
+"%lld × %lld px" = "%1$lld × %2$lld px";
+"Snap to edges" = "Snap to edges";
+"Hold ⌘ to turn snapping on." = "Hold ⌘ to turn snapping on.";
+"Revert to Original" = "Revert to Original";
+"Rotate image?" = "Rotate image?";
+"Flip image?" = "Flip image?";
+"Flatten and Rotate" = "Flatten and Rotate";
+"Flatten and Flip" = "Flatten and Flip";
+"This burns every mark into the picture, so you can no longer edit them. You cannot undo this." = "This burns every mark into the picture, so you can no longer edit them. You cannot undo this.";
+"Don't ask again" = "Don't ask again";
+"Width:" = "Width:";
+"Height:" = "Height:";
+"pixels" = "pixels";
+"percent" = "percent";
+"Flatten Marks" = "Flatten Marks";
+"(Cannot be undone)" = "(Cannot be undone)";
+"Resize" = "Resize";
+"Keep Proportions" = "Keep Proportions";
+"Take Screenshot" = "Take Screenshot";
+"Paste From Clipboard" = "Paste From Clipboard";
+"Choose From File…" = "Choose From File…";
+"Open" = "Open";
+"Top" = "Top";
+"Bottom" = "Bottom";
+"Left" = "Left";
+"Right" = "Right";
+"Add New Preset…" = "Add New Preset…";
+"Add wallpaper" = "Add wallpaper";
+"Alignment" = "Alignment";
+"Apply Previous Settings" = "Apply Previous Settings";
+"Auto Balance" = "Auto Balance";
+"Automatically apply preset to all screenshots:" = "Automatically apply preset to all screenshots:";
+"Blurred desktop" = "Blurred desktop";
+"Blurred picture" = "Blurred picture";
+"Bottom left" = "Bottom left";
+"Bottom right" = "Bottom right";
+"Clean" = "Clean";
+"Dark blur" = "Dark blur";
+"Dark gray" = "Dark gray";
+"Default Preset" = "Default Preset";
+"Delete Preset" = "Delete Preset";
+"Delete this preset?" = "Delete this preset?";
+"Desktop picture" = "Desktop picture";
+"Dusk" = "Dusk";
+"Gradients" = "Gradients";
+"Inset" = "Inset";
+"Light gray" = "Light gray";
+"Mint" = "Mint";
+"Mist" = "Mist";
+"My preset" = "My preset";
+"Night" = "Night";
+"Padding" = "Padding";
+"Pale blue" = "Pale blue";
+"Pale green" = "Pale green";
+"Pale orange" = "Pale orange";
+"Pale red" = "Pale red";
+"Pale violet" = "Pale violet";
+"Pale yellow" = "Pale yellow";
+"Preset options" = "Preset options";
+"Presets" = "Presets";
+"Remove wallpaper" = "Remove wallpaper";
+"Rose" = "Rose";
+"Sand" = "Sand";
+"Save as new preset" = "Save as new preset";
+"Save changes" = "Save changes";
+"Shadow" = "Shadow";
+"Soft" = "Soft";
+"Top left" = "Top left";
+"Top right" = "Top right";
+"Violet" = "Violet";
+"Wallpaper" = "Wallpaper";
+"Wallpapers" = "Wallpapers";
+"Hold Command ⌘ to disable snapping." = "Hold Command ⌘ to disable snapping.";
+
+/* Settings > Cursor Capture, in CleanShot X's order: the tabs, the section headings and the rows. Auto-close is a switch; Interval is the time menu under it. Position on screen says where the card sits. Self-Timer interval is the wait before the picture. OCR is the section that holds Capture Text */
+"Quick Access" = "Quick Access";
+"Screenshots" = "Screenshots";
+"Advanced" = "Advanced";
+"Sounds" = "Sounds";
+"Export" = "Export";
+"After Capture" = "After Capture";
+"Behavior" = "Behavior";
+"Capture" = "Capture";
+"Window Screenshots" = "Window Screenshots";
+"OCR" = "OCR";
+"Play sounds" = "Play sounds";
+"Export location" = "Export location";
+"Show Quick Access Overlay" = "Show Quick Access Overlay";
+"Position on screen" = "Position on screen";
+"Auto-close" = "Auto-close";
+"Interval" = "Interval";
+"Self-Timer interval" = "Self-Timer interval";
+"Show cursor on screenshots" = "Show cursor on screenshots";
+"Capture Area" = "Capture Area";
+"Capture Previous Area" = "Capture Previous Area";
+"Capture Fullscreen" = "Capture Fullscreen";
+"Set the default save location used when saving from the Quick Access Overlay, After Capture, and other Save actions across the app." = "Set the default save location used when saving from the Quick Access Overlay, After Capture, and other Save actions across the app.";
+"Decide what should happen after taking a screenshot." = "Decide what should happen after taking a screenshot.";
+"After the Capture Area shortcut, press Space to pick a window. Press Space again to draw an area." = "After the Capture Area shortcut, press Space to pick a window. Press Space again to draw an area.";
+"Action" = "Action";
+"Screenshot" = "Screenshot";
+"Copy file to clipboard" = "Copy file to clipboard";
+"Open Annotate tool" = "Open Annotate tool";
+"Pin to the screen" = "Pin to the screen";
+"Output" = "Output";
+"File format" = "File format";
+"Convert to sRGB profile" = "Convert to sRGB profile";
+"Scale Retina screenshots to 1x" = "Scale Retina screenshots to 1x";
+"Add 1px border to all screenshots" = "Add 1px border to all screenshots";
+"Background preset" = "Background preset";
+"Apply Background Tool preset to all screenshots. You can create presets in the editor. Hold ⇧ Shift while capturing a screenshot to disable this option." = "Apply Background Tool preset to all screenshots. You can create presets in the editor. Hold ⇧ Shift while capturing a screenshot to disable this option.";
+"2 Seconds" = "2 Seconds";
+"5 Seconds" = "5 Seconds";
+"10 Seconds" = "10 Seconds";
+"15 Seconds" = "15 Seconds";
+"Self-Timer" = "Self-Timer";
+"This works in Fullscreen or Self-Timer modes only." = "This works in Fullscreen or Self-Timer modes only.";
+"Freeze screen when taking a screenshot" = "Freeze screen when taking a screenshot";
+"With wallpaper" = "With wallpaper";
+"Capture window shadow" = "Capture window shadow";
+"Hold ⇧ Shift while taking a screenshot to capture the window with wallpaper." = "Hold ⇧ Shift while taking a screenshot to capture the window with wallpaper.";
+"Crosshair" = "Crosshair";
+"Crosshair Mode" = "Crosshair Mode";
+"Always enabled" = "Always enabled";
+"When ⌘ Command is pressed" = "When ⌘ Command is pressed";
+"Disabled" = "Disabled";
+"Show magnifier" = "Show magnifier";
+"To enable magnifier, you must enable Crosshair Mode first." = "To enable magnifier, you must enable Crosshair Mode first.";
+"File Name" = "File Name";
+"Ask for name after every capture" = "Ask for name after every capture";
+"File name format" = "File name format";
+"Customize…" = "Customize…";
+"Add “@2x” suffix to Retina screenshots" = "Add “@2x” suffix to Retina screenshots";
+"This option improves compatibility with displaying Retina screenshots in third-party apps." = "This option improves compatibility with displaying Retina screenshots in third-party apps.";
+"Type text and drag elements to create a custom format:" = "Type text and drag elements to create a custom format:";
+"Year" = "Year";
+"Month (numeric)" = "Month (numeric)";
+"Day" = "Day";
+"Window title" = "Window title";
+"App name" = "App name";
+"Minutes" = "Minutes";
+"Seconds" = "Seconds";
+"Auto-increment" = "Auto-increment";
+"Remove illegal characters" = "Remove illegal characters";
+"Restore Defaults" = "Restore Defaults";
+"Next number" = "Next number";
+"Name this screenshot" = "Name this screenshot";
+"Use Default Name" = "Use Default Name";
+"Copy to clipboard" = "Copy to clipboard";
+"File & Image (default)" = "File & Image (default)";
+"Image only" = "Image only";
+"File only" = "File only";
+"Adjust this option if you've encountered any issues with pasting from clipboard or clipboard managers." = "Adjust this option if you've encountered any issues with pasting from clipboard or clipboard managers.";
+"Text Recognition" = "Text Recognition";
+"Automatically Detect Language" = "Automatically Detect Language";
+"Keep line breaks" = "Keep line breaks";
+"Detect links" = "Detect links";
+"Arabic (Najdi)" = "Arabic (Najdi)";
+"Chinese (Simplified)" = "Chinese (Simplified)";
+"Chinese (Traditional)" = "Chinese (Traditional)";
+"Norwegian (Bokmål)" = "Norwegian (Bokmål)";
+"Norwegian (Nynorsk)" = "Norwegian (Nynorsk)";
+"Do you want to open this link?" = "Do you want to open this link?";
+"Open Link in Browser" = "Open Link in Browser";
+"Never open links" = "Never open links";
+"Area Selection" = "Area Selection";
+"Remember last selection" = "Remember last selection";
+"Keep styling" = "Keep styling";
+"Date" = "Date";
+"Capture History" = "Capture History";
+"Keep history" = "Keep history";
+"1 day" = "1 day";
+"3 days" = "3 days";
+"1 week" = "1 week";
+"1 month" = "1 month";
+"You can restore old files with “Capture History” option from the menu bar." = "You can restore old files with “Capture History” option from the menu bar.";
+"Capture History..." = "Capture History…";
+"Capture History is disabled." = "Capture History is disabled.";
+"No files to restore..." = "No files to restore…";
+"Clear History..." = "Clear History…";
+"Are you sure you want to delete all files from history?" = "Are you sure you want to delete all files from history?";
+
+/* Settings > Cursor Capture > Quick Access: the Appearance and Behavior rows, the Auto-close interval choices, and the card with no heading. Overlay is the small card shown after a capture. ⌥ is the Option key. "Export location" names the row on the General tab */
+"Move to active screen" = "Move to active screen";
+"Active screen is the screen where your cursor is pointing." = "Active screen is the screen where your cursor is pointing.";
+"Overlay size" = "Overlay size";
+"Save and Close" = "Save and Close";
+"5 seconds" = "5 seconds";
+"10 seconds" = "10 seconds";
+"15 seconds" = "15 seconds";
+"30 seconds" = "30 seconds";
+"1 minute" = "1 minute";
+"2 minutes" = "2 minutes";
+"5 minutes" = "5 minutes";
+"10 minutes" = "10 minutes";
+"Close after dragging" = "Close after dragging";
+"Hold ⌥ (option) to keep the item on Overlay after dragging." = "Hold ⌥ (option) to keep the item on Overlay after dragging.";
+"Hold ⌥ (option) to close the item from Overlay after dragging." = "Hold ⌥ (option) to close the item from Overlay after dragging.";
+"Save button behavior" = "Save button behavior";
+"Save to \"Export location\"" = "Save to \"Export location\"";
+"Ask for destination" = "Ask for destination";
+"Press with ⌥ (option) to choose the destination." = "Press with ⌥ (option) to choose the destination.";
+"Press with ⌥ (option) to use 'Export Location' without asking." = "Press with ⌥ (option) to use 'Export Location' without asking.";
+"Search Themes" = "Search Themes";
+
+/* Welcome window, version 2 */
+"MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them." = "MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them.";
+"Cursor Look" = "Cursor Look";
+"When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied.";
+"Install the Helper Tool on the first page to use Cursor Trails." = "Install the Helper Tool on the first page to use Cursor Trails.";
+"Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings.";
+"Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings.";
+"Press the shortcut to take a picture of your screen." = "Press the shortcut to take a picture of your screen.";
+"This feature needs the Finder extension and Full Disk Access for MaCursor. If either is missing, choose Grant Permission to open System Settings." = "This feature needs the Finder extension and Full Disk Access for MaCursor. If either is missing, choose Grant Permission to open System Settings.";
+"Help Writronic keep growing" = "Help Writronic keep growing";
+"If you would like to support development, you can donate on the Writronic website." = "If you would like to support development, you can donate on the Writronic website.";
+"Thank you for being here." = "Thank you for being here.";
+"A star on GitHub also helps more people find MaCursor, and it means a lot." = "A star on GitHub also helps more people find MaCursor, and it means a lot.";
+"Give a Star" = "Give a Star";
+/* Welcome window: button at the end of an access line whose dot is red; it opens System Settings at that access */
+"Grant Permission" = "Grant Permission";
+/* Welcome window: what VoiceOver reads after the name of an access whose dot is red */
+"Access not granted" = "Access not granted";
+
+/* Welcome window: line under the cards on pages 2 to 4 while the Helper Tool is installed but not running. MaCursor starts it again when it opens. */
+"The Helper Tool is not running. Quit and reopen MaCursor to start it." = "The Helper Tool is not running. Quit and reopen MaCursor to start it.";
+
+"Hide desktop icons while capturing" = "Hide desktop icons while capturing";
+
+"Left Button" = "Left Button";
+"Hold a key with the left or right button, so normal clicks still work." = "Hold a key with the left or right button, so normal clicks still work.";
+"A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it.";

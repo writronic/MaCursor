@@ -26,9 +26,12 @@ final class MenuBarPanelModel: ObservableObject {
     @Published private(set) var cursorGestures = CursorGesturesConfig()
     @Published private(set) var cursorShaker = CursorShakerConfig()
     @Published private(set) var cursorTranslator = CursorTranslatorConfig()
+    @Published private(set) var cursorScreenshot = CursorScreenshotConfig()
     @Published private(set) var screenRecording = false
+    @Published private(set) var clipboardOffersImage = false
     @Published private(set) var thumbnails: [String: NSImage] = [:]
     @Published private(set) var panelBackdropAlpha: Double = 0.0
+    @Published private(set) var panelBlocks: [MACMenuBarPanelBlock] = []
     @Published var cursorScale: Double = 1.0
     @Published var ffmDelayMs: Double = 100
 
@@ -38,6 +41,8 @@ final class MenuBarPanelModel: ObservableObject {
     private var thumbnailGeneration = 0
     private var observers: [NSObjectProtocol] = []
     var isShown = false
+    var onCapture: (@MainActor (MACMenuBarCaptureItem) -> Void)?
+    var onOpen: (@MainActor (MACMenuBarFileItem) -> Void)?
 
     init() {
         let names: [Notification.Name] = [
@@ -103,10 +108,25 @@ final class MenuBarPanelModel: ObservableObject {
         cursorScale = snapshot.cursorScale
         ffmDelayMs = Double(snapshot.ffmDelayMs)
         panelBackdropAlpha = snapshot.panelBackdropAlpha
+        cursorScreenshot = CursorScreenshotConfig.load()
+        clipboardOffersImage = CursorScreenshotImageSource.offersImage(.general)
+        panelBlocks = MACMenuBarPanelBlocks(
+            order: MACMenuBarItemOrder(MACPreferences.value(forKey: MACPreferences.menuBarItemOrderKey)),
+            hidden: MACMenuBarHiddenItems(MACPreferences.value(forKey: MACPreferences.menuBarHiddenItemsKey)),
+            captureOrder: MACMenuBarCaptureRowOrder(MACPreferences.value(forKey: MACPreferences.menuBarCaptureOrderKey)),
+            captureHidden: cursorScreenshot.enabled
+                ? MACMenuBarHiddenCaptureRows(MACPreferences.value(forKey: MACPreferences.menuBarHiddenCaptureRowsKey))
+                : Set(MACMenuBarCaptureRow.allCases))
         var wanted = favoriteThemes.map(\.id)
         if let visible = visibleIdentifier, !wanted.contains(visible) { wanted.append(visible) }
         loadThumbnails(for: wanted)
     }
+
+    func capture(_ item: MACMenuBarCaptureItem) { onCapture?(item) }
+
+    func isEnabled(_ item: MACMenuBarFileItem) -> Bool { item != .openClipboard || clipboardOffersImage }
+
+    func open(_ item: MACMenuBarFileItem) { onOpen?(item) }
 
     func reloadTrails() {
         cursorTrails = CursorTrailsConfig.load()

@@ -375,9 +375,6 @@
 /* Toggle: cursor drop shadow */
 "Cursor Shadow" = "カーソルの影";
 
-/* Caption explaining the cursor shadow toggle */
-"When enabled, a soft drop shadow is drawn under the cursor, similar to the pointer shadow on Windows. The shadow appears while a cursor theme is applied." = "オンにすると、Windows のポインタの影のように、カーソルの下に柔らかいドロップシャドウが描画されます。影はカーソルテーマの適用中に表示されます。";
-
 /* Section: software updates */
 "Software Updates" = "ソフトウェアアップデート";
 
@@ -616,7 +613,7 @@
 "The menu bar icon is provided by the Helper Tool. Install it above to use it." = "メニューバーアイコンはヘルパーツールが提供します。使用するには上でインストールしてください。";
 
 /* Caption under the Show Menu Bar Icon toggle */
-"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "カーソルテーマやアプリごとのルールを切り替えるためのMaCursorアイコンをメニューバーに表示します。表示されない場合は、「システム設定」を開いて「メニューバー」の項目を確認してください。";
+"Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section." = "すばやくアクセスできるように、MaCursorアイコンをメニューバーに表示します。表示されない場合は、「システム設定」を開いて「メニューバー」の項目を確認してください。";
 
 /* Menu bar panel */
 
@@ -667,6 +664,18 @@
 /* Menu bar panel: caption under the favorites placeholder */
 "Mark themes as favorites in MaCursor to show them here." = "MaCursorでテーマをお気に入りに登録すると、ここに表示されます。";
 
+/* Menu bar panel: row that reads the text in a box on the screen. CleanShot X calls it Capture Text (OCR) in its menu */
+"Capture Text (OCR)" = "テキストをキャプチャ（OCR）";
+
+/* Menu bar panel: row that opens a picture from a file in the editor. CleanShot X calls it Open... in its menu */
+"Open..." = "開く…";
+
+/* Menu bar panel: row that opens the picture on the clipboard in the editor. Dim when the clipboard has no picture */
+"Open from Clipboard" = "クリップボードから開く";
+
+/* Menu bar panel: row that picks a picture file and floats it on the screen. CleanShot X calls it Pin to the Screen... in its menu */
+"Pin to the Screen..." = "画面にピン留め…";
+
 /* Helper status: installed but not running */
 "Installed, not running" = "インストール済み・停止中";
 
@@ -693,6 +702,30 @@
 
 /* Button that closes that window once access was granted */
 "Let’s Go!" = "さあ、始めましょう！";
+
+/* Welcome window: window title and heading of the first page */
+"Welcome to MaCursor" = "MaCursorへようこそ";
+
+/* Welcome window: main button on the middle pages */
+"Next" = "次へ";
+
+/* Welcome window: heading of the last page */
+"You’re All Set" = "準備が完了しました";
+
+/* Welcome window: text of the last page */
+"You can change any of this later in Settings." = "これらはあとから設定で変更できます。";
+
+/* Welcome window: text of the Helper Tool page */
+"The Helper Tool starts when you log in. It keeps your cursors after a restart and runs most features on the next pages. Install it now, or later in Settings → General." = "ヘルパーツールはログイン時に起動します。再起動後もカーソルを維持し、次のページにあるほとんどの機能を実行します。今すぐインストールするか、あとで「設定」→「一般」からインストールしてください。";
+
+/* Welcome window: line under the switches while the Helper Tool is not installed */
+"Install the Helper Tool to use the switches on this page." = "このページのスイッチを使うには、ヘルパーツールをインストールしてください。";
+
+/* Welcome window: title of the warning shown before the window closes */
+"Are you sure you want to close this window?" = "このウインドウを閉じてもよろしいですか？";
+
+/* Welcome window: text of the warning shown before the window closes */
+"You can change these features in Settings. This window opens again only after Reset All Settings." = "これらの機能は設定で変更できます。このウインドウは、すべての設定をリセットした後にのみ再度開きます。";
 
 /* Empty search result in the Edit Theme sidebar; %@ is the search text */
 "No Results for “%@”" = "「%@」の検索結果なし";
@@ -1235,7 +1268,7 @@
 "Triggers to Ignore" = "無視するトリガ";
 "Every Trigger" = "すべてのトリガ";
 "Mouse Buttons" = "マウスボタン";
-/* Cursor Gestures settings: picker of when an ignored app counts: only while it is in front, or whenever one of its windows is on screen */
+/* Cursor Gestures settings: picker of when an ignored app counts: In Front (only while it is the front app) or Under the Pointer (only when a gesture starts over one of its windows) */
 "Ignore When" = "無視するとき";
 "In Front" = "最前面のとき";
 /* Cursor Gestures settings: button and title of the alert that adds back the ready-made gestures */
@@ -1291,7 +1324,7 @@
 "Delay window focus for %@" = "%@後にフォーカスを移す";
 /* Menu bar panel: folded row under the Focus on Hover switch that holds the delay slider */
 "Focus Delay" = "フォーカスの遅延";
-/* Cursor Shaker: feature name in the Settings sidebar, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
+/* Cursor Shaker: feature name in Settings → Cursor Control, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
 "Cursor Shaker" = "カーソルシェイカー";
 "Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool." = "「カーソルシェイカー」にはヘルパーツールが必要です。「一般」→「ヘルパーツール」からインストールできます。";
 /* Cursor Shaker: grey caption under its switch */
@@ -1416,3 +1449,355 @@
 
 /* Cursor Translator: the first choice of “Translate to” in Settings. It follows the Mac's language; %@ is that language's name, for example “English (System Default)” */
 "%@ (System Default)" = "%@（システムのデフォルト）";
+
+/* Cursor Capture: the Settings tab that takes a picture of the screen with a shortcut */
+"Cursor Capture" = "カーソルキャプチャ";
+"Cursor Capture requires the Helper Tool. You can install it from General → Helper Tool." = "「カーソルキャプチャ」にはヘルパーツールが必要です。「一般」→「ヘルパーツール」からインストールできます。";
+"Choose…" = "選択…";
+"Desktop" = "デスクトップ";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "MaCursorは、画面の画像を撮影するために画面収録のアクセス権を必要とします。画像はお使いのMacから外に出ません。「画面収録を許可」を選択し、「プライバシーとセキュリティ」→「画面収録とシステムオーディオ録音」でMaCursorを許可してください。";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "MaCursorは、画面の画像を撮影するために画面収録のアクセス権を必要とします。画像はお使いのMacから外に出ません。「画面収録を許可」を選択し、「プライバシーとセキュリティ」→「画面収録」でMaCursorを許可してください。";
+"Waiting for access. This window updates as soon as MaCursor is allowed." = "アクセスを待機中です。MaCursorが許可されると、このウインドウはすぐに更新されます。";
+
+/* Settings, General, Menu Bar: the label above the list of the panel's items */
+"Panel Items" = "パネルの項目";
+"Drag an item to change its place in the panel. Turning an item off hides it from the panel, and its feature keeps working." = "項目をドラッグすると、パネル内の位置を変更できます。項目をオフにするとパネルから隠れますが、機能は動作し続けます。";
+
+/* Cursor Capture editor: the tools that draw on the picture. Box draws an empty rectangle. Pixelate turns what it covers into coloured blocks */
+"Arrow" = "矢印";
+"Box" = "枠";
+"Pixelate" = "モザイク";
+
+/* Cursor Capture editor: more tools. Text types words on the picture. Number places the next number in a circle. Highlight is a marker pen. Crop cuts the picture smaller */
+"Text" = "テキスト";
+"Number" = "番号";
+"Highlight" = "ハイライト";
+"Crop" = "切り取り";
+
+/* Settings > Cursor Capture: the switch card line, the Shortcuts tab, and the Capture Text rows */
+"Take a picture of your screen, with your cursor in it if you want." = "画面の画像を撮ります。必要に応じてカーソルも含められます。";
+"Shortcuts" = "ショートカット";
+"Capture Text" = "テキストをキャプチャ";
+"Copy Text" = "テキストをコピー";
+"Text Copied" = "テキストをコピーしました";
+"No Text Found" = "テキストが見つかりません";
+"Drag a box, and the text in it goes to your clipboard. No picture is saved." = "枠をドラッグすると、枠内のテキストがクリップボードにコピーされます。画像は保存されません。";
+"Filled Box" = "塗りつぶし枠";
+"Oval" = "楕円";
+"Pen" = "ペン";
+"Select" = "選択";
+"Add Image" = "イメージを追加";
+"Background" = "背景";
+"Color" = "カラー";
+"Size" = "サイズ";
+"Save as…" = "別名で保存…";
+"Done Editing" = "完了";
+"Zoom" = "ズーム";
+"Zoom In" = "拡大";
+"Zoom Out" = "縮小";
+"Fit Canvas" = "キャンバスに合わせる";
+"Drag Me" = "ドラッグ";
+"Share" = "共有";
+"Pin" = "ピン留め";
+"Don't Save" = "保存しない";
+"Format:" = "フォーマット：";
+"JPEG Image" = "JPEGイメージ";
+"PNG Image" = "PNGイメージ";
+"HEIC Image" = "HEICイメージ";
+"WebP Image" = "WebPイメージ";
+"%lld pt" = "%lldpt";
+"%lld%%" = "%lld%%";
+"Hex" = "16進数";
+"Alpha" = "アルファ";
+"Hue" = "色相";
+"R" = "R";
+"G" = "G";
+"B" = "B";
+"Add to My Colors" = "マイカラーに追加";
+"My Colors" = "マイカラー";
+"More Colors" = "その他のカラー";
+"Fewer Colors" = "カラーを減らす";
+"Pick a Color" = "カラーを選択";
+"Black" = "ブラック";
+"Red" = "レッド";
+"Orange" = "オレンジ";
+"Yellow" = "イエロー";
+"Green" = "グリーン";
+"Teal" = "ティール";
+"Blue" = "ブルー";
+"Purple" = "パープル";
+"Pink" = "ピンク";
+"White" = "ホワイト";
+"Arrow Style" = "矢印のスタイル";
+"Text Style" = "テキストのスタイル";
+"Spotlight Shape" = "Spotlightの形";
+"Pixelate Style" = "モザイクのスタイル";
+"Number Settings" = "番号の設定";
+"Unlock Canvas" = "キャンバスのロックを解除";
+"Lock Canvas" = "キャンバスをロック";
+"Spotlight Opacity" = "Spotlightの不透明度";
+"Pixelate Strength" = "モザイクの強さ";
+"Emoji" = "絵文字";
+"Starting Number:" = "開始番号：";
+"Standard" = "標準";
+"Fancy" = "装飾";
+"Curved" = "曲線";
+"Double" = "両方向";
+"Rectangle" = "長方形";
+"Rounded Rectangle" = "角丸長方形";
+"Secure Blur" = "安全なぼかし";
+"Blur" = "ぼかし";
+"Black Out" = "黒塗り";
+"Rounded" = "丸み";
+"Outlined" = "アウトライン";
+"Mono" = "等幅";
+"Mono Box" = "等幅枠";
+"Rounded Box" = "丸枠";
+"Freeform" = "自由形式";
+"Custom Ratio" = "カスタム比率";
+"Original Ratio" = "元の比率";
+"1 : 1 (Square)" = "1 : 1（正方形）";
+"Ratio" = "比率";
+"Ratio Width" = "比率の幅";
+"Ratio Height" = "比率の高さ";
+"Swap Width and Height" = "幅と高さを入れ替え";
+"Fill Color" = "塗りつぶしの色";
+"Transparent" = "透明";
+"Auto" = "自動";
+"Gray" = "グレー";
+"Custom Color…" = "カスタムカラー…";
+"Rotate" = "回転";
+"Flip" = "反転";
+"Image size:" = "画像サイズ：";
+"%lld × %lld px" = "%1$lld × %2$lld px";
+"Snap to edges" = "端にスナップ";
+"Hold ⌘ to turn snapping on." = "スナップをオンにするには⌘を押し続けます。";
+"Revert to Original" = "オリジナルに戻す";
+"Rotate image?" = "画像を回転しますか？";
+"Flip image?" = "画像を反転しますか？";
+"Flatten and Rotate" = "統合して回転";
+"Flatten and Flip" = "統合して反転";
+"This burns every mark into the picture, so you can no longer edit them. You cannot undo this." = "すべてのマークが画像に統合され、編集できなくなります。この操作は取り消せません。";
+"Don't ask again" = "今後確認しない";
+"Width:" = "幅：";
+"Height:" = "高さ：";
+"pixels" = "ピクセル";
+"percent" = "パーセント";
+"Flatten Marks" = "マークを統合";
+"(Cannot be undone)" = "（取り消せません）";
+"Resize" = "サイズを変更";
+"Keep Proportions" = "縦横比を保持";
+"Take Screenshot" = "スクリーンショットを撮る";
+"Paste From Clipboard" = "クリップボードからペースト";
+"Choose From File…" = "ファイルから選択…";
+"Open" = "開く";
+"Top" = "上";
+"Bottom" = "下";
+"Left" = "左";
+"Right" = "右";
+"Add New Preset…" = "新規プリセットを追加…";
+"Add wallpaper" = "壁紙を追加";
+"Alignment" = "配置";
+"Apply Previous Settings" = "前回の設定を適用";
+"Auto Balance" = "自動バランス";
+"Automatically apply preset to all screenshots:" = "すべてのスクリーンショットにプリセットを自動で適用：";
+"Blurred desktop" = "ぼかしたデスクトップ";
+"Blurred picture" = "ぼかした画像";
+"Bottom left" = "左下";
+"Bottom right" = "右下";
+"Clean" = "クリーン";
+"Dark blur" = "暗いぼかし";
+"Dark gray" = "ダークグレー";
+"Default Preset" = "デフォルトのプリセット";
+"Delete Preset" = "プリセットを削除";
+"Delete this preset?" = "このプリセットを削除しますか？";
+"Desktop picture" = "デスクトップピクチャ";
+"Dusk" = "夕暮れ";
+"Gradients" = "グラデーション";
+"Inset" = "インセット";
+"Light gray" = "ライトグレー";
+"Mint" = "ミント";
+"Mist" = "ミスト";
+"My preset" = "マイプリセット";
+"Night" = "ナイト";
+"Padding" = "余白";
+"Pale blue" = "淡い青";
+"Pale green" = "淡い緑";
+"Pale orange" = "淡いオレンジ";
+"Pale red" = "淡い赤";
+"Pale violet" = "淡い紫";
+"Pale yellow" = "淡い黄";
+"Preset options" = "プリセットオプション";
+"Presets" = "プリセット";
+"Remove wallpaper" = "壁紙を削除";
+"Rose" = "ローズ";
+"Sand" = "サンド";
+"Save as new preset" = "新規プリセットとして保存";
+"Save changes" = "変更を保存";
+"Shadow" = "影";
+"Soft" = "ソフト";
+"Top left" = "左上";
+"Top right" = "右上";
+"Violet" = "紫";
+"Wallpaper" = "壁紙";
+"Wallpapers" = "壁紙";
+"Hold Command ⌘ to disable snapping." = "スナップをオフにするにはcommand ⌘を押し続けます。";
+
+/* Settings > Cursor Capture, in CleanShot X's order: the tabs, the section headings and the rows. Auto-close is a switch; Interval is the time menu under it. Position on screen says where the card sits. Self-Timer interval is the wait before the picture. OCR is the section that holds Capture Text */
+"Quick Access" = "クイックアクセス";
+"Screenshots" = "スクリーンショット";
+"Advanced" = "詳細";
+"Sounds" = "サウンド";
+"Export" = "書き出し";
+"After Capture" = "キャプチャ後";
+"Behavior" = "動作";
+"Capture" = "キャプチャ";
+"Window Screenshots" = "ウインドウのスクリーンショット";
+"OCR" = "テキスト認識";
+"Play sounds" = "サウンドを再生";
+"Export location" = "書き出し先";
+"Show Quick Access Overlay" = "クイックアクセスオーバーレイを表示";
+"Position on screen" = "画面上の位置";
+"Auto-close" = "自動的に閉じる";
+"Interval" = "間隔";
+"Self-Timer interval" = "セルフタイマーの間隔";
+"Show cursor on screenshots" = "スクリーンショットにカーソルを表示";
+"Capture Area" = "範囲をキャプチャ";
+"Capture Previous Area" = "前回の範囲をキャプチャ";
+"Capture Fullscreen" = "画面全体をキャプチャ";
+"Set the default save location used when saving from the Quick Access Overlay, After Capture, and other Save actions across the app." = "クイックアクセスオーバーレイ、「キャプチャ後」、およびアプリ内のほかの保存操作で保存するときに使う、デフォルトの保存先を設定します。";
+"Decide what should happen after taking a screenshot." = "スクリーンショットを撮った後の動作を選びます。";
+"After the Capture Area shortcut, press Space to pick a window. Press Space again to draw an area." = "「範囲をキャプチャ」のショートカットを押した後、スペースキーを押すとウインドウを選択します。もう一度スペースキーを押すと範囲を選択します。";
+"Action" = "アクション";
+"Screenshot" = "スクリーンショット";
+"Copy file to clipboard" = "ファイルをクリップボードにコピー";
+"Open Annotate tool" = "注釈ツールを開く";
+"Pin to the screen" = "画面にピン留め";
+"Output" = "出力";
+"File format" = "ファイル形式";
+"Convert to sRGB profile" = "sRGBプロファイルに変換";
+"Scale Retina screenshots to 1x" = "Retinaスクリーンショットを1xに縮小";
+"Add 1px border to all screenshots" = "すべてのスクリーンショットに1pxの枠線を追加";
+"Background preset" = "背景のプリセット";
+"Apply Background Tool preset to all screenshots. You can create presets in the editor. Hold ⇧ Shift while capturing a screenshot to disable this option." = "背景ツールのプリセットをすべてのスクリーンショットに適用します。プリセットはエディタで作成できます。スクリーンショットの撮影中に⇧ Shiftキーを押したままにすると、このオプションは無効になります。";
+"2 Seconds" = "2秒";
+"5 Seconds" = "5秒";
+"10 Seconds" = "10秒";
+"15 Seconds" = "15秒";
+"Self-Timer" = "セルフタイマー";
+"This works in Fullscreen or Self-Timer modes only." = "「フルスクリーン」または「セルフタイマー」モードでのみ機能します。";
+"Freeze screen when taking a screenshot" = "スクリーンショットの撮影時に画面を固定";
+"With wallpaper" = "壁紙あり";
+"Capture window shadow" = "ウインドウの影を撮影";
+"Hold ⇧ Shift while taking a screenshot to capture the window with wallpaper." = "スクリーンショットの撮影中に⇧ Shiftキーを押したままにすると、ウインドウを壁紙付きで撮影します。";
+"Crosshair" = "十字線";
+"Crosshair Mode" = "十字線モード";
+"Always enabled" = "常に有効";
+"When ⌘ Command is pressed" = "command ⌘キーを押している間";
+"Disabled" = "無効";
+"Show magnifier" = "拡大鏡を表示";
+"To enable magnifier, you must enable Crosshair Mode first." = "拡大鏡を有効にするには、先に「十字線モード」を有効にしてください。";
+"File Name" = "ファイル名";
+"Ask for name after every capture" = "撮影するたびに名前を尋ねる";
+"File name format" = "ファイル名の形式";
+"Customize…" = "カスタマイズ…";
+"Add “@2x” suffix to Retina screenshots" = "Retinaスクリーンショットに「@2x」サフィックスを追加";
+"This option improves compatibility with displaying Retina screenshots in third-party apps." = "このオプションを使うと、他社製アプリでRetinaスクリーンショットを表示するときの互換性が向上します。";
+"Type text and drag elements to create a custom format:" = "テキストを入力し、要素をドラッグしてカスタム形式を作成してください：";
+"Year" = "年";
+"Month (numeric)" = "月（数字）";
+"Day" = "日";
+"Window title" = "ウインドウのタイトル";
+"App name" = "アプリ名";
+"Minutes" = "分";
+"Seconds" = "秒";
+"Auto-increment" = "自動連番";
+"Remove illegal characters" = "使用できない文字を削除";
+"Restore Defaults" = "デフォルトに戻す";
+"Next number" = "次の番号";
+"Name this screenshot" = "このスクリーンショットに名前を付けてください";
+"Use Default Name" = "デフォルトの名前を使用";
+"Copy to clipboard" = "クリップボードにコピー";
+"File & Image (default)" = "ファイルと画像（デフォルト）";
+"Image only" = "画像のみ";
+"File only" = "ファイルのみ";
+"Adjust this option if you've encountered any issues with pasting from clipboard or clipboard managers." = "クリップボードやクリップボードマネージャからのペーストで問題が起きる場合は、このオプションを変更してください。";
+"Text Recognition" = "テキスト認識";
+"Automatically Detect Language" = "言語を自動検出";
+"Keep line breaks" = "改行を保持";
+"Detect links" = "リンクを検出";
+"Arabic (Najdi)" = "アラビア語（ナジュド地方）";
+"Chinese (Simplified)" = "中国語（簡体字）";
+"Chinese (Traditional)" = "中国語（繁体字）";
+"Norwegian (Bokmål)" = "ノルウェー語（ブークモール）";
+"Norwegian (Nynorsk)" = "ノルウェー語（ニーノシュク）";
+"Do you want to open this link?" = "このリンクを開きますか？";
+"Open Link in Browser" = "リンクをブラウザで開く";
+"Never open links" = "リンクを開かない";
+"Area Selection" = "範囲の選択";
+"Remember last selection" = "前回の選択範囲を記憶";
+"Keep styling" = "書式を保持";
+"Date" = "日付";
+"Capture History" = "キャプチャ履歴";
+"Keep history" = "履歴の保存期間";
+"1 day" = "1日";
+"3 days" = "3日";
+"1 week" = "1週間";
+"1 month" = "1か月";
+"You can restore old files with “Capture History” option from the menu bar." = "メニューバーの「キャプチャ履歴」から古いファイルを復元できます。";
+"Capture History..." = "キャプチャ履歴…";
+"Capture History is disabled." = "キャプチャ履歴は無効です。";
+"No files to restore..." = "復元するファイルはありません…";
+"Clear History..." = "履歴を消去…";
+"Are you sure you want to delete all files from history?" = "履歴からすべてのファイルを削除してもよろしいですか？";
+
+/* Settings > Cursor Capture > Quick Access: the Appearance and Behavior rows, the Auto-close interval choices, and the card with no heading. Overlay is the small card shown after a capture. ⌥ is the Option key. "Export location" names the row on the General tab */
+"Move to active screen" = "アクティブな画面に移動";
+"Active screen is the screen where your cursor is pointing." = "アクティブな画面とは、カーソルが指している画面のことです。";
+"Overlay size" = "オーバーレイのサイズ";
+"Save and Close" = "保存して閉じる";
+"5 seconds" = "5秒";
+"10 seconds" = "10秒";
+"15 seconds" = "15秒";
+"30 seconds" = "30秒";
+"1 minute" = "1分";
+"2 minutes" = "2分";
+"5 minutes" = "5分";
+"10 minutes" = "10分";
+"Close after dragging" = "ドラッグ後に閉じる";
+"Hold ⌥ (option) to keep the item on Overlay after dragging." = "⌥ optionキーを押したままにすると、ドラッグ後も項目をオーバーレイに残します。";
+"Hold ⌥ (option) to close the item from Overlay after dragging." = "⌥ optionキーを押したままにすると、ドラッグ後に項目をオーバーレイから閉じます。";
+"Save button behavior" = "保存ボタンの動作";
+"Save to \"Export location\"" ="「書き出し先」に保存";
+"Ask for destination" = "保存先を確認";
+"Press with ⌥ (option) to choose the destination." = "⌥ optionキーを押しながらクリックすると、保存先を選択できます。";
+"Press with ⌥ (option) to use 'Export Location' without asking." = "⌥ optionキーを押しながらクリックすると、確認せずに「書き出し先」に保存します。";
+"Search Themes" = "テーマを検索";
+
+/* Welcome window, version 2 */
+"MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them." = "MaCursorを使うと、macOSのシステムカーソルを自由に操作できます。次のページで追加機能をオンにすることも、スキップすることもできます。";
+"Cursor Look" = "カーソルの見た目";
+"When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "オンにすると、カーソルの下に柔らかいドロップシャドウが描画されます。影はカーソルテーマの適用中に表示されます。";
+"Install the Helper Tool on the first page to use Cursor Trails." = "カーソルの軌跡を使うには、最初のページでヘルパーツールをインストールしてください。";
+"Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "このページの機能には、MaCursorHelperのアクセシビリティのアクセス権が必要です。ない場合は、「アクセスを許可」を選ぶとシステム設定が開きます。";
+"Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "このページの機能には、MaCursorの画面収録のアクセス権が必要です。カーソル翻訳には、MaCursorHelperのアクセシビリティのアクセス権も必要です。ない場合は、「アクセスを許可」を選ぶとシステム設定が開きます。";
+"Press the shortcut to take a picture of your screen." = "ショートカットを押すと、画面の画像を撮影します。";
+"This feature needs the Finder extension and Full Disk Access for MaCursor. If either is missing, choose Grant Permission to open System Settings." = "この機能には、Finder機能拡張とMaCursorのフルディスクアクセスが必要です。どちらかがない場合は、「アクセスを許可」を選ぶとシステム設定が開きます。";
+"Help Writronic keep growing" = "Writronicの成長を応援してください";
+"If you would like to support development, you can donate on the Writronic website." = "開発を支援したい場合は、WritronicのWebサイトで寄付できます。";
+"Thank you for being here." = "ご利用ありがとうございます。";
+"A star on GitHub also helps more people find MaCursor, and it means a lot." = "GitHubでスターを付けていただくと、より多くの人がMaCursorを見つけやすくなり、とても励みになります。";
+"Give a Star" = "スターを付ける";
+/* Welcome window: button at the end of an access line whose dot is red; it opens System Settings at that access */
+"Grant Permission" = "アクセスを許可";
+/* Welcome window: what VoiceOver reads after the name of an access whose dot is red */
+"Access not granted" = "アクセスが許可されていません";
+
+/* Welcome window: line under the cards on pages 2 to 4 while the Helper Tool is installed but not running. MaCursor starts it again when it opens. */
+"The Helper Tool is not running. Quit and reopen MaCursor to start it." = "ヘルパーツールが停止しています。起動するには、MaCursorを終了して再度開いてください。";
+
+"Hide desktop icons while capturing" = "キャプチャ時にデスクトップアイコンを非表示";
+
+"Left Button" = "左ボタン";
+"Hold a key with the left or right button, so normal clicks still work." = "通常のクリックが使えるように、左ボタンまたは右ボタンと一緒にキーを押してください。";
+"A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "「カーソルキャプチャ」のショートカットが同じキーとボタンを使っています。「カーソルキャプチャ」が優先されます。";

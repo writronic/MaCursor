@@ -38,15 +38,8 @@ final class AppearanceManager: ObservableObject {
 
     func applyAndPersist() {
         MACPreferences.set(NSNumber(value: currentMode.rawValue), forKey: MACPreferences.appearanceModeKey)
-
-        switch currentMode {
-        case .system:
-            NSApp.appearance = nil
-        case .light:
-            NSApp.appearance = NSAppearance(named: .aqua)
-        case .dark:
-            NSApp.appearance = NSAppearance(named: .darkAqua)
-        }
+        MACApplyAppearanceMode(NSNumber(value: currentMode.rawValue), to: NSApp)
+        DistributedNotificationCenter.default().postNotificationName(.MACAppearanceDidChange, object: nil, userInfo: nil, deliverImmediately: true)
     }
 
     func applyOnLaunch() {

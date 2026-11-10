@@ -6,11 +6,19 @@ struct LibraryView: View {
     @Environment(\.openWindow) private var openWindow
     @State private var selectedThemeId: String?
     @State private var columnVisibility = NavigationSplitViewVisibility.all
+    @State private var isSearchOpen = false
+    @State private var searchText = ""
+    @State private var searchFocusToken = 0
+    @State private var themeCount = 0
+
+    private var visibleThemes: [CursorThemeModel] {
+        Self.themes(library.cursorThemes, matching: searchText)
+    }
 
     var body: some View {
         NavigationSplitView(columnVisibility: $columnVisibility) {
             ScrollViewReader { proxy in
-            List(library.cursorThemes, selection: $selectedThemeId) { cursorTheme in
+            List(visibleThemes, selection: $selectedThemeId) { cursorTheme in
                 CursorThemeRowView(
                     cursorTheme: cursorTheme,
                     isSelected: selectedThemeId == cursorTheme.id
@@ -58,30 +66,55 @@ struct LibraryView: View {
             }
             .listStyle(.sidebar)
             .overlay(ListMenuOwner())
+            .overlay {
+                let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !query.isEmpty && visibleThemes.isEmpty {
+                    UnavailableContent.search(text: query)
+                }
+            }
+            .onChangeCompat(of: isSearchOpen) { open in
+                if !open, let themeId = selectedThemeId {
+                    proxy.scrollTo(themeId, anchor: .center)
+                }
+            }
             .sidebarToggleRemoved()
             .toolbar {
                 ToolbarItem { Spacer() }
                 ToolbarItemGroup(placement: .primaryAction) {
-                    Button(action: {
-                        guard let newId = library.addNewTheme() else { return }
-                        selectedThemeId = newId
-                        withAnimation {
-                            proxy.scrollTo(newId, anchor: .center)
+                    if isSearchOpen {
+                        SearchFieldView(text: $searchText, prompt: String(localized: "Search"),
+                                        focusToken: searchFocusToken, onDismiss: closeSearch)
+                            .frame(width: 240)
+                    } else {
+                        Button(action: openSearch) {
+                            Label("Search Themes", systemImage: "magnifyingglass")
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 4)
+                                .contentShape(Rectangle())
                         }
-                    }) {
-                        Label("Add Theme", systemImage: "plus")
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 4)
-                            .contentShape(Rectangle())
-                    }
+                        .help("Search Themes")
 
-                    Button(action: { library.restoreCursors() }) {
-                        Label("Restore", systemImage: "arrow.counterclockwise")
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 4)
-                            .contentShape(Rectangle())
+                        Button(action: {
+                            guard let newId = library.addNewTheme() else { return }
+                            selectedThemeId = newId
+                            withAnimation {
+                                proxy.scrollTo(newId, anchor: .center)
+                            }
+                        }) {
+                            Label("Add Theme", systemImage: "plus")
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 4)
+                                .contentShape(Rectangle())
+                        }
+
+                        Button(action: { library.restoreCursors() }) {
+                            Label("Restore", systemImage: "arrow.counterclockwise")
+                                .padding(.horizontal, 5)
+                                .padding(.vertical, 4)
+                                .contentShape(Rectangle())
+                        }
+                        .help("Restore system cursors")
                     }
-                    .help("Restore system cursors")
                 }
             }
             }
@@ -124,6 +157,20 @@ struct LibraryView: View {
             }
         }
         .navigationTitle("MaCursor")
+        .focusedSceneValue(\.librarySearch, openSearch)
+        .onAppear { themeCount = library.cursorThemes.count }
+        .onChangeCompat(of: library.cursorThemes.count) { count in
+            if count > themeCount {
+                closeSearch()
+            }
+            themeCount = count
+        }
+        .onChangeCompat(of: visibleThemes.map(\.id)) { visibleIds in
+            if let themeId = selectedThemeId, !visibleIds.contains(themeId),
+               library.theme(withId: themeId) != nil {
+                selectedThemeId = nil
+            }
+        }
         .background(ToolbarConfigurator())
         .background(WindowRoleAccessor(role: .main))
         .onChangeCompat(of: columnVisibility) { newValue in
@@ -192,6 +239,17 @@ struct LibraryView: View {
         openWindow(value: cursorTheme.id)
     }
 
+    private func openSearch() {
+        isSearchOpen = true
+        searchFocusToken += 1
+    }
+
+    private func closeSearch() {
+        guard isSearchOpen else { return }
+        isSearchOpen = false
+        searchText = ""
+    }
+
     private func favoriteTitle(for cursorTheme: CursorThemeModel) -> LocalizedStringKey {
         library.isFavorite(cursorTheme) ? "Remove from Favorites" : "Add to Favorites"
     }
@@ -200,6 +258,30 @@ struct LibraryView: View {
 extension LibraryView {
     func handleDoubleClick(on cursorTheme: CursorThemeModel) {
         library.apply(cursorTheme)
+    }
+
+    static func themes(_ themes: [CursorThemeModel], matching query: String) -> [CursorThemeModel] {
+        let query = searchFolded(query.trimmingCharacters(in: .whitespacesAndNewlines))
+        guard !query.isEmpty else { return themes }
+        return themes.filter {
+            searchFolded($0.name).contains(query) || searchFolded($0.creator).contains(query)
+        }
+    }
+
+    private static func searchFolded(_ text: String) -> String {
+        text.folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: nil)
+            .replacingOccurrences(of: "ı", with: "i")
+    }
+}
+
+struct LibrarySearchKey: FocusedValueKey {
+    typealias Value = () -> Void
+}
+
+extension FocusedValues {
+    var librarySearch: LibrarySearchKey.Value? {
+        get { self[LibrarySearchKey.self] }
+        set { self[LibrarySearchKey.self] = newValue }
     }
 }
 
@@ -270,7 +352,15 @@ struct ListMenuOwner: NSViewRepresentable {
         }
 
         override func menu(for event: NSEvent) -> NSMenu? {
-            table?.menu(for: event)
+            guard let source = table?.menu(for: event) else { return nil }
+            let items = source.items
+            source.removeAllItems()
+            guard let menu = source.copy() as? NSMenu else {
+                source.items = items
+                return nil
+            }
+            menu.items = items
+            return menu
         }
 
         override func acceptsFirstMouse(for event: NSEvent?) -> Bool {

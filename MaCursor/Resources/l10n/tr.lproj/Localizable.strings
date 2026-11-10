@@ -375,9 +375,6 @@
 /* Toggle: cursor drop shadow */
 "Cursor Shadow" = "İmleç Gölgesi";
 
-/* Caption explaining the cursor shadow toggle */
-"When enabled, a soft drop shadow is drawn under the cursor, similar to the pointer shadow on Windows. The shadow appears while a cursor theme is applied." = "Etkinleştirildiğinde, imlecin altına Windows’taki işaretçi gölgesine benzer yumuşak bir gölge çizilir. Gölge, bir imleç teması uygulandığında görünür.";
-
 /* Section: software updates */
 "Software Updates" = "Yazılım Güncellemeleri";
 
@@ -616,7 +613,7 @@
 "The menu bar icon is provided by the Helper Tool. Install it above to use it." = "Menü Çubuğu simgesi Yardımcı Araç tarafından sağlanır. Kullanmak için yukarıdan yükleyin.";
 
 /* Caption under the Show Menu Bar Icon toggle */
-"Shows a MaCursor icon in the menu bar for switching cursor themes and per-app rules. If it does not appear, open System Settings and look in the Menu Bar section." = "İmleç temalarını ve uygulamaya özel kuralları değiştirmek için menü çubuğunda bir MaCursor simgesi gösterir. Görünmüyorsa Sistem Ayarları'nı açıp Menü Çubuğu bölümüne bakın.";
+"Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section." = "Hızlı erişim için menü çubuğunda bir MaCursor simgesi gösterir. Görünmüyorsa Sistem Ayarları'nı açıp Menü Çubuğu bölümüne bakın.";
 
 /* Menu bar panel */
 
@@ -667,6 +664,18 @@
 /* Menu bar panel: caption under the favorites placeholder */
 "Mark themes as favorites in MaCursor to show them here." = "Temaları burada göstermek için MaCursor’da favori olarak işaretleyin.";
 
+/* Menu bar panel: row that reads the text in a box on the screen. CleanShot X calls it Capture Text (OCR) in its menu */
+"Capture Text (OCR)" = "Metin Yakala (OCR)";
+
+/* Menu bar panel: row that opens a picture from a file in the editor. CleanShot X calls it Open... in its menu */
+"Open..." = "Aç…";
+
+/* Menu bar panel: row that opens the picture on the clipboard in the editor. Dim when the clipboard has no picture */
+"Open from Clipboard" = "Panodan Aç";
+
+/* Menu bar panel: row that picks a picture file and floats it on the screen. CleanShot X calls it Pin to the Screen... in its menu */
+"Pin to the Screen..." = "Ekrana İğnele…";
+
 /* Helper status: installed but not running */
 "Installed, not running" = "Yüklü, çalışmıyor";
 
@@ -696,6 +705,30 @@
 
 /* Button that closes that window once access was granted */
 "Let’s Go!" = "Hadi Başlayalım!";
+
+/* Welcome window: window title and heading of the first page */
+"Welcome to MaCursor" = "MaCursor’a Hoş Geldiniz";
+
+/* Welcome window: main button on the middle pages */
+"Next" = "İleri";
+
+/* Welcome window: heading of the last page */
+"You’re All Set" = "Her Şey Hazır";
+
+/* Welcome window: text of the last page */
+"You can change any of this later in Settings." = "Bunların hepsini daha sonra Ayarlar’dan değiştirebilirsiniz.";
+
+/* Welcome window: text of the Helper Tool page */
+"The Helper Tool starts when you log in. It keeps your cursors after a restart and runs most features on the next pages. Install it now, or later in Settings → General." = "Yardımcı Araç, oturum açtığınızda başlar. İmleçlerinizi yeniden başlatmadan sonra korur ve sonraki sayfalardaki özelliklerin çoğunu çalıştırır. Şimdi veya daha sonra Ayarlar → Genel bölümünden yükleyin.";
+
+/* Welcome window: line under the switches while the Helper Tool is not installed */
+"Install the Helper Tool to use the switches on this page." = "Bu sayfadaki anahtarları kullanmak için Yardımcı Araç’ı yükleyin.";
+
+/* Welcome window: title of the warning shown before the window closes */
+"Are you sure you want to close this window?" = "Bu pencereyi kapatmak istediğinizden emin misiniz?";
+
+/* Welcome window: text of the warning shown before the window closes */
+"You can change these features in Settings. This window opens again only after Reset All Settings." = "Bu özellikleri Ayarlar’dan değiştirebilirsiniz. Bu pencere yalnızca tüm ayarları sıfırladıktan sonra yeniden açılır.";
 
 /* Alert title when a chosen or dropped file cannot become a cursor or slot image */
 "Could Not Use File" = "Dosya Kullanılamadı";
@@ -1235,7 +1268,7 @@
 "Triggers to Ignore" = "Yok Sayılacak Tetikleyiciler";
 "Every Trigger" = "Tüm Tetikleyiciler";
 "Mouse Buttons" = "Fare Düğmeleri";
-/* Cursor Gestures settings: picker of when an ignored app counts: only while it is in front, or whenever one of its windows is on screen */
+/* Cursor Gestures settings: picker of when an ignored app counts: In Front (only while it is the front app) or Under the Pointer (only when a gesture starts over one of its windows) */
 "Ignore When" = "Ne Zaman Yok Sayılsın";
 "In Front" = "Öndeyken";
 /* Cursor Gestures settings: button and title of the alert that adds back the ready-made gestures */
@@ -1291,7 +1324,7 @@
 "Delay window focus for %@" = "Odağı %@ sonra ver";
 /* Menu bar panel: folded row under the Focus on Hover switch that holds the delay slider */
 "Focus Delay" = "Odak Gecikmesi";
-/* Cursor Shaker: feature name in the Settings sidebar, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
+/* Cursor Shaker: feature name in Settings → Cursor Control, its switch, its access window title and the menu bar panel switch; it nudges the pointer while the user is away so apps keep showing them as active */
 "Cursor Shaker" = "İmleç Sallayıcı";
 "Cursor Shaker requires the Helper Tool. You can install it from General → Helper Tool." = "İmleç Sallayıcı özelliği için Yardımcı Araç gereklidir. Genel → Yardımcı Araç bölümünden yükleyebilirsiniz.";
 /* Cursor Shaker: grey caption under its switch */
@@ -1416,3 +1449,355 @@
 
 /* Cursor Translator: the first choice of “Translate to” in Settings. It follows the Mac's language; %@ is that language's name, for example “English (System Default)” */
 "%@ (System Default)" = "%@ (Sistem Varsayılanı)";
+
+/* Cursor Capture: the Settings tab that takes a picture of the screen with a shortcut */
+"Cursor Capture" = "İmleç Yakalama";
+"Cursor Capture requires the Helper Tool. You can install it from General → Helper Tool." = "İmleç Yakalama özelliği için Yardımcı Araç gereklidir. Genel → Yardımcı Araç bölümünden yükleyebilirsiniz.";
+"Choose…" = "Seç…";
+"Desktop" = "Masaüstü";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "MaCursor, ekranınızın görüntüsünü almak için Ekran Kaydı iznine ihtiyaç duyar. Görüntü Mac’inizde kalır. “Ekran Kaydına İzin Ver” düğmesini seçin, ardından Gizlilik ve Güvenlik → Ekran ve Sistem Sesi Kaydı bölümünde MaCursor’a izin verin.";
+"MaCursor needs Screen Recording access to take a picture of your screen. The picture stays on your Mac. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "MaCursor, ekranınızın görüntüsünü almak için Ekran Kaydı iznine ihtiyaç duyar. Görüntü Mac’inizde kalır. “Ekran Kaydına İzin Ver” düğmesini seçin, ardından Gizlilik ve Güvenlik → Ekran Kaydı bölümünde MaCursor’a izin verin.";
+"Waiting for access. This window updates as soon as MaCursor is allowed." = "Erişim izni bekleniyor. MaCursor’a izin verilir verilmez bu pencere güncellenir.";
+
+/* Settings, General, Menu Bar: the label above the list of the panel's items */
+"Panel Items" = "Panel Öğeleri";
+"Drag an item to change its place in the panel. Turning an item off hides it from the panel, and its feature keeps working." = "Paneldeki yerini değiştirmek için bir öğeyi sürükleyin. Bir öğeyi kapatmak onu panelden gizler; özelliği çalışmaya devam eder.";
+
+/* Cursor Capture editor: the tools that draw on the picture. Box draws an empty rectangle. Pixelate turns what it covers into coloured blocks */
+"Arrow" = "Ok";
+"Box" = "Kutu";
+"Pixelate" = "Pikselleştir";
+
+/* Cursor Capture editor: more tools. Text types words on the picture. Number places the next number in a circle. Highlight is a marker pen. Crop cuts the picture smaller */
+"Text" = "Metin";
+"Number" = "Numara";
+"Highlight" = "Vurgula";
+"Crop" = "Kırp";
+
+/* Settings > Cursor Capture: the switch card line, the Shortcuts tab, and the Capture Text rows */
+"Take a picture of your screen, with your cursor in it if you want." = "Ekranınızın görüntüsünü alın, isterseniz imleciniz de içinde olsun.";
+"Shortcuts" = "Kısayollar";
+"Capture Text" = "Metin Yakala";
+"Copy Text" = "Metni Kopyala";
+"Text Copied" = "Metin Kopyalandı";
+"No Text Found" = "Metin Bulunamadı";
+"Drag a box, and the text in it goes to your clipboard. No picture is saved." = "Bir kutu çizin, içindeki metin panonuza gider. Görüntü kaydedilmez.";
+"Filled Box" = "Dolu Kutu";
+"Oval" = "Oval";
+"Pen" = "Kalem";
+"Select" = "Seç";
+"Add Image" = "Görüntü Ekle";
+"Background" = "Arka Plan";
+"Color" = "Renk";
+"Size" = "Boyut";
+"Save as…" = "Farklı Kaydet…";
+"Done Editing" = "Bitti";
+"Zoom" = "Yakınlaştırma";
+"Zoom In" = "Yakınlaştır";
+"Zoom Out" = "Uzaklaştır";
+"Fit Canvas" = "Tuvale Sığdır";
+"Drag Me" = "Beni Sürükleyin";
+"Share" = "Paylaş";
+"Pin" = "İğnele";
+"Don't Save" = "Kaydetme";
+"Format:" = "Biçim:";
+"JPEG Image" = "JPEG Görüntüsü";
+"PNG Image" = "PNG Görüntüsü";
+"HEIC Image" = "HEIC Görüntüsü";
+"WebP Image" = "WebP Görüntüsü";
+"%lld pt" = "%lld pt";
+"%lld%%" = "%%%lld";
+"Hex" = "Hex";
+"Alpha" = "Alfa";
+"Hue" = "Ton";
+"R" = "R";
+"G" = "G";
+"B" = "B";
+"Add to My Colors" = "Renklerime Ekle";
+"My Colors" = "Renklerim";
+"More Colors" = "Diğer Renkler";
+"Fewer Colors" = "Daha Az Renk";
+"Pick a Color" = "Renk Seç";
+"Black" = "Siyah";
+"Red" = "Kırmızı";
+"Orange" = "Turuncu";
+"Yellow" = "Sarı";
+"Green" = "Yeşil";
+"Teal" = "Turkuaz";
+"Blue" = "Mavi";
+"Purple" = "Mor";
+"Pink" = "Pembe";
+"White" = "Beyaz";
+"Arrow Style" = "Ok Stili";
+"Text Style" = "Metin Stili";
+"Spotlight Shape" = "Spotlight Şekli";
+"Pixelate Style" = "Pikselleştirme Stili";
+"Number Settings" = "Numara Ayarları";
+"Unlock Canvas" = "Tuvalin Kilidini Aç";
+"Lock Canvas" = "Tuvali Kilitle";
+"Spotlight Opacity" = "Spotlight Opaklığı";
+"Pixelate Strength" = "Pikselleştirme Gücü";
+"Emoji" = "Emoji";
+"Starting Number:" = "Başlangıç Numarası:";
+"Standard" = "Standart";
+"Fancy" = "Süslü";
+"Curved" = "Kavisli";
+"Double" = "Çift";
+"Rectangle" = "Dikdörtgen";
+"Rounded Rectangle" = "Yuvarlak Dikdörtgen";
+"Secure Blur" = "Güvenli Bulanıklık";
+"Blur" = "Bulanıklık";
+"Black Out" = "Karartma";
+"Rounded" = "Yuvarlak";
+"Outlined" = "Dış Çizgili";
+"Mono" = "Mono";
+"Mono Box" = "Mono Kutu";
+"Rounded Box" = "Yuvarlak Kutu";
+"Freeform" = "Serbest";
+"Custom Ratio" = "Özel Oran";
+"Original Ratio" = "Özgün Oran";
+"1 : 1 (Square)" = "1 : 1 (Kare)";
+"Ratio" = "Oran";
+"Ratio Width" = "Oran Genişliği";
+"Ratio Height" = "Oran Yüksekliği";
+"Swap Width and Height" = "Genişlik ve Yüksekliği Değiştir";
+"Fill Color" = "Dolgu Rengi";
+"Transparent" = "Saydam";
+"Auto" = "Otomatik";
+"Gray" = "Gri";
+"Custom Color…" = "Özel Renk…";
+"Rotate" = "Döndür";
+"Flip" = "Çevir";
+"Image size:" = "Görüntü boyutu:";
+"%lld × %lld px" = "%1$lld × %2$lld px";
+"Snap to edges" = "Kenarlara yasla";
+"Hold ⌘ to turn snapping on." = "Yaslamayı açmak için ⌘ tuşunu basılı tutun.";
+"Revert to Original" = "Özgün Hale Döndür";
+"Rotate image?" = "Görüntü döndürülsün mü?";
+"Flip image?" = "Görüntü çevrilsin mi?";
+"Flatten and Rotate" = "Birleştir ve Döndür";
+"Flatten and Flip" = "Birleştir ve Çevir";
+"This burns every mark into the picture, so you can no longer edit them. You cannot undo this." = "Bu işlem tüm işaretleri görüntüye işler, artık onları düzenleyemezsiniz. Geri alınamaz.";
+"Don't ask again" = "Bir daha sorma";
+"Width:" = "Genişlik:";
+"Height:" = "Yükseklik:";
+"pixels" = "piksel";
+"percent" = "yüzde";
+"Flatten Marks" = "İşaretleri Birleştir";
+"(Cannot be undone)" = "(Geri alınamaz)";
+"Resize" = "Yeniden Boyutlandır";
+"Keep Proportions" = "Oranları Koru";
+"Take Screenshot" = "Ekran Görüntüsü Al";
+"Paste From Clipboard" = "Panodan Yapıştır";
+"Choose From File…" = "Dosyadan Seç…";
+"Open" = "Aç";
+"Top" = "Üst";
+"Bottom" = "Alt";
+"Left" = "Sol";
+"Right" = "Sağ";
+"Add New Preset…" = "Yeni Hazır Ayar Ekle…";
+"Add wallpaper" = "Duvar kâğıdı ekle";
+"Alignment" = "Hizalama";
+"Apply Previous Settings" = "Önceki Ayarları Uygula";
+"Auto Balance" = "Otomatik Dengele";
+"Automatically apply preset to all screenshots:" = "Hazır ayarı tüm ekran görüntülerine otomatik uygula:";
+"Blurred desktop" = "Bulanık masaüstü";
+"Blurred picture" = "Bulanık görüntü";
+"Bottom left" = "Sol alt";
+"Bottom right" = "Sağ alt";
+"Clean" = "Temiz";
+"Dark blur" = "Koyu bulanık";
+"Dark gray" = "Koyu gri";
+"Default Preset" = "Varsayılan Hazır Ayar";
+"Delete Preset" = "Hazır Ayarı Sil";
+"Delete this preset?" = "Bu hazır ayar silinsin mi?";
+"Desktop picture" = "Masaüstü resmi";
+"Dusk" = "Alacakaranlık";
+"Gradients" = "Gradyanlar";
+"Inset" = "İç boşluk";
+"Light gray" = "Açık gri";
+"Mint" = "Nane";
+"Mist" = "Sis";
+"My preset" = "Hazır ayarım";
+"Night" = "Gece";
+"Padding" = "Kenar boşluğu";
+"Pale blue" = "Soluk mavi";
+"Pale green" = "Soluk yeşil";
+"Pale orange" = "Soluk turuncu";
+"Pale red" = "Soluk kırmızı";
+"Pale violet" = "Soluk mor";
+"Pale yellow" = "Soluk sarı";
+"Preset options" = "Hazır ayar seçenekleri";
+"Presets" = "Hazır Ayarlar";
+"Remove wallpaper" = "Duvar kâğıdını kaldır";
+"Rose" = "Gül";
+"Sand" = "Kum";
+"Save as new preset" = "Yeni hazır ayar olarak kaydet";
+"Save changes" = "Değişiklikleri kaydet";
+"Shadow" = "Gölge";
+"Soft" = "Yumuşak";
+"Top left" = "Sol üst";
+"Top right" = "Sağ üst";
+"Violet" = "Mor";
+"Wallpaper" = "Duvar kâğıdı";
+"Wallpapers" = "Duvar Kâğıtları";
+"Hold Command ⌘ to disable snapping." = "Yaslamayı kapatmak için Komut ⌘ tuşunu basılı tutun.";
+
+/* Settings > Cursor Capture, in CleanShot X's order: the tabs, the section headings and the rows. Auto-close is a switch; Interval is the time menu under it. Position on screen says where the card sits. Self-Timer interval is the wait before the picture. OCR is the section that holds Capture Text */
+"Quick Access" = "Hızlı Erişim";
+"Screenshots" = "Ekran Görüntüleri";
+"Advanced" = "Gelişmiş";
+"Sounds" = "Sesler";
+"Export" = "Dışa Aktarma";
+"After Capture" = "Yakalamadan Sonra";
+"Behavior" = "Davranış";
+"Capture" = "Yakalama";
+"Window Screenshots" = "Pencere Ekran Görüntüleri";
+"OCR" = "Metin Tanıma";
+"Play sounds" = "Sesleri çal";
+"Export location" = "Dışa aktarma konumu";
+"Show Quick Access Overlay" = "Hızlı Erişim Katmanını Göster";
+"Position on screen" = "Ekrandaki konum";
+"Auto-close" = "Otomatik kapat";
+"Interval" = "Aralık";
+"Self-Timer interval" = "Zamanlayıcı aralığı";
+"Show cursor on screenshots" = "Ekran görüntülerinde imleci göster";
+"Capture Area" = "Alanı Yakala";
+"Capture Previous Area" = "Önceki Alanı Yakala";
+"Capture Fullscreen" = "Tam Ekranı Yakala";
+"Set the default save location used when saving from the Quick Access Overlay, After Capture, and other Save actions across the app." = "“Hızlı Erişim Katmanı”, “Yakalamadan Sonra” ve uygulamadaki diğer Kaydet eylemleriyle kaydederken kullanılan varsayılan kayıt konumunu ayarlayın.";
+"Decide what should happen after taking a screenshot." = "Ekran görüntüsü aldıktan sonra ne olacağını seçin.";
+"After the Capture Area shortcut, press Space to pick a window. Press Space again to draw an area." = "“Alanı Yakala” kısayolundan sonra pencere seçmek için Boşluk tuşuna basın. Alan çizmek için Boşluk tuşuna yeniden basın.";
+"Action" = "Eylem";
+"Screenshot" = "Ekran Görüntüsü";
+"Copy file to clipboard" = "Dosyayı panoya kopyala";
+"Open Annotate tool" = "İşaretleme aracını aç";
+"Pin to the screen" = "Ekrana iğnele";
+"Output" = "Çıktı";
+"File format" = "Dosya biçimi";
+"Convert to sRGB profile" = "sRGB profiline dönüştür";
+"Scale Retina screenshots to 1x" = "Retina ekran görüntülerini 1x boyutuna ölçekle";
+"Add 1px border to all screenshots" = "Tüm ekran görüntülerine 1 piksellik kenarlık ekle";
+"Background preset" = "Arka plan hazır ayarı";
+"Apply Background Tool preset to all screenshots. You can create presets in the editor. Hold ⇧ Shift while capturing a screenshot to disable this option." = "Arka Plan aracının hazır ayarını tüm ekran görüntülerine uygular. Hazır ayarları düzenleyicide oluşturabilirsiniz. Bu seçeneği kapatmak için ekran görüntüsü alırken ⇧ Shift tuşunu basılı tutun.";
+"2 Seconds" = "2 saniye";
+"5 Seconds" = "5 saniye";
+"10 Seconds" = "10 saniye";
+"15 Seconds" = "15 saniye";
+"Self-Timer" = "Zamanlayıcı";
+"This works in Fullscreen or Self-Timer modes only." = "Bu yalnızca “Tam Ekran” veya “Zamanlayıcı” modlarında çalışır.";
+"Freeze screen when taking a screenshot" = "Ekran görüntüsü alırken ekranı dondur";
+"With wallpaper" = "Duvar kâğıdıyla";
+"Capture window shadow" = "Pencere gölgesini yakala";
+"Hold ⇧ Shift while taking a screenshot to capture the window with wallpaper." = "Pencereyi duvar kâğıdıyla yakalamak için ekran görüntüsü alırken ⇧ Shift tuşunu basılı tutun.";
+"Crosshair" = "Artı İşareti";
+"Crosshair Mode" = "Artı İşareti Modu";
+"Always enabled" = "Her zaman açık";
+"When ⌘ Command is pressed" = "⌘ Komut tuşuna basıldığında";
+"Disabled" = "Kapalı";
+"Show magnifier" = "Büyüteci göster";
+"To enable magnifier, you must enable Crosshair Mode first." = "Büyüteci açmak için önce “Artı İşareti Modu”nu açmanız gerekir.";
+"File Name" = "Dosya Adı";
+"Ask for name after every capture" = "Her yakalamadan sonra ad sor";
+"File name format" = "Dosya adı biçimi";
+"Customize…" = "Özelleştir…";
+"Add “@2x” suffix to Retina screenshots" = "Retina ekran görüntülerine “@2x” son ekini ekle";
+"This option improves compatibility with displaying Retina screenshots in third-party apps." = "Bu seçenek, Retina ekran görüntülerinin üçüncü taraf uygulamalarda gösterilmesinde uyumluluğu artırır.";
+"Type text and drag elements to create a custom format:" = "Özel bir biçim oluşturmak için metin yazın ve öğeleri sürükleyin:";
+"Year" = "Yıl";
+"Month (numeric)" = "Ay (sayı)";
+"Day" = "Gün";
+"Window title" = "Pencere başlığı";
+"App name" = "Uygulama adı";
+"Minutes" = "Dakika";
+"Seconds" = "Saniye";
+"Auto-increment" = "Otomatik artan sayı";
+"Remove illegal characters" = "Geçersiz karakterleri kaldır";
+"Restore Defaults" = "Varsayılanları Geri Yükle";
+"Next number" = "Sonraki sayı";
+"Name this screenshot" = "Bu ekran görüntüsünü adlandırın";
+"Use Default Name" = "Varsayılan Adı Kullan";
+"Copy to clipboard" = "Panoya kopyala";
+"File & Image (default)" = "Dosya ve Görüntü (varsayılan)";
+"Image only" = "Yalnızca görüntü";
+"File only" = "Yalnızca dosya";
+"Adjust this option if you've encountered any issues with pasting from clipboard or clipboard managers." = "Panodan veya pano yöneticilerinden yapıştırırken sorun yaşadıysanız bu seçeneği değiştirin.";
+"Text Recognition" = "Metin Tanıma";
+"Automatically Detect Language" = "Dili Otomatik Algıla";
+"Keep line breaks" = "Satır sonlarını koru";
+"Detect links" = "Bağlantıları algıla";
+"Arabic (Najdi)" = "Arapça (Necd)";
+"Chinese (Simplified)" = "Çince (Basitleştirilmiş)";
+"Chinese (Traditional)" = "Çince (Geleneksel)";
+"Norwegian (Bokmål)" = "Norveççe (Bokmål)";
+"Norwegian (Nynorsk)" = "Norveççe (Nynorsk)";
+"Do you want to open this link?" = "Bu bağlantıyı açmak istiyor musunuz?";
+"Open Link in Browser" = "Bağlantıyı Tarayıcıda Aç";
+"Never open links" = "Bağlantıları Hiçbir Zaman Açma";
+"Area Selection" = "Alan Seçimi";
+"Remember last selection" = "Son seçimi hatırla";
+"Keep styling" = "Biçimlendirmeyi koru";
+"Date" = "Tarih";
+"Capture History" = "Yakalama Geçmişi";
+"Keep history" = "Geçmişi sakla";
+"1 day" = "1 gün";
+"3 days" = "3 gün";
+"1 week" = "1 hafta";
+"1 month" = "1 ay";
+"You can restore old files with “Capture History” option from the menu bar." = "Eski dosyaları menü çubuğundaki “Yakalama Geçmişi” seçeneğiyle geri yükleyebilirsiniz.";
+"Capture History..." = "Yakalama Geçmişi…";
+"Capture History is disabled." = "Yakalama Geçmişi kapalı.";
+"No files to restore..." = "Geri yüklenecek dosya yok…";
+"Clear History..." = "Geçmişi Temizle…";
+"Are you sure you want to delete all files from history?" = "Geçmişteki tüm dosyaları silmek istediğinizden emin misiniz?";
+
+/* Settings > Cursor Capture > Quick Access: the Appearance and Behavior rows, the Auto-close interval choices, and the card with no heading. Overlay is the small card shown after a capture. ⌥ is the Option key. "Export location" names the row on the General tab */
+"Move to active screen" = "Etkin ekrana taşı";
+"Active screen is the screen where your cursor is pointing." = "Etkin ekran, imlecinizin bulunduğu ekrandır.";
+"Overlay size" = "Katman boyutu";
+"Save and Close" = "Kaydet ve Kapat";
+"5 seconds" = "5 saniye";
+"10 seconds" = "10 saniye";
+"15 seconds" = "15 saniye";
+"30 seconds" = "30 saniye";
+"1 minute" = "1 dakika";
+"2 minutes" = "2 dakika";
+"5 minutes" = "5 dakika";
+"10 minutes" = "10 dakika";
+"Close after dragging" = "Sürükledikten sonra kapat";
+"Hold ⌥ (option) to keep the item on Overlay after dragging." = "Sürükledikten sonra öğeyi katmanda tutmak için ⌥ Option tuşunu basılı tutun.";
+"Hold ⌥ (option) to close the item from Overlay after dragging." = "Sürükledikten sonra öğeyi katmandan kapatmak için ⌥ Option tuşunu basılı tutun.";
+"Save button behavior" = "Kaydet düğmesinin davranışı";
+"Save to \"Export location\"" ="“Dışa aktarma konumu”na kaydet";
+"Ask for destination" = "Hedefi sor";
+"Press with ⌥ (option) to choose the destination." = "Hedefi seçmek için ⌥ Option tuşuyla basın.";
+"Press with ⌥ (option) to use 'Export Location' without asking." = "Sormadan “Dışa aktarma konumu”nu kullanmak için ⌥ Option tuşuyla basın.";
+"Search Themes" = "Temalarda Ara";
+
+/* Welcome window, version 2 */
+"MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them." = "MaCursor, macOS’taki sistem imleçleri üzerinde size kontrol sağlar. Sonraki sayfalarda ek özellikleri açabilir veya bunları atlayabilirsiniz.";
+"Cursor Look" = "İmleç Görünümü";
+"When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "Etkinleştirildiğinde, imlecin altına yumuşak bir gölge çizilir. Gölge, bir imleç teması uygulandığında görünür.";
+"Install the Helper Tool on the first page to use Cursor Trails." = "İmleç İzleri’ni kullanmak için ilk sayfada Yardımcı Araç’ı yükleyin.";
+"Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "Bu sayfadaki özellikler için MaCursorHelper’a Erişilebilirlik izni gerekir. İzin yoksa Sistem Ayarları’nı açmak için “İzin Ver”i seçin.";
+"Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "Bu sayfadaki özellikler için MaCursor’a Ekran Kaydı izni gerekir. İmleç Çevirmeni için ayrıca MaCursorHelper’a Erişilebilirlik izni gerekir. İzin yoksa Sistem Ayarları’nı açmak için “İzin Ver”i seçin.";
+"Press the shortcut to take a picture of your screen." = "Ekranınızın görüntüsünü almak için kısayola basın.";
+"This feature needs the Finder extension and Full Disk Access for MaCursor. If either is missing, choose Grant Permission to open System Settings." = "Bu özellik için Finder uzantısı ve MaCursor’a Tam Disk Erişimi gerekir. Biri eksikse Sistem Ayarları’nı açmak için “İzin Ver”i seçin.";
+"Help Writronic keep growing" = "Writronic’in büyümesine yardım edin";
+"If you would like to support development, you can donate on the Writronic website." = "Geliştirmeyi desteklemek isterseniz Writronic web sitesinden bağış yapabilirsiniz.";
+"Thank you for being here." = "Burada olduğunuz için teşekkürler.";
+"A star on GitHub also helps more people find MaCursor, and it means a lot." = "GitHub’da bir yıldız, MaCursor’u daha fazla kişinin bulmasına da yardımcı olur ve bizim için çok değerlidir.";
+"Give a Star" = "Yıldız Ver";
+/* Welcome window: button at the end of an access line whose dot is red; it opens System Settings at that access */
+"Grant Permission" = "İzin Ver";
+/* Welcome window: what VoiceOver reads after the name of an access whose dot is red */
+"Access not granted" = "Erişim izni verilmedi";
+
+/* Welcome window: line under the cards on pages 2 to 4 while the Helper Tool is installed but not running. MaCursor starts it again when it opens. */
+"The Helper Tool is not running. Quit and reopen MaCursor to start it." = "Yardımcı Araç çalışmıyor. Başlatmak için MaCursor’dan çıkıp yeniden açın.";
+
+"Hide desktop icons while capturing" = "Yakalarken masaüstü simgelerini gizle";
+
+"Left Button" = "Sol Düğme";
+"Hold a key with the left or right button, so normal clicks still work." = "Sol veya sağ düğmeyle birlikte bir tuşu basılı tutun; böylece normal tıklamalar çalışmaya devam eder.";
+"A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "Bir İmleç Yakalama kısayolu aynı tuşları ve düğmeyi kullanıyor. Öncelik İmleç Yakalama’da.";

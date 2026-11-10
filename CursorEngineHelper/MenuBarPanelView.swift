@@ -20,14 +20,38 @@ struct MenuBarPanelView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: PanelMetrics.sectionSpacing) {
             header
-            themesSection
-            activeAppSection
-            quickControlsSection
-            cursorTrailsSection
+            ForEach(model.panelBlocks, id: \.self) { block in
+                panelBlock(block)
+            }
+            if !hasControlsBlock && (needsAccessibilityAccess || needsScreenRecordingAccess) {
+                VStack(alignment: .leading, spacing: 8) {
+                    accessWarnings
+                }
+                .controlSize(.small)
+                .panelCard()
+            }
         }
         .padding(PanelMetrics.padding)
         .frame(width: PanelMetrics.width)
         .background(Color(nsColor: .windowBackgroundColor).opacity(model.panelBackdropAlpha))
+    }
+
+    @ViewBuilder
+    private func panelBlock(_ block: MACMenuBarPanelBlock) -> some View {
+        switch block {
+        case .themes: themesSection
+        case .activeApp: activeAppSection
+        case .controls(let items): quickControlsSection(items)
+        case .cursorCapture(let rows): cursorCaptureSection(rows)
+        case .cursorTrails: cursorTrailsSection
+        }
+    }
+
+    private var hasControlsBlock: Bool {
+        model.panelBlocks.contains { block in
+            if case .controls = block { return true }
+            return false
+        }
     }
 
     private var header: some View {
@@ -234,108 +258,138 @@ struct MenuBarPanelView: View {
         )
     }
 
-    private var quickControlsSection: some View {
+    private func quickControlsSection(_ items: [MACMenuBarItem]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             sectionTitle(MenuBarL("Quick Controls"))
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text(MenuBarL("Cursor Scale"))
-                        .font(.system(size: 12))
-                    Spacer()
-                    Text(verbatim: scaleLabel)
-                        .font(.system(size: 11).monospacedDigit())
-                        .foregroundStyle(.secondary)
+                ForEach(items, id: \.self) { item in
+                    quickControlRows(item)
                 }
-                Slider(value: scaleBinding,
-                       in: MACMenuBarMinCursorScale...MACMenuBarMaxCursorScale,
-                       step: 0.1) { editing in
-                    if !editing { model.commitCursorScale() }
-                }
-                .controlSize(.small)
-                .accessibilityLabel(MenuBarL("Cursor Scale"))
-                .accessibilityValue(scaleLabel)
-                Toggle(isOn: binding(model.cursorShadow, model.setCursorShadow)) {
-                    Text(MenuBarL("Cursor Shadow")).frame(maxWidth: .infinity, alignment: .leading)
-                }
-                Toggle(isOn: focusFollowsMouseBinding) {
-                    Text(MenuBarL("Focus on Hover")).frame(maxWidth: .infinity, alignment: .leading)
-                }
-                if model.focusFollowsMouse && model.accessibilityTrusted {
-                    Button {
-                        withAnimation(.easeOut(duration: 0.15)) { ffmDelayExpanded.toggle() }
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 8.5, weight: .bold))
-                                .foregroundStyle(.secondary)
-                                .rotationEffect(.degrees(ffmDelayExpanded ? 90 : 0))
-                                .accessibilityHidden(true)
-                            Text(MenuBarL("Focus Delay"))
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .contentShape(Rectangle())
-                    }
-                    .buttonStyle(.plain)
-                    if ffmDelayExpanded {
-                        delaySlider
-                    }
-                }
-                Toggle(isOn: cursorGesturesBinding) {
-                    Text(MenuBarL("Cursor Gestures")).frame(maxWidth: .infinity, alignment: .leading)
-                }
-                Toggle(isOn: cursorTranslatorBinding) {
-                    Text(MenuBarL("Cursor Translator")).frame(maxWidth: .infinity, alignment: .leading)
-                }
-                Toggle(isOn: cursorShakerBinding) {
-                    Text(MenuBarL("Cursor Shaker")).frame(maxWidth: .infinity, alignment: .leading)
-                }
-                if model.cursorShaker.enabled && model.accessibilityTrusted {
-                    HStack(spacing: 8) {
-                        Text(MenuBarL("Stop After"))
-                        Spacer(minLength: 8)
-                        Picker(MenuBarL("Stop After"), selection: Binding(get: { model.cursorShaker.stopAfter }, set: { model.setCursorShakerStopAfter($0) })) {
-                            Text(MenuBarL("Never")).tag(nil as Int?)
-                            ForEach(CursorShakerConfig.stopTimes, id: \.self) { minutes in
-                                Text(CursorShakerConfig.stopLabel(minutes)).tag(minutes as Int?)
-                            }
-                        }
-                        .labelsHidden()
-                        .pickerStyle(.menu)
-                        .controlSize(.small)
-                        .font(.system(size: 11))
-                    }
-                }
-                if (model.focusFollowsMouse || model.cursorGestures.enabled || model.cursorShaker.enabled || model.cursorTranslator.enabled) && !model.accessibilityTrusted {
-                    HStack(spacing: 4) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange)
-                        Text(MenuBarL("Needs Accessibility access"))
-                            .foregroundStyle(.secondary)
-                        Button(MenuBarL("Open System Settings")) {
-                            model.openAccessibilitySettings()
-                        }
-                        .buttonStyle(.link)
-                    }
-                    .font(.system(size: 10))
-                }
-                if model.cursorTranslator.enabled && model.accessibilityTrusted && !model.screenRecording {
-                    HStack(spacing: 4) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.orange)
-                        Text(MenuBarL("Needs Screen Recording access"))
-                            .foregroundStyle(.secondary)
-                        Button(MenuBarL("Open System Settings")) {
-                            CursorTranslatorConfig.requestScreenRecording()
-                        }
-                        .buttonStyle(.link)
-                    }
-                    .font(.system(size: 10))
-                }
+                accessWarnings
             }
             .toggleStyle(.switch)
             .controlSize(.small)
             .font(.system(size: 12))
             .panelCard()
+        }
+    }
+
+    @ViewBuilder
+    private func quickControlRows(_ item: MACMenuBarItem) -> some View {
+        switch item {
+        case .cursorScale:
+            HStack {
+                Text(MenuBarL("Cursor Scale"))
+                    .font(.system(size: 12))
+                Spacer()
+                Text(verbatim: scaleLabel)
+                    .font(.system(size: 11).monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            Slider(value: scaleBinding,
+                   in: MACMenuBarMinCursorScale...MACMenuBarMaxCursorScale,
+                   step: 0.1) { editing in
+                if !editing { model.commitCursorScale() }
+            }
+            .controlSize(.small)
+            .accessibilityLabel(MenuBarL("Cursor Scale"))
+            .accessibilityValue(scaleLabel)
+        case .cursorShadow:
+            Toggle(isOn: binding(model.cursorShadow, model.setCursorShadow)) {
+                Text(MenuBarL("Cursor Shadow")).frame(maxWidth: .infinity, alignment: .leading)
+            }
+        case .focusOnHover:
+            Toggle(isOn: focusFollowsMouseBinding) {
+                Text(MenuBarL("Focus on Hover")).frame(maxWidth: .infinity, alignment: .leading)
+            }
+            if model.focusFollowsMouse && model.accessibilityTrusted {
+                Button {
+                    withAnimation(.easeOut(duration: 0.15)) { ffmDelayExpanded.toggle() }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 8.5, weight: .bold))
+                            .foregroundStyle(.secondary)
+                            .rotationEffect(.degrees(ffmDelayExpanded ? 90 : 0))
+                            .accessibilityHidden(true)
+                        Text(MenuBarL("Focus Delay"))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                if ffmDelayExpanded {
+                    delaySlider
+                }
+            }
+        case .cursorGestures:
+            Toggle(isOn: cursorGesturesBinding) {
+                Text(MenuBarL("Cursor Gestures")).frame(maxWidth: .infinity, alignment: .leading)
+            }
+        case .cursorTranslator:
+            Toggle(isOn: cursorTranslatorBinding) {
+                Text(MenuBarL("Cursor Translator")).frame(maxWidth: .infinity, alignment: .leading)
+            }
+        case .cursorShaker:
+            Toggle(isOn: cursorShakerBinding) {
+                Text(MenuBarL("Cursor Shaker")).frame(maxWidth: .infinity, alignment: .leading)
+            }
+            if model.cursorShaker.enabled && model.accessibilityTrusted {
+                HStack(spacing: 8) {
+                    Text(MenuBarL("Stop After"))
+                    Spacer(minLength: 8)
+                    Picker(MenuBarL("Stop After"), selection: Binding(get: { model.cursorShaker.stopAfter }, set: { model.setCursorShakerStopAfter($0) })) {
+                        Text(MenuBarL("Never")).tag(nil as Int?)
+                        ForEach(CursorShakerConfig.stopTimes, id: \.self) { minutes in
+                            Text(CursorShakerConfig.stopLabel(minutes)).tag(minutes as Int?)
+                        }
+                    }
+                    .labelsHidden()
+                    .pickerStyle(.menu)
+                    .controlSize(.small)
+                    .font(.system(size: 11))
+                }
+            }
+        case .themes, .activeApp, .quickControls, .cursorTrails:
+            EmptyView()
+        }
+    }
+
+    private var needsAccessibilityAccess: Bool {
+        (model.focusFollowsMouse || model.cursorGestures.enabled || model.cursorShaker.enabled || model.cursorTranslator.enabled) && !model.accessibilityTrusted
+    }
+
+    private var needsScreenRecordingAccess: Bool {
+        model.cursorTranslator.enabled && model.accessibilityTrusted && !model.screenRecording
+    }
+
+    @ViewBuilder
+    private var accessWarnings: some View {
+        if needsAccessibilityAccess {
+            HStack(spacing: 4) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                Text(MenuBarL("Needs Accessibility access"))
+                    .foregroundStyle(.secondary)
+                Button(MenuBarL("Open System Settings")) {
+                    model.openAccessibilitySettings()
+                }
+                .buttonStyle(.link)
+            }
+            .font(.system(size: 10))
+        }
+        if needsScreenRecordingAccess {
+            HStack(spacing: 4) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.orange)
+                Text(MenuBarL("Needs Screen Recording access"))
+                    .foregroundStyle(.secondary)
+                Button(MenuBarL("Open System Settings")) {
+                    CursorTranslatorConfig.requestScreenRecording()
+                }
+                .buttonStyle(.link)
+            }
+            .font(.system(size: 10))
         }
     }
 
@@ -459,6 +513,85 @@ struct MenuBarPanelView: View {
             get: { model.cursorShaker.enabled && model.accessibilityTrusted },
             set: { _ in model.toggleCursorShaker() }
         )
+    }
+
+    private func cursorCaptureSection(_ rows: [MACMenuBarCaptureRow]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            sectionTitle(MenuBarL("Cursor Capture"))
+            VStack(spacing: 0) {
+                ForEach(Array(rows.enumerated()), id: \.element) { index, row in
+                    if index > 0 {
+                        if rows[index - 1].group == row.group {
+                            Divider().padding(.leading, 41).padding(.trailing, 10)
+                        } else {
+                            Divider()
+                        }
+                    }
+                    if let item = row.capture {
+                        captureRow(item)
+                    } else if let item = row.file {
+                        fileRow(item)
+                    }
+                }
+            }
+            .panelCard(padding: 0)
+        }
+    }
+
+    private func captureRow(_ item: MACMenuBarCaptureItem) -> some View {
+        Button {
+            model.capture(item)
+        } label: {
+            HStack(spacing: 9) {
+                Image(systemName: item.symbol)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 22)
+                    .accessibilityHidden(true)
+                Text(MenuBarL(item.title))
+                    .font(.system(size: 12, weight: .semibold))
+                Spacer(minLength: 8)
+                if let shortcut = item.shortcut(in: model.cursorScreenshot) {
+                    Text(verbatim: shortcut.displayString)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func fileRow(_ item: MACMenuBarFileItem) -> some View {
+        let enabled = model.isEnabled(item)
+        return Button {
+            model.open(item)
+        } label: {
+            HStack(spacing: 9) {
+                Image(systemName: item.symbol)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(enabled ? .secondary : .tertiary)
+                    .frame(width: 22)
+                    .accessibilityHidden(true)
+                Text(MenuBarL(item.title))
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(enabled ? .primary : .tertiary)
+                Spacer(minLength: 8)
+                if let key = item.commandKey {
+                    Text(verbatim: "⌘" + String(key).uppercased())
+                        .font(.system(size: 11))
+                        .foregroundStyle(enabled ? .secondary : .tertiary)
+                }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(!enabled)
+        .keyboardShortcut(item.commandKey.map { KeyboardShortcut(KeyEquivalent($0), modifiers: .command) })
     }
 }
 

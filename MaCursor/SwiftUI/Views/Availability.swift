@@ -18,6 +18,12 @@ enum SystemSettingsPane {
     }
 }
 
+enum ScreenCaptureSupport {
+    static func controlsWindowShadow(on version: OperatingSystemVersion = ProcessInfo.processInfo.operatingSystemVersion) -> Bool {
+        version.majorVersion >= 14
+    }
+}
+
 extension View {
     @ViewBuilder
     func onChangeCompat<V: Equatable>(of value: V, perform action: @escaping (V) -> Void) -> some View {

@@ -334,8 +334,8 @@ struct CursorGesturesConfig: Codable, Equatable {
 
     var padTriggers: [NSEvent.ModifierFlags] { held(twoFinger: true) }
 
-    var tapMask: CGEventMask {
-        let left: [CGEventType] = enabled ? [.leftMouseDown, .leftMouseUp, .leftMouseDragged] : []
+    func tapMask(clicksLeft: Bool) -> CGEventMask {
+        let left: [CGEventType] = enabled || clicksLeft ? [.leftMouseDown, .leftMouseUp, .leftMouseDragged] : []
         let buttons = left + [.rightMouseDown, .rightMouseUp, .rightMouseDragged, .otherMouseDown, .otherMouseUp, .otherMouseDragged]
         return (padTriggers.isEmpty ? buttons : buttons + [.scrollWheel]).reduce(0) { $0 | 1 << $1.rawValue }
     }
@@ -1285,6 +1285,7 @@ struct CursorGestureSnapshot {
     var natural = true
     var appAt: @Sendable (CGPoint) -> String? = CursorGestures.app(at:)
     var translator: CursorGestureTrigger?
+    var captures: [(id: UInt32, trigger: CursorGestureTrigger)] = []
 }
 
 final class CursorGestureShared: @unchecked Sendable {
@@ -1301,6 +1302,7 @@ enum CursorGestureNote {
     case update([CGPoint], CursorGestureTrigger, finished: Bool)
     case play(CursorGesture?)
     case frame(CursorTranslatorNote)
+    case capture(UInt32)
 }
 
 struct CursorGestureInput {
@@ -1392,6 +1394,16 @@ struct CursorGestureInput {
         guard event.getIntegerValueField(.eventSourceUserData) != CursorGestureKeys.marker,
               event.getIntegerValueField(.eventSourceUserData) != CursorShaker.marker,
               snapshot.config.accepts(source: event.getIntegerValueField(.eventSourceStateID)) else { return false }
+        if [.leftMouseDown, .rightMouseDown, .otherMouseDown].contains(type) {
+            let pressed = CursorGestureTrigger(keys: NSEvent.ModifierFlags(rawValue: UInt(event.flags.rawValue)).intersection(CursorGestureStroke.keys).rawValue,
+                                               button: Int(event.getIntegerValueField(.mouseEventButtonNumber)),
+                                               device: CursorGestureDevice(subtype: event.getIntegerValueField(.mouseEventSubtype)))
+            if let capture = snapshot.captures.first(where: { $0.trigger.overlaps(pressed) }) {
+                swallowing.insert(pressed.button ?? 0)
+                notes.append(.capture(capture.id))
+                return true
+            }
+        }
         if let unanswered, now - unanswered > Self.echo { failedOpen = true }
         guard !failedOpen else {
             for dropped in [press?.button, framing?.button, leftHeld ? 0 : nil] { if let dropped { swallowing.insert(dropped) } }

@@ -36,18 +36,27 @@ enum MACPreferences {
     static let cursorTrailsKey           = "MACCursorTrails"
     static let cursorGesturesKey         = "MACCursorGestures"
     static let cursorShakerKey           = "MACCursorShaker"
+    static let cursorScreenshotKey       = "MACCursorScreenshot"
+    static let cursorScreenshotMarkupKey = "MACCursorScreenshotMarkup"
     static let cursorTranslatorKey       = "MACCursorTranslator"
     static let cursorTranslatorScreenRecordingKey = "MACCursorTranslatorScreenRecording"
     static let ffmAccessibilityTrustedKey = "MACFFMAccessibilityTrusted"
     static let showMenuBarIconKey        = "MACShowMenuBarIcon"
     static let menuBarPanelBackgroundKey = "MACMenuBarPanelBackground"
+    static let menuBarItemOrderKey       = "MACMenuBarItemOrder"
+    static let menuBarHiddenItemsKey     = "MACMenuBarHiddenItems"
+    static let menuBarCaptureOrderKey    = "MACMenuBarCaptureOrder"
+    static let menuBarHiddenCaptureRowsKey = "MACMenuBarHiddenCaptureRows"
     static let favoriteThemesKey         = "MACFavoriteThemes"
     static let pendingOpenSettingsKey    = "MACPendingOpenSettings"
     static let pendingFFMAccessWindowKey = "MACPendingFFMAccessWindow"
     static let pendingGesturesAccessWindowKey = "MACPendingGesturesAccessWindow"
     static let pendingShakerAccessWindowKey = "MACPendingShakerAccessWindow"
+    static let pendingScreenshotAccessWindowKey = "MACPendingScreenshotAccessWindow"
     static let pendingTranslatorAccessWindowKey = "MACPendingTranslatorAccessWindow"
-    static let fullDiskAccessAskedKey    = "MACFullDiskAccessAsked"
+    static let welcomeShownKey           = "MACWelcomeShown"
+    static let welcomePageKey            = "MACWelcomePage"
+    static let fullDiskAccessAskedKey   = "MACFullDiskAccessAsked"
     static let helperBuildKey            = "MACHelperBuild"
 
     static let resetKeys: [String] = [
@@ -59,6 +68,8 @@ enum MACPreferences {
         favoriteCursorsKey,
         appearanceModeKey,
         languageKey,
+        welcomeShownKey,
+        welcomePageKey,
         hideTahoeCursorsKey,
         advancedEditorLayoutKey,
         cursorShadowKey,
@@ -69,10 +80,16 @@ enum MACPreferences {
         cursorTrailsKey,
         cursorGesturesKey,
         cursorShakerKey,
+        cursorScreenshotKey,
+        cursorScreenshotMarkupKey,
         cursorTranslatorKey,
         cursorTranslatorScreenRecordingKey,
         showMenuBarIconKey,
         menuBarPanelBackgroundKey,
+        menuBarItemOrderKey,
+        menuBarHiddenItemsKey,
+        menuBarCaptureOrderKey,
+        menuBarHiddenCaptureRowsKey,
         favoriteThemesKey,
         ffmAccessibilityTrustedKey,
         fullDiskAccessAskedKey

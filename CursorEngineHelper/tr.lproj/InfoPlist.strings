@@ -1,2 +1,3 @@
 "NSAppleEventsUsageDescription" = "Bu izin, Finder araç çubuğundaki MaCursor düğmesinin iCloud klasörlerinde çalışmasını sağlar.";
-"NSScreenCaptureUsageDescription" = "İmleç Çevirmeni, çerçevedeki metni çevirmek için okur. Hiçbir şey saklanmaz; metin yalnızca seçtiğiniz Çeviri Hizmeti’ne gönderilir.";
+"NSScreenCaptureUsageDescription" = "İmleç Çevirmeni çerçevedeki metni okur ve metin yalnızca seçtiğiniz Çeviri Hizmeti’ne gönderilir. İmleç Yakalama, istediğinizde ekranınızın görüntüsünü alır ve görüntü Mac’inizde kalır.";
+"NSDesktopFolderUsageDescription" = "İmleç Yakalama, istediğinizde görüntülerinizi Masaüstü’nüze kaydeder.";

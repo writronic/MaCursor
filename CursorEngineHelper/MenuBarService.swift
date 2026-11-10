@@ -266,6 +266,15 @@ enum MenuBarService {
         launchParentAppThenPost(nil)
     }
 
+    static func requestCursorScreenshotAccess() {
+        if NSRunningApplication.runningApplications(withBundleIdentifier: MACAppBundleIdentifier).isEmpty {
+            MACPreferences.setFlag(true, forKey: MACPreferences.pendingScreenshotAccessWindowKey)
+        } else {
+            postDistributed(.MACCursorScreenshotShowAccessWindow)
+        }
+        launchParentAppThenPost(nil)
+    }
+
     static func requestCursorTranslatorAccess() {
         if NSRunningApplication.runningApplications(withBundleIdentifier: MACAppBundleIdentifier).isEmpty {
             MACPreferences.setFlag(true, forKey: MACPreferences.pendingTranslatorAccessWindowKey)

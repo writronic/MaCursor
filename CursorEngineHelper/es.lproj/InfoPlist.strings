@@ -1,2 +1,3 @@
 "NSAppleEventsUsageDescription" = "Esto permite que el botón de MaCursor de la barra de herramientas del Finder funcione en las carpetas de iCloud.";
-"NSScreenCaptureUsageDescription" = "El Traductor del cursor lee el texto del marco para traducirlo. No se guarda nada, y el texto solo va al servicio de traducción que elijas.";
+"NSScreenCaptureUsageDescription" = "El Traductor del cursor lee el texto del marco, y el texto solo va al servicio de traducción que elijas. La función Captura del cursor toma una imagen de tu pantalla cuando lo pides, y la imagen se queda en tu Mac.";
+"NSDesktopFolderUsageDescription" = "La función Captura del cursor guarda tus imágenes en tu escritorio cuando lo pides.";

@@ -18,6 +18,9 @@ extension Notification.Name {
     static let MACCursorShakerShowAccessWindow = Notification.Name("MACCursorShakerShowAccessWindow")
     static let MACCursorTranslatorShowAccessWindow = Notification.Name("MACCursorTranslatorShowAccessWindow")
     static let MACCursorPreferencesDidChange = Notification.Name("MACCursorPreferencesDidChange")
+    nonisolated static let MACAppearanceDidChange = Notification.Name("MACAppearanceDidChange")
+    nonisolated static let MACShortcutRecordingDidStart = Notification.Name("MACShortcutRecordingDidStart")
+    nonisolated static let MACShortcutRecordingDidStop = Notification.Name("MACShortcutRecordingDidStop")
 }
 
 struct MACMenuBarThemeEntry: Identifiable, Hashable, Sendable {
@@ -178,6 +181,177 @@ func MACMenuBarFavoriteCatalog(_ catalog: [MACMenuBarThemeEntry]?, _ stored: Any
     return (catalog ?? []).filter { !$0.id.isEmpty && wanted.contains($0.id) }
 }
 
+enum MACMenuBarItem: String, CaseIterable, Sendable {
+    case themes, activeApp, quickControls, cursorScale, cursorShadow, focusOnHover, cursorGestures, cursorTranslator, cursorShaker, cursorTrails
+
+    static let panelItems: [MACMenuBarItem] = [.themes, .activeApp, .quickControls, .cursorTrails]
+    static let quickControlItems: [MACMenuBarItem] = [.cursorScale, .cursorShadow, .focusOnHover, .cursorGestures, .cursorTranslator, .cursorShaker]
+}
+
+enum MACMenuBarCaptureRow: String, CaseIterable, Sendable {
+    case area, previousArea, fullscreen, selfTimer, text, open, openClipboard, pin, history
+
+    var capture: MACMenuBarCaptureItem? {
+        switch self {
+        case .area: return .area
+        case .previousArea: return .previousArea
+        case .fullscreen: return .fullscreen
+        case .selfTimer: return .selfTimer
+        case .text: return .text
+        case .open, .openClipboard, .pin, .history: return nil
+        }
+    }
+
+    var file: MACMenuBarFileItem? {
+        switch self {
+        case .open: return .open
+        case .openClipboard: return .openClipboard
+        case .pin: return .pin
+        case .history: return .history
+        case .area, .previousArea, .fullscreen, .selfTimer, .text: return nil
+        }
+    }
+
+    var group: Int {
+        if capture != nil { return 0 }
+        return self == .history ? 2 : 1
+    }
+}
+
+enum MACMenuBarPanelBlock: Hashable, Sendable {
+    case themes
+    case activeApp
+    case controls([MACMenuBarItem])
+    case cursorCapture([MACMenuBarCaptureRow])
+    case cursorTrails
+}
+
+enum MACMenuBarCaptureItem: CaseIterable, Sendable {
+    case area, previousArea, fullscreen, selfTimer, text
+
+    var title: String {
+        switch self {
+        case .area: return "Capture Area"
+        case .previousArea: return "Capture Previous Area"
+        case .fullscreen: return "Capture Fullscreen"
+        case .selfTimer: return "Self-Timer"
+        case .text: return "Capture Text (OCR)"
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .area: return "rectangle.dashed"
+        case .previousArea: return "repeat"
+        case .fullscreen: return "display"
+        case .selfTimer: return "timer"
+        case .text: return "text.viewfinder"
+        }
+    }
+
+    var hotKeyID: UInt32 {
+        switch self {
+        case .area: return CursorScreenshot.areaHotKeyID
+        case .previousArea: return CursorScreenshot.repeatHotKeyID
+        case .fullscreen: return CursorScreenshot.wholeScreenHotKeyID
+        case .selfTimer: return CursorScreenshot.selfTimerHotKeyID
+        case .text: return CursorScreenshot.textHotKeyID
+        }
+    }
+
+    func shortcut(in config: CursorScreenshotConfig) -> KeyboardShortcutData? {
+        switch self {
+        case .area: return config.areaShortcut
+        case .previousArea: return config.repeatShortcut
+        case .fullscreen: return config.wholeScreenShortcut
+        case .selfTimer: return config.selfTimerShortcut
+        case .text: return config.textShortcut
+        }
+    }
+}
+
+enum MACMenuBarFileItem: CaseIterable, Sendable {
+    case open, openClipboard, pin, history
+
+    var title: String {
+        switch self {
+        case .open: return "Open..."
+        case .openClipboard: return "Open from Clipboard"
+        case .pin: return "Pin to the Screen..."
+        case .history: return "Capture History..."
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .open: return "folder"
+        case .openClipboard: return "doc.on.clipboard"
+        case .pin: return "pin"
+        case .history: return "clock.arrow.circlepath"
+        }
+    }
+
+    var commandKey: Character? {
+        self == .openClipboard ? "v" : nil
+    }
+}
+
+private func menuBarItems<Item: RawRepresentable & Hashable>(_ stored: Any?) -> [Item] where Item.RawValue == String {
+    guard let values = stored as? [Any] else { return [] }
+    var seen = Set<Item>()
+    return values.compactMap { value in
+        guard let id = value as? String, let item = Item(rawValue: id), seen.insert(item).inserted else { return nil }
+        return item
+    }
+}
+
+private func menuBarOrder<Item: CaseIterable & RawRepresentable & Hashable>(_ stored: Any?) -> [Item] where Item.RawValue == String {
+    var order: [Item] = menuBarItems(stored)
+    for (place, item) in Item.allCases.enumerated() where !order.contains(item) {
+        order.insert(item, at: min(place, order.count))
+    }
+    return order
+}
+
+func MACMenuBarItemOrder(_ stored: Any?) -> [MACMenuBarItem] {
+    menuBarOrder(stored)
+}
+
+func MACMenuBarHiddenItems(_ stored: Any?) -> Set<MACMenuBarItem> {
+    Set(menuBarItems(stored)).subtracting([.quickControls])
+}
+
+func MACMenuBarCaptureRowOrder(_ stored: Any?) -> [MACMenuBarCaptureRow] {
+    menuBarOrder(stored)
+}
+
+func MACMenuBarHiddenCaptureRows(_ stored: Any?) -> Set<MACMenuBarCaptureRow> {
+    Set(menuBarItems(stored))
+}
+
+func MACMenuBarItemOrder(_ order: [MACMenuBarItem], movingIn list: [MACMenuBarItem], from source: IndexSet, to destination: Int) -> [MACMenuBarItem] {
+    var moved = order.filter(list.contains)
+    moved.move(fromOffsets: source, toOffset: destination)
+    var next = moved.makeIterator()
+    return order.map { list.contains($0) ? next.next() ?? $0 : $0 }
+}
+
+func MACMenuBarPanelBlocks(order: [MACMenuBarItem], hidden: Set<MACMenuBarItem>,
+                           captureOrder: [MACMenuBarCaptureRow], captureHidden: Set<MACMenuBarCaptureRow>) -> [MACMenuBarPanelBlock] {
+    let controls = order.filter { MACMenuBarItem.quickControlItems.contains($0) && !hidden.contains($0) }
+    let capture = captureOrder.filter { !captureHidden.contains($0) }
+    return order.flatMap { item -> [MACMenuBarPanelBlock] in
+        switch item {
+        case .quickControls: return (capture.isEmpty ? [] : [.cursorCapture(capture)]) + (controls.isEmpty ? [] : [.controls(controls)])
+        case _ where hidden.contains(item): return []
+        case .themes: return [.themes]
+        case .activeApp: return [.activeApp]
+        case .cursorTrails: return [.cursorTrails]
+        case .cursorScale, .cursorShadow, .focusOnHover, .cursorGestures, .cursorTranslator, .cursorShaker: return []
+        }
+    }
+}
+
 func MACMenuBarClampCursorScale(_ scale: Double) -> Double {
     guard scale.isFinite else { return 1 }
     return min(MACMenuBarMaxCursorScale, max(MACMenuBarMinCursorScale, scale))
@@ -190,6 +364,11 @@ func MACMenuBarAppearanceNameForMode(_ mode: Any?) -> NSAppearance.Name? {
     case 2: return .darkAqua
     default: return nil
     }
+}
+
+@MainActor
+func MACApplyAppearanceMode(_ mode: Any?, to application: NSApplication) {
+    application.appearance = MACMenuBarAppearanceNameForMode(mode).flatMap { NSAppearance(named: $0) }
 }
 
 func MACMenuBarClickIsSecondary(_ type: NSEvent.EventType, _ flags: NSEvent.ModifierFlags) -> Bool {
