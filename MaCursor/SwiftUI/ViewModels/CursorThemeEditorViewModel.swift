@@ -111,6 +111,19 @@ class CursorThemeEditorViewModel: ObservableObject {
             }
         )
         forwardCursorChanges()
+        cursorTheme.openEditorCount += 1
+    }
+
+    private var isClosed = false
+
+    func close() {
+        guard !isClosed else { return }
+        isClosed = true
+        cursorTheme.openEditorCount -= 1
+    }
+
+    deinit {
+        close()
     }
 
     var selectedCursor: CursorModel? {

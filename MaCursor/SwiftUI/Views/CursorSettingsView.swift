@@ -603,6 +603,16 @@ extension CursorTrailsStyle {
         switch self {
         case .line: return String(localized: "Line")
         case .softDots: return String(localized: "Soft Dots")
+        case .cursorCopies: return String(localized: "Echoes")
+        }
+    }
+}
+
+extension CursorTrailsEchoesColors {
+    var title: String {
+        switch self {
+        case .glow: return String(localized: "Use Colors on Glow")
+        case .style: return String(localized: "Use Colors with Style")
         }
     }
 }
@@ -697,8 +707,25 @@ struct CursorTrailsSettingsView: View {
                         }
                     ))
 
+                    if trails.drawsCopies {
+                        Picker("Colors", selection: Binding(
+                            get: { trails.echoesColors },
+                            set: {
+                                trails.echoesColors = $0
+                                trails.save()
+                            }
+                        )) {
+                            ForEach(CursorTrailsEchoesColors.allCases, id: \.self) { choice in
+                                Text(choice.title).tag(choice)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                    }
+
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Colors")
+                        if !trails.drawsCopies {
+                            Text("Colors")
+                        }
                         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 3), spacing: 12) {
                             ForEach(CursorTrailsPalette.allCases, id: \.self) { palette in
                                 ThemeCard(name: palette.title, isApplied: trails.palette == palette) {

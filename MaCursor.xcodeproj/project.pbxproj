@@ -116,6 +116,8 @@
 		C04BE37392E89F77D924CA06 /* MACCursorTranslator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 917578261F01C232B6F81D26 /* MACCursorTranslator.swift */; };
 		C0D7D87269C8554F82908EE9 /* MenuBarItemsSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5CF6B7FA2868510F848151C /* MenuBarItemsSettingsView.swift */; };
 		C11F9AF8600979EC9727613C /* MaCursorHelper.app in Copy Helper */ = {isa = PBXBuildFile; fileRef = B11C4EE7A55FDC4E3A771DC1 /* MaCursorHelper.app */; };
+		C3D4A36F666DEAFDDDB67401 /* PixelUpscaler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E343BD70A466BDF95EEF23 /* PixelUpscaler.swift */; };
+		792846605624CFD823CC743B /* upscale.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 35B856E236814195D488A9C0 /* upscale.mlmodel */; };
 		C5475B4F2BA5AC865C4D8531 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2F0C3B03DB82A9E62EA9E5D5 /* SystemConfiguration.framework */; };
 		C5744C629E2498405A5CD7C9 /* SharedExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2113D6137D086F1485EC2FB /* SharedExtensions.swift */; };
 		C7D34A3585984CE3D3BEF4EE /* LibraryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECD64CEAC408967BEF748EE /* LibraryViewModel.swift */; };
@@ -262,6 +264,8 @@
 		8024FC4064B62C35996C97F3 /* de */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		81D1B557FEEB5D16934A5E19 /* fr */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		822AA46EAA8E188937F8C791 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUI/AppDelegate.swift; sourceTree = "<group>"; };
+		82E343BD70A466BDF95EEF23 /* PixelUpscaler.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PixelUpscaler.swift; path = SwiftUI/Services/PixelUpscaler.swift; sourceTree = "<group>"; };
+		35B856E236814195D488A9C0 /* upscale.mlmodel */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = file.mlmodel; name = upscale.mlmodel; path = Resources/upscale.mlmodel; sourceTree = "<group>"; };
 		831B510FB228DE9195D6BE9A /* MaCursor-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MaCursor-Prefix.pch"; sourceTree = "<group>"; };
 		8574FFD83EC52D4A26BA70DB /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
 		8632FC338D84FE2E2A5BE854 /* CursorPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUI/Views/CursorPreviewView.swift; sourceTree = "<group>"; };
@@ -577,6 +581,8 @@
 				B8B183B1917523B29D831522 /* WelcomeWindow.swift */,
 				7DA25AF4744F49D2E10E3D53 /* WelcomePage.swift */,
 				FFD23E9A2B55AF206AF3EECA /* WelcomeAccess.swift */,
+				82E343BD70A466BDF95EEF23 /* PixelUpscaler.swift */,
+				35B856E236814195D488A9C0 /* upscale.mlmodel */,
 			);
 			path = MaCursor;
 			sourceTree = "<group>";
@@ -923,6 +929,8 @@
 				648C5DAF53E133A995E3BD37 /* CursorScreenshotNameSheet.swift in Sources */,
 				AC132A8B7F27A4F890EC2FAC /* MACCursorScreenshotHistory.swift in Sources */,
 				7B48DACA51462E49A48CABBD /* WelcomeAccess.swift in Sources */,
+				C3D4A36F666DEAFDDDB67401 /* PixelUpscaler.swift in Sources */,
+				792846605624CFD823CC743B /* upscale.mlmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1006,7 +1014,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = SP495GG2KZ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1024,7 +1032,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.8.0;
+				MARKETING_VERSION = 2.8.2;
 				METAL_ENABLE_DEBUG_INFO = NO;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -1049,10 +1057,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MaCursor/MaCursor.entitlements;
+				COREML_CODEGEN_LANGUAGE = None;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = SP495GG2KZ;
@@ -1065,7 +1074,7 @@
 					"$(LD_RUNPATH_SEARCH_PATHS_$(IS_MACCATALYST))",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.8.0;
+				MARKETING_VERSION = 2.8.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.writronic.macursor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1086,13 +1095,13 @@
 				CODE_SIGN_ENTITLEMENTS = MaCursorFinder/MaCursorFinder.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = SP495GG2KZ;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MaCursorFinder/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.8.0;
+				MARKETING_VERSION = 2.8.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.writronic.macursor.finder;
 				PRODUCT_MODULE_NAME = MaCursorFinder;
 				PRODUCT_NAME = MaCursorFinder;
@@ -1106,10 +1115,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = MaCursor/MaCursor.entitlements;
+				COREML_CODEGEN_LANGUAGE = None;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEAD_CODE_STRIPPING = YES;
 				DEFINES_MODULE = YES;
 				DEVELOPMENT_TEAM = SP495GG2KZ;
@@ -1122,7 +1132,7 @@
 					"$(LD_RUNPATH_SEARCH_PATHS_$(IS_MACCATALYST))",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.8.0;
+				MARKETING_VERSION = 2.8.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.writronic.macursor;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1147,7 +1157,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = SP495GG2KZ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -1169,7 +1179,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				MARKETING_VERSION = 2.8.0;
+				MARKETING_VERSION = 2.8.2;
 				METAL_ENABLE_DEBUG_INFO = YES;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
@@ -1253,13 +1263,13 @@
 				CODE_SIGN_ENTITLEMENTS = MaCursorFinder/MaCursorFinder.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DEVELOPMENT_TEAM = SP495GG2KZ;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MaCursorFinder/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
-				MARKETING_VERSION = 2.8.0;
+				MARKETING_VERSION = 2.8.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.writronic.macursor.finder;
 				PRODUCT_MODULE_NAME = MaCursorFinder;
 				PRODUCT_NAME = MaCursorFinder;

@@ -40,8 +40,7 @@ struct MaCursorApp: App {
                 }
                 .onReceive(DistributedNotificationCenter.default().publisher(
                     for: .MACOpenSettingsRequested)) { _ in
-                    MACPreferences.setFlag(false, forKey: MACPreferences.pendingOpenSettingsKey)
-                    openSettingsWindow()
+                    openRequestedSettings()
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .macursorImportFile)) { notification in
                     if let url = notification.userInfo?["url"] as? URL {
@@ -138,10 +137,18 @@ private extension MaCursorApp {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    func openRequestedSettings() {
+        CFPreferencesSynchronize(MACPreferences.domain, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
+        MACPreferences.setFlag(false, forKey: MACPreferences.pendingOpenSettingsKey)
+        let tab = (MACPreferences.value(forKey: MACPreferences.pendingSettingsTabKey) as? String).flatMap(SettingsTab.init(rawValue:))
+        MACPreferences.set(nil, forKey: MACPreferences.pendingSettingsTabKey)
+        openSettingsWindow()
+        if let tab { SettingsWindowController.shared.select(tab) }
+    }
+
     func drainPendingSettingsRequest() {
         guard MACPreferences.flag(MACPreferences.pendingOpenSettingsKey) else { return }
-        MACPreferences.setFlag(false, forKey: MACPreferences.pendingOpenSettingsKey)
-        openSettingsWindow()
+        openRequestedSettings()
     }
 }
 

@@ -623,9 +623,6 @@
 /* Menu bar panel: placeholder when the library is empty */
 "No cursor themes yet" = "Nog geen cursorthema’s";
 
-/* Menu bar panel: heading above the frontmost app */
-"Active App" = "Actieve app";
-
 /* Menu bar panel: label of the per-app theme picker */
 "Cursor for this app" = "Cursor voor deze app";
 
@@ -1083,9 +1080,6 @@
 "Ignored Apps" = "Genegeerde apps";
 /* Cursor Gestures: help tag of the Ignored Apps row */
 "Cursor Gestures stay off in these apps for the triggers you pick." = "Cursorgebaren blijven uit in deze apps voor de triggers die je kiest.";
-/* Menu bar panel: switch in the Active App card that turns Cursor Gestures off for the app in front */
-"Ignore Cursor Gestures" = "Cursorgebaren negeren";
-
 /* Cursor Gestures: action categories */
 "Apps" = "Apps";
 "Browser and Tabs" = "Browser en tabbladen";
@@ -1801,3 +1795,21 @@
 "Left Button" = "Linkerknop";
 "Hold a key with the left or right button, so normal clicks still work." = "Houd een toets ingedrukt bij de linker- of rechterknop, zodat gewone klikken blijven werken.";
 "A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "Een sneltoets van Cursoropname gebruikt dezelfde toetsen en knop. Cursoropname gaat voor.";
+
+/* Trail style: copies of the cursor picture left at the pointer's recent places, like Windows pointer trails */
+"Echoes" = "Echo’s";
+
+/* Cursor Gestures: short lines under the actions that run a Cursor Capture command from the menu bar panel. The last line is shared by the actions that switch Cursor Shadow, Focus on Hover, Cursor Translator, Cursor Shaker, Cursor Trails and Per-App Themes */
+"Take a picture of the same area again" = "Legt hetzelfde gebied opnieuw vast";
+"Take a picture of the screen under the pointer" = "Legt het scherm onder de aanwijzer vast";
+"Choose a part, and the picture is taken after a wait" = "Kies een deel, en de afbeelding wordt na een wachttijd gemaakt";
+"Copy the text in the part you choose" = "Kopieert de tekst in het gekozen deel";
+"Open a picture file in the editor" = "Opent een afbeeldingsbestand in de editor";
+"Open the picture on the clipboard in the editor" = "Opent de afbeelding op het klembord in de editor";
+"Keep a picture on top of your windows" = "Houdt een afbeelding boven je vensters";
+"See the pictures you took before" = "Toont de afbeeldingen die je eerder hebt gemaakt";
+"Turn it on, or off when it is on" = "Zet de functie aan, of uit als die aan staat";
+
+/* Cursor Trails, Echoes style: the two choices of the Colors drop-down. "Use Colors on Glow" puts the chosen colours on the glow only; "Use Colors with Style" also fills the copies of the cursor with them */
+"Use Colors on Glow" = "Kleuren gebruiken voor de gloed";
+"Use Colors with Style" = "Kleuren gebruiken met de stijl";

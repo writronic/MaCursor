@@ -12,6 +12,7 @@ class LibraryViewModel: ObservableObject {
 
     private let backingController: LibraryController
     private let preferences: MACPreferences.Operations
+    private let upscaleModelURL: URL?
     private let postDistributed: (Notification.Name) -> Void
     private var conversionForwarder: AnyCancellable?
     private nonisolated(unsafe) var didSaveObserver: Any?
@@ -22,8 +23,10 @@ class LibraryViewModel: ObservableObject {
          preferences: MACPreferences.Operations = .live,
          postDistributed: @escaping (Notification.Name) -> Void = {
              DistributedNotificationCenter.default().postNotificationName($0, object: nil, userInfo: nil, deliverImmediately: true)
-         }) {
+         },
+         upscaleModelURL: URL? = PixelUpscaler.bundledModelURL) {
         self.preferences = preferences
+        self.upscaleModelURL = upscaleModelURL
         self.postDistributed = postDistributed
         favoriteThemeIds = Set(MACMenuBarFavoriteThemeIdentifiers(
             MACPreferences.value(forKey: MACPreferences.favoriteThemesKey, operations: preferences)))
@@ -240,9 +243,40 @@ class LibraryViewModel: ObservableObject {
         return landTheme(copy)
     }
 
-    func importTheme(at url: URL) {
-        guard let lib = CursorLibrary(contentsOfURL: url) else { return }
-        landTheme(lib)
+    @discardableResult
+    func importTheme(at url: URL) -> Task<Void, Never>? {
+        guard let lib = CursorLibrary(contentsOfURL: url), landTheme(lib) != nil else { return nil }
+        return Task { await addTwoXPictures(to: lib) }
+    }
+
+    private func addTwoXPictures(to lib: CursorLibrary) async {
+        guard let cursorTheme = cursorThemes.first(where: { $0.backingLibrary === lib }) else { return }
+        let jobs = cursorTheme.cursors.compactMap { cursor in cursor.oneXStrip.map { (cursor.backingCursor, $0) } }
+        guard !jobs.isEmpty else { return }
+        let strips = jobs.map(\.1)
+        let modelURL = upscaleModelURL
+        guard let doubled = try? await Task.detached(priority: .userInitiated, operation: {
+            try PixelUpscaler.doubled(strips, modelURL: modelURL)
+        }).value,
+              let liveTheme = cursorThemes.first(where: { $0.backingLibrary === lib }),
+              liveTheme.openEditorCount == 0 else { return }
+        var upscaled: [CursorModel] = []
+        for ((backingCursor, source), strip) in zip(jobs, doubled) {
+            guard let cursor = liveTheme.cursors.first(where: { $0.backingCursor === backingCursor }),
+                  cursor.oneXStrip == source,
+                  let rep = try? PixelUpscaler.image(of: strip) else { continue }
+            cursor.addUpscaledRepresentation(rep)
+            upscaled.append(cursor)
+        }
+        guard !upscaled.isEmpty else { return }
+        if liveTheme.save() != nil {
+            upscaled.forEach { $0.removeUpscaledRepresentation() }
+            return
+        }
+        reload()
+        if liveTheme.isApplied {
+            _ = CursorService.applyTheme(from: liveTheme.backingLibrary)
+        }
     }
 
     @discardableResult

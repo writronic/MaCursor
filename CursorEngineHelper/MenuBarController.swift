@@ -98,6 +98,8 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         let appearance = MACMenuBarAppearanceNameForMode(MACPreferences.value(forKey: MACPreferences.appearanceModeKey))
         popover.appearance = appearance.flatMap { NSAppearance(named: $0) }
         MenuBarPanelModel.shared.isShown = true
+        MenuBarPanelModel.shared.panelMaxHeight = MACMenuBarPanelMaxHeight(button.window?.screen?.visibleFrame.height ?? .nan)
+        MenuBarPanelModel.shared.openCount += 1
         MenuBarPanelModel.shared.reload()
         popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         applyPanelGlassAlpha(popover.contentViewController?.view,
@@ -195,8 +197,7 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
     }
 
     @objc private func openSettings(_ sender: NSMenuItem) {
-        MACPreferences.setFlag(true, forKey: MACPreferences.pendingOpenSettingsKey)
-        MenuBarService.launchParentAppThenPost(.MACOpenSettingsRequested)
+        MenuBarService.openSettings()
     }
 
     @objc private func quit(_ sender: NSMenuItem) {

@@ -421,7 +421,7 @@ class CursorLibrary: NSObject, NSCopying, @unchecked Sendable {
 
 
     func copy(with zone: NSZone? = nil) -> Any {
-        let copy = CursorLibrary(cursors: cursors)
+        let copy = CursorLibrary(cursors: cursors.compactMap { $0.copy() as? MACCursorSwift })
         copy.undoManager.disableUndoRegistration()
         copy.name = name
         copy.creator = creator

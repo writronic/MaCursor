@@ -93,6 +93,9 @@ struct CursorThemeEditorView: View {
             return true
         }))
         .background(WindowRoleAccessor(role: .modal))
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { note in
+            if let window = editorWindow, note.object as? NSWindow === window { viewModel.close() }
+        }
         .onChangeCompat(of: editorWindow) { window in
             guard let window else { return }
             redirectInitialFocus(in: window)

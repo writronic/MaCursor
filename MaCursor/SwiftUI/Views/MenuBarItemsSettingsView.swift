@@ -4,7 +4,7 @@ private extension MACMenuBarItem {
     var title: String {
         switch self {
         case .themes: return String(localized: "Cursor Themes")
-        case .activeApp: return String(localized: "Active App")
+        case .activeApp: return String(localized: "Per-App Themes")
         case .quickControls: return String(localized: "Quick Controls")
         case .cursorScale: return String(localized: "Cursor Scale")
         case .cursorShadow: return String(localized: "Cursor Shadow")
@@ -39,12 +39,10 @@ struct MenuBarItemsSettingsView: View {
         Text("Drag an item to change its place in the panel. Turning an item off hides it from the panel, and its feature keeps working.")
     }
 
-    static let hiddenDidChange = Notification.Name("MACMenuBarItemsHiddenDidChange")
-
     static func setShown(items: [MACMenuBarItem: Bool], captureRows: [MACMenuBarCaptureRow: Bool], preferences: MACPreferences.Operations = .live) {
         saveHidden(hiding(savedHidden(preferences), items), key: MACPreferences.menuBarHiddenItemsKey, preferences: preferences)
         saveHidden(hiding(savedCaptureHidden(preferences), captureRows), key: MACPreferences.menuBarHiddenCaptureRowsKey, preferences: preferences)
-        NotificationCenter.default.post(name: hiddenDidChange, object: nil)
+        NotificationCenter.default.post(name: .MACMenuBarHiddenRowsDidChange, object: nil)
     }
 
     private static func hiding<Item: Hashable>(_ hidden: Set<Item>, _ shown: [Item: Bool]) -> Set<Item> {
@@ -73,7 +71,7 @@ struct MenuBarItemsSettingsView: View {
     var body: some View {
         Text("Panel Items")
         itemList(order.filter(MACMenuBarItem.panelItems.contains), label: "Panel Items", title: \.title,
-                 shown: { $0 == .quickControls ? nil : shownBinding($0, in: $hidden, key: MACPreferences.menuBarHiddenItemsKey) },
+                 shown: { $0 == .quickControls ? nil : shownBinding($0, in: $hidden, key: MACPreferences.menuBarHiddenItemsKey, saved: Self.savedHidden) },
                  move: { move(in: MACMenuBarItem.panelItems, from: $0, to: $1) })
             .onReceive(NotificationCenter.default.publisher(for: .cursorSettingsDidReset)) { _ in
                 order = Self.savedOrder(preferences)
@@ -81,17 +79,17 @@ struct MenuBarItemsSettingsView: View {
                 captureOrder = Self.savedCaptureOrder(preferences)
                 captureHidden = Self.savedCaptureHidden(preferences)
             }
-            .onReceive(NotificationCenter.default.publisher(for: Self.hiddenDidChange)) { _ in
+            .onReceive(NotificationCenter.default.publisher(for: .MACMenuBarHiddenRowsDidChange)) { _ in
                 hidden = Self.savedHidden(preferences)
                 captureHidden = Self.savedCaptureHidden(preferences)
             }
         Text("Cursor Capture")
         itemList(captureOrder, label: "Cursor Capture", title: \.title,
-                 shown: { shownBinding($0, in: $captureHidden, key: MACPreferences.menuBarHiddenCaptureRowsKey) },
+                 shown: { shownBinding($0, in: $captureHidden, key: MACPreferences.menuBarHiddenCaptureRowsKey, saved: Self.savedCaptureHidden) },
                  move: moveCapture)
         Text("Quick Controls")
         itemList(order.filter(MACMenuBarItem.quickControlItems.contains), label: "Quick Controls", title: \.title,
-                 shown: { shownBinding($0, in: $hidden, key: MACPreferences.menuBarHiddenItemsKey) },
+                 shown: { shownBinding($0, in: $hidden, key: MACPreferences.menuBarHiddenItemsKey, saved: Self.savedHidden) },
                  move: { move(in: MACMenuBarItem.quickControlItems, from: $0, to: $1) })
     }
 
@@ -154,11 +152,13 @@ struct MenuBarItemsSettingsView: View {
         }
     }
 
-    private func shownBinding<Item: CaseIterable & Hashable & RawRepresentable>(_ item: Item, in hidden: Binding<Set<Item>>, key: String) -> Binding<Bool>
+    private func shownBinding<Item: CaseIterable & Hashable & RawRepresentable>(_ item: Item, in hidden: Binding<Set<Item>>, key: String,
+                                                                              saved: @escaping (MACPreferences.Operations) -> Set<Item>) -> Binding<Bool>
         where Item.RawValue == String {
         Binding(
             get: { !hidden.wrappedValue.contains(item) },
             set: { shown in
+                hidden.wrappedValue = saved(preferences)
                 if shown { hidden.wrappedValue.remove(item) } else { hidden.wrappedValue.insert(item) }
                 Self.saveHidden(hidden.wrappedValue, key: key, preferences: preferences)
             }

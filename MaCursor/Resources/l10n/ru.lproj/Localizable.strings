@@ -623,9 +623,6 @@
 /* Menu bar panel: placeholder when the library is empty */
 "No cursor themes yet" = "Тем курсора пока нет";
 
-/* Menu bar panel: heading above the frontmost app */
-"Active App" = "Активное приложение";
-
 /* Menu bar panel: label of the per-app theme picker */
 "Cursor for this app" = "Курсор для этого приложения";
 
@@ -1083,9 +1080,6 @@
 "Ignored Apps" = "Игнорируемые приложения";
 /* Cursor Gestures: help tag of the Ignored Apps row */
 "Cursor Gestures stay off in these apps for the triggers you pick." = "В этих приложениях жесты курсора не работают для выбранных триггеров.";
-/* Menu bar panel: switch in the Active App card that turns Cursor Gestures off for the app in front */
-"Ignore Cursor Gestures" = "Игнорировать жесты курсора";
-
 /* Cursor Gestures: action categories */
 "Apps" = "Приложения";
 "Browser and Tabs" = "Браузер и вкладки";
@@ -1801,3 +1795,21 @@
 "Left Button" = "Левая кнопка";
 "Hold a key with the left or right button, so normal clicks still work." = "Удерживайте клавишу вместе с левой или правой кнопкой, чтобы обычные щелчки продолжали работать.";
 "A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "Сочетание «Снимка курсора» использует те же клавиши и кнопку. Приоритет у «Снимка курсора».";
+
+/* Trail style: copies of the cursor picture left at the pointer's recent places, like Windows pointer trails */
+"Echoes" = "Эхо";
+
+/* Cursor Gestures: short lines under the actions that run a Cursor Capture command from the menu bar panel. The last line is shared by the actions that switch Cursor Shadow, Focus on Hover, Cursor Translator, Cursor Shaker, Cursor Trails and Per-App Themes */
+"Take a picture of the same area again" = "Снова снимает ту же область";
+"Take a picture of the screen under the pointer" = "Снимает экран под указателем";
+"Choose a part, and the picture is taken after a wait" = "Выберите область, и снимок будет сделан после ожидания";
+"Copy the text in the part you choose" = "Копирует текст из выбранной области";
+"Open a picture file in the editor" = "Открывает файл изображения в редакторе";
+"Open the picture on the clipboard in the editor" = "Открывает изображение из буфера обмена в редакторе";
+"Keep a picture on top of your windows" = "Держит изображение поверх ваших окон";
+"See the pictures you took before" = "Показывает снимки, сделанные ранее";
+"Turn it on, or off when it is on" = "Включает функцию или выключает, если она включена";
+
+/* Cursor Trails, Echoes style: the two choices of the Colors drop-down. "Use Colors on Glow" puts the chosen colours on the glow only; "Use Colors with Style" also fills the copies of the cursor with them */
+"Use Colors on Glow" = "Использовать цвета для свечения";
+"Use Colors with Style" = "Использовать цвета со стилем";

@@ -30,10 +30,12 @@ public enum CursorThemeWriter {
                              outputDirectory: URL,
                              writePreview: Bool = false,
                              fillMissingScales: Bool = true,
-                             hiDPI: Bool = true) throws -> ThemeBuildResult {
+                             hiDPI: Bool = true,
+                             upscaleModelURL: URL? = nil) throws -> ThemeBuildResult {
         guard !cursors.isEmpty else { throw ThemeBuildError.emptyTheme }
         let identifier = identity?.identifier ?? sanitizeIdentifier(themeName)
         guard !identifier.isEmpty else { throw ThemeBuildError.invalidThemeName(themeName) }
+        let network = upscaleModelURL.flatMap { try? PixelUpscaler.Network(contentsOf: $0) }
 
         var warnings: [ImportWarning] = []
         var generated2x: [String] = []
@@ -43,7 +45,7 @@ public enum CursorThemeWriter {
         for (slotIdentifier, animated) in cursors.sorted(by: { $0.key < $1.key }) {
             guard !animated.frames.isEmpty else { continue }
             let unified = try unify(animated, identifier: slotIdentifier,
-                                    warnings: &warnings, fillMissingScales: fillMissingScales)
+                                    warnings: &warnings, fillMissingScales: fillMissingScales, network: network)
             if unified.synthesized2x { generated2x.append(slotIdentifier) }
             cursorsDict[slotIdentifier] = [
                 "FrameCount": unified.frameCount,
@@ -107,7 +109,7 @@ public enum CursorThemeWriter {
 
     private static func unify(_ animated: AnimatedCursor, identifier: String,
                               warnings: inout [ImportWarning],
-                              fillMissingScales: Bool) throws -> UnifiedCursor {
+                              fillMissingScales: Bool, network: PixelUpscaler.Network?) throws -> UnifiedCursor {
         let delays = animated.frames.map(\.delayMS)
         let total = delays.reduce(0, +)
 
@@ -211,6 +213,13 @@ public enum CursorThemeWriter {
                 throw ThemeBuildError.compositionFailed("\(identifier): sheet \(scaleIndex) composition")
             }
             sheets.append(try encodePNG(sheet))
+            if emitSizes == [standardSizes[0]], let network,
+               let rgba = try? ImageScaler.straightRGBA(of: sheet),
+               let doubled = try? PixelUpscaler.doubled(PixelUpscaler.Strip(rgba: rgba, width: px, height: px * frameCount,
+                                                                             frameCount: frameCount), network: network),
+               let image = try? ImageScaler.makeImage(rgba: doubled.rgba, width: doubled.width, height: doubled.height) {
+                sheets.append(try encodePNG(image))
+            }
         }
 
         return UnifiedCursor(frameCount: indexList.count,

@@ -228,6 +228,40 @@ class CursorModel: ObservableObject, Identifiable, Hashable {
         }
     }
 
+    var hasOnlyOneXRepresentation: Bool {
+        ladderRepresentations().map(\.scale) == [100]
+    }
+
+    var canUpscaleOneXRepresentation: Bool {
+        guard hasOnlyOneXRepresentation,
+              let rep = backingCursor.representation(for: .scale100),
+              rep.pixelsHigh.isMultiple(of: max(1, frameCount)),
+              let framePixels = CursorGeometry.framePixelHeight(of: rep, frameCount: frameCount) else { return false }
+        return CGFloat(rep.pixelsWide) == size.width && CGFloat(framePixels) == size.height
+    }
+
+    var oneXStrip: PixelUpscaler.Strip? {
+        guard canUpscaleOneXRepresentation, let rep = backingCursor.representation(for: .scale100) else { return nil }
+        return PixelUpscaler.strip(of: rep, frameCount: frameCount)
+    }
+
+    func addUpscaledRepresentation(_ rep: NSBitmapImageRep) {
+        keepingHotSpotAndSize { setRepresentation(rep, forScale: 200) }
+    }
+
+    func removeUpscaledRepresentation() {
+        keepingHotSpotAndSize { removeRepresentation(forScale: 200) }
+    }
+
+    private func keepingHotSpotAndSize(_ change: () -> Void) {
+        let keptHotSpot = hotSpot
+        let keptSize = size
+        change()
+        hotSpot = keptHotSpot
+        size = keptSize
+        backingCursor.size = NSSize(width: keptSize.width, height: keptSize.height)
+    }
+
     private func governingRepresentation() -> (scale: Int, rep: NSBitmapImageRep)? {
         ladderRepresentations().max { $0.scale < $1.scale }
     }

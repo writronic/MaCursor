@@ -623,9 +623,6 @@
 /* Menu bar panel: placeholder when the library is empty */
 "No cursor themes yet" = "Noch keine Cursor-Themen";
 
-/* Menu bar panel: heading above the frontmost app */
-"Active App" = "Aktive App";
-
 /* Menu bar panel: label of the per-app theme picker */
 "Cursor for this app" = "Cursor für diese App";
 
@@ -1083,9 +1080,6 @@
 "Ignored Apps" = "Ignorierte Apps";
 /* Cursor Gestures: help tag of the Ignored Apps row */
 "Cursor Gestures stay off in these apps for the triggers you pick." = "Cursorgesten bleiben in diesen Apps für die gewählten Auslöser aus.";
-/* Menu bar panel: switch in the Active App card that turns Cursor Gestures off for the app in front */
-"Ignore Cursor Gestures" = "Cursorgesten ignorieren";
-
 /* Cursor Gestures: action categories */
 "Apps" = "Apps";
 "Browser and Tabs" = "Browser und Tabs";
@@ -1801,3 +1795,21 @@
 "Left Button" = "Linke Taste";
 "Hold a key with the left or right button, so normal clicks still work." = "Halten Sie zur linken oder rechten Taste eine Taste gedrückt, damit normale Klicks weiter funktionieren.";
 "A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "Ein Kurzbefehl der Cursoraufnahme nutzt dieselben Tasten und dieselbe Maustaste. Die Cursoraufnahme hat Vorrang.";
+
+/* Trail style: copies of the cursor picture left at the pointer's recent places, like Windows pointer trails */
+"Echoes" = "Echos";
+
+/* Cursor Gestures: short lines under the actions that run a Cursor Capture command from the menu bar panel. The last line is shared by the actions that switch Cursor Shadow, Focus on Hover, Cursor Translator, Cursor Shaker, Cursor Trails and Per-App Themes */
+"Take a picture of the same area again" = "Nimmt den gleichen Bereich noch einmal auf";
+"Take a picture of the screen under the pointer" = "Nimmt den Bildschirm unter dem Zeiger auf";
+"Choose a part, and the picture is taken after a wait" = "Sie wählen einen Bereich, und das Bild wird nach einer Wartezeit aufgenommen";
+"Copy the text in the part you choose" = "Kopiert den Text im gewählten Bereich";
+"Open a picture file in the editor" = "Öffnet eine Bilddatei im Editor";
+"Open the picture on the clipboard in the editor" = "Öffnet das Bild aus der Zwischenablage im Editor";
+"Keep a picture on top of your windows" = "Hält ein Bild über Ihren Fenstern";
+"See the pictures you took before" = "Zeigt die Bilder, die Sie zuvor aufgenommen haben";
+"Turn it on, or off when it is on" = "Schaltet die Funktion ein oder, wenn sie an ist, aus";
+
+/* Cursor Trails, Echoes style: the two choices of the Colors drop-down. "Use Colors on Glow" puts the chosen colours on the glow only; "Use Colors with Style" also fills the copies of the cursor with them */
+"Use Colors on Glow" = "Farben für das Leuchten verwenden";
+"Use Colors with Style" = "Farben mit dem Stil verwenden";

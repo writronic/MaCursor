@@ -7,7 +7,6 @@ enum MenuBarService {
         let favorites: [MACMenuBarThemeEntry]
         let appliedIdentifier: String?
         let overrideIdentifier: String?
-        let frontBundleIdentifier: String?
         let frontDisplayName: String?
         let frontIcon: NSImage?
         let frontRuleThemeIdentifier: String?
@@ -108,7 +107,6 @@ enum MenuBarService {
             favorites: favorites,
             appliedIdentifier: storedString(MACPreferences.appliedCursorKey),
             overrideIdentifier: storedString(MACPreferences.appOverrideKey),
-            frontBundleIdentifier: front,
             frontDisplayName: displayName(for: front),
             frontIcon: icon(for: front),
             frontRuleThemeIdentifier: MACMenuBarRuleThemeForBundleID(config, front),
@@ -162,10 +160,7 @@ enum MenuBarService {
     static func setFrontAppRule(_ themeIdentifier: String?) {
         guard let front = MACMenuBarState.shared.lastForegroundBundleID, !front.isEmpty else { return }
         let theme = themeIdentifier.flatMap { $0.isEmpty ? nil : $0 }
-        var updated = MACMenuBarConfigBySettingRule(MACAutoSwitchEffects.shared.readConfig(), front, displayName(for: front), theme)
-        if (updated["switchByApp"] as? NSNumber)?.boolValue != true && theme != nil {
-            updated = MACMenuBarConfigBySettingSwitchByApp(updated, true)
-        }
+        let updated = MACMenuBarConfigBySettingRule(MACAutoSwitchEffects.shared.readConfig(), front, displayName(for: front), theme)
         MACMenuBarWriteConfig(updated)
         MACAutoSwitchEffects.shared.handleFrontmostApp(front)
     }
@@ -237,6 +232,12 @@ enum MenuBarService {
                 postDistributed(name)
             }
         }
+    }
+
+    static func openSettings(tab: String? = nil) {
+        MACPreferences.set(tab, forKey: MACPreferences.pendingSettingsTabKey)
+        MACPreferences.setFlag(true, forKey: MACPreferences.pendingOpenSettingsKey)
+        launchParentAppThenPost(.MACOpenSettingsRequested)
     }
 
     static func requestFocusFollowsMouseAccess() {

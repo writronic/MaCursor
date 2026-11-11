@@ -623,9 +623,6 @@
 /* Menu bar panel: placeholder when the library is empty */
 "No cursor themes yet" = "لا توجد سمات مؤشر بعد";
 
-/* Menu bar panel: heading above the frontmost app */
-"Active App" = "التطبيق النشط";
-
 /* Menu bar panel: label of the per-app theme picker */
 "Cursor for this app" = "مؤشر هذا التطبيق";
 
@@ -1083,9 +1080,6 @@
 "Ignored Apps" = "التطبيقات المتجاهلة";
 /* Cursor Gestures: help tag of the Ignored Apps row */
 "Cursor Gestures stay off in these apps for the triggers you pick." = "تبقى إيماءات المؤشر متوقفة في هذه التطبيقات للمُشغِّلات التي تختارها.";
-/* Menu bar panel: switch in the Active App card that turns Cursor Gestures off for the app in front */
-"Ignore Cursor Gestures" = "تجاهل إيماءات المؤشر";
-
 /* Cursor Gestures: action categories */
 "Apps" = "التطبيقات";
 "Browser and Tabs" = "المتصفح وعلامات التبويب";
@@ -1801,3 +1795,21 @@
 "Left Button" = "الزر الأيسر";
 "Hold a key with the left or right button, so normal clicks still work." = "اضغط مع الاستمرار على مفتاح مع الزر الأيسر أو الأيمن، لكي تبقى النقرات العادية تعمل.";
 "A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "يستخدم اختصار في «التقاط المؤشر» المفاتيح والزر نفسها. تكون الأولوية لـ «التقاط المؤشر».";
+
+/* Trail style: copies of the cursor picture left at the pointer's recent places, like Windows pointer trails */
+"Echoes" = "أصداء";
+
+/* Cursor Gestures: short lines under the actions that run a Cursor Capture command from the menu bar panel. The last line is shared by the actions that switch Cursor Shadow, Focus on Hover, Cursor Translator, Cursor Shaker, Cursor Trails and Per-App Themes */
+"Take a picture of the same area again" = "يلتقط صورة للمنطقة نفسها مرة أخرى";
+"Take a picture of the screen under the pointer" = "يلتقط صورة للشاشة الموجودة أسفل المؤشر";
+"Choose a part, and the picture is taken after a wait" = "اختر جزءًا، وتُلتقط الصورة بعد انتظار";
+"Copy the text in the part you choose" = "ينسخ النص الموجود في الجزء الذي تختاره";
+"Open a picture file in the editor" = "يفتح ملف صورة في المحرر";
+"Open the picture on the clipboard in the editor" = "يفتح الصورة الموجودة في الحافظة في المحرر";
+"Keep a picture on top of your windows" = "يُبقي صورة فوق نوافذك";
+"See the pictures you took before" = "يعرض الصور التي التقطتها من قبل";
+"Turn it on, or off when it is on" = "يشغّل الميزة، أو يوقفها إن كانت تعمل";
+
+/* Cursor Trails, Echoes style: the two choices of the Colors drop-down. "Use Colors on Glow" puts the chosen colours on the glow only; "Use Colors with Style" also fills the copies of the cursor with them */
+"Use Colors on Glow" = "استخدام الألوان على التوهج";
+"Use Colors with Style" = "استخدام الألوان مع النمط";

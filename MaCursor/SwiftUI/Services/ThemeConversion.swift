@@ -46,7 +46,7 @@ struct ConversionOutcome: Sendable {
 }
 
 enum ThemeConversionService {
-    static func convert(input: URL) throws -> ConversionOutcome {
+    static func convert(input: URL, upscaleModelURL: URL? = PixelUpscaler.bundledModelURL) throws -> ConversionOutcome {
         let workDir = FileManager.default.temporaryDirectory
             .appendingPathComponent("MaCursor-Convert-\(UUID().uuidString)", isDirectory: true)
         try FileManager.default.createDirectory(at: workDir, withIntermediateDirectories: true)
@@ -66,7 +66,8 @@ enum ThemeConversionService {
                     themeName: themeName,
                     creator: creator,
                     outputDirectory: workDir,
-                    writePreview: true
+                    writePreview: true,
+                    upscaleModelURL: upscaleModelURL
                 )
                 return (built, result.report, themeName, creator)
             }

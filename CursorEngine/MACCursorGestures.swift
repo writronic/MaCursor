@@ -153,7 +153,24 @@ enum CursorGestureOperation: String, Codable, CaseIterable {
     case leftHalf, rightHalf, topHalf, bottomHalf, topLeftQuarter, topRightQuarter, bottomLeftQuarter, bottomRightQuarter,
          leftThird, centerThird, rightThird, leftTwoThirds, rightTwoThirds, maximize, center, nextDisplay, restoreSize,
          minimize, closeWindow, hideApp, volumeUp, volumeDown, mute, brightnessUp, brightnessDown, sleep, screenSaver,
-         nextFavoriteTheme, systemCursors
+         nextFavoriteTheme, systemCursors, screenshotArea,
+         capturePreviousArea, captureFullscreen, captureSelfTimer, captureText, captureOpen, captureOpenClipboard, capturePin, captureHistory,
+         cursorShadow, focusOnHover, cursorTranslator, cursorShaker, cursorTrails, switchByApp
+
+    var capture: MACMenuBarCaptureItem? {
+        switch self {
+        case .screenshotArea: return .area
+        case .capturePreviousArea: return .previousArea
+        case .captureFullscreen: return .fullscreen
+        case .captureSelfTimer: return .selfTimer
+        case .captureText: return .text
+        default: return nil
+        }
+    }
+
+    var needsCursorCapture: Bool {
+        capture != nil || [.captureOpen, .captureOpenClipboard, .capturePin, .captureHistory].contains(self)
+    }
 }
 
 struct CursorGestureShortcut: Codable, Equatable {
@@ -181,6 +198,7 @@ struct CursorGestureAction: Codable, Equatable, Identifiable {
     var key: String?
 
     var changesScreen: Bool {
+        if case .operation(let operation) = kind, operation.capture != nil { return true }
         guard case .shortcut = kind else { return false }
         return category == .system
     }
@@ -540,21 +558,12 @@ struct CursorGesturesConfig: Codable, Equatable {
                                       by: \.family)
     }
 
-    func ignores(_ app: String?) -> Bool {
-        ignored.contains { $0.app == app && $0.block == .all }
-    }
-
     mutating func ignore(_ app: String, _ on: Bool) {
         if !on {
             ignored.removeAll { $0.app == app }
         } else if !ignored.contains(where: { $0.app == app }) {
             ignored.append(CursorGestureIgnoredApp(app: app))
         }
-    }
-
-    mutating func ignoreFully(_ app: String, _ on: Bool) {
-        ignore(app, on)
-        if let index = ignored.firstIndex(where: { $0.app == app }) { ignored[index].block = .all }
     }
 
     func blocks(button: Bool, front: String?, pointer: @autoclosure () -> String? = nil) -> Bool {
@@ -839,8 +848,16 @@ enum CursorGestures {
         action("lockScreen", "Lock Screen", String(localized: "Lock the Mac right away"), "lock", .system, key(12, "q", [.control, .command])),
         action("forceQuit", "Force Quit Window", String(localized: "Choose an app that is not responding"), "exclamationmark.octagon", .system, key(53, nil, [.option, .command])),
         action("screenshot", "Screenshot of the Screen", String(localized: "Save a picture of the whole screen"), "camera", .system, key(20, nil, [.shift, .command])),
-        action("screenshotArea", "Screenshot of an Area", String(localized: "Save a picture of the part you choose"), "camera.viewfinder", .system, key(21, nil, [.shift, .command])),
+        operation(.screenshotArea, "Screenshot of an Area", String(localized: "Save a picture of the part you choose"), "camera.viewfinder", .system),
         action("screenshotOptions", "Screenshot Options", String(localized: "Open the screenshot tools"), "camera.aperture", .system, key(23, nil, [.shift, .command])),
+        operation(.capturePreviousArea, "Capture Previous Area", String(localized: "Take a picture of the same area again"), "repeat", .system),
+        operation(.captureFullscreen, "Capture Fullscreen", String(localized: "Take a picture of the screen under the pointer"), "display", .system),
+        operation(.captureSelfTimer, "Self-Timer", String(localized: "Choose a part, and the picture is taken after a wait"), "timer", .system),
+        operation(.captureText, "Capture Text (OCR)", String(localized: "Copy the text in the part you choose"), "text.viewfinder", .system),
+        operation(.captureOpen, "Open...", String(localized: "Open a picture file in the editor"), "folder", .system),
+        operation(.captureOpenClipboard, "Open from Clipboard", String(localized: "Open the picture on the clipboard in the editor"), "doc.on.clipboard", .system),
+        operation(.capturePin, "Pin to the Screen...", String(localized: "Keep a picture on top of your windows"), "pin", .system),
+        operation(.captureHistory, "Capture History...", String(localized: "See the pictures you took before"), "clock.arrow.circlepath", .system),
         operation(.volumeUp, "Volume Up", String(localized: "Make the sound louder"), "speaker.wave.3", .system),
         operation(.volumeDown, "Volume Down", String(localized: "Make the sound quieter"), "speaker.wave.1", .system),
         operation(.mute, "Mute", String(localized: "Turn the sound off or on"), "speaker.slash", .system),
@@ -850,6 +867,12 @@ enum CursorGestures {
         operation(.screenSaver, "Start Screen Saver", String(localized: "Show the screen saver now"), "sparkles.tv", .system),
         operation(.nextFavoriteTheme, "Next Favorite Theme", String(localized: "Apply the next theme in your favorites"), "star", .macursor),
         operation(.systemCursors, "Use System Cursors", String(localized: "Go back to the standard macOS cursors"), "cursorarrow", .macursor),
+        operation(.cursorShadow, "Cursor Shadow", String(localized: "Turn it on, or off when it is on"), "shadow", .macursor),
+        operation(.focusOnHover, "Focus on Hover", String(localized: "Turn it on, or off when it is on"), "macwindow.on.rectangle", .macursor),
+        operation(.cursorTranslator, "Cursor Translator", String(localized: "Turn it on, or off when it is on"), "text.bubble", .macursor),
+        operation(.cursorShaker, "Cursor Shaker", String(localized: "Turn it on, or off when it is on"), "arrow.left.and.right", .macursor),
+        operation(.cursorTrails, "Cursor Trails", String(localized: "Turn it on, or off when it is on"), "cursorarrow.motionlines", .macursor),
+        operation(.switchByApp, "Per-App Themes", String(localized: "Turn it on, or off when it is on"), "app.badge", .macursor),
     ]
 
     static let readyMade: [CursorGesture] = {

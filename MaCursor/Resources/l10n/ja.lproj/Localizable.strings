@@ -623,9 +623,6 @@
 /* Menu bar panel: placeholder when the library is empty */
 "No cursor themes yet" = "カーソルテーマはまだありません";
 
-/* Menu bar panel: heading above the frontmost app */
-"Active App" = "アクティブなアプリ";
-
 /* Menu bar panel: label of the per-app theme picker */
 "Cursor for this app" = "このアプリのカーソル";
 
@@ -1083,9 +1080,6 @@
 "Ignored Apps" = "無視するアプリ";
 /* Cursor Gestures: help tag of the Ignored Apps row */
 "Cursor Gestures stay off in these apps for the triggers you pick." = "選んだトリガでは、これらのアプリでカーソルジェスチャは動作しません。";
-/* Menu bar panel: switch in the Active App card that turns Cursor Gestures off for the app in front */
-"Ignore Cursor Gestures" = "カーソルジェスチャを無視";
-
 /* Cursor Gestures: action categories */
 "Apps" = "アプリ";
 "Browser and Tabs" = "ブラウザとタブ";
@@ -1801,3 +1795,21 @@
 "Left Button" = "左ボタン";
 "Hold a key with the left or right button, so normal clicks still work." = "通常のクリックが使えるように、左ボタンまたは右ボタンと一緒にキーを押してください。";
 "A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "「カーソルキャプチャ」のショートカットが同じキーとボタンを使っています。「カーソルキャプチャ」が優先されます。";
+
+/* Trail style: copies of the cursor picture left at the pointer's recent places, like Windows pointer trails */
+"Echoes" = "エコー";
+
+/* Cursor Gestures: short lines under the actions that run a Cursor Capture command from the menu bar panel. The last line is shared by the actions that switch Cursor Shadow, Focus on Hover, Cursor Translator, Cursor Shaker, Cursor Trails and Per-App Themes */
+"Take a picture of the same area again" = "同じ範囲の画像をもう一度撮ります";
+"Take a picture of the screen under the pointer" = "ポインタがある画面の画像を撮ります";
+"Choose a part, and the picture is taken after a wait" = "部分を選ぶと、少し待ってから画像を撮ります";
+"Copy the text in the part you choose" = "選んだ部分のテキストをコピーします";
+"Open a picture file in the editor" = "画像ファイルをエディタで開きます";
+"Open the picture on the clipboard in the editor" = "クリップボードの画像をエディタで開きます";
+"Keep a picture on top of your windows" = "画像をウインドウの上に表示したままにします";
+"See the pictures you took before" = "以前に撮った画像を表示します";
+"Turn it on, or off when it is on" = "オフならオンに、オンならオフにします";
+
+/* Cursor Trails, Echoes style: the two choices of the Colors drop-down. "Use Colors on Glow" puts the chosen colours on the glow only; "Use Colors with Style" also fills the copies of the cursor with them */
+"Use Colors on Glow" = "光にカラーを使用";
+"Use Colors with Style" = "スタイルにカラーを使用";

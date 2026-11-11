@@ -65,7 +65,7 @@ jobs:
           if [ -z "$SPARKLE_BIN" ]; then
             echo "Sparkle bin not found in build output, downloading..."
             mkdir -p /tmp/sparkle
-            curl -sL https://github.com/sparkle-project/Sparkle/releases/download/2.10.0/Sparkle-2.10.0.tar.xz \
+            curl -sL https://github.com/sparkle-project/Sparkle/releases/download/2.10.1/Sparkle-2.10.1.tar.xz \
               | tar xJ -C /tmp/sparkle
             SPARKLE_BIN="/tmp/sparkle/bin"
           fi

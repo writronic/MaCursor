@@ -14,7 +14,6 @@ final class MenuBarPanelModel: ObservableObject {
     @Published private(set) var favoriteThemes: [MACMenuBarThemeEntry] = []
     @Published private(set) var appliedIdentifier: String?
     @Published private(set) var overrideIdentifier: String?
-    @Published private(set) var frontBundleIdentifier: String?
     @Published private(set) var frontDisplayName: String?
     @Published private(set) var frontIcon: NSImage?
     @Published private(set) var frontRuleThemeIdentifier: String?
@@ -34,6 +33,8 @@ final class MenuBarPanelModel: ObservableObject {
     @Published private(set) var panelBlocks: [MACMenuBarPanelBlock] = []
     @Published var cursorScale: Double = 1.0
     @Published var ffmDelayMs: Double = 100
+    @Published var panelMaxHeight: CGFloat = .infinity
+    @Published var openCount = 0
 
     let brandImage: NSImage? = MenuBarService.brandImage()
 
@@ -48,7 +49,9 @@ final class MenuBarPanelModel: ObservableObject {
         let names: [Notification.Name] = [
             .MACAutoSwitchDidChange,
             .MACAutoSwitchAppliedThemeDidChange,
+            .MACFocusFollowsMouseDidChange,
             .MACFocusFollowsMouseStatusDidChange,
+            .MACCursorTranslatorDidChange,
             .MACCursorTranslatorStatusDidChange,
             .MACCursorPreferencesDidChange,
         ]
@@ -92,7 +95,6 @@ final class MenuBarPanelModel: ObservableObject {
         favoriteThemes = snapshot.favorites
         appliedIdentifier = snapshot.appliedIdentifier
         overrideIdentifier = snapshot.overrideIdentifier
-        frontBundleIdentifier = snapshot.frontBundleIdentifier
         frontDisplayName = snapshot.frontDisplayName
         frontIcon = snapshot.frontIcon
         frontRuleThemeIdentifier = snapshot.frontRuleThemeIdentifier
@@ -204,10 +206,6 @@ final class MenuBarPanelModel: ObservableObject {
         reload()
     }
 
-    var ignoresFrontApp: Bool {
-        cursorGestures.ignores(frontBundleIdentifier)
-    }
-
     func toggleCursorGestures() {
         guard accessibilityTrusted else {
             MenuBarService.requestCursorGesturesAccess()
@@ -238,12 +236,6 @@ final class MenuBarPanelModel: ObservableObject {
     func setCursorShakerStopAfter(_ minutes: Int?) {
         CursorShakerConfig.setStopAfter(minutes)
         reloadShaker()
-    }
-
-    func ignoreFrontApp(_ ignored: Bool) {
-        guard let front = frontBundleIdentifier else { return }
-        MenuBarService.setCursorGestures { $0.ignoreFully(front, ignored) }
-        reload()
     }
 
     func openAccessibilitySettings() {

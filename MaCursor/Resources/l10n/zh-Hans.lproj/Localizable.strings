@@ -623,9 +623,6 @@
 /* Menu bar panel: placeholder when the library is empty */
 "No cursor themes yet" = "尚无指针主题";
 
-/* Menu bar panel: heading above the frontmost app */
-"Active App" = "当前活动应用";
-
 /* Menu bar panel: label of the per-app theme picker */
 "Cursor for this app" = "此应用的指针";
 
@@ -1083,9 +1080,6 @@
 "Ignored Apps" = "忽略的应用";
 /* Cursor Gestures: help tag of the Ignored Apps row */
 "Cursor Gestures stay off in these apps for the triggers you pick." = "对于你选择的触发方式，指针手势在这些应用中保持关闭。";
-/* Menu bar panel: switch in the Active App card that turns Cursor Gestures off for the app in front */
-"Ignore Cursor Gestures" = "忽略指针手势";
-
 /* Cursor Gestures: action categories */
 "Apps" = "应用";
 "Browser and Tabs" = "浏览器和标签页";
@@ -1801,3 +1795,21 @@
 "Left Button" = "左键";
 "Hold a key with the left or right button, so normal clicks still work." = "请在按左键或右键的同时按住一个按键，这样普通的点按仍可正常使用。";
 "A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "某个“指针截屏”快捷键使用了相同的按键和按钮。“指针截屏”优先。";
+
+/* Trail style: copies of the cursor picture left at the pointer's recent places, like Windows pointer trails */
+"Echoes" = "回声";
+
+/* Cursor Gestures: short lines under the actions that run a Cursor Capture command from the menu bar panel. The last line is shared by the actions that switch Cursor Shadow, Focus on Hover, Cursor Translator, Cursor Shaker, Cursor Trails and Per-App Themes */
+"Take a picture of the same area again" = "再次截取同一区域的图片";
+"Take a picture of the screen under the pointer" = "截取指针所在屏幕的图片";
+"Choose a part, and the picture is taken after a wait" = "选择一个部分，稍等片刻后截取图片";
+"Copy the text in the part you choose" = "拷贝所选部分中的文本";
+"Open a picture file in the editor" = "在编辑器中打开图片文件";
+"Open the picture on the clipboard in the editor" = "在编辑器中打开剪贴板中的图片";
+"Keep a picture on top of your windows" = "让图片停留在你的窗口上方";
+"See the pictures you took before" = "查看你以前截取的图片";
+"Turn it on, or off when it is on" = "关闭时打开，打开时关闭";
+
+/* Cursor Trails, Echoes style: the two choices of the Colors drop-down. "Use Colors on Glow" puts the chosen colours on the glow only; "Use Colors with Style" also fills the copies of the cursor with them */
+"Use Colors on Glow" = "将颜色用于光晕";
+"Use Colors with Style" = "将颜色用于样式";

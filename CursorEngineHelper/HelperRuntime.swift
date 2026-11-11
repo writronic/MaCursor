@@ -253,6 +253,7 @@ final class HelperRuntime {
         observeDistributed(Notification.Name.MACFocusFollowsMouseDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorTrailsDidChange.rawValue)
         observeDistributed(Notification.Name.MACAutoSwitchAppliedThemeDidChange.rawValue)
+        observeDistributed(Notification.Name.MACCursorPreferencesDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorGesturesDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorShakerDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorTranslatorDidChange.rawValue)
@@ -300,6 +301,12 @@ final class HelperRuntime {
         cursorGestures.captures = { [weak self] in self?.captureClicks ?? [] }
         cursorGestures.capturing = { [weak self] in self?.cursorScreenshot.isOpen ?? false }
         cursorGestures.captured = { [weak self] in _ = self?.hotKeyPressed(signature: Self.hotKeySignature, id: $0, clicked: true) }
+        cursorGestures.history = { [weak self] in self?.cursorScreenshot.showHistory() }
+        cursorGestures.screenRecording = { [weak self] in
+            guard let self else { return false }
+            self.cursorTranslator.probe()
+            return self.cursorTranslator.screenRecording
+        }
         cursorScreenshot.opened = { [weak self] in self?.cursorGestures.publish() }
         cursorGestures.raiseWindow = { [weak self] in self?.focusController.raise($0) ?? false }
         cursorGestures.windowUnderPointer = { [weak self] in self?.focusController.windowUnderPointer() }
@@ -434,7 +441,7 @@ final class HelperRuntime {
         case Notification.Name.MACCursorTrailsDidChange.rawValue:
             cursorTrails.start()
             menuBarController?.refreshTrails()
-        case Notification.Name.MACAutoSwitchAppliedThemeDidChange.rawValue:
+        case Notification.Name.MACAutoSwitchAppliedThemeDidChange.rawValue, Notification.Name.MACCursorPreferencesDidChange.rawValue:
             cursorTrails.themeChanged()
         default:
             guard let request = RightClickMenuHandoff.requests[name] else { break }
@@ -700,6 +707,8 @@ final class CursorGesturesController {
     var captures: @MainActor () -> [(id: UInt32, trigger: CursorGestureTrigger)] = { [] }
     var capturing: @MainActor () -> Bool = { false }
     var captured: @MainActor (UInt32) -> Void = { _ in }
+    var history: @MainActor () -> Void = {}
+    var screenRecording: @MainActor () -> Bool = { false }
     private var clicksLeft = false
 
     init(overlay: CursorTrailsController) {
@@ -948,6 +957,10 @@ final class CursorGesturesController {
     }
 
     private func operate(_ operation: CursorGestureOperation, target: MACFFMWindow?) -> Bool {
+        if operation.needsCursorCapture, !CursorScreenshotConfig.load().enabled {
+            MenuBarService.openSettings(tab: "Cursor Capture")
+            return false
+        }
         switch operation {
         case .nextFavoriteTheme:
             CFPreferencesSynchronize(MACPreferences.domain, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
@@ -962,6 +975,36 @@ final class CursorGesturesController {
         case .screenSaver:
             NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: "/System/Library/CoreServices/ScreenSaverEngine.app"),
                                                configuration: NSWorkspace.OpenConfiguration())
+        case .screenshotArea:
+            captured(CursorScreenshot.areaHotKeyID)
+        case .capturePreviousArea, .captureFullscreen, .captureSelfTimer, .captureText:
+            guard let item = operation.capture else { return false }
+            captured(item.hotKeyID)
+        case .captureOpen:
+            CursorScreenshotEditor.openFile()
+        case .captureOpenClipboard:
+            guard CursorScreenshotImageSource.offersImage(.general) else { return false }
+            CursorScreenshotEditor.openClipboard()
+        case .capturePin:
+            CursorScreenshotEditor.pinFile()
+        case .captureHistory:
+            history()
+        case .cursorShadow:
+            MenuBarService.setCursorShadow(!MACPreferences.flag(MACPreferences.cursorShadowKey))
+        case .focusOnHover:
+            MenuBarService.setFocusFollowsMouse(!MACFFMEnabled(MACFFMReadConfig()))
+        case .cursorTranslator:
+            guard screenRecording() else {
+                MenuBarService.requestCursorTranslatorAccess()
+                return false
+            }
+            CursorTranslatorConfig.setEnabled(!CursorTranslatorConfig.load().enabled)
+        case .cursorShaker:
+            MenuBarService.setCursorShakerEnabled(!CursorShakerConfig.load().enabled)
+        case .cursorTrails:
+            MenuBarService.setCursorTrails(\.enabled, !CursorTrailsConfig.load().enabled)
+        case .switchByApp:
+            MenuBarService.setSwitchByApp(!((MACAutoSwitchEffects.shared.readConfig()?["switchByApp"] as? NSNumber)?.boolValue ?? false))
         default:
             guard let key = CursorGestureKeys.mediaKey(for: operation) else { return arrange(operation, target: target) }
             CursorGestureKeys.pressMedia(key)
@@ -1022,13 +1065,16 @@ final class CursorTrailsController {
     private var restTip: CGPoint?
     private var stops: [UInt32] = []
     private var theme: String?
+    private var copy: CursorTrailsCopy?
+    private var textures: [MTLTexture] = []
+    private var copyTheme: String?
 
     func start() {
         let previous = config
         config = CursorTrailsConfig.load()
         guard config.enabled || strokes?.isRunning == true else { return stop() }
         refreshStops()
-        let renderer = config.enabled && config.useGPU && config.style == .line ? CursorTrailsMetal.shared : nil
+        let renderer = config.enabled && config.useGPU && config.style != .softDots ? CursorTrailsMetal.shared : nil
         if config.style != previous.style || config.useGPU != previous.useGPU || config.enabled != previous.enabled { stop() }
         if !config.enabled { clock?.cancel(); clock = nil; samples = []; dots = []; show([]) }
         guard monitors.isEmpty else { return settle() }
@@ -1066,6 +1112,7 @@ final class CursorTrailsController {
         dots = []
         drawn = false
         shown = false
+        copyTheme = nil
         metal?.draw([], on: windows)
         windows.forEach { $0.close() }
         windows = []
@@ -1081,9 +1128,10 @@ final class CursorTrailsController {
     }
 
     func themeChanged() {
-        guard config.enabled, config.palette == .match, !windows.isEmpty else { return }
+        guard config.enabled, !windows.isEmpty else { return }
         let previous = stops
         refreshStops()
+        refreshCopy()
         guard stops != previous else { return }
         if pauseTimer != nil {
             emitters { emitter, _ in
@@ -1104,6 +1152,7 @@ final class CursorTrailsController {
         guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
         if config.emits { return emit() }
         refreshStops()
+        refreshCopy()
         let fps = NSScreen.screens.map(\.maximumFramesPerSecond).max() ?? 0
         let timer = DispatchSource.makeTimerSource(queue: .main)
         timer.schedule(deadline: .now(), repeating: CursorTrailsSample.interval(framesPerSecond: fps), leeway: .milliseconds(2))
@@ -1118,6 +1167,9 @@ final class CursorTrailsController {
         if config.style == .softDots {
             (samples, dots) = CursorTrailsDot.step(samples, dots, to: tip, at: now, lifetime: config.lifetime, width: config.width, stops: stops)
             show(dots, at: now)
+        } else if config.drawsCopies {
+            samples = CursorTrailsCopy.advance(samples, to: tip, at: now, count: config.length)
+            show(copies: samples, tip: tip)
         } else {
             samples = CursorTrailsSample.advance(samples, to: tip, at: now, length: config.lifetime)
             show(CursorTrailsPiece.line(samples, tip: tip, at: now, length: config.lifetime, width: CGFloat(config.width), fade: config.fade, stops: stops))
@@ -1144,6 +1196,18 @@ final class CursorTrailsController {
         if drawn { order() }
         defer { order() }
         paint { CursorTrailsDot.picture(dots, at: now, lifetime: config.lifetime, fade: config.fade, in: $0.frame, scale: $0.backingScaleFactor) }
+    }
+
+    private func show(copies samples: [CursorTrailsSample], tip: CGPoint) {
+        guard drawn || !samples.isEmpty else { return }
+        drawn = !samples.isEmpty && copy != nil
+        if drawn { order() }
+        defer { order() }
+        if let metal {
+            let sprites = (copy?.sprites(samples, tip: tip, fade: config.fade) ?? []).filter { textures.indices.contains($0.picture) }
+            return metal.draw(CursorTrailsSprite.quads(sprites), pictures: sprites.map { textures[$0.picture] }, on: windows)
+        }
+        paint { copy?.picture(samples, tip: tip, fade: config.fade, in: $0.frame, scale: $0.backingScaleFactor) }
     }
 
     private func paint(_ picture: (NSWindow) -> (frame: CGRect, image: CGImage)?) {
@@ -1234,15 +1298,34 @@ final class CursorTrailsController {
             theme = nil
             return
         }
+        let file = themeFile()
+        guard file.key != theme else { return }
+        theme = file.key
+        stops = CursorTrailsPalette.matchStops(themeAt: file.path)
+    }
+
+    private func refreshCopy() {
+        guard config.drawsCopies else { return }
+        let file = themeFile()
+        let scale = (MACPreferences.value(forKey: MACPreferences.cursorScaleKey) as? NSNumber)?.doubleValue ?? 1
+        let leftHanded = file.path != nil && MACPreferences.isLeftHanded
+        let key = "\(file.key)|\(scale)|\(leftHanded)|\(config.echoesColors)|\(stops)|\(config.length)"
+        guard key != copyTheme else { return }
+        copyTheme = key
+        func plist(_ path: String) -> [AnyHashable: Any]? {
+            (try? Data(contentsOf: URL(fileURLWithPath: path))).flatMap { try? PropertyListSerialization.propertyList(from: $0, format: nil) as? [AnyHashable: Any] }
+        }
+        copy = CursorTrailsCopy(theme: file.path.flatMap(plist), baseline: plist(MACCursorCapture.systemDefaultPath), scale: scale, leftHanded: leftHanded).map { config.painted($0, stops: stops) }
+        textures = copy.flatMap { metal?.textures($0) } ?? []
+    }
+
+    private func themeFile() -> (path: String?, key: String) {
         CFPreferencesSynchronize(MACPreferences.domain, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
         let path = MACMenuBarVisibleThemeIdentifier(MACPreferences.value(forKey: MACPreferences.appliedCursorKey) as? String,
                                                     MACPreferences.value(forKey: MACPreferences.appOverrideKey) as? String)
             .map(MACAutoSwitchThemePathForIdentifier)
         let modified = path.flatMap { (try? FileManager.default.attributesOfItem(atPath: $0))?[.modificationDate] as? Date }
-        let key = "\(path ?? "")|\(modified?.timeIntervalSinceReferenceDate ?? 0)"
-        guard key != theme else { return }
-        theme = key
-        stops = CursorTrailsPalette.matchStops(themeAt: path)
+        return (path, "\(path ?? "")|\(modified?.timeIntervalSinceReferenceDate ?? 0)")
     }
 
     private static func overlay(_ screen: NSScreen, layer: CALayer) -> NSWindow {
@@ -1273,21 +1356,27 @@ final class CursorTrailsMetal: @unchecked Sendable {
         #include <metal_stdlib>
         using namespace metal;
         struct TrailVertex { float4 position; float4 color; };
-        struct TrailFragment { float4 position [[position]]; float4 color; };
+        struct TrailFragment { float4 position [[position]]; float4 color; float2 corner; };
         vertex TrailFragment trailVertex(uint id [[vertex_id]], const device TrailVertex *strip [[buffer(0)]],
                                          constant float4 &screen [[buffer(1)]]) {
             TrailFragment out;
             out.position = float4((strip[id].position.xy - screen.xy) / screen.zw * 2.0f - 1.0f, strip[id].position.z, 1.0f);
             out.color = strip[id].color;
+            out.corner = float2(id & 1, (id >> 1) & 1);
             return out;
         }
         fragment float4 trailFragment(TrailFragment in [[stage_in]]) {
             return in.color;
         }
+        fragment float4 copyFragment(TrailFragment in [[stage_in]], texture2d<float> picture [[texture(0)]]) {
+            constexpr sampler smooth(filter::linear);
+            return picture.sample(smooth, in.corner) * in.color;
+        }
         """
     private let device: MTLDevice
     private let queue: MTLCommandQueue
     private let pipeline: MTLRenderPipelineState
+    private let copies: MTLRenderPipelineState
     private let depth: MTLDepthStencilState
     private let samples: Int
     private let work = DispatchQueue(label: "com.writronic.macursor.trails", qos: .userInteractive)
@@ -1301,26 +1390,30 @@ final class CursorTrailsMetal: @unchecked Sendable {
               let queue = device.makeCommandQueue(),
               let library = try? device.makeLibrary(source: Self.shaders, options: nil) else { return nil }
         let samples = device.supportsFamily(.apple7) ? 4 : 1
-        let descriptor = MTLRenderPipelineDescriptor()
-        descriptor.vertexFunction = library.makeFunction(name: "trailVertex")
-        descriptor.fragmentFunction = library.makeFunction(name: "trailFragment")
-        descriptor.rasterSampleCount = samples
-        descriptor.depthAttachmentPixelFormat = .depth32Float
-        let color: MTLRenderPipelineColorAttachmentDescriptor = descriptor.colorAttachments[0]
-        color.pixelFormat = .bgra8Unorm
-        color.isBlendingEnabled = true
-        color.sourceRGBBlendFactor = .one
-        color.sourceAlphaBlendFactor = .one
-        color.destinationRGBBlendFactor = .oneMinusSourceAlpha
-        color.destinationAlphaBlendFactor = .oneMinusSourceAlpha
+        func state(_ fragment: String) -> MTLRenderPipelineState? {
+            let descriptor = MTLRenderPipelineDescriptor()
+            descriptor.vertexFunction = library.makeFunction(name: "trailVertex")
+            descriptor.fragmentFunction = library.makeFunction(name: fragment)
+            descriptor.rasterSampleCount = samples
+            descriptor.depthAttachmentPixelFormat = .depth32Float
+            let color: MTLRenderPipelineColorAttachmentDescriptor = descriptor.colorAttachments[0]
+            color.pixelFormat = .bgra8Unorm
+            color.isBlendingEnabled = true
+            color.sourceRGBBlendFactor = .one
+            color.sourceAlphaBlendFactor = .one
+            color.destinationRGBBlendFactor = .oneMinusSourceAlpha
+            color.destinationAlphaBlendFactor = .oneMinusSourceAlpha
+            return try? device.makeRenderPipelineState(descriptor: descriptor)
+        }
         let depthTest = MTLDepthStencilDescriptor()
         depthTest.depthCompareFunction = .less
         depthTest.isDepthWriteEnabled = true
-        guard let pipeline = try? device.makeRenderPipelineState(descriptor: descriptor),
+        guard let pipeline = state("trailFragment"), let copies = state("copyFragment"),
               let depth = device.makeDepthStencilState(descriptor: depthTest) else { return nil }
         self.device = device
         self.queue = queue
         self.pipeline = pipeline
+        self.copies = copies
         self.depth = depth
         self.samples = samples
     }
@@ -1336,19 +1429,31 @@ final class CursorTrailsMetal: @unchecked Sendable {
         return layer
     }
 
-    @MainActor func draw(_ strip: [CursorTrailsVertex], on windows: [NSWindow]) {
+    func textures(_ copy: CursorTrailsCopy) -> [MTLTexture] {
+        let made = copy.pictures.compactMap { picture -> MTLTexture? in
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: picture.width, height: picture.height, mipmapped: false)
+            descriptor.usage = .shaderRead
+            guard let bytes = CursorTrailsCopy.bgra(picture), let texture = device.makeTexture(descriptor: descriptor) else { return nil }
+            bytes.withUnsafeBytes { texture.replace(region: MTLRegionMake2D(0, 0, picture.width, picture.height), mipmapLevel: 0, withBytes: $0.baseAddress!, bytesPerRow: picture.width * 4) }
+            return texture
+        }
+        return made.count == copy.pictures.count ? made : []
+    }
+
+    @MainActor func draw(_ strip: [CursorTrailsVertex], pictures: [MTLTexture] = [], on windows: [NSWindow]) {
         guard strip.isEmpty || queued == 0 else { return }
         queued += 1
         nonisolated(unsafe) let windows = windows.compactMap { window in
             (window.contentView?.layer?.sublayers?.first as? CAMetalLayer).map { (layer: $0, frame: window.frame, scale: window.backingScaleFactor) }
         }
+        nonisolated(unsafe) let pictures = pictures
         work.async {
-            self.render(strip, on: windows)
+            self.render(strip, pictures: pictures, on: windows)
             DispatchQueue.main.async { MainActor.assumeIsolated { self.queued -= 1 } }
         }
     }
 
-    private func render(_ strip: [CursorTrailsVertex], on windows: [(layer: CAMetalLayer, frame: CGRect, scale: CGFloat)]) {
+    private func render(_ strip: [CursorTrailsVertex], pictures: [MTLTexture], on windows: [(layer: CAMetalLayer, frame: CGRect, scale: CGFloat)]) {
         guard let commands = queue.makeCommandBuffer() else { return }
         let length = strip.count * MemoryLayout<CursorTrailsVertex>.stride
         last?.waitUntilCompleted()
@@ -1384,11 +1489,15 @@ final class CursorTrailsMetal: @unchecked Sendable {
             pass.depthAttachment.storeAction = .dontCare
             guard let encoder = commands.makeRenderCommandEncoder(descriptor: pass) else { continue }
             var box = SIMD4<Float>(Float(window.frame.minX + frame.minX), Float(window.frame.minY + frame.minY), Float(frame.width), Float(frame.height))
-            encoder.setRenderPipelineState(pipeline)
+            encoder.setRenderPipelineState(pictures.isEmpty ? pipeline : copies)
             encoder.setDepthStencilState(depth)
             encoder.setVertexBuffer(vertices, offset: 0, index: 0)
             encoder.setVertexBytes(&box, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
-            encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: strip.count)
+            if pictures.isEmpty { encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: strip.count) }
+            for (index, picture) in pictures.enumerated() {
+                encoder.setFragmentTexture(picture, index: 0)
+                encoder.drawPrimitives(type: .triangleStrip, vertexStart: 4 * index, vertexCount: 4)
+            }
             encoder.endEncoding()
             layer.frame = frame
             drawables.append(drawable)

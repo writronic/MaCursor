@@ -21,6 +21,7 @@ extension Notification.Name {
     nonisolated static let MACAppearanceDidChange = Notification.Name("MACAppearanceDidChange")
     nonisolated static let MACShortcutRecordingDidStart = Notification.Name("MACShortcutRecordingDidStart")
     nonisolated static let MACShortcutRecordingDidStop = Notification.Name("MACShortcutRecordingDidStop")
+    nonisolated static let MACMenuBarHiddenRowsDidChange = Notification.Name("MACMenuBarItemsHiddenDidChange")
 }
 
 struct MACMenuBarThemeEntry: Identifiable, Hashable, Sendable {
@@ -329,6 +330,36 @@ func MACMenuBarHiddenCaptureRows(_ stored: Any?) -> Set<MACMenuBarCaptureRow> {
     Set(menuBarItems(stored))
 }
 
+func MACMenuBarRows(turnedOnBy key: String) -> (items: [MACMenuBarItem], captureRows: [MACMenuBarCaptureRow])? {
+    switch key {
+    case MACPreferences.cursorShadowKey: return ([.cursorShadow], [])
+    case MACPreferences.focusFollowsMouseKey: return ([.focusOnHover], [])
+    case MACPreferences.cursorGesturesKey: return ([.cursorGestures], [])
+    case MACPreferences.cursorTranslatorKey: return ([.cursorTranslator], [])
+    case MACPreferences.cursorShakerKey: return ([.cursorShaker], [])
+    case MACPreferences.cursorTrailsKey: return ([.cursorTrails], [])
+    case MACPreferences.cursorScreenshotKey: return ([], MACMenuBarCaptureRow.allCases)
+    case MACPreferences.autoSwitchRulesKey: return ([.activeApp], [])
+    default: return nil
+    }
+}
+
+func MACMenuBarFeatureIsOn(_ stored: Any?, key: String) -> Bool {
+    guard let data = stored as? Data else { return (stored as? NSNumber)?.boolValue ?? false }
+    let field = key == MACPreferences.autoSwitchRulesKey ? "switchByApp" : "enabled"
+    return ((try? JSONSerialization.jsonObject(with: data)) as? [String: Any])?[field] as? Bool ?? false
+}
+
+func MACMenuBarShowRows(_ rows: (items: [MACMenuBarItem], captureRows: [MACMenuBarCaptureRow]), operations: MACPreferences.Operations) {
+    let hidden = MACMenuBarHiddenItems(MACPreferences.value(forKey: MACPreferences.menuBarHiddenItemsKey, operations: operations)).subtracting(rows.items)
+    let captureHidden = MACMenuBarHiddenCaptureRows(MACPreferences.value(forKey: MACPreferences.menuBarHiddenCaptureRowsKey, operations: operations))
+        .subtracting(rows.captureRows)
+    MACPreferences.set(MACMenuBarItem.allCases.filter(hidden.contains).map(\.rawValue), forKey: MACPreferences.menuBarHiddenItemsKey, operations: operations)
+    MACPreferences.set(MACMenuBarCaptureRow.allCases.filter(captureHidden.contains).map(\.rawValue), forKey: MACPreferences.menuBarHiddenCaptureRowsKey,
+                       operations: operations)
+    NotificationCenter.default.post(name: .MACMenuBarHiddenRowsDidChange, object: nil)
+}
+
 func MACMenuBarItemOrder(_ order: [MACMenuBarItem], movingIn list: [MACMenuBarItem], from source: IndexSet, to destination: Int) -> [MACMenuBarItem] {
     var moved = order.filter(list.contains)
     moved.move(fromOffsets: source, toOffset: destination)
@@ -357,6 +388,13 @@ func MACMenuBarClampCursorScale(_ scale: Double) -> Double {
     return min(MACMenuBarMaxCursorScale, max(MACMenuBarMinCursorScale, scale))
 }
 
+let MACMenuBarPanelMinHeight: CGFloat = 240
+
+func MACMenuBarPanelMaxHeight(_ visibleHeight: CGFloat) -> CGFloat {
+    guard visibleHeight.isFinite, visibleHeight > 0 else { return MACMenuBarPanelMinHeight }
+    return max(MACMenuBarPanelMinHeight, visibleHeight - 40)
+}
+
 func MACMenuBarAppearanceNameForMode(_ mode: Any?) -> NSAppearance.Name? {
     guard let number = mode as? NSNumber else { return nil }
     switch number.intValue {
@@ -380,18 +418,19 @@ struct MACMenuBarThumbnail: Sendable {
     let frameCount: UInt
 }
 
+func MACSharpestRepresentation(_ reps: [Any]) -> (data: Data, image: CGImage)? {
+    reps.compactMap { rep in (rep as? Data).flatMap { data in NSBitmapImageRep(data: data)?.cgImage.map { (data: data, image: $0) } } }
+        .max(by: { $0.image.width * $0.image.height < $1.image.width * $1.image.height })
+}
+
 func MACMenuBarThemeThumbnailData(_ theme: [AnyHashable: Any]?) -> MACMenuBarThumbnail? {
     guard let cursors = theme?[MACCursorDefinitions.cursorsKey] as? [AnyHashable: Any] else { return nil }
     for identifier in ["com.apple.coregraphics.Arrow", "com.apple.coregraphics.ArrowS"] {
         guard let entry = cursors[identifier] as? [AnyHashable: Any],
               let reps = entry[MACCursorDefinitions.representationsKey] as? [Any], !reps.isEmpty else { continue }
-        var best: Data?
-        for case let rep as Data in reps {
-            if best == nil || rep.count > best!.count { best = rep }
-        }
-        guard let best else { return nil }
+        guard let best = MACSharpestRepresentation(reps) else { return nil }
         let frames = (entry[MACCursorDefinitions.frameCountKey] as? NSNumber)?.intValue ?? 1
-        return MACMenuBarThumbnail(data: best, frameCount: UInt(max(1, frames)))
+        return MACMenuBarThumbnail(data: best.data, frameCount: UInt(max(1, frames)))
     }
     return nil
 }
@@ -577,5 +616,39 @@ struct ThemeCard<Preview: View>: View {
         .help(help ?? name)
         .accessibilityLabel(name)
         .accessibilityAddTraits(isApplied ? .isSelected : [])
+    }
+}
+
+extension View {
+    func overlayScrollers() -> some View { background(MACOverlayScrollers()) }
+}
+
+struct MACOverlayScrollers: NSViewRepresentable {
+    func makeNSView(context: Context) -> MACOverlayScrollersView { MACOverlayScrollersView() }
+    func updateNSView(_ view: MACOverlayScrollersView, context: Context) { view.applyOverlay() }
+}
+
+final class MACOverlayScrollersView: NSView {
+    private var observer: NSObjectProtocol?
+
+    override func viewDidMoveToWindow() {
+        super.viewDidMoveToWindow()
+        applyOverlay()
+        if window == nil, let observer {
+            NotificationCenter.default.removeObserver(observer)
+            self.observer = nil
+        } else if window != nil, observer == nil {
+            observer = NotificationCenter.default.addObserver(forName: NSScroller.preferredScrollerStyleDidChangeNotification,
+                                                              object: nil, queue: .main) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    DispatchQueue.main.async { self?.applyOverlay() }
+                }
+            }
+        }
+    }
+
+    func applyOverlay() {
+        guard let scrollView = enclosingScrollView, scrollView.scrollerStyle != .overlay else { return }
+        scrollView.scrollerStyle = .overlay
     }
 }

@@ -77,6 +77,8 @@ class CursorThemeModel: ObservableObject, Identifiable, Hashable {
         cursors.contains { $0.backingCursor.isApplicable }
     }
 
+    var openEditorCount = 0
+
     func refreshFromObjC() {
         name = backingLibrary.name
         creator = backingLibrary.creator

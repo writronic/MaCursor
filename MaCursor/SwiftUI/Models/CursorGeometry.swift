@@ -127,6 +127,33 @@ enum ImageScaler {
         return out
     }
 
+    static func straightRGBA(of image: CGImage) throws -> [UInt8] {
+        let ctx = try rgbaContext(width: image.width, height: image.height)
+        ctx.interpolationQuality = .none
+        ctx.setBlendMode(.copy)
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        guard let data = ctx.data?.assumingMemoryBound(to: UInt8.self) else {
+            throw CursorReadError.unsupportedImage("cannot read \(image.width)x\(image.height) RGBA pixels")
+        }
+        var rgba = [UInt8](repeating: 0, count: image.width * image.height * 4)
+        for y in 0..<image.height {
+            for x in 0..<image.width {
+                let pixel = data + y * ctx.bytesPerRow + x * 4
+                let index = (y * image.width + x) * 4
+                for channel in 0..<3 {
+                    rgba[index + channel] = unpremultiplied(pixel[channel], alpha: pixel[3])
+                }
+                rgba[index + 3] = pixel[3]
+            }
+        }
+        return rgba
+    }
+
+    static func unpremultiplied(_ value: UInt8, alpha: UInt8) -> UInt8 {
+        guard alpha > 0 else { return 0 }
+        return UInt8(min(255, (Int(value) * 255 + Int(alpha) / 2) / Int(alpha)))
+    }
+
     static func makeImage(rgba: [UInt8], width: Int, height: Int) throws -> CGImage {
         guard width > 0, height > 0, rgba.count == width * height * 4,
               let space = CGColorSpace(name: CGColorSpace.sRGB),

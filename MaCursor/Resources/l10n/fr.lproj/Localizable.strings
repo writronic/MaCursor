@@ -623,9 +623,6 @@
 /* Menu bar panel: placeholder when the library is empty */
 "No cursor themes yet" = "Pas encore de thèmes de curseur";
 
-/* Menu bar panel: heading above the frontmost app */
-"Active App" = "App active";
-
 /* Menu bar panel: label of the per-app theme picker */
 "Cursor for this app" = "Curseur pour cette app";
 
@@ -1083,9 +1080,6 @@
 "Ignored Apps" = "Apps ignorées";
 /* Cursor Gestures: help tag of the Ignored Apps row */
 "Cursor Gestures stay off in these apps for the triggers you pick." = "Les gestes du curseur restent désactivés dans ces apps pour les déclencheurs choisis.";
-/* Menu bar panel: switch in the Active App card that turns Cursor Gestures off for the app in front */
-"Ignore Cursor Gestures" = "Ignorer les gestes du curseur";
-
 /* Cursor Gestures: action categories */
 "Apps" = "Apps";
 "Browser and Tabs" = "Navigateur et onglets";
@@ -1801,3 +1795,21 @@
 "Left Button" = "Bouton gauche";
 "Hold a key with the left or right button, so normal clicks still work." = "Maintenez une touche avec le bouton gauche ou droit, pour que les clics habituels fonctionnent toujours.";
 "A Cursor Capture shortcut uses the same keys and button. Cursor Capture takes it." = "Un raccourci de la Capture de curseur utilise les mêmes touches et le même bouton. La Capture de curseur a la priorité.";
+
+/* Trail style: copies of the cursor picture left at the pointer's recent places, like Windows pointer trails */
+"Echoes" = "Échos";
+
+/* Cursor Gestures: short lines under the actions that run a Cursor Capture command from the menu bar panel. The last line is shared by the actions that switch Cursor Shadow, Focus on Hover, Cursor Translator, Cursor Shaker, Cursor Trails and Per-App Themes */
+"Take a picture of the same area again" = "Reprend une image de la même zone";
+"Take a picture of the screen under the pointer" = "Prend une image de l’écran sous le pointeur";
+"Choose a part, and the picture is taken after a wait" = "Vous choisissez une zone, et l’image est prise après un délai";
+"Copy the text in the part you choose" = "Copie le texte de la zone choisie";
+"Open a picture file in the editor" = "Ouvre un fichier image dans l’éditeur";
+"Open the picture on the clipboard in the editor" = "Ouvre l’image du presse-papiers dans l’éditeur";
+"Keep a picture on top of your windows" = "Garde une image au-dessus de vos fenêtres";
+"See the pictures you took before" = "Affiche les images que vous avez prises avant";
+"Turn it on, or off when it is on" = "Active la fonction, ou la désactive si elle est activée";
+
+/* Cursor Trails, Echoes style: the two choices of the Colors drop-down. "Use Colors on Glow" puts the chosen colours on the glow only; "Use Colors with Style" also fills the copies of the cursor with them */
+"Use Colors on Glow" = "Utiliser les couleurs sur la lueur";
+"Use Colors with Style" = "Utiliser les couleurs avec le style";

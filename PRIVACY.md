@@ -2,89 +2,30 @@
 
 **Last Updated:** November 2026
 
-## Overview
-
-MaCursor is a free, open-source macOS application for customizing system cursors. **MaCursor does not collect, store, or transmit any personal data.** The one exception is Cursor Translator with an online service: the text inside its frame goes to the service you choose.
-
-The full source code is publicly available at [github.com/writronic/MaCursor](https://github.com/writronic/MaCursor).
+MaCursor is a free, open-source macOS app for customizing system cursors. **MaCursor does not collect, store, or transmit any personal data.** The one exception is Cursor Translator with an online service: the text inside its frame goes to the service you choose. The full source code is at [github.com/writronic/MaCursor](https://github.com/writronic/MaCursor), so you can check these claims.
 
 ---
 
 ## Data Collection
 
-MaCursor does **not** collect:
-
-- Personal information (name, email, etc.)
-- Usage analytics or telemetry
-- Crash reports or diagnostics
-- Device identifiers or location data
+MaCursor does **not** collect personal information, usage analytics, telemetry, crash reports, device identifiers or location data. No analytics, advertising, or tracking SDKs are included.
 
 ---
 
 ## Local Data
 
-All data stays on your device:
+MaCursor keeps these on your Mac:
 
-| Data | Location | Purpose |
-|------|----------|---------|
-| Cursor themes | `~/Library/Application Support/MaCursor/` | Persist installed themes |
-| Preferences | `com.writronic.MaCursor` domain | Remember your settings |
-| Login item | Managed by macOS via `SMAppService` | Optionally apply themes at startup |
-| Right-Click Menu settings | `~/Library/Group Containers/SP495GG2KZ.com.writronic.macursor/` | Share your Right-Click Menu choices with the Finder extension and the helper |
-| Translation service keys | macOS Keychain | Let MaCursor and its helper use the online service you choose in Cursor Translator. Sent only to that service |
-| Cursor Capture pictures | Your Desktop or the folder you choose | Keep the pictures you save with Cursor Capture |
-| Cursor Capture history | `~/Library/Application Support/MaCursor/CursorScreenshotHistory/` | Bring back a recent picture from Capture History. MaCursor deletes each picture after the time you choose |
-| Cursor Capture wallpapers | `~/Library/Application Support/MaCursor/CursorScreenshotWallpapers/` | Keep the wallpapers you add in the editor's Background panel |
-| Cursor Capture temporary copies | `~/Library/Group Containers/SP495GG2KZ.com.writronic.macursor/` | Hand a picture to another app when you copy it, drag it or use Share. MaCursor deletes them later |
-
----
-
-## Accessibility and Screen Recording Access
-
-The optional Focus on Hover feature uses macOS Accessibility APIs so the helper (`MaCursorHelper`) can activate the window under your pointer:
-
-- Requested only when you turn the feature on, and used only while it stays on
-- Window information is read at the moment of activation and never stored
-- Nothing is logged or transmitted
-
-The optional Cursor Gestures feature uses the same Accessibility access:
-
-- Requested only when you turn the feature on, and used only while it stays on
-- Nothing is logged or transmitted
-
-The optional Cursor Translator feature uses the same Accessibility access, and Screen Recording access to read the text inside its frame:
-
-- Requested only when you turn the feature on, and used only while it stays on
-- Nothing is logged or saved, and the text inside the frame goes only to the Translation Service you choose
-
-The optional Cursor Shaker feature uses the same Accessibility access:
-
-- Requested only when you turn the feature on, and used only while it stays on
-- Nothing is logged or transmitted
-
-The optional Cursor Capture feature uses Screen Recording access to take a picture of your screen when you use its shortcut:
-
-- Requested only when you turn the feature on, and used only while it stays on
-- A click shortcut uses the same Accessibility access, and only while it is set
-- The picture stays on your Mac: on the clipboard and, when you save it, in your Desktop or the folder you choose. Nothing is logged or transmitted
-- Capture History keeps a copy of each picture on your Mac for 1 week. You can choose another time, or turn it off, in the Cursor Capture settings
-- Capture Text reads the text in the box you draw on your Mac. The text goes only to your clipboard, and no picture is saved
-- The editor works on your Mac. A picture leaves it only if you choose Share and pick a service in the macOS share sheet
-- The editor's blurred desktop background is made on your Mac from your desktop picture file, not from a picture of your screen
-- macOS may ask you to allow MaCursor to use that folder, such as your Desktop. If you say no, the picture is not saved
-
----
-
-## Finder Extension
-
-The optional Right-Click Menu is a Finder extension (`MaCursorFinder`) that runs in the macOS sandbox:
-
-- Turned on only by you, in System Settings (or with a Terminal command on macOS 15.0 and 15.1)
-- Reads and writes only to create an empty file where you right-click, hide or unhide the items you select or the items in the current folder, and copy or open their paths
-- Never reads what is inside your files
-- Has no network access, and stores or transmits nothing it handles
-- Needs Full Disk Access for MaCursor to work
-- Inside iCloud Drive folders, the toolbar button asks Finder for the folder through the helper (`MaCursorHelper`). macOS may ask you to allow this once
+- Cursor themes and a saved copy of your Mac's original cursors, in `~/Library/Application Support/MaCursor/`
+- Your settings, in the `com.writronic.MaCursor` preferences domain
+- A login item, managed by macOS, so the helper can apply your theme at startup
+- Right-Click Menu settings, in `~/Library/Group Containers/SP495GG2KZ.com.writronic.macursor/`
+- Translation service keys, in the macOS Keychain
+- Cursor Translator text stays in memory and is never written to disk
+- Cursor Capture pictures you save, on your Desktop or in the folder you choose
+- Capture History, in `~/Library/Application Support/MaCursor/CursorScreenshotHistory/`: MaCursor deletes each picture after the time you choose in **Keep history**
+- Cursor Capture wallpapers you add in the editor, in `~/Library/Application Support/MaCursor/CursorScreenshotWallpapers/`
+- Copies of a picture you copy, drag or **Share**, in the same group container: MaCursor deletes them later
 
 ---
 
@@ -92,50 +33,26 @@ The optional Right-Click Menu is a Finder extension (`MaCursorFinder`) that runs
 
 MaCursor includes [Sparkle](https://sparkle-project.org) for optional update checks:
 
-- Connects to a GitHub-hosted appcast URL to check for new versions
-- No system profiling data is collected or transmitted
-- Can be disabled in Settings
+- **Automatically check for updates** in Settings, General turns the automatic checks on or off
+- A check connects to `raw.githubusercontent.com` and sends no system profiling data
+- Installing an update downloads it from GitHub Releases
 
-With Apple Translation (macOS 15 and later), MaCursor sends nothing out itself: macOS translates the text with the languages you downloaded to your Mac. With an online service (DeepL, OpenAI, Google Gemini, Claude, or a server you type in):
+Cursor Translator with an online service (DeepL, OpenAI, Google Gemini, Claude, or a server you type in) sends the text inside its frame and your language choices to that service. Your API key goes only to that service. That service's own privacy policy covers what it receives. With Apple Translation, MaCursor sends nothing.
 
-- The text inside the frame goes straight to that service, with your language choices and, except for DeepL, a short instruction to translate it. Your API key, if you add one, goes only to that service
-- That service's own privacy policy covers what it receives
+**Share** in the Cursor Capture editor hands a picture to the macOS share sheet, and the service you pick receives it.
 
 Beyond Sparkle and the service you choose in Cursor Translator, MaCursor makes **zero network requests**.
 
 ---
 
-## Third-Party Dependencies
-
-| Dependency | Purpose | Privacy Impact |
-|-----------|---------|----------------|
-| [Sparkle 2](https://sparkle-project.org) | Software updates | HTTPS request to check for updates. No user data collected. |
-
-No analytics, advertising, or tracking SDKs are included.
-
----
-
 ## Data Deletion
 
-All data is stored locally and can be removed by:
-
-- Removing `~/Library/Application Support/MaCursor/`
-- Removing `~/Library/Group Containers/SP495GG2KZ.com.writronic.macursor/`
-- Clearing the **API Key** field in Settings → Cursor Translator, for each service
-- Clicking **Reset** in Settings → General → Reset Settings, which also removes every translation service key
-- Uninstalling MaCursor
+- **Reset** in Settings, General moves all themes to the Trash and deletes your settings, every translation service key, Capture History and the Cursor Capture wallpapers
+- Clearing the **API Key** field in Settings, Cursor Translator deletes that service's key
+- Setting **Keep history** to **Disabled** in Settings, Cursor Capture deletes every Capture History picture
+- Moving MaCursor to the Trash leaves its data behind. To remove everything, also delete `~/Library/Application Support/MaCursor/`, `~/Library/Group Containers/SP495GG2KZ.com.writronic.macursor/`, the `com.writronic.MaCursor` preferences and the `com.writronic.macursor.translator` items in Keychain Access
 
 ---
-
-## Open Source
-
-MaCursor is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.html). Review the source code to verify these claims.
-
----
-
-## Changes
-
-Updates to this policy will be reflected in the "Last Updated" date and committed to the repository.
 
 ## Contact
 

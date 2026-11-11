@@ -14,25 +14,39 @@ private enum PanelMetrics {
 
 struct MenuBarPanelView: View {
     @ObservedObject var model: MenuBarPanelModel
-    @AppStorage("MACMenuBarCursorTrailsExpanded") private var trailsExpanded = true
+    @AppStorage("MACMenuBarCursorThemesExpanded") private var themesExpanded = true
+    @AppStorage("MACMenuBarActiveAppExpanded") private var activeAppExpanded = false
+    @AppStorage("MACMenuBarCursorCaptureExpanded") private var captureExpanded = false
+    @AppStorage("MACMenuBarQuickControlsExpanded") private var controlsExpanded = false
+    @AppStorage("MACMenuBarCursorTrailsExpanded") private var trailsExpanded = false
     @AppStorage("MACMenuBarFocusOnHoverExpanded") private var ffmDelayExpanded = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: PanelMetrics.sectionSpacing) {
-            header
-            ForEach(model.panelBlocks, id: \.self) { block in
-                panelBlock(block)
-            }
-            if !hasControlsBlock && (needsAccessibilityAccess || needsScreenRecordingAccess) {
-                VStack(alignment: .leading, spacing: 8) {
-                    accessWarnings
+        ScrollViewReader { proxy in
+            ScrollView(.vertical) {
+                VStack(alignment: .leading, spacing: PanelMetrics.sectionSpacing) {
+                    header
+                    ForEach(model.panelBlocks, id: \.self) { block in
+                        panelBlock(block)
+                    }
+                    if !hasControlsBlock && (needsAccessibilityAccess || needsScreenRecordingAccess) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            accessWarnings
+                        }
+                        .controlSize(.small)
+                        .panelCard()
+                    }
                 }
-                .controlSize(.small)
-                .panelCard()
+                .padding(PanelMetrics.padding)
+                .frame(width: PanelMetrics.width)
+                .id("top")
+                .overlayScrollers()
+            }
+            .frame(maxHeight: model.panelMaxHeight)
+            .onChange(of: model.openCount) { _ in
+                proxy.scrollTo("top", anchor: .top)
             }
         }
-        .padding(PanelMetrics.padding)
-        .frame(width: PanelMetrics.width)
         .background(Color(nsColor: .windowBackgroundColor).opacity(model.panelBackdropAlpha))
     }
 
@@ -121,19 +135,21 @@ struct MenuBarPanelView: View {
 
     private var themesSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            sectionTitle(MenuBarL("Cursor Themes"))
-            if model.themes.isEmpty {
-                emptyThemes(MenuBarL("No cursor themes yet"), caption: nil)
-            } else if model.favoriteThemes.isEmpty {
-                emptyThemes(MenuBarL("No favorite themes yet"),
-                            caption: MenuBarL("Mark themes as favorites in MaCursor to show them here."))
-            } else if model.favoriteThemes.count <= PanelMetrics.gridInlineLimit {
-                themeGrid
-            } else {
-                ScrollView(.vertical) {
+            sectionTitle(MenuBarL("Cursor Themes"), isExpanded: $themesExpanded)
+            if themesExpanded {
+                if model.themes.isEmpty {
+                    emptyThemes(MenuBarL("No cursor themes yet"), caption: nil)
+                } else if model.favoriteThemes.isEmpty {
+                    emptyThemes(MenuBarL("No favorite themes yet"),
+                                caption: MenuBarL("Mark themes as favorites in MaCursor to show them here."))
+                } else if model.favoriteThemes.count <= PanelMetrics.gridInlineLimit {
                     themeGrid
+                } else {
+                    ScrollView(.vertical) {
+                        themeGrid.overlayScrollers()
+                    }
+                    .frame(height: PanelMetrics.gridMaxHeight)
                 }
-                .frame(height: PanelMetrics.gridMaxHeight)
             }
         }
     }
@@ -180,69 +196,65 @@ struct MenuBarPanelView: View {
 
     private var activeAppSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            sectionTitle(MenuBarL("Active App"))
-            VStack(alignment: .leading, spacing: 8) {
-                if let name = model.frontDisplayName {
-                    HStack(spacing: 8) {
-                        if let icon = model.frontIcon {
-                            Image(nsImage: icon)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 24, height: 24)
-                                .accessibilityHidden(true)
-                        }
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(name)
-                                .font(.system(size: 12, weight: .semibold))
-                                .lineLimit(1)
-                            Text(activeAppCaption)
-                                .font(.system(size: 10))
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                        }
-                        Spacer(minLength: 0)
+            sectionTitle(MenuBarL("Per-App Themes"), isExpanded: $activeAppExpanded)
+            if activeAppExpanded {
+                VStack(alignment: .leading, spacing: 8) {
+                    Toggle(isOn: binding(model.switchByApp, model.setSwitchByApp)) {
+                        Text(MenuBarL("Per-App Themes")).frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    HStack(spacing: 8) {
-                        Text(MenuBarL("Cursor for this app"))
-                            .font(.system(size: 12))
-                        Spacer(minLength: 8)
-                        Picker(MenuBarL("Cursor for this app"), selection: frontRuleBinding) {
-                            Text(MenuBarL("None")).tag("")
-                            ForEach(model.appRuleChoices) { theme in
-                                Text(theme.name).tag(theme.id)
-                            }
-                        }
-                        .labelsHidden()
-                        .pickerStyle(.menu)
+                        .toggleStyle(.switch)
                         .controlSize(.small)
-                        .font(.system(size: 11))
-                    }
-                    if model.cursorGestures.enabled && model.accessibilityTrusted {
-                        Toggle(isOn: binding(model.ignoresFrontApp, model.ignoreFrontApp)) {
-                            Text(MenuBarL("Ignore Cursor Gestures")).frame(maxWidth: .infinity, alignment: .leading)
+                        .font(.system(size: 12))
+                    if model.switchByApp {
+                        if let name = model.frontDisplayName {
+                            HStack(spacing: 8) {
+                                if let icon = model.frontIcon {
+                                    Image(nsImage: icon)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .frame(width: 24, height: 24)
+                                        .accessibilityHidden(true)
+                                }
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(name)
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .lineLimit(1)
+                                    Text(activeAppCaption)
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(1)
+                                }
+                                Spacer(minLength: 0)
+                            }
+                            HStack(spacing: 8) {
+                                Text(MenuBarL("Cursor for this app"))
+                                    .font(.system(size: 12))
+                                Spacer(minLength: 8)
+                                Picker(MenuBarL("Cursor for this app"), selection: frontRuleBinding) {
+                                    Text(MenuBarL("None")).tag("")
+                                    ForEach(model.appRuleChoices) { theme in
+                                        Text(theme.name).tag(theme.id)
+                                    }
+                                }
+                                .labelsHidden()
+                                .pickerStyle(.menu)
+                                .controlSize(.small)
+                                .font(.system(size: 11))
+                            }
+                        } else {
+                            Text(MenuBarL("No app in front"))
+                                .font(.system(size: 11))
+                                .foregroundStyle(.secondary)
                         }
-                            .toggleStyle(.switch)
-                            .controlSize(.small)
-                            .font(.system(size: 12))
                     }
-                } else {
-                    Text(MenuBarL("No app in front"))
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
                 }
-                Toggle(isOn: binding(model.switchByApp, model.setSwitchByApp)) {
-                    Text(MenuBarL("Per-App Themes")).frame(maxWidth: .infinity, alignment: .leading)
-                }
-                    .toggleStyle(.switch)
-                    .controlSize(.small)
-                    .font(.system(size: 12))
+                .panelCard()
             }
-            .panelCard()
         }
     }
 
     private var activeAppCaption: String {
-        if model.switchByApp, let rule = model.frontRuleThemeIdentifier, let name = model.name(forTheme: rule) {
+        if let rule = model.frontRuleThemeIdentifier, let name = model.name(forTheme: rule) {
             return String(format: MenuBarL("Uses %@"), name)
         }
         return MenuBarL("Uses the current cursor")
@@ -260,17 +272,19 @@ struct MenuBarPanelView: View {
 
     private func quickControlsSection(_ items: [MACMenuBarItem]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            sectionTitle(MenuBarL("Quick Controls"))
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(items, id: \.self) { item in
-                    quickControlRows(item)
+            sectionTitle(MenuBarL("Quick Controls"), isExpanded: $controlsExpanded)
+            if controlsExpanded {
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(items, id: \.self) { item in
+                        quickControlRows(item)
+                    }
+                    accessWarnings
                 }
-                accessWarnings
+                .toggleStyle(.switch)
+                .controlSize(.small)
+                .font(.system(size: 12))
+                .panelCard()
             }
-            .toggleStyle(.switch)
-            .controlSize(.small)
-            .font(.system(size: 12))
-            .panelCard()
         }
     }
 
@@ -395,21 +409,7 @@ struct MenuBarPanelView: View {
 
     private var cursorTrailsSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Button {
-                withAnimation(.easeOut(duration: 0.15)) { trailsExpanded.toggle() }
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 8.5, weight: .bold))
-                        .foregroundStyle(.secondary)
-                        .rotationEffect(.degrees(trailsExpanded ? 90 : 0))
-                        .accessibilityHidden(true)
-                    sectionTitle(MenuBarL("Cursor Trails"))
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
+            sectionTitle(MenuBarL("Cursor Trails"), isExpanded: $trailsExpanded)
             if trailsExpanded {
                 VStack(spacing: 0) {
                     trailsRow(MenuBarL("Cursor Trails"), icon: "cursorarrow.motionlines", key: \.enabled, isOn: model.cursorTrails.enabled)
@@ -475,12 +475,26 @@ struct MenuBarPanelView: View {
         }
     }
 
-    private func sectionTitle(_ title: String) -> some View {
-        Text(title)
-            .font(.system(size: 10, weight: .semibold))
-            .kerning(0.5)
-            .textCase(.uppercase)
-            .foregroundStyle(.secondary)
+    private func sectionTitle(_ title: String, isExpanded: Binding<Bool>) -> some View {
+        Button {
+            withAnimation(.easeOut(duration: 0.15)) { isExpanded.wrappedValue.toggle() }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 8.5, weight: .bold))
+                    .foregroundStyle(.secondary)
+                    .rotationEffect(.degrees(isExpanded.wrappedValue ? 90 : 0))
+                    .accessibilityHidden(true)
+                Text(title)
+                    .font(.system(size: 10, weight: .semibold))
+                    .kerning(0.5)
+                    .textCase(.uppercase)
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     private func binding(_ value: Bool, _ update: @escaping (Bool) -> Void) -> Binding<Bool> {
@@ -517,24 +531,39 @@ struct MenuBarPanelView: View {
 
     private func cursorCaptureSection(_ rows: [MACMenuBarCaptureRow]) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            sectionTitle(MenuBarL("Cursor Capture"))
-            VStack(spacing: 0) {
-                ForEach(Array(rows.enumerated()), id: \.element) { index, row in
-                    if index > 0 {
-                        if rows[index - 1].group == row.group {
-                            Divider().padding(.leading, 41).padding(.trailing, 10)
-                        } else {
-                            Divider()
+            sectionTitle(MenuBarL("Cursor Capture"), isExpanded: $captureExpanded)
+            if captureExpanded {
+                VStack(spacing: 0) {
+                    ForEach(Array(rows.enumerated()), id: \.element) { index, row in
+                        if index > 0 {
+                            if rows[index - 1].group == row.group {
+                                Divider().padding(.leading, 41).padding(.trailing, 10)
+                            } else {
+                                Divider()
+                            }
+                        }
+                        if let item = row.capture {
+                            captureRow(item)
+                        } else if let item = row.file {
+                            fileRow(item)
                         }
                     }
-                    if let item = row.capture {
-                        captureRow(item)
-                    } else if let item = row.file {
-                        fileRow(item)
-                    }
+                }
+                .panelCard(padding: 0)
+            }
+        }
+        .overlay {
+            ForEach(rows.compactMap(\.file), id: \.self) { item in
+                if let key = item.commandKey {
+                    Button { model.open(item) } label: { EmptyView() }
+                        .keyboardShortcut(KeyEquivalent(key), modifiers: .command)
+                        .disabled(!model.isEnabled(item))
+                        .frame(width: 0, height: 0)
+                        .opacity(0)
+                        .allowsHitTesting(false)
+                        .accessibilityHidden(true)
                 }
             }
-            .panelCard(padding: 0)
         }
     }
 
@@ -591,7 +620,6 @@ struct MenuBarPanelView: View {
         }
         .buttonStyle(.plain)
         .disabled(!enabled)
-        .keyboardShortcut(item.commandKey.map { KeyboardShortcut(KeyEquivalent($0), modifiers: .command) })
     }
 }
 

@@ -154,6 +154,11 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate {
         updateDetailView()
     }
 
+    func select(_ tab: SettingsTab) {
+        selectedTab = tab
+        updateSidebarView()
+    }
+
     override func showWindow(_ sender: Any?) {
         let wasAlreadyVisible = window?.isVisible ?? false
         super.showWindow(sender)

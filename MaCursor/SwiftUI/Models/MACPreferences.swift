@@ -49,6 +49,7 @@ enum MACPreferences {
     static let menuBarHiddenCaptureRowsKey = "MACMenuBarHiddenCaptureRows"
     static let favoriteThemesKey         = "MACFavoriteThemes"
     static let pendingOpenSettingsKey    = "MACPendingOpenSettings"
+    static let pendingSettingsTabKey     = "MACPendingSettingsTab"
     static let pendingFFMAccessWindowKey = "MACPendingFFMAccessWindow"
     static let pendingGesturesAccessWindowKey = "MACPendingGesturesAccessWindow"
     static let pendingShakerAccessWindowKey = "MACPendingShakerAccessWindow"
@@ -126,8 +127,14 @@ enum MACPreferences {
     }
 
     static func set(_ value: Any?, forKey key: String, user: CFString, host: CFString, operations: Operations = .live) {
+        let shown = MACMenuBarRows(turnedOnBy: key).flatMap { rows -> (items: [MACMenuBarItem], captureRows: [MACMenuBarCaptureRow])? in
+            guard MACMenuBarFeatureIsOn(value, key: key) else { return nil }
+            operations.synchronize(domain, user, host)
+            return MACMenuBarFeatureIsOn(operations.read(key as CFString, domain, user, host), key: key) ? nil : rows
+        }
         operations.write(key as CFString, value, domain, user, host)
         operations.synchronize(domain, user, host)
+        if let shown { MACMenuBarShowRows(shown, operations: operations) }
     }
 
     static func setFlag(_ value: Bool, forKey key: String, operations: Operations = .live) {

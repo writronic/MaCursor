@@ -106,7 +106,7 @@ enum CursorTrailsPalette: String, Codable, CaseIterable {
 }
 
 enum CursorTrailsStyle: String, Codable, CaseIterable {
-    case line, softDots
+    case line, softDots, cursorCopies
 
     static let pause: TimeInterval = 0.1
 
@@ -125,6 +125,10 @@ enum CursorTrailsStyle: String, Codable, CaseIterable {
     }
 }
 
+enum CursorTrailsEchoesColors: String, Codable, CaseIterable {
+    case glow, style
+}
+
 struct CursorTrailsConfig: Codable, Equatable {
     static let lengths = 2...11
     static let defaultLength = 6
@@ -140,10 +144,17 @@ struct CursorTrailsConfig: Codable, Equatable {
     var length = CursorTrailsConfig.defaultLength
     var width = CursorTrailsConfig.defaultWidth
     var glow = false
+    var echoesColors = CursorTrailsEchoesColors.glow
 
     var lifetime: TimeInterval { Double(length) / 10 }
 
     var emits: Bool { style == .softDots && useGPU && Self.hasMetal }
+
+    var drawsCopies: Bool { style == .cursorCopies }
+
+    func painted(_ copy: CursorTrailsCopy, stops: [UInt32]) -> CursorTrailsCopy {
+        echoesColors == .style ? copy.tinted(stops, count: length) : copy
+    }
 
     static func load() -> CursorTrailsConfig {
         CFPreferencesSynchronize(MACPreferences.domain, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
@@ -221,6 +232,7 @@ extension CursorTrailsConfig {
         length = clamped(.length, to: Self.lengths, or: Self.defaultLength)
         width = clamped(.width, to: Self.widths, or: Self.defaultWidth)
         glow = (try? container.decode(Bool.self, forKey: .glow)) ?? false
+        echoesColors = (try? container.decode(CursorTrailsEchoesColors.self, forKey: .echoesColors)) ?? .glow
     }
 }
 
@@ -239,6 +251,116 @@ struct CursorTrailsSample: Equatable {
             samples.append(CursorTrailsSample(point: tip, time: now))
         }
         return samples.filter { now - $0.time < length }
+    }
+}
+
+struct CursorTrailsCopy {
+    let image: CGImage
+    let size: CGSize
+    let hotSpot: CGPoint
+    var tints: [CGImage] = []
+
+    init?(theme: [AnyHashable: Any]?, scale: Double, leftHanded: Bool) {
+        let cursors = theme?[MACCursorDefinitions.cursorsKey] as? [AnyHashable: Any]
+        guard let entry = ["com.apple.coregraphics.Arrow", "com.apple.coregraphics.ArrowS"].lazy
+                .compactMap({ cursors?[$0] as? [AnyHashable: Any] })
+                .first(where: { !(($0[MACCursorDefinitions.representationsKey] as? [Any]) ?? []).isEmpty }),
+              let strip = (entry[MACCursorDefinitions.representationsKey] as? [Any]).flatMap(MACSharpestRepresentation)?.image else { return nil }
+        func number(_ key: String) -> CGFloat { CGFloat((entry[key] as? NSNumber)?.doubleValue ?? 0) }
+        let frames = max((entry[MACCursorDefinitions.frameCountKey] as? NSNumber)?.intValue ?? 1, 1)
+        let declared = CGSize(width: number(MACCursorDefinitions.pointsWideKey), height: number(MACCursorDefinitions.pointsHighKey))
+        guard declared.width > 0, declared.height > 0,
+              let frame = strip.cropping(to: CGRect(x: 0, y: 0, width: strip.width, height: max(strip.height / frames, 1))) else { return nil }
+        var hot = CGPoint(x: number(MACCursorDefinitions.hotSpotXKey), y: number(MACCursorDefinitions.hotSpotYKey))
+        var picture = frame
+        if leftHanded {
+            hot.x = declared.width - hot.x - 1
+            guard let context = MACCursorShadow.makeContext(width: frame.width, height: frame.height) else { return nil }
+            context.translateBy(x: CGFloat(frame.width), y: 0)
+            context.scaleBy(x: -1, y: 1)
+            context.draw(frame, in: CGRect(x: 0, y: 0, width: frame.width, height: frame.height))
+            guard let flipped = context.makeImage() else { return nil }
+            picture = flipped
+        }
+        let fit = min(MACCursorDefinitions.maxPointSize / max(declared.width, declared.height), 1) * CGFloat(scale > 0 ? scale : 1)
+        image = picture
+        size = CGSize(width: declared.width * fit, height: declared.height * fit)
+        hotSpot = CGPoint(x: hot.x * fit, y: hot.y * fit)
+    }
+
+    init?(theme: [AnyHashable: Any]?, baseline: @autoclosure () -> [AnyHashable: Any]?, scale: Double, leftHanded: Bool) {
+        guard let copy = CursorTrailsCopy(theme: theme, scale: scale, leftHanded: leftHanded)
+                ?? CursorTrailsCopy(theme: baseline(), scale: scale, leftHanded: false) else { return nil }
+        self = copy
+    }
+
+    func tinted(_ stops: [UInt32], count: Int) -> CursorTrailsCopy {
+        var copy = self
+        let area = CGRect(x: 0, y: 0, width: image.width, height: image.height)
+        copy.tints = (0..<count).map { age in
+            guard let context = MACCursorShadow.makeContext(width: image.width, height: image.height) else { return image }
+            context.draw(image, in: area)
+            context.setBlendMode(.sourceIn)
+            context.setFillColor(CursorTrailsPalette.color(at: 1 - CGFloat(age) / CGFloat(max(count - 1, 1)), stops: stops, alpha: 1))
+            context.fill(area)
+            return context.makeImage() ?? image
+        }
+        return copy
+    }
+
+    static func advance(_ samples: [CursorTrailsSample], to tip: CGPoint, at now: TimeInterval, count: Int) -> [CursorTrailsSample] {
+        let kept = Array((samples + [CursorTrailsSample(point: tip, time: now)]).suffix(count + 1))
+        let caughtUp = kept.count > count && !kept.contains { MACFFMMovementExceedsThreshold($0.point, tip, 0.5) }
+        return caughtUp ? [] : kept
+    }
+
+    var pictures: [CGImage] { tints.isEmpty ? [image] : tints }
+
+    func frame(at spot: CGPoint) -> CGRect {
+        CGRect(x: spot.x - hotSpot.x, y: spot.y + hotSpot.y - size.height, width: size.width, height: size.height)
+    }
+
+    func sprites(_ samples: [CursorTrailsSample], tip: CGPoint, fade: Bool) -> [CursorTrailsSprite] {
+        samples.enumerated().filter { MACFFMMovementExceedsThreshold($0.element.point, tip, 0.5) }.map { index, sample in
+            CursorTrailsSprite(frame: frame(at: sample.point), alpha: fade ? CGFloat(index + 1) / CGFloat(samples.count) : 1,
+                               picture: tints.isEmpty ? 0 : min(max(samples.count - 2 - index, 0), tints.count - 1))
+        }
+    }
+
+    func picture(_ samples: [CursorTrailsSample], tip: CGPoint, fade: Bool, in screen: CGRect, scale: CGFloat) -> (frame: CGRect, image: CGImage)? {
+        let sprites = sprites(samples, tip: tip, fade: fade)
+        let pictures = pictures
+        return CursorTrailsPiece.picture(sprites.reduce(CGRect.null) { $0.union($1.frame) }, in: screen, scale: scale) { context in
+            for sprite in sprites {
+                context.setAlpha(sprite.alpha)
+                context.draw(pictures[sprite.picture], in: sprite.frame)
+            }
+        }
+    }
+
+    static func bgra(_ picture: CGImage) -> Data? {
+        guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+              let context = CGContext(data: nil, width: picture.width, height: picture.height, bitsPerComponent: 8, bytesPerRow: picture.width * 4, space: space,
+                                      bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue | CGBitmapInfo.byteOrder32Little.rawValue),
+              let data = context.data else { return nil }
+        context.draw(picture, in: CGRect(x: 0, y: 0, width: picture.width, height: picture.height))
+        return Data(bytes: data, count: context.bytesPerRow * picture.height)
+    }
+}
+
+struct CursorTrailsSprite: Equatable {
+    let frame: CGRect
+    let alpha: CGFloat
+    let picture: Int
+
+    static func quads(_ sprites: [CursorTrailsSprite]) -> [CursorTrailsVertex] {
+        sprites.enumerated().flatMap { index, sprite in
+            let depth = Float(sprites.count - index) / Float(sprites.count + 1)
+            return [CGPoint(x: sprite.frame.minX, y: sprite.frame.maxY), CGPoint(x: sprite.frame.maxX, y: sprite.frame.maxY),
+                    CGPoint(x: sprite.frame.minX, y: sprite.frame.minY), CGPoint(x: sprite.frame.maxX, y: sprite.frame.minY)].map {
+                CursorTrailsVertex(position: SIMD4(Float($0.x), Float($0.y), depth, 1), color: SIMD4(repeating: Float(sprite.alpha)))
+            }
+        }
     }
 }
 
