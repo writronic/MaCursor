@@ -28,7 +28,7 @@ enum WelcomePage: Int, CaseIterable {
         switch self {
         case .welcome: return [.showMenuBarIcon]
         case .cursorLook: return [.cursorTrails, .cursorShadow]
-        case .accessibility: return [.focusOnHover, .cursorGestures, .cursorShaker]
+        case .accessibility: return [.focusOnHover, .cursorGestures, .cursorShaker, .cursorBoard]
         case .screenRecording: return [.cursorTranslator, .cursorCapture]
         case .rightClickMenu: return [.rightClickMenu]
         case .support, .menuBar, .allSet: return []
@@ -82,13 +82,23 @@ enum WelcomePage: Int, CaseIterable {
 
 enum WelcomeLayout {
     static let styleMask: NSWindow.StyleMask = [.titled, .closable]
-    static let frameSize = NSSize(width: 1075, height: 694)
+    static let frameSize = NSSize(width: 1075, height: 805)
+    static let screenMargin: CGFloat = 8
     static let columnWidth: CGFloat = 640
     static let padding: CGFloat = 28
     static let menuBarCardHeight: CGFloat = 380
 
     static var contentSize: NSSize {
-        NSWindow.contentRect(forFrameRect: NSRect(origin: .zero, size: frameSize), styleMask: styleMask).size
+        contentSize(visibleHeight: .infinity)
+    }
+
+    static func frameHeight(visibleHeight: CGFloat) -> CGFloat {
+        min(frameSize.height, visibleHeight - screenMargin)
+    }
+
+    static func contentSize(visibleHeight: CGFloat) -> NSSize {
+        let frame = NSRect(x: 0, y: 0, width: frameSize.width, height: frameHeight(visibleHeight: visibleHeight))
+        return NSWindow.contentRect(forFrameRect: frame, styleMask: styleMask).size
     }
 }
 
@@ -143,17 +153,21 @@ struct WelcomeContent: View {
     let turn: (WelcomePage?) -> Void
     let pressMain: () -> Void
     var preferences: MACPreferences.Operations = .live
+    var height = WelcomeLayout.contentSize.height
 
     var body: some View {
         VStack(spacing: 16) {
-            WelcomePageView(page: page, snapshot: snapshot, toggle: toggle, grant: grant, preferences: preferences)
-                .frame(maxHeight: .infinity, alignment: page.isCentred ? .center : .top)
+            GeometryReader { room in
+                ScrollView {
+                    WelcomePageView(page: page, snapshot: snapshot, toggle: toggle, grant: grant, preferences: preferences)
+                        .frame(maxWidth: .infinity, minHeight: room.size.height, alignment: page.isCentred ? .center : .top)
+                }
+            }
             bottomRow
         }
         .padding(WelcomeLayout.padding)
         .controlSize(.large)
-        .frame(width: WelcomeLayout.contentSize.width)
-        .frame(minHeight: WelcomeLayout.contentSize.height)
+        .frame(width: WelcomeLayout.contentSize.width, height: height)
     }
 
     private var bottomRow: some View {
@@ -286,6 +300,7 @@ struct WelcomePageView: View {
         card(.focusOnHover)
         card(.cursorGestures)
         card(.cursorShaker)
+        card(.cursorBoard)
         helperNote(Text("Install the Helper Tool to use the switches on this page."))
     }
 

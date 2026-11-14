@@ -29,7 +29,7 @@ extension CursorScreenshotOutput {
     }
 
     func encode(_ image: CGImage, scale: CGFloat, density: CGFloat? = nil, as format: CursorScreenshotFormat) -> Data? {
-        format.data(of: apply(image, scale: scale), scale: shownScale(scale) * (density ?? scale) / scale)
+        format.data(of: apply(image, scale: scale), scale: shownDensity(scale, density: density ?? scale))
     }
 }
 

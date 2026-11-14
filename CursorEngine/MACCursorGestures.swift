@@ -155,7 +155,7 @@ enum CursorGestureOperation: String, Codable, CaseIterable {
          minimize, closeWindow, hideApp, volumeUp, volumeDown, mute, brightnessUp, brightnessDown, sleep, screenSaver,
          nextFavoriteTheme, systemCursors, screenshotArea,
          capturePreviousArea, captureFullscreen, captureSelfTimer, captureText, captureOpen, captureOpenClipboard, capturePin, captureHistory,
-         cursorShadow, focusOnHover, cursorTranslator, cursorShaker, cursorTrails, switchByApp
+         cursorShadow, focusOnHover, cursorTranslator, cursorShaker, cursorTrails, switchByApp, showRecentItems, showCursorBoard
 
     var capture: MACMenuBarCaptureItem? {
         switch self {
@@ -170,6 +170,10 @@ enum CursorGestureOperation: String, Codable, CaseIterable {
 
     var needsCursorCapture: Bool {
         capture != nil || [.captureOpen, .captureOpenClipboard, .capturePin, .captureHistory].contains(self)
+    }
+
+    var needsCursorBoard: Bool {
+        self == .showRecentItems || self == .showCursorBoard
     }
 }
 
@@ -818,6 +822,8 @@ enum CursorGestures {
         action("copy", "Copy", String(localized: "Put the selection on the clipboard"), "doc.on.doc", .clipboard, key(8, "c", .command)),
         action("cut", "Cut", String(localized: "Move the selection to the clipboard"), "scissors", .clipboard, key(7, "x", .command)),
         action("paste", "Paste", String(localized: "Insert what is on the clipboard"), "doc.on.clipboard", .clipboard, key(9, "v", .command)),
+        operation(.showRecentItems, "Show Recent Items", String(localized: "Show your last copies next to the pointer"), "list.clipboard", .clipboard),
+        operation(.showCursorBoard, "Show Cursor Board", String(localized: "Open the panel at the screen edge"), "sidebar.right", .clipboard),
         snap(.leftHalf, "Left Half", "rectangle.lefthalf.filled"),
         snap(.rightHalf, "Right Half", "rectangle.righthalf.filled"),
         snap(.topHalf, "Top Half", "rectangle.tophalf.filled"),
@@ -1323,9 +1329,9 @@ final class CursorGestureShared: @unchecked Sendable {
 
 enum CursorGestureNote {
     case update([CGPoint], CursorGestureTrigger, finished: Bool)
-    case play(CursorGesture?)
+    case play(CursorGesture?, keys: UInt)
     case frame(CursorTranslatorNote)
-    case capture(UInt32)
+    case capture(UInt32, keys: UInt)
 }
 
 struct CursorGestureInput {
@@ -1423,7 +1429,7 @@ struct CursorGestureInput {
                                                device: CursorGestureDevice(subtype: event.getIntegerValueField(.mouseEventSubtype)))
             if let capture = snapshot.captures.first(where: { $0.trigger.overlaps(pressed) }) {
                 swallowing.insert(pressed.button ?? 0)
-                notes.append(.capture(capture.id))
+                notes.append(.capture(capture.id, keys: capture.trigger.keys))
                 return true
             }
         }
@@ -1535,7 +1541,7 @@ struct CursorGestureInput {
 
     private mutating func released(_ ended: CursorGesturePress, _ snapshot: CursorGestureSnapshot, at now: TimeInterval) {
         guard let point = ended.click else { return finish(ended.points, ended.trigger, snapshot) }
-        if let gesture = snapshot.config.clicked(ended.trigger, front: snapshot.front) { return play(gesture) }
+        if let gesture = snapshot.config.clicked(ended.trigger, front: snapshot.front) { return play(gesture, keys: ended.trigger.keys) }
         clicks.append((ended.button, flip(point, snapshot), ended.trigger.keys))
         unanswered = unanswered ?? now
         update()
@@ -1547,7 +1553,7 @@ struct CursorGestureInput {
             guard let next = ongoing.click(live.points, at: now, config: snapshot.config, front: snapshot.front) else { return }
             repeating = ongoing
             clearCurrent()
-            play(next)
+            play(next, keys: ongoing.trigger.keys)
         } else if let entered = CursorGestureRepeat(live.points, trigger: live.trigger, started: began, at: now, config: snapshot.config, front: snapshot.front) {
             repeating = entered
             update(live)
@@ -1564,7 +1570,7 @@ struct CursorGestureInput {
     private mutating func release(_ drawn: [CGPoint], _ snapshot: CursorGestureSnapshot) {
         guard let ending = repeating else { return }
         repeating = nil
-        play(ending.switched(drawn, config: snapshot.config, front: snapshot.front))
+        play(ending.switched(drawn, config: snapshot.config, front: snapshot.front), keys: ending.trigger.keys)
     }
 
     private var keyTrigger: CursorGestureTrigger { CursorGestureTrigger(keys: stroke.trigger.rawValue, device: device) }
@@ -1590,9 +1596,9 @@ struct CursorGestureInput {
         MACFFMConvertToAXPoint(point, snapshot.height)
     }
 
-    private mutating func play(_ gesture: CursorGesture?) {
+    private mutating func play(_ gesture: CursorGesture?, keys: UInt) {
         shown = false
-        notes.append(.play(gesture))
+        notes.append(.play(gesture, keys: keys))
     }
 
     private mutating func update(_ finished: (points: [CGPoint], trigger: CursorGestureTrigger)? = nil) {
@@ -1710,6 +1716,20 @@ enum CursorGestureKeys {
         for down in [true, false] {
             post(CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: down), flags)
         }
+    }
+
+    static func pasteEvents(_ keyCode: CGKeyCode) -> [CGEvent] {
+        let source = CGEventSource(stateID: .privateState)
+        return [true, false].compactMap { down in
+            guard let event = CGEvent(keyboardEventSource: source, virtualKey: keyCode, keyDown: down) else { return nil }
+            event.flags = CursorBoard.pasteFlags
+            event.setIntegerValueField(.eventSourceUserData, value: marker)
+            return event
+        }
+    }
+
+    @MainActor static func paste() {
+        pasteEvents(keyCode(for: CursorBoard.pasteKey)).forEach { $0.post(tap: .cghidEventTap) }
     }
 
     static func click(_ button: Int, at point: CGPoint, keys: UInt) {

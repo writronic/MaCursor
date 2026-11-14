@@ -177,6 +177,23 @@ func MACMenuBarFavoriteThemeIdentifiers(_ stored: Any?) -> [String] {
     }
 }
 
+struct FavoriteCursorSlot: Identifiable, Codable, Hashable {
+    let id: UUID
+    var themeIdentifier: String?
+    var shortcut: KeyboardShortcutData?
+
+    init(id: UUID = UUID(), themeIdentifier: String? = nil, shortcut: KeyboardShortcutData? = nil) {
+        self.id = id
+        self.themeIdentifier = themeIdentifier
+        self.shortcut = shortcut
+    }
+}
+
+func MACFavoriteKeys(_ stored: Any?) -> [KeyboardShortcutData] {
+    let slots = (stored as? Data).flatMap { try? JSONDecoder().decode([FavoriteCursorSlot].self, from: $0) } ?? []
+    return slots.filter { $0.themeIdentifier != nil }.compactMap(\.shortcut)
+}
+
 func MACMenuBarFavoriteCatalog(_ catalog: [MACMenuBarThemeEntry]?, _ stored: Any?) -> [MACMenuBarThemeEntry] {
     let wanted = Set(MACMenuBarFavoriteThemeIdentifiers(stored))
     return (catalog ?? []).filter { !$0.id.isEmpty && wanted.contains($0.id) }
@@ -260,13 +277,25 @@ enum MACMenuBarCaptureItem: CaseIterable, Sendable {
         }
     }
 
-    func shortcut(in config: CursorScreenshotConfig) -> KeyboardShortcutData? {
+    var field: WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?> {
         switch self {
-        case .area: return config.areaShortcut
-        case .previousArea: return config.repeatShortcut
-        case .fullscreen: return config.wholeScreenShortcut
-        case .selfTimer: return config.selfTimerShortcut
-        case .text: return config.textShortcut
+        case .area: return \.areaShortcut
+        case .previousArea: return \.repeatShortcut
+        case .fullscreen: return \.wholeScreenShortcut
+        case .selfTimer: return \.selfTimerShortcut
+        case .text: return \.textShortcut
+        }
+    }
+
+    func shortcut(in config: CursorScreenshotConfig) -> KeyboardShortcutData? {
+        config[keyPath: field]
+    }
+
+    func shownShortcut(in config: CursorScreenshotConfig, favorites: Any? = MACPreferences.value(forKey: MACPreferences.favoriteCursorsKey),
+                       shaker: CursorShakerConfig = .load(), board: CursorBoardConfig = .load()) -> KeyboardShortcutData? {
+        shortcut(in: config).flatMap {
+            MACCaptureShortcutIsAllowed($0.modifierFlagsRaw, $0.keyCode)
+                && !config.heldElsewhere($0, besides: field, favorites: favorites, shaker: shaker, board: board) ? $0 : nil
         }
     }
 }
@@ -519,15 +548,19 @@ struct KeyboardShortcutData: Codable, Hashable, Equatable {
         NSEvent.ModifierFlags(rawValue: modifierFlagsRaw)
     }
 
-    var displayString: String {
+    var displayString: String { displayString(shortcutLayout()) }
+
+    func displayString(_ layout: Data?) -> String {
         var parts: [String] = []
         if modifierFlags.contains(.control) { parts.append("⌃") }
         if modifierFlags.contains(.option) { parts.append("⌥") }
         if modifierFlags.contains(.shift) { parts.append("⇧") }
         if modifierFlags.contains(.command) { parts.append("⌘") }
 
+        let typed = layout.flatMap { shortcutKey(keyCode, [], $0) }
+            .flatMap { $0.isEmpty || $0.unicodeScalars.contains(where: CharacterSet.controlCharacters.contains) ? nil : $0 }
         let keyStr: String
-        if let char = keyCharacter, !char.isEmpty {
+        if let char = typed ?? keyCharacter, !char.isEmpty {
             keyStr = char == " " ? "Space" : char.uppercased()
         } else {
             keyStr = "?"
@@ -540,21 +573,28 @@ struct KeyboardShortcutData: Codable, Hashable, Equatable {
 
 func MACShortcutIsAllowed(_ modifierFlagsRaw: UInt, _ keyCode: UInt16, _ layout: Data? = shortcutLayout()) -> Bool {
     let modifiers = shortcutModifiers(modifierFlagsRaw)
-    guard !modifiers.isDisjoint(with: [.command, .control]),
-          modifiers != .command, modifiers != [.command, .shift] else { return false }
-    guard let layout, let key = shortcutKey(keyCode, modifiers, layout) else { return true }
+    guard !modifiers.isDisjoint(with: [.command, .control]) else { return false }
+    guard let layout, let key = shortcutKey(keyCode, modifiers, layout) else { return modifiers != .command && modifiers != [.command, .shift] }
     let reserved: Set<String>
     switch modifiers {
+    case .command: reserved = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "z",
+                               "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", " ", "`", ",", ".", "-", "=", "[", "]", ";"]
+    case [.shift, .command]: reserved = ["5", "6", " ", "`", "z", "s", "g", "q", "n", "t", "p", "v", "w", "[", "]", "-", "=", "/"]
     case .control: reserved = ["a", "b", "d", "e", "f", "h", "k", "l", "n", "o", "p", "t", "y", " "]
-    case [.option, .command]: reserved = ["h", "m", "w", " ", "l", "d", "p", "s", "n", "t", "v", "y", "f", "c", "i", "`"]
-    case [.control, .command]: reserved = [" ", "f", "n", "q", "t", "a", "d"]
+    case [.option, .command]: reserved = [" ", "d", "h", "m", "w", "8", "-", "=", "c", "v", "f", "i", "t", "`"]
+    case [.control, .command]: reserved = [" ", "f", "q", "d"]
     case [.control, .option]: reserved = [" "]
     case [.control, .option, .command]: reserved = ["8", ",", "."]
-    case [.control, .shift, .command]: reserved = ["t"]
+    case [.control, .shift, .command]: reserved = ["3", "4"]
     case [.option, .shift, .command]: reserved = ["v", "q"]
     default: reserved = []
     }
     return !reserved.contains(key)
+}
+
+func MACCaptureShortcutIsAllowed(_ modifierFlagsRaw: UInt, _ keyCode: UInt16) -> Bool {
+    MACShortcutIsAllowed(modifierFlagsRaw, keyCode)
+        || (shortcutModifiers(modifierFlagsRaw) == [.command, .shift] && [29, 18, 19, 20, 21, 23, 22, 26, 28, 25].contains(keyCode))
 }
 
 func MACShortcutsCollide(_ keyCode: UInt16, _ modifierFlagsRaw: UInt,
@@ -629,21 +669,13 @@ struct MACOverlayScrollers: NSViewRepresentable {
 }
 
 final class MACOverlayScrollersView: NSView {
-    private var observer: NSObjectProtocol?
+    private var observation: NSKeyValueObservation?
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
         applyOverlay()
-        if window == nil, let observer {
-            NotificationCenter.default.removeObserver(observer)
-            self.observer = nil
-        } else if window != nil, observer == nil {
-            observer = NotificationCenter.default.addObserver(forName: NSScroller.preferredScrollerStyleDidChangeNotification,
-                                                              object: nil, queue: .main) { [weak self] _ in
-                MainActor.assumeIsolated {
-                    DispatchQueue.main.async { self?.applyOverlay() }
-                }
-            }
+        observation = window == nil ? nil : enclosingScrollView?.observe(\.scrollerStyle) { [weak self] _, _ in
+            MainActor.assumeIsolated { self?.applyOverlay() }
         }
     }
 

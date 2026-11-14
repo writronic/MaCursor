@@ -1,17 +1,5 @@
 import SwiftUI
 
-struct FavoriteCursorSlot: Identifiable, Codable, Hashable {
-    let id: UUID
-    var themeIdentifier: String?
-    var shortcut: KeyboardShortcutData?
-
-    init(id: UUID = UUID(), themeIdentifier: String? = nil, shortcut: KeyboardShortcutData? = nil) {
-        self.id = id
-        self.themeIdentifier = themeIdentifier
-        self.shortcut = shortcut
-    }
-}
-
 struct ShortcutSettingsView: View {
     @EnvironmentObject private var library: LibraryViewModel
 
@@ -265,45 +253,16 @@ struct KeyRecorderView: View {
     @State private var eventMonitor: Any?
 
     var body: some View {
-        Button {
+        KeyField(record: "Record Shortcut", press: "Press shortcut…", key: shown?.displayString, recording: isRecording) {
             if isRecording {
                 stopRecording()
             } else {
                 startRecording()
             }
-        } label: {
-            ZStack {
-                Text("Record Shortcut").font(.callout).hidden()
-                Text("Press shortcut…").font(.callout).hidden()
-                if isRecording {
-                    Text("Press shortcut…")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                } else if let shortcut, !isShadowed, MACShortcutIsAllowed(shortcut.modifierFlagsRaw, shortcut.keyCode) {
-                    Text(shortcut.displayString)
-                        .font(.system(.callout, design: .rounded, weight: .medium))
-                } else {
-                    Text("Record Shortcut")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .frame(minWidth: 130, minHeight: 25, maxHeight: 25)
-            .background {
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(isRecording ? Color.accentColor.opacity(0.15) : Color.quaternaryFill)
-            }
-            .overlay {
-                RoundedRectangle(cornerRadius: 6)
-                    .strokeBorder(
-                        isRecording ? Color.accentColor : Color.clear,
-                        lineWidth: 1
-                    )
-            }
+        } clear: {
+            stopRecording()
+            shortcut = nil
         }
-        .buttonStyle(.plain)
         .onChangeCompat(of: isEnabled) { enabled in
             if !enabled {
                 stopRecording()
@@ -319,6 +278,11 @@ struct KeyRecorderView: View {
         .onDisappear {
             stopRecording()
         }
+    }
+
+    private var shown: KeyboardShortcutData? {
+        guard let shortcut, !isShadowed, MACShortcutIsAllowed(shortcut.modifierFlagsRaw, shortcut.keyCode) else { return nil }
+        return shortcut
     }
 
     private func startRecording() {

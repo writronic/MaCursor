@@ -69,6 +69,13 @@ struct CursorScreenshotConfig: Codable, Equatable {
         return rows.filter { $0 != field }.compactMap { self[keyPath: $0] }
     }
 
+    func heldElsewhere(_ candidate: KeyboardShortcutData, besides field: WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?>,
+                       favorites: Any? = MACPreferences.value(forKey: MACPreferences.favoriteCursorsKey),
+                       shaker: CursorShakerConfig = .load(), board: CursorBoardConfig = .load()) -> Bool {
+        let held = MACFavoriteKeys(favorites) + [shaker.shortcut].compactMap { $0 } + board.keys(besides: nil) + keys(besides: field)
+        return CursorScreenshot.refuses(candidate, held: held)
+    }
+
     private static var clickRows: [(id: UInt32, field: WritableKeyPath<CursorScreenshotConfig, CursorGestureTrigger>)] {
         [(CursorScreenshot.wholeScreenHotKeyID, \.wholeScreenClick), (CursorScreenshot.areaHotKeyID, \.areaClick), (CursorScreenshot.repeatHotKeyID, \.repeatClick),
          (CursorScreenshot.textHotKeyID, \.textClick), (CursorScreenshot.selfTimerHotKeyID, \.selfTimerClick)]
@@ -281,6 +288,10 @@ struct CursorScreenshotOutput: Codable, Equatable, Sendable {
     func shownScale(_ scale: CGFloat) -> CGFloat {
         scalesTo1x ? 1 : scale
     }
+
+    func shownDensity(_ scale: CGFloat, density: CGFloat) -> CGFloat {
+        shownScale(scale) * density / scale
+    }
 }
 
 extension CursorScreenshotOutput {
@@ -351,6 +362,102 @@ extension CursorScreenshotTextRecognition {
         keepsLineBreaks = (try? container.decode(Bool.self, forKey: .keepsLineBreaks)) ?? true
         detectsLinks = (try? container.decode(Bool.self, forKey: .detectsLinks)) ?? false
         keepsStyling = (try? container.decode(Bool.self, forKey: .keepsStyling)) ?? false
+    }
+}
+
+struct CursorTrigger: Equatable {
+    static let keys: [(flag: NSEvent.ModifierFlags, glyph: String)] = [(.function, "fn"), (.control, "⌃"), (.option, "⌥"), (.shift, "⇧"), (.command, "⌘")]
+    private static let held = NSEvent.ModifierFlags(keys.map(\.flag)).rawValue
+    private static let keyboard = held & ~NSEvent.ModifierFlags.function.rawValue
+
+    var key: KeyboardShortcutData?
+    var click: CursorGestureTrigger
+    var shadowed = false
+
+    var holdKeys: UInt {
+        get { (click.button == nil ? key?.modifierFlagsRaw ?? click.keys : click.keys) & Self.held }
+        set {
+            if !mixed { key?.modifierFlagsRaw = newValue & Self.keyboard }
+            click.keys = newValue
+        }
+    }
+
+    var mixed: Bool {
+        !shadowed && click.button != nil && key.map { $0.modifierFlagsRaw & Self.held != click.keys & Self.held } ?? false
+    }
+
+    var button: Int? {
+        get { click.button }
+        set {
+            let held = holdKeys
+            let mixed = mixed
+            click.button = newValue
+            if newValue == nil { click.device = .both } else { key = nil }
+            if !mixed { holdKeys = held }
+        }
+    }
+
+    var keyName: String? { name(withKeys: mixed) }
+
+    private func name(withKeys: Bool) -> String? {
+        shadowed ? nil : key.map { KeyboardShortcutData(keyCode: $0.keyCode, modifierFlagsRaw: withKeys ? $0.modifierFlagsRaw : 0, keyCharacter: $0.keyCharacter).displayString }
+    }
+
+    var blocked: Bool {
+        !shadowed && keyCannotWork
+    }
+
+    var keyCannotWork: Bool {
+        key.map { !MACCaptureShortcutIsAllowed($0.modifierFlagsRaw, $0.keyCode) } ?? false
+    }
+
+    var result: String {
+        let keyboard = key.flatMap { key in name(withKeys: false).map { Self.join(key.modifierFlagsRaw & ~NSEvent.ModifierFlags.function.rawValue, $0) } }
+        let mouse = click.button.map { button -> String in
+            let name = switch button {
+            case 0: String(localized: "Left Click")
+            case 1: String(localized: "Right Click")
+            case 2: String(localized: "Middle Click")
+            default: CursorGestureTrigger(button: button).label
+            }
+            return Self.join(click.keys, name)
+        }
+        switch (keyboard, mouse) {
+        case let (keyboard?, mouse?): return String(format: String(localized: "%1$@ or %2$@"), keyboard, mouse)
+        case (let only?, nil), (nil, let only?): return only
+        case (nil, nil): return String(localized: "None")
+        }
+    }
+
+    mutating func record(_ event: NSEvent) {
+        let pressed = event.modifierFlags.rawValue & Self.held
+        if pressed != 0 { holdKeys = pressed }
+        key = KeyboardShortcutData(keyCode: event.keyCode, modifierFlagsRaw: holdKeys & Self.keyboard, keyCharacter: event.characters(byApplyingModifiers: []))
+        button = nil
+    }
+
+    func recorded(_ event: NSEvent) -> CursorTrigger {
+        var next = self
+        next.record(event)
+        return next
+    }
+
+    func recording(_ event: NSEvent, isTaken: (CursorTrigger) -> Bool) -> CursorTrigger? {
+        let next = recorded(event)
+        return (shadowed && next.key == key) || next.keyCannotWork || isTaken(next) ? nil : next
+    }
+
+    func refuses(_ next: CursorTrigger) -> Bool {
+        next.keyCannotWork && next.key != key
+    }
+
+    mutating func removeKey() {
+        if click.button == nil { click.keys = holdKeys }
+        key = nil
+    }
+
+    private static func join(_ flags: UInt, _ name: String) -> String {
+        (keys.filter { NSEvent.ModifierFlags(rawValue: flags).contains($0.flag) }.map(\.glyph) + [name]).joined(separator: " + ")
     }
 }
 

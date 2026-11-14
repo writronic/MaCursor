@@ -192,7 +192,8 @@ final class HelperRuntime {
     private let cursorShaker = CursorShakerController()
     private let cursorTranslator = CursorTranslatorController()
     private let cursorScreenshot = CursorScreenshotController()
-    private var captureClicks = CursorScreenshotConfig.load().clicks
+    private let cursorBoard = CursorBoardController()
+    private var captureClicks = CursorScreenshotConfig.load().clicks + CursorBoardConfig.load().clicks
     private let autoSwitchSchedule = MACAutoSwitchScheduleTimer()
 
     func run() {
@@ -258,6 +259,8 @@ final class HelperRuntime {
         observeDistributed(Notification.Name.MACCursorShakerDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorTranslatorDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorScreenshotDidChange.rawValue)
+        observeDistributed(Notification.Name.MACCursorBoardDidChange.rawValue)
+        observeDistributed(Notification.Name.MACCursorBoardClearHistory.rawValue)
         observeDistributed(Notification.Name.MACAppearanceDidChange.rawValue)
         observeDistributed(inputSourceChanged)
         for name in RightClickMenuHandoff.requests.keys {
@@ -269,6 +272,7 @@ final class HelperRuntime {
                 guard self?.running == true else { return }
                 self?.focusController.noteSpaceChange()
                 self?.cursorGestures.cancel()
+                self?.cursorBoard.close(.space)
             }
         })
         workspaceObservers.append(center.addObserver(forName: NSWorkspace.didWakeNotification,
@@ -287,7 +291,7 @@ final class HelperRuntime {
         autoSwitchSchedule.start()
         focusController.strokesEnabled = { [weak self] in
             (self?.cursorGestures.wantsTrust ?? false) || (self?.cursorShaker.wantsTrust ?? false) || (self?.cursorTranslator.wantsTrust ?? false)
-                || !(self?.captureClicks.isEmpty ?? true)
+                || (self?.cursorBoard.wantsTrust ?? false) || !(self?.captureClicks.isEmpty ?? true)
         }
         focusController.strokeInProgress = { [weak self] in self?.cursorGestures.isDrawing ?? false }
         focusController.trustWillCheck = { [weak self] in self?.cursorTranslator.probeAhead() }
@@ -300,8 +304,10 @@ final class HelperRuntime {
         cursorGestures.framed = { [weak self] in self?.cursorTranslator.received($0) }
         cursorGestures.captures = { [weak self] in self?.captureClicks ?? [] }
         cursorGestures.capturing = { [weak self] in self?.cursorScreenshot.isOpen ?? false }
-        cursorGestures.captured = { [weak self] in _ = self?.hotKeyPressed(signature: Self.hotKeySignature, id: $0, clicked: true) }
+        cursorGestures.captured = { [weak self] in _ = self?.hotKeyPressed(signature: Self.hotKeySignature, id: $0, keys: $1) }
         cursorGestures.history = { [weak self] in self?.cursorScreenshot.showHistory() }
+        cursorGestures.recentItems = { [weak self] in self?.cursorBoard.toggleList() }
+        cursorGestures.cursorBoard = { [weak self] in self?.cursorBoard.togglePanel() }
         cursorGestures.screenRecording = { [weak self] in
             guard let self else { return false }
             self.cursorTranslator.probe()
@@ -311,6 +317,10 @@ final class HelperRuntime {
         cursorGestures.raiseWindow = { [weak self] in self?.focusController.raise($0) ?? false }
         cursorGestures.windowUnderPointer = { [weak self] in self?.focusController.windowUnderPointer() }
         cursorGestures.windowFrame = { [weak self] in self?.focusController.copyWindowFrame($0) }
+        cursorBoard.foreground = { [weak self] in self?.foregroundBundleID() }
+        cursorBoard.busy = { [weak self] in (self?.cursorScreenshot.isOpen ?? false) || (self?.cursorGestures.isDrawing ?? false) }
+        cursorBoard.trusted = { [weak self] in self?.focusController.lastTrusted ?? false }
+        cursorBoard.configChanged()
         focusController.start()
         focusController.syncTrust()
         cursorTrails.start()
@@ -336,6 +346,7 @@ final class HelperRuntime {
         let wasRunning = running
         running = false
         cursorScreenshot.closeOverlay()
+        cursorBoard.stop()
         displayTimer?.cancel()
         activationTimer?.cancel()
         displayTimer = nil
@@ -432,12 +443,25 @@ final class HelperRuntime {
             CursorScreenshotHistory.clean()
             unregisterHotKeys()
             registerHotKeys()
-            captureClicks = CursorScreenshotConfig.load().clicks
+            captureClicks = CursorScreenshotConfig.load().clicks + CursorBoardConfig.load().clicks
             if focusController.lastTrusted {
                 cursorGestures.sync(trusted: true)
             } else {
                 focusController.syncTrust()
             }
+        case Notification.Name.MACCursorBoardDidChange.rawValue:
+            let wanted = cursorBoard.wantsTrust
+            cursorBoard.configChanged()
+            unregisterHotKeys()
+            registerHotKeys()
+            captureClicks = CursorScreenshotConfig.load().clicks + CursorBoardConfig.load().clicks
+            if focusController.lastTrusted, cursorBoard.wantsTrust == wanted {
+                cursorGestures.sync(trusted: true)
+            } else {
+                focusController.syncTrust()
+            }
+        case Notification.Name.MACCursorBoardClearHistory.rawValue:
+            cursorBoard.clearHistory()
         case Notification.Name.MACCursorTrailsDidChange.rawValue:
             cursorTrails.start()
             menuBarController?.refreshTrails()
@@ -532,6 +556,7 @@ final class HelperRuntime {
     fileprivate func displayChanged() {
         guard running else { return }
         cursorScreenshot.closeOverlay()
+        cursorBoard.close(.display)
         displayTimer?.cancel()
         let deadline = displayDebounce.replaceDeadline(at: .now())
         let timer = DispatchSource.makeTimerSource(queue: .main)
@@ -616,9 +641,26 @@ final class HelperRuntime {
                               (CursorScreenshot.textHotKeyID, screenshot.textShortcut),
                               (CursorScreenshot.selfTimerHotKeyID, screenshot.selfTimerShortcut)]
         for (keyID, key) in screenshotKeys where screenshot.enabled {
-            guard let shortcut = key, MACShortcutIsAllowed(shortcut.modifierFlagsRaw, shortcut.keyCode) else { continue }
+            guard let shortcut = key, MACCaptureShortcutIsAllowed(shortcut.modifierFlagsRaw, shortcut.keyCode) else { continue }
             var reference: EventHotKeyRef?
             let id = EventHotKeyID(signature: Self.hotKeySignature, id: keyID)
+            if RegisterEventHotKey(UInt32(shortcut.keyCode), HelperEventPolicy.carbonModifiers(shortcut.modifierFlagsRaw), id,
+                                   GetApplicationEventTarget(), 0, &reference) == noErr, let reference {
+                hotKeyRefs.append(reference)
+            }
+        }
+        let board = CursorBoardConfig.load()
+        if board.enabled, let shortcut = board.listShortcut, MACCaptureShortcutIsAllowed(shortcut.modifierFlagsRaw, shortcut.keyCode) {
+            var reference: EventHotKeyRef?
+            let id = EventHotKeyID(signature: Self.hotKeySignature, id: CursorBoard.listHotKeyID)
+            if RegisterEventHotKey(UInt32(shortcut.keyCode), HelperEventPolicy.carbonModifiers(shortcut.modifierFlagsRaw), id,
+                                   GetApplicationEventTarget(), 0, &reference) == noErr, let reference {
+                hotKeyRefs.append(reference)
+            }
+        }
+        if board.enabled, let shortcut = board.panelShortcut, MACCaptureShortcutIsAllowed(shortcut.modifierFlagsRaw, shortcut.keyCode) {
+            var reference: EventHotKeyRef?
+            let id = EventHotKeyID(signature: Self.hotKeySignature, id: CursorBoard.panelHotKeyID)
             if RegisterEventHotKey(UInt32(shortcut.keyCode), HelperEventPolicy.carbonModifiers(shortcut.modifierFlagsRaw), id,
                                    GetApplicationEventTarget(), 0, &reference) == noErr, let reference {
                 hotKeyRefs.append(reference)
@@ -635,13 +677,21 @@ final class HelperRuntime {
         registeredThemes.removeAll()
     }
 
-    fileprivate func hotKeyPressed(signature: OSType, id: UInt32, clicked: Bool = false) -> OSStatus {
+    fileprivate func hotKeyPressed(signature: OSType, id: UInt32, keys: UInt? = nil) -> OSStatus {
         if running, signature == Self.hotKeySignature, id == CursorShaker.hotKeyID {
             if HelperTrustProbe.isTrusted() {
                 MenuBarService.setCursorShakerEnabled(!CursorShakerConfig.load().enabled)
             } else {
                 MenuBarService.requestCursorShakerAccess()
             }
+            return noErr
+        }
+        if running, signature == Self.hotKeySignature, id == CursorBoard.listHotKeyID {
+            cursorBoard.toggleList()
+            return noErr
+        }
+        if running, signature == Self.hotKeySignature, id == CursorBoard.panelHotKeyID {
+            cursorBoard.togglePanel()
             return noErr
         }
         if running, signature == Self.hotKeySignature,
@@ -652,10 +702,10 @@ final class HelperRuntime {
             }
             switch id {
             case CursorScreenshot.areaHotKeyID: cursorScreenshot.takeArea(allowed: allowed)
-            case CursorScreenshot.repeatHotKeyID: cursorScreenshot.repeatArea(allowed: allowed, clicked: clicked)
+            case CursorScreenshot.repeatHotKeyID: cursorScreenshot.repeatArea(allowed: allowed, keys: keys)
             case CursorScreenshot.textHotKeyID: cursorScreenshot.takeText(allowed: allowed)
             case CursorScreenshot.selfTimerHotKeyID: cursorScreenshot.takeSelfTimer(allowed: allowed)
-            default: cursorScreenshot.takeWholeScreen(allowed: allowed, clicked: clicked)
+            default: cursorScreenshot.takeWholeScreen(allowed: allowed, keys: keys)
             }
             return noErr
         }
@@ -697,7 +747,7 @@ final class CursorGesturesController {
     private var savedFrames: [CFHashCode: CGRect] = [:]
     private var generation = 0
     private var playing = false
-    private var queued: [(gesture: CursorGesture, target: MACFFMWindow?)] = []
+    private var queued: [(gesture: CursorGesture, keys: UInt, target: MACFFMWindow?)] = []
     private(set) var isDrawing = false
     var raiseWindow: @MainActor (MACFFMWindow) -> Bool = { _ in false }
     var windowUnderPointer: @MainActor () -> MACFFMWindow? = { nil }
@@ -706,8 +756,10 @@ final class CursorGesturesController {
     var framed: @MainActor (CursorTranslatorNote) -> Void = { _ in }
     var captures: @MainActor () -> [(id: UInt32, trigger: CursorGestureTrigger)] = { [] }
     var capturing: @MainActor () -> Bool = { false }
-    var captured: @MainActor (UInt32) -> Void = { _ in }
+    var captured: @MainActor (UInt32, UInt) -> Void = { _, _ in }
     var history: @MainActor () -> Void = {}
+    var recentItems: @MainActor () -> Void = {}
+    var cursorBoard: @MainActor () -> Void = {}
     var screenRecording: @MainActor () -> Bool = { false }
     private var clicksLeft = false
 
@@ -822,14 +874,14 @@ final class CursorGesturesController {
                         }
                     }
                 }
-            case .play(let gesture):
+            case .play(let gesture, let keys):
                 current = ([], CursorGestureTrigger())
                 show([], matched: nil, fading: false)
-                if let gesture { perform(gesture, later: false, target: CursorGestures.target(gesture, windowUnderPointer(), front: MACMenuBarState.shared.lastForegroundBundleID)) }
+                if let gesture { perform(gesture, keys: keys, later: false, target: CursorGestures.target(gesture, windowUnderPointer(), front: MACMenuBarState.shared.lastForegroundBundleID)) }
             case .frame(let note):
                 framed(note)
-            case .capture(let id):
-                captured(id)
+            case .capture(let id, let keys):
+                captured(id, keys)
             }
         }
     }
@@ -843,7 +895,7 @@ final class CursorGesturesController {
         let actions = gesture?.steps.filter(\.enabled).compactMap { config.action($0.action) } ?? []
         let hide = finished != nil && actions.first?.changesScreen == true
         show(hide ? [] : points, matched: match, fading: finished != nil && !hide)
-        if finished != nil, let gesture { perform(gesture, later: hide || actions.contains(where: \.typesIntoWindow) && config.raiseWindow && target.map { raiseWindow($0) } ?? false, target: target) }
+        if finished != nil, let gesture { perform(gesture, keys: trigger.keys, later: hide || actions.contains(where: \.typesIntoWindow) && config.raiseWindow && target.map { raiseWindow($0) } ?? false, target: target) }
     }
 
     private func show(_ points: [CGPoint], matched: (gesture: CursorGesture, score: CGFloat)?, fading: Bool) {
@@ -913,15 +965,15 @@ final class CursorGesturesController {
         return label
     }
 
-    private func perform(_ gesture: CursorGesture, later: Bool, target: MACFFMWindow?) {
-        guard !playing else { return queued.append((gesture, target)) }
+    private func perform(_ gesture: CursorGesture, keys: UInt, later: Bool, target: MACFFMWindow?) {
+        guard !playing else { return queued.append((gesture, keys, target)) }
         playing = true
         let token = generation
         let play: @MainActor () -> Void = { [weak self] in
             CursorGestures.play(gesture.steps[...], wait: { milliseconds, next in
                 guard milliseconds > 0 else { return next() }
                 DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(milliseconds)) { MainActor.assumeIsolated(next) }
-            }, live: { self?.generation == token }, run: { self?.run($0, target: target) ?? false }, done: { self?.next() })
+            }, live: { self?.generation == token }, run: { self?.run($0, target: target, keys: keys) ?? false }, done: { self?.next() })
         }
         guard later else { return play() }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { MainActor.assumeIsolated(play) }
@@ -930,11 +982,11 @@ final class CursorGesturesController {
     private func next() {
         playing = false
         guard !queued.isEmpty else { return }
-        let (gesture, target) = queued.removeFirst()
-        perform(gesture, later: false, target: target)
+        let (gesture, keys, target) = queued.removeFirst()
+        perform(gesture, keys: keys, later: false, target: target)
     }
 
-    private func run(_ id: String, target: MACFFMWindow?) -> Bool {
+    private func run(_ id: String, target: MACFFMWindow?, keys: UInt) -> Bool {
         guard let action = config.action(id) else { return false }
         switch action.kind {
         case .shortcut(let shortcut):
@@ -951,14 +1003,18 @@ final class CursorGesturesController {
         case .theme(let identifier):
             return apply(identifier)
         case .operation(let operation):
-            return operate(operation, target: target)
+            return operate(operation, target: target, keys: keys)
         }
         return true
     }
 
-    private func operate(_ operation: CursorGestureOperation, target: MACFFMWindow?) -> Bool {
+    private func operate(_ operation: CursorGestureOperation, target: MACFFMWindow?, keys: UInt) -> Bool {
         if operation.needsCursorCapture, !CursorScreenshotConfig.load().enabled {
             MenuBarService.openSettings(tab: "Cursor Capture")
+            return false
+        }
+        if operation.needsCursorBoard, !CursorBoardConfig.load().enabled {
+            MenuBarService.openSettings(tab: "Cursor Board")
             return false
         }
         switch operation {
@@ -976,10 +1032,10 @@ final class CursorGesturesController {
             NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: "/System/Library/CoreServices/ScreenSaverEngine.app"),
                                                configuration: NSWorkspace.OpenConfiguration())
         case .screenshotArea:
-            captured(CursorScreenshot.areaHotKeyID)
+            captured(CursorScreenshot.areaHotKeyID, keys)
         case .capturePreviousArea, .captureFullscreen, .captureSelfTimer, .captureText:
             guard let item = operation.capture else { return false }
-            captured(item.hotKeyID)
+            captured(item.hotKeyID, keys)
         case .captureOpen:
             CursorScreenshotEditor.openFile()
         case .captureOpenClipboard:
@@ -989,6 +1045,10 @@ final class CursorGesturesController {
             CursorScreenshotEditor.pinFile()
         case .captureHistory:
             history()
+        case .showRecentItems:
+            recentItems()
+        case .showCursorBoard:
+            cursorBoard()
         case .cursorShadow:
             MenuBarService.setCursorShadow(!MACPreferences.flag(MACPreferences.cursorShadowKey))
         case .focusOnHover:
@@ -1369,7 +1429,7 @@ final class CursorTrailsMetal: @unchecked Sendable {
             return in.color;
         }
         fragment float4 copyFragment(TrailFragment in [[stage_in]], texture2d<float> picture [[texture(0)]]) {
-            constexpr sampler smooth(filter::linear);
+            constexpr sampler smooth(filter::linear, mip_filter::linear);
             return picture.sample(smooth, in.corner) * in.color;
         }
         """
@@ -1431,13 +1491,17 @@ final class CursorTrailsMetal: @unchecked Sendable {
 
     func textures(_ copy: CursorTrailsCopy) -> [MTLTexture] {
         let made = copy.pictures.compactMap { picture -> MTLTexture? in
-            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: picture.width, height: picture.height, mipmapped: false)
+            let descriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .bgra8Unorm, width: picture.width, height: picture.height, mipmapped: true)
             descriptor.usage = .shaderRead
             guard let bytes = CursorTrailsCopy.bgra(picture), let texture = device.makeTexture(descriptor: descriptor) else { return nil }
             bytes.withUnsafeBytes { texture.replace(region: MTLRegionMake2D(0, 0, picture.width, picture.height), mipmapLevel: 0, withBytes: $0.baseAddress!, bytesPerRow: picture.width * 4) }
             return texture
         }
-        return made.count == copy.pictures.count ? made : []
+        guard made.count == copy.pictures.count, let commands = queue.makeCommandBuffer(), let blit = commands.makeBlitCommandEncoder() else { return [] }
+        made.forEach { blit.generateMipmaps(for: $0) }
+        blit.endEncoding()
+        commands.commit()
+        return made
     }
 
     @MainActor func draw(_ strip: [CursorTrailsVertex], pictures: [MTLTexture] = [], on windows: [NSWindow]) {

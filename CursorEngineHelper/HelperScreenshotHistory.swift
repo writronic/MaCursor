@@ -9,8 +9,7 @@ enum CursorScreenshotHistory {
     private static var timer: Timer?
 
     static func record(_ picture: CGImage, scale: CGFloat, date: Date, name: CursorScreenshotFileName, file: URL?, config: CursorScreenshotConfig) {
-        let keep = config.keepHistory
-        guard keep != .disabled else { return }
+        guard config.keepHistory != .disabled else { return }
         let entry = CursorScreenshotHistoryEntry(date: date, scale: scale, output: config.output, name: name, file: file)
         let store = store
         let side = thumbnailSide
@@ -18,7 +17,9 @@ enum CursorScreenshotHistory {
             guard let data = MACCursorCapture.pngData(for: picture) else { return }
             let small = CursorScreenshotImageSource.image(from: CGImageSourceCreateWithData(data as CFData, nil), side: side)
             let thumbnail = small.flatMap { MACCursorCapture.pngData(for: $0) }
+            let keep = CursorScreenshotConfig.load().keepHistory
             await store.prune(keeping: keep, now: Date())
+            guard keep != .disabled else { return }
             await store.add(entry, picture: data, thumbnail: thumbnail)
         }
     }
@@ -101,7 +102,7 @@ final class CursorScreenshotHistoryWindow: NSObject, NSWindowDelegate {
         Task {
             if let back { await CursorScreenshotController.waited { back.isActive } }
             let picture = await Task.detached(priority: .userInitiated) {
-                CursorScreenshotImageSource.image(from: CGImageSourceCreateWithURL(url as CFURL, nil), side: CursorScreenshotEditorLook.largestImageSide)
+                CursorScreenshotImageSource.image(from: CGImageSourceCreateWithURL(url as CFURL, nil), side: .max)
             }.value
             guard let picture, let screen else { return NSSound.beep() }
             switch action {

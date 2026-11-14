@@ -41,6 +41,8 @@ enum CursorScreenshotEditorLook {
     static let copyOffsetPoints: CGFloat = 8
     static let dropBandPoints: CGFloat = 100
     static let largestImageSide = 16384
+    static let pinScreenShare: CGFloat = 0.8
+    static let pinLargestSize = CGSize(width: 1440, height: 920)
     static let nudgePoints: CGFloat = 1
     static let bigNudgePoints: CGFloat = 10
     static let penStepPoints: CGFloat = 5
@@ -1048,7 +1050,12 @@ enum CursorScreenshotImageSource {
     }
 
     static func picture(from source: CGImageSource?, scale: CGFloat) -> CursorScreenshotPicture? {
-        image(from: source, side: CursorScreenshotEditorLook.largestImageSide).flatMap { CursorScreenshotPicture($0, scale: taggedScale(of: source) ?? scale) }
+        image(from: source, side: .max).flatMap { CursorScreenshotPicture($0, scale: taggedScale(of: source) ?? scale) }
+    }
+
+    static func pin(from source: CGImageSource?, output: CursorScreenshotOutput) -> (image: CGImage, scale: CGFloat)? {
+        let scale = taggedScale(of: source) ?? 1
+        return image(from: source, side: .max).map { (output.apply($0, scale: scale), output.shownScale(scale)) }
     }
 
     private static func taggedScale(of source: CGImageSource?) -> CGFloat? {
@@ -1246,9 +1253,10 @@ struct CursorScreenshotCropResize: Equatable, Sendable {
         Int((inPercent ? value / max(whole, 1) * 100 : value).rounded())
     }
 
+    private var limit: CGFloat { max(CGFloat(CursorScreenshotEditorLook.largestImageSide), base.width, base.height) }
+
     private func toPixels(_ typed: Int, of whole: CGFloat) -> CGFloat {
-        let limit = CGFloat(CursorScreenshotEditorLook.largestImageSide)
-        return min(max((inPercent ? CGFloat(typed) / 100 * whole : CGFloat(typed)).rounded(), 1), limit)
+        min(max((inPercent ? CGFloat(typed) / 100 * whole : CGFloat(typed)).rounded(), 1), limit)
     }
 
     mutating func setWidth(_ typed: Int?) {
@@ -1264,7 +1272,7 @@ struct CursorScreenshotCropResize: Equatable, Sendable {
     }
 
     private mutating func keepLockedShapeInLimit() {
-        let over = max(pixels.width, pixels.height) / CGFloat(CursorScreenshotEditorLook.largestImageSide)
+        let over = max(pixels.width, pixels.height) / limit
         guard locked, over > 1 else { return }
         pixels = CGSize(width: max((pixels.width / over).rounded(), 1), height: max((pixels.height / over).rounded(), 1))
     }
@@ -1557,6 +1565,13 @@ enum CursorScreenshotRender {
         let width = pixels.width * scale
         let height = pixels.height * scale
         return CGRect(x: ((bounds.width - width) / 2).rounded(), y: ((bounds.height - height) / 2).rounded(), width: width, height: height)
+    }
+
+    static func pinFrame(_ pixels: CGSize, backing: CGFloat, on screen: CGRect) -> CGRect {
+        let share = CursorScreenshotEditorLook.pinScreenShare, largest = CursorScreenshotEditorLook.pinLargestSize
+        let room = CGSize(width: min(largest.width, screen.width * share), height: min(largest.height, screen.height * share))
+        let size = placed(pixels, in: room, backing: backing).size
+        return CGRect(x: screen.midX - size.width / 2, y: screen.midY - size.height / 2, width: size.width, height: size.height)
     }
 
     static func dragFrame(_ pixels: CGSize, in bounds: CGSize, backing: CGFloat, around point: CGPoint) -> CGRect {
@@ -1916,8 +1931,11 @@ final class CursorScreenshotEditorModel: ObservableObject {
     @Published private(set) var backdropThumbnails: [CursorScreenshotBackdropFill: CGImage] = [:]
     var libraryChanged: ((inout CursorScreenshotBackgroundLibrary) -> Void) -> Void = { _ in }
     var output: () -> CursorScreenshotOutput = { CursorScreenshotOutput() }
-    var clipboard: () -> (mode: CursorScreenshotClipboardMode, folder: URL?, name: CursorScreenshotFileName) = {
-        (.imageOnly, nil, CursorScreenshotFileName(stem: "", number: nil, retina: false))
+    var naming: () -> CursorScreenshotNaming = { CursorScreenshotNaming() }
+    var clipboard: () -> (mode: CursorScreenshotClipboardMode, folder: URL?) = { (.imageOnly, nil) }
+    var name = CursorScreenshotFileName(stem: "", number: nil, retina: false)
+    var fileName: CursorScreenshotFileName {
+        CursorScreenshotFileName(stem: name.stem, number: name.number, retina: naming().retina(at: output().shownDensity(picture.scale, density: picture.density * edit.outputScale)))
     }
     private let backdropSource: CursorScreenshotBackdropSource
     private let textLineSource: @Sendable (CursorScreenshotPicture) async -> [CGRect]?
@@ -3067,7 +3085,7 @@ final class CursorScreenshotEditorModel: ObservableObject {
         let down = contentHeight / max(box.height, 1)
         let whole = wholePicture
         let size = CGSize(width: max((whole.width * across).rounded(), 1), height: max((whole.height * down).rounded(), 1))
-        guard max(size.width, size.height) <= CGFloat(CursorScreenshotEditorLook.largestImageSide), let burned = burnedImage(size: size) else { return false }
+        guard max(size.width, size.height) <= max(CGFloat(CursorScreenshotEditorLook.largestImageSide), whole.width, whole.height), let burned = burnedImage(size: size) else { return false }
         let scaled = CGRect(x: ((box.minX - whole.minX) * across).rounded(), y: ((box.minY - whole.minY) * down).rounded(), width: contentWidth, height: contentHeight)
         replacePicture(with: burned, crop: scaled, resized: (across + down) / 2)
         if isCropping { closeCrop() }
@@ -3119,8 +3137,8 @@ final class CursorScreenshotEditorModel: ObservableObject {
 
     func copy(to pasteboard: NSPasteboard = .general) async -> Bool {
         guard let made = await encoded() else { return false }
-        let (mode, folder, name) = clipboard()
-        return CursorScreenshot.copy(made.data, as: made.format, mode: mode, in: folder, name: name, to: pasteboard)
+        let (mode, folder) = clipboard()
+        return CursorScreenshot.copy(made.data, as: made.format, mode: mode, in: folder, name: fileName, to: pasteboard)
     }
 
     func save(to url: URL, as format: CursorScreenshotFormat = .png) async -> Bool {

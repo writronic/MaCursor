@@ -5,10 +5,7 @@ import UniformTypeIdentifiers
     func openApplication(_ sender: NSMenuItem)
     func copySelectedPaths()
     func copyFolderPath()
-    func newTextFile()
-    func newMarkdownFile()
-    func newTextFileInFolder()
-    func newMarkdownFileInFolder()
+    func newFile(_ sender: NSMenuItem)
     func hideSelectedFiles()
     func unhideSelectedFiles()
     func hideAllFilesInPath()
@@ -19,10 +16,7 @@ enum RightClickMenuAction: Equatable {
     case application(RightClickMenuAppList, Int, RightClickMenuApplication)
     case copySelectedPaths
     case copyFolderPath
-    case newTextFile
-    case newMarkdownFile
-    case newTextFileInFolder
-    case newMarkdownFileInFolder
+    case newFile(Int, RightClickMenuFile)
     case hideSelectedFiles
     case unhideSelectedFiles
     case hideAllFilesInPath
@@ -32,8 +26,7 @@ enum RightClickMenuAction: Equatable {
         switch self {
         case .application(let list, _, let application): return list.itemTitle(application.displayName)
         case .copySelectedPaths, .copyFolderPath: return RightClickMenuSwitch.copyPath.title
-        case .newTextFile, .newTextFileInFolder: return RightClickMenuFileType.text.itemTitle
-        case .newMarkdownFile, .newMarkdownFileInFolder: return RightClickMenuFileType.markdown.itemTitle
+        case .newFile(_, let file): return file.name
         case .hideSelectedFiles: return RightClickMenuSwitch.hideSelected.title
         case .unhideSelectedFiles: return RightClickMenuSwitch.unhideSelected.title
         case .hideAllFilesInPath: return RightClickMenuSwitch.hideAll.title
@@ -44,23 +37,23 @@ enum RightClickMenuAction: Equatable {
     var submenuTitle: String {
         switch self {
         case .application(_, _, let application): return application.displayName
-        case .newTextFile, .newTextFileInFolder: return RightClickMenuFileType.text.name
-        case .newMarkdownFile, .newMarkdownFileInFolder: return RightClickMenuFileType.markdown.name
+        case .newFile(_, let file): return file.name
         default: return title
         }
     }
 
     var tag: Int {
-        if case .application(_, let tag, _) = self { return tag }
-        return -1
+        switch self {
+        case .application(_, let tag, _), .newFile(let tag, _): return tag
+        default: return -1
+        }
     }
 
     var icon: NSImage? {
         switch self {
         case .application(_, _, let application): return RightClickMenuActions.applicationIcon(application)
         case .copySelectedPaths, .copyFolderPath: return RightClickMenuActions.copyPathIcon()
-        case .newTextFile, .newTextFileInFolder: return RightClickMenuActions.fileIcon(for: .plainText)
-        case .newMarkdownFile, .newMarkdownFileInFolder: return RightClickMenuActions.fileIcon(for: RightClickMenuActions.markdownContentType())
+        case .newFile(_, let file): return RightClickMenuActions.fileIcon(for: RightClickMenuActions.contentType(UTType(filenameExtension: file.fileExtension)))
         case .hideSelectedFiles, .hideAllFilesInPath: return RightClickMenuActions.symbolIcon(RightClickMenuSwitch.hideSelected.symbolName)
         case .unhideSelectedFiles, .unhideAllFilesInPath: return RightClickMenuActions.symbolIcon(RightClickMenuSwitch.unhideSelected.symbolName)
         }
@@ -71,10 +64,7 @@ enum RightClickMenuAction: Equatable {
         case .application: return #selector(RightClickMenuActionTarget.openApplication(_:))
         case .copySelectedPaths: return #selector(RightClickMenuActionTarget.copySelectedPaths)
         case .copyFolderPath: return #selector(RightClickMenuActionTarget.copyFolderPath)
-        case .newTextFile: return #selector(RightClickMenuActionTarget.newTextFile)
-        case .newMarkdownFile: return #selector(RightClickMenuActionTarget.newMarkdownFile)
-        case .newTextFileInFolder: return #selector(RightClickMenuActionTarget.newTextFileInFolder)
-        case .newMarkdownFileInFolder: return #selector(RightClickMenuActionTarget.newMarkdownFileInFolder)
+        case .newFile: return #selector(RightClickMenuActionTarget.newFile(_:))
         case .hideSelectedFiles: return #selector(RightClickMenuActionTarget.hideSelectedFiles)
         case .unhideSelectedFiles: return #selector(RightClickMenuActionTarget.unhideSelectedFiles)
         case .hideAllFilesInPath: return #selector(RightClickMenuActionTarget.hideAllFilesInPath)
@@ -135,8 +125,7 @@ enum RightClickMenuActions {
         case .action(.unhideSelected): return .unhideSelectedFiles
         case .action(.hideAll): return .hideAllFilesInPath
         case .action(.unhideAll): return .unhideAllFilesInPath
-        case .file(.text): return context == .items ? .newTextFile : .newTextFileInFolder
-        case .file(.markdown): return context == .items ? .newMarkdownFile : .newMarkdownFileInFolder
+        case .file(let file): return settings.files.firstIndex(of: file).map { .newFile($0, file) }
         case .application(let list, let identifier):
             guard let application = applications[identifier],
                   let index = settings[keyPath: list.keyPath].firstIndex(where: { $0.bundleIdentifier == identifier }) else { return nil }
@@ -350,7 +339,7 @@ enum RightClickMenuActions {
         return bitmapIcon(from: symbol, isTemplate: true)
     }
 
-    static func markdownContentType(_ resolved: UTType? = UTType(filenameExtension: "md")) -> UTType {
+    static func contentType(_ resolved: UTType?) -> UTType {
         guard let resolved, !resolved.isDynamic else { return .plainText }
         return resolved
     }
@@ -415,20 +404,20 @@ enum RightClickMenuActions {
 enum RightClickMenuHandoff {
     enum Request: Equatable {
         case copyPath
-        case newFile(RightClickMenuFileType)
+        case newFile(Int)
         case openCommonApp(Int)
     }
 
     static let helperBundleIdentifier = "com.writronic.macursor.helper"
     static let commonAppSlots = 32
-    static let requests = Dictionary(uniqueKeysWithValues: ([Request.copyPath] + RightClickMenuFileType.allCases.map(Request.newFile)
+    static let requests = Dictionary(uniqueKeysWithValues: ([Request.copyPath] + (0..<RightClickMenuSettings.maximumFileTypes).map(Request.newFile)
                                                             + (0..<commonAppSlots).map(Request.openCommonApp)).map { (name($0), $0) })
 
     static func name(_ request: Request) -> String {
         let action: String
         switch request {
         case .copyPath: action = "copyPath"
-        case .newFile(let type): action = "newFile.\(type.rawValue)"
+        case .newFile(let index): action = "newFile.\(index)"
         case .openCommonApp(let index): action = "openCommonApp.\(index)"
         }
         return "\(RightClickMenuSettings.appGroupIdentifier).handoff.\(getuid()).\(action)"

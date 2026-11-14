@@ -64,22 +64,11 @@ final class MACFinderSync: FIFinderSync, RightClickMenuActionTarget {
         RightClickMenuActions.copyPaths([url])
     }
 
-    @objc func newTextFile() {
-        createFile(context: .items, baseName: RightClickMenuAction.newTextFile.title, ext: "txt")
-    }
-
-    @objc func newMarkdownFile() {
-        createFile(context: .items, baseName: RightClickMenuAction.newMarkdownFile.title, ext: "md")
-    }
-
-    @objc func newTextFileInFolder() {
-        guard targetFolder != nil else { return RightClickMenuHandoff.post(.newFile(.text)) }
-        createFile(context: .container, baseName: RightClickMenuAction.newTextFileInFolder.title, ext: "txt")
-    }
-
-    @objc func newMarkdownFileInFolder() {
-        guard targetFolder != nil else { return RightClickMenuHandoff.post(.newFile(.markdown)) }
-        createFile(context: .container, baseName: RightClickMenuAction.newMarkdownFileInFolder.title, ext: "md")
+    @objc func newFile(_ sender: NSMenuItem) {
+        let files = menuSettings.files
+        guard files.indices.contains(sender.tag) else { return }
+        guard menuContext == .items || targetFolder != nil else { return RightClickMenuHandoff.post(.newFile(sender.tag)) }
+        createFile(context: menuContext, baseName: files[sender.tag].baseName, ext: files[sender.tag].fileExtension)
     }
 
     @objc func hideSelectedFiles() {

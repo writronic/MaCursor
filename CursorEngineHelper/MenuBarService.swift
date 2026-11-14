@@ -258,6 +258,15 @@ enum MenuBarService {
         launchParentAppThenPost(nil)
     }
 
+    static func requestCursorBoardAccess() {
+        if NSRunningApplication.runningApplications(withBundleIdentifier: MACAppBundleIdentifier).isEmpty {
+            MACPreferences.setFlag(true, forKey: MACPreferences.pendingBoardAccessWindowKey)
+        } else {
+            postDistributed(.MACCursorBoardShowAccessWindow)
+        }
+        launchParentAppThenPost(nil)
+    }
+
     static func requestCursorShakerAccess() {
         if NSRunningApplication.runningApplications(withBundleIdentifier: MACAppBundleIdentifier).isEmpty {
             MACPreferences.setFlag(true, forKey: MACPreferences.pendingShakerAccessWindowKey)
