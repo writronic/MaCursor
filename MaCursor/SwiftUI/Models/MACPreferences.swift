@@ -22,6 +22,7 @@ enum MACPreferences {
     static let cursorScaleKey            = "MACCursorScale"
     static let handednessKey             = "MACHandedness"
     static let cursorShadowKey           = "MACCursorShadow"
+    static let padCursorCanvasKey        = "MACPadCursorCanvas"
     static let suppressDeleteLibraryKey  = "MACSuppressDeleteLibraryConfirmationKey"
     static let suppressDeleteCursorKey   = "MACSuppressDeleteCursorConfirmationKey"
     static let favoriteCursorsKey        = "MACFavoriteCursors"
@@ -74,6 +75,7 @@ enum MACPreferences {
         hideTahoeCursorsKey,
         advancedEditorLayoutKey,
         cursorShadowKey,
+        padCursorCanvasKey,
         autoSwitchRulesKey,
         appOverrideKey,
         appOverrideBaseKey,

@@ -1813,3 +1813,7 @@
 /* Cursor Trails, Echoes style: the two choices of the Colors drop-down. "Use Colors on Glow" puts the chosen colours on the glow only; "Use Colors with Style" also fills the copies of the cursor with them */
 "Use Colors on Glow" = "将颜色用于光晕";
 "Use Colors with Style" = "将颜色用于样式";
+
+"Cursor Canvas Padding" = "指针画布留边";
+
+"Try this if custom cursors revert to the system pointer in some windows. It adds transparent space around the cursor artwork." = "如果自定义指针在某些窗口中变回系统指针，可以试试此设置。它会在指针图案周围填充透明区域。";
