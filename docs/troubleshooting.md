@@ -53,6 +53,10 @@ In some places, such as iCloud Drive, the button works only while the Helper Too
 
 Yes. Turn items off in **Settings → General → Menu Bar**, in the list that shows while **Show Menu Bar Icon** is on. An item you turn off is hidden from the panel, and its feature keeps working. When the panel does not fit on your screen, it scrolls, and you can click a section title to fold that section. See [Menu Bar Panel](README.md#menu-bar-panel).
 
+## I picked an item in Cursor Board, but it did not paste. Why?
+
+Cursor Board pastes only when **MaCursorHelper** has Accessibility access, and only when the app you were using is still in front when you pick the item. Otherwise the item is on the clipboard, so press **⌘V** yourself. To give the access, see [Getting started](README.md#getting-started).
+
 ## How do I update MaCursor?
 
 Choose **Check for Updates…** in the MaCursor menu. The **Automatically check for updates** switch in **Settings → General → Software Updates** sets whether MaCursor checks by itself.

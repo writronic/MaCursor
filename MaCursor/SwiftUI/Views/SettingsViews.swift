@@ -12,6 +12,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
     case general  = "General"
     case cursor   = "Cursor Control"
     case cursorScreenshot = "Cursor Capture"
+    case cursorBoard = "Cursor Board"
     case cursorTranslator = "Cursor Translator"
     case cursorGestures = "Cursor Gestures"
     case cursorTrails = "Cursor Trails"
@@ -26,6 +27,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .general:  return String(localized: "General")
         case .cursor:   return String(localized: "Cursor Control")
         case .cursorScreenshot: return String(localized: "Cursor Capture")
+        case .cursorBoard: return String(localized: "Cursor Board")
         case .cursorTranslator: return String(localized: "Cursor Translator")
         case .cursorGestures: return String(localized: "Cursor Gestures")
         case .cursorTrails: return String(localized: "Cursor Trails")
@@ -40,6 +42,7 @@ enum SettingsTab: String, CaseIterable, Identifiable {
         case .general:  return "gear"
         case .cursor:   return "cursorarrow"
         case .cursorScreenshot: return "camera.viewfinder"
+        case .cursorBoard: return "list.clipboard"
         case .cursorTranslator: return "character.bubble"
         case .cursorGestures: return "scribble.variable"
         case .cursorTrails: return "cursorarrow.motionlines"
@@ -219,6 +222,8 @@ final class SettingsWindowController: NSWindowController, NSToolbarDelegate {
             detailView = AnyView(CursorSettingsView())
         case .cursorScreenshot:
             detailView = AnyView(CursorScreenshotSettingsView())
+        case .cursorBoard:
+            detailView = AnyView(CursorBoardSettingsView())
         case .cursorTranslator:
             detailView = AnyView(CursorTranslatorSettingsView())
         case .cursorGestures:
@@ -443,6 +448,9 @@ struct GeneralSettingsView: View {
         CursorTranslatorService.allCases.forEach { CursorTranslatorKeychain.set("", for: $0) }
         CursorScreenshot.removeCopiedFiles(support: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first,
                                            group: FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: RightClickMenuSettings.appGroupIdentifier))
+        CursorBoardStore(root: FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent(CursorBoard.folder, isDirectory: true)).removeAll()
+        CursorBoardConfig.notifyHelper()
         AutoSwitchConfig.notifyHelper()
         FocusFollowsMouseConfig.notifyHelper()
         CursorTrailsConfig.notifyHelper()

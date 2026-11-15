@@ -1013,16 +1013,14 @@ private struct GestureShortcutRecorder: View {
 
     var body: some View {
         HStack {
-            Button {
+            KeyField(record: "Record Shortcut", press: "Press shortcut…",
+                     key: CursorGestureKeys.recordable(shortcut.keyCode, NSEvent.ModifierFlags(rawValue: shortcut.flags))
+                         ? CursorGestureKeys.label(shortcut, layout: layout) : nil,
+                     recording: monitor != nil) {
                 monitor == nil ? start() : stop()
-            } label: {
-                if monitor != nil {
-                    Text("Press shortcut…")
-                } else if CursorGestureKeys.recordable(shortcut.keyCode, NSEvent.ModifierFlags(rawValue: shortcut.flags)) {
-                    Text(verbatim: CursorGestureKeys.label(shortcut, layout: layout))
-                } else {
-                    Text("Record Shortcut")
-                }
+            } clear: {
+                stop()
+                record(CursorGestureShortcut(keyCode: 0, flags: 0))
             }
 
             if monitor != nil {
@@ -1394,8 +1392,6 @@ private struct GestureEditor: View {
 private struct GestureTriggerEditor: View {
     @Binding var trigger: CursorGestureTrigger
     let remove: (() -> Void)?
-    var buttonsOnly = false
-    var clicks = false
 
     private static let keys: [(NSEvent.ModifierFlags, String)] = [(.function, "fn"), (.control, "⌃"), (.option, "⌥"), (.shift, "⇧"), (.command, "⌘")]
 
@@ -1431,30 +1427,18 @@ private struct GestureTriggerEditor: View {
                 }
 
                 Picker("Draw With", selection: Binding(
-                    get: { trigger.twoFinger ? 4 : trigger.button == 0 ? 5 : min(trigger.button ?? 0, 3) },
+                    get: { trigger.twoFinger ? 4 : min(trigger.button ?? 0, 3) },
                     set: { value in
-                        if clicks, value == 0 {
-                            trigger = CursorGestureTrigger()
-                            return
-                        }
-                        trigger.button = value == 5 ? 0 : value == 3 ? max(trigger.button ?? 3, 3) : (1...2).contains(value) ? value : nil
+                        trigger.button = value == 3 ? max(trigger.button ?? 3, 3) : (1...2).contains(value) ? value : nil
                         trigger.twoFinger = value == 4
                         if value == 4 { trigger.device = .trackpad }
                     }
                 )) {
-                    if clicks {
-                        Text("None").tag(0)
-                        Text("Left Button").tag(5)
-                    }
-                    if !buttonsOnly {
-                        Text("Held Keys").tag(0)
-                    }
+                    Text("Held Keys").tag(0)
                     Text("Right Button").tag(1)
                     Text("Middle Button").tag(2)
                     Text("Side Button").tag(3)
-                    if !buttonsOnly {
-                        Text("Two Fingers").tag(4)
-                    }
+                    Text("Two Fingers").tag(4)
                 }
                 .lineLimit(1)
 
@@ -1473,42 +1457,6 @@ private struct GestureTriggerEditor: View {
             }
             .padding(4)
         }
-    }
-}
-
-private struct GestureButtonField: View {
-    let button: Int
-    let name: (Int) -> Void
-    @State private var monitor: Any?
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Label(CursorGestureTrigger(button: button).label, systemImage: "computermouse")
-                .frame(maxWidth: .infinity, minHeight: 28)
-                .background(RoundedRectangle(cornerRadius: 6, style: .continuous).fill(monitor == nil ? Color.primary.opacity(0.05) : Color.accentColor.opacity(0.15)))
-                .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(monitor == nil ? Color.clear : Color.accentColor))
-                .contentShape(Rectangle())
-                .onHover { $0 ? start() : stop() }
-                .onDisappear(perform: stop)
-
-            Text("Point here and click the side button you want.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-    }
-
-    private func start() {
-        guard monitor == nil else { return }
-        monitor = NSEvent.addLocalMonitorForEvents(matching: .otherMouseDown) { event in
-            guard event.buttonNumber >= 3 else { return event }
-            name(event.buttonNumber)
-            return nil
-        }
-    }
-
-    private func stop() {
-        if let monitor { NSEvent.removeMonitor(monitor) }
-        monitor = nil
     }
 }
 
@@ -1758,14 +1706,5 @@ private struct CursorGesturesAccessView: View {
     private func refresh() {
         CursorGesturesConfig.notifyHelper()
         trusted = FocusFollowsMouseConfig.accessibilityTrusted
-    }
-}
-
-struct TranslatorTriggerEditor: View {
-    @Binding var trigger: CursorGestureTrigger
-    var clicks = false
-
-    var body: some View {
-        GestureTriggerEditor(trigger: $trigger, remove: nil, buttonsOnly: true, clicks: clicks)
     }
 }

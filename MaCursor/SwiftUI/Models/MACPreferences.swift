@@ -40,6 +40,7 @@ enum MACPreferences {
     static let cursorScreenshotKey       = "MACCursorScreenshot"
     static let cursorScreenshotMarkupKey = "MACCursorScreenshotMarkup"
     static let cursorTranslatorKey       = "MACCursorTranslator"
+    static let cursorBoardKey            = "MACCursorBoard"
     static let cursorTranslatorScreenRecordingKey = "MACCursorTranslatorScreenRecording"
     static let ffmAccessibilityTrustedKey = "MACFFMAccessibilityTrusted"
     static let showMenuBarIconKey        = "MACShowMenuBarIcon"
@@ -56,6 +57,7 @@ enum MACPreferences {
     static let pendingShakerAccessWindowKey = "MACPendingShakerAccessWindow"
     static let pendingScreenshotAccessWindowKey = "MACPendingScreenshotAccessWindow"
     static let pendingTranslatorAccessWindowKey = "MACPendingTranslatorAccessWindow"
+    static let pendingBoardAccessWindowKey = "MACPendingBoardAccessWindow"
     static let welcomeShownKey           = "MACWelcomeShown"
     static let welcomePageKey            = "MACWelcomePage"
     static let fullDiskAccessAskedKey   = "MACFullDiskAccessAsked"
@@ -86,6 +88,7 @@ enum MACPreferences {
         cursorScreenshotKey,
         cursorScreenshotMarkupKey,
         cursorTranslatorKey,
+        cursorBoardKey,
         cursorTranslatorScreenRecordingKey,
         showMenuBarIconKey,
         menuBarPanelBackgroundKey,

@@ -104,9 +104,9 @@ enum HelperFinderHandoff {
         case .openCommonApp(let index):
             guard let (_, row) = RightClickMenuActions.applicationRow(tag: settings.openWithApps.count + index, shown: settings, latest: settings) else { return }
             inFolder(folder, fail: fail) { open($0, row.bundleIdentifier) }
-        case .newFile(let type):
-            guard settings[keyPath: type.keyPath].enabled else { return }
-            let baseName = type.itemTitle, ext = type.fileExtension
+        case .newFile(let index):
+            guard settings.files.indices.contains(index), settings[file: settings.files[index]].enabled else { return }
+            let baseName = settings.files[index].baseName, ext = settings.files[index].fileExtension
             queue.async {
                 do {
                     _ = try RightClickMenuActions.createFile(in: URL(fileURLWithPath: "/", isDirectory: true), baseName: baseName, ext: ext) {

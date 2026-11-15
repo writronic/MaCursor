@@ -580,7 +580,7 @@ struct MenuBarPanelView: View {
                 Text(MenuBarL(item.title))
                     .font(.system(size: 12, weight: .semibold))
                 Spacer(minLength: 8)
-                if let shortcut = item.shortcut(in: model.cursorScreenshot) {
+                if let shortcut = item.shownShortcut(in: model.cursorScreenshot) {
                     Text(verbatim: shortcut.displayString)
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)

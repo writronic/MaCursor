@@ -562,7 +562,6 @@ final class CursorScreenshotEditor: NSObject, NSWindowDelegate, NSApplicationDel
     private nonisolated static let reader = CursorTranslatorReader()
 
     private let model: CursorScreenshotEditorModel
-    private let name: CursorScreenshotFileName
     private let window: NSWindow
     private let colors: CursorScreenshotColorPopup
     private var root: CursorScreenshotEditorView?
@@ -632,15 +631,13 @@ final class CursorScreenshotEditor: NSObject, NSWindowDelegate, NSApplicationDel
     static func pinFile() {
         chooseFile(prompt: "Pin") { url in
             let screen = screenUnderMouse
-            let scale = screen?.backingScaleFactor ?? 1
             let output = CursorScreenshotConfig.load().output
             Task {
-                let image = await Task.detached(priority: .userInitiated) {
-                    CursorScreenshotImageSource.image(from: CGImageSourceCreateWithURL(url as CFURL, nil), side: CursorScreenshotEditorLook.largestImageSide)
-                        .map { output.apply($0, scale: scale) }
+                let pin = await Task.detached(priority: .userInitiated) {
+                    CursorScreenshotImageSource.pin(from: CGImageSourceCreateWithURL(url as CFURL, nil), output: output)
                 }.value
-                guard let image else { return NSSound.beep() }
-                CursorScreenshotPin.show(image, scale: output.shownScale(scale), on: screen)
+                guard let pin else { return NSSound.beep() }
+                CursorScreenshotPin.show(pin.image, scale: pin.scale, on: screen)
             }
         }
     }
@@ -724,7 +721,6 @@ final class CursorScreenshotEditor: NSObject, NSWindowDelegate, NSApplicationDel
     }
 
     private init(picture: CursorScreenshotPicture, name: CursorScreenshotFileName) {
-        self.name = name
         model = CursorScreenshotEditorModel(picture: picture, choices: .load(), library: CursorScreenshotConfig.load().background, backdropSource: Self.backdropSource(for: Self.screenUnderMouse), textLineSource: { source in
             let image = source.image
             let larger = await Task.detached(priority: .userInitiated) { CursorScreenshot.forReading(image, pointScale: source.scale) }.value
@@ -736,7 +732,9 @@ final class CursorScreenshotEditor: NSObject, NSWindowDelegate, NSApplicationDel
         })
         model.libraryChanged = { CursorScreenshotConfig.changeBackground($0) }
         model.output = { CursorScreenshotConfig.load().output }
-        model.clipboard = { [name] in (CursorScreenshotConfig.load().clipboard, CursorScreenshotController.clipboardFolder, name) }
+        model.naming = { CursorScreenshotConfig.load().naming }
+        model.clipboard = { (CursorScreenshotConfig.load().clipboard, CursorScreenshotController.clipboardFolder) }
+        model.name = name
         window = Self.makeWindow(frame: Self.frame(for: picture))
         colors = CursorScreenshotColorPopup(model: model)
         super.init()
@@ -1092,13 +1090,13 @@ final class CursorScreenshotEditor: NSObject, NSWindowDelegate, NSApplicationDel
     private func sharePicture(from anchor: NSView) {
         Task {
             guard let made = await model.encoded(), let dragFolder,
-                  let file = try? CursorScreenshot.dragFile(made.data, as: made.format, name: name, in: dragFolder) else { return NSSound.beep() }
+                  let file = try? CursorScreenshot.dragFile(made.data, as: made.format, name: model.fileName, in: dragFolder) else { return NSSound.beep() }
             NSSharingServicePicker(items: [file]).show(relativeTo: anchor.bounds, of: anchor, preferredEdge: .minY)
         }
     }
 
     private func makeDragFile() -> URL? {
-        guard let made = model.encodedNow(), let dragFolder, let file = try? CursorScreenshot.dragFile(made.data, as: made.format, name: name, in: dragFolder) else { return nil }
+        guard let made = model.encodedNow(), let dragFolder, let file = try? CursorScreenshot.dragFile(made.data, as: made.format, name: model.fileName, in: dragFolder) else { return nil }
         return file
     }
 
@@ -1124,7 +1122,7 @@ final class CursorScreenshotEditor: NSObject, NSWindowDelegate, NSApplicationDel
         panel.allowedContentTypes = [UTType(format.rawValue) ?? .png]
         panel.canCreateDirectories = true
         let folder = CursorScreenshotConfig.load().folderURL
-        panel.nameFieldStringValue = name.freeFile(as: format, in: folder)
+        panel.nameFieldStringValue = model.fileName.freeFile(as: format, in: folder)
         panel.directoryURL = folder
         panel.beginSheetModal(for: window) { [self] answer in
             guard answer == .OK, let url = panel.url else { return cancelled() }

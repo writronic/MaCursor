@@ -9,6 +9,7 @@ Read the [project overview](../README.md) to see what MaCursor does, then start 
 - [Menu Bar Panel](#menu-bar-panel): reach your favorite themes and everyday controls from the menu bar.
 - [Right-Click Menu](#right-click-menu): get more from the right-click menu in Finder and on the Desktop.
 - [Cursor Capture](#cursor-capture): take pictures of your screen, mark them up, and copy the text in them.
+- [Cursor Board](#cursor-board): keep what you copy, and paste it later.
 - [Cursor Translator](#cursor-translator): show the text on your screen in your language.
 - [Cursor Gestures](#cursor-gestures): run actions by drawing shapes with your pointer.
 - [Cursor Trails](#cursor-trails): add a trail that follows your pointer.
@@ -39,6 +40,7 @@ These features need the Helper Tool (`MaCursorHelper`), which keeps them working
 - Menu Bar Panel
 - The MaCursor button in the Finder toolbar, inside iCloud Drive folders
 - Cursor Capture
+- Cursor Board
 - Cursor Translator
 - Cursor Gestures
 - Cursor Trails
@@ -55,6 +57,7 @@ Install it in **MaCursor → Settings → General → Helper Tool**. Until you d
 These features also need Accessibility access for **MaCursorHelper**:
 
 - Cursor Capture
+- Cursor Board
 - Cursor Translator
 - Cursor Gestures
 - Focus on Hover
@@ -69,6 +72,8 @@ When you turn one on and MaCursorHelper is not allowed yet, the **Allow Accessib
 Cursor Translator also needs Screen Recording access for **MaCursor**, to read the text inside the frame. Its window is called **Cursor Translator** and has two steps. After **Access granted**, click **Continue**, then **Allow Screen Recording**. Turn on **MaCursor** in **System Settings → Privacy & Security → Screen & System Audio Recording** (on macOS 13, **Screen Recording**). Look for **MaCursor** here, not MaCursorHelper: macOS gives this access to the app that holds the helper. If MaCursor is not in the list, click **+** and choose **MaCursor** in Applications. Then click **Let’s Go!**. If MaCursorHelper already has Accessibility access, the window starts at step 2.
 
 Cursor Capture needs the same Screen Recording access for **MaCursor**, to take the picture. Its window is called **Cursor Capture**. Click **Allow Screen Recording**, turn on **MaCursor** in the same list, then click **Let’s Go!**. Its click shortcuts also need Accessibility access for **MaCursorHelper**. If it is missing, the **Shortcuts** tab says so. It does not use the **Allow Accessibility Access** window. The warning in the **Shortcuts** tab has an **Open System Settings** button.
+
+Cursor Board needs Accessibility access for **MaCursorHelper** to paste the item you pick, and for its click shortcuts. When you pick an item without it, the item goes to the clipboard only, and the **Allow Accessibility Access** window appears with the steps above. Press **⌘V** to paste the item. If the access is missing, the top of **Settings → Cursor Board** also says so, with an **Open System Settings** button.
 
 > [!IMPORTANT]
 > A switch reads on only while its feature is enabled, MaCursorHelper is allowed, and the helper is running. If it flips straight back off, check all three. Cursor Translator and Cursor Capture also need Screen Recording access, so check that too.
@@ -140,7 +145,7 @@ Whenever that app comes to the front, MaCursor applies its theme, and puts your 
 2. Add slots, assign a theme and a key combination to each.
 3. Press your shortcut from any app to switch cursors instantly.
 
-Every shortcut needs **⌃**, or **⌘** together with **⌥**. MaCursor beeps and refuses a plain **⌘** or **⌘⇧** combination, a common macOS shortcut, or one another slot already uses. If a shortcut you saved earlier breaks these rules, its slot shows **Record Shortcut** until you record a new one.
+Every shortcut needs **⌃** or **⌘**. MaCursor beeps and refuses a combination that macOS and most apps use, such as **⌘C** or **⇧⌘Z**, or one another slot already uses. If a shortcut you saved earlier breaks these rules, its slot shows **Record Shortcut** until you record a new one.
 
 ## Menu Bar Panel
 
@@ -179,7 +184,7 @@ Press **⌘V** while the panel is open to use **Open from Clipboard**, even when
 
 Turn on the Right-Click Menu, choose its items, and add a button to the Finder toolbar.
 
-MaCursor makes your right-click menu in Finder and on the Desktop do more. Copy a path, make a new text or Markdown file, open files or a folder in the app you choose, and hide files or show them again.
+MaCursor makes your right-click menu in Finder and on the Desktop do more. Copy a path, make a new file, open files or a folder in the app you choose, and hide files or show them again.
 
 1. Open **MaCursor → Settings → Right-Click Menu** and turn on **Right-Click Menu**.
 2. If the Finder extension **MaCursorFinder** is not on yet, a **Right-Click Menu** window appears.
@@ -197,12 +202,14 @@ Each item shows when you right-click a file or folder, when you right-click empt
 | --- | --- |
 | **Open With** | On a file or folder. Opens the files you selected in an app from your list. The list starts with Sublime Text, which shows only if you have it installed |
 | **Copy Path** | In both places. Copies the full path of each item you selected, one per line. On empty space it copies the path of the folder you are in |
-| **New File** | In both places. Makes an empty text or Markdown file in the open folder, or next to the item you right-clicked, not inside a right-clicked folder. If the name is taken, MaCursor adds a number |
+| **New File** | In both places. Makes an empty file of the type you pick in the open folder, or next to the item you right-clicked, not inside a right-clicked folder. If the name is taken, MaCursor adds a number |
 | **Common Apps** | In both places. Opens a folder in an app from your list, which starts with Terminal. On empty space it opens the folder you are in. On a folder it opens that folder. On a file it opens the folder that holds it |
 | **Hide Selected File(s)** and **Unhide Selected Files** | On a file or folder. They hide the items you selected, or show them again, without renaming them. Names that start with a dot stay hidden |
 | **Hide All Files in Path** and **Unhide All Files in Path** | On empty space. They hide every item directly in the folder you are in, or show them again. What is inside its subfolders stays as it is |
 
 To change the menu, use the tabs in **MaCursor → Settings → Right-Click Menu**. You can switch each item on or off, add your own apps with **+**, move an item out of its submenu with **Show in**, and drag rows in **Main Menu** to change the order.
+
+On the **New File** tab, click **+** to add your own file type. In the **Add File Type** sheet, **Menu Name** is what the menu shows, **File Name** is the name of the new file, and **Extension** is its type. With **Swift File**, **hello** and **swift**, **New File → Swift File** makes `hello.swift`. If you type something that cannot be used, **Add** is greyed out and an orange line says why. To change a type, right-click it, choose **Edit…** and click **Save**. To remove one, select it and click **−**, or right-click it and choose **Delete**, which asks you to confirm first. This works for **Text File** and **Markdown File** too.
 
 You can also add a **MaCursor** button to the Finder toolbar. In Finder, choose **View → Customize Toolbar…** and drag the button in. Click it to get the items you see when you right-click empty space, for the folder you are in. Inside iCloud Drive folders, use this button.
 
@@ -225,11 +232,11 @@ Record a shortcut for **Capture Text**, press it and drag a box. The text in the
 
 Record a shortcut for **Self-Timer**, press it and draw a box or pick a window, as with **Capture Area**. A countdown shows on screen, then the picture is taken. **Self-Timer interval** in the **Screenshots** tab sets the wait to 2, 5, 10 or 15 seconds. Press the same shortcut again to cancel.
 
-The **Shortcuts** tab lists **Capture Area**, **Capture Previous Area**, **Capture Fullscreen**, **Self-Timer** and **Capture Text**. Each row takes a key, or a mouse click. A left or right click needs a modifier key held, so normal clicks keep working.
+The **Shortcuts** tab lists **Capture Area**, **Capture Previous Area**, **Capture Fullscreen**, **Self-Timer** and **Capture Text**. Each row takes a key, or a mouse click. A left or right click needs a modifier key held, so normal clicks keep working. A key needs **⌃** or **⌘** held, or **⇧⌘** with a number from the top row. MaCursor beeps and refuses a key that macOS or most apps use, or one that Global Shortcuts, Cursor Shaker, Cursor Board or another row already uses. It refuses a click that another row or Cursor Board already uses.
 
 Turn on **Show Quick Access Overlay** and a small card appears in a corner of your screen after each picture. The card shows the picture, with these rows: **Copy**, **Save**, **Edit**, **Copy Text** and **Close**. **Save** saves a picture that is not saved yet, and then reads **Show in Finder**. Double-click the picture to open the editor, or drag it into another app. In the **Quick Access** tab, **Position on screen** puts the card on the **Left** or **Right**, and **Overlay size** makes the card smaller or larger. **Auto-close** closes the card after the **Interval**. The card waits while your pointer is on it. **Action** sets what happens then: **Save and Close** saves the picture first, and **Close** only closes the card.
 
-The editor opens in its own window. The top bar has **Crop**, **Add Image** and **Background**, then the tools **Select**, **Box**, **Filled Box**, **Oval**, **Line**, **Arrow**, **Pen**, **Text**, **Pixelate**, **Spotlight**, **Highlight** and **Number**, with Undo and Redo, then colour, size, **Save as…** and **Done**. **Pixelate** can use **Secure Blur**, **Blur** or **Black Out**. **Add Image** takes a new capture, the clipboard or a file. **Crop** has a ratio menu, rotate and flip. **Background** puts the picture on a colour, a gradient, your desktop picture, a wallpaper you add, or a blurred copy of your desktop picture or of the capture, with padding, corners and a shadow. You can save your look as a preset, and pick one to apply to every new picture. Hold **⇧** when you take a picture to skip that preset.
+The editor opens in its own window. The top bar has **Crop**, **Add Image** and **Background**, then the tools **Select**, **Box**, **Filled Box**, **Oval**, **Line**, **Arrow**, **Pen**, **Text**, **Pixelate**, **Spotlight**, **Highlight** and **Number**, with Undo and Redo, then colour, size, **Save as…** and **Done**. **Pixelate** can use **Secure Blur**, **Blur** or **Black Out**. **Add Image** takes a new capture, the clipboard or a file. **Crop** has a ratio menu, rotate and flip. **Background** puts the picture on a colour, a gradient, your desktop picture, a wallpaper you add, or a blurred copy of your desktop picture or of the capture, with padding, corners and a shadow. You can save your look as a preset, and pick one to apply to every new picture. Hold **⇧** when you take a picture to skip that preset. A key, click or gesture that already holds **⇧** does not skip it for **Capture Fullscreen** or **Capture Previous Area**.
 
 The bottom bar has **Zoom**, **Drag Me**, **Share**, **Pin** and **Copy**. **Drag Me** drags the picture into another app. **Pin** keeps it floating on your screen. **Save as…** can write PNG, JPEG and WebP, and HEIC when your Mac can. **Done** asks first if you have unsaved marks.
 
@@ -244,6 +251,32 @@ In the **Advanced** tab, **File Name** can ask for a name after every capture an
 **Capture History** keeps a copy of each picture. Open **Capture History…** in the menu bar panel to bring one back. **Keep history** in the **Advanced** tab sets how long: **Disabled**, **1 day**, **3 days**, **1 week** or **1 month**.
 
 The first time you save, macOS may ask you to allow MaCursor to use your Desktop folder, or the folder you chose. If you say no, the picture is not saved, but the clipboard copy still works. You can change your answer in **System Settings → Privacy & Security → Files & Folders**.
+
+## Cursor Board
+
+Turn on Cursor Board, open your copies and paste them.
+
+Keep a history of what you copy:
+
+1. Open **MaCursor → Settings → Cursor Board** and turn on **Cursor Board**.
+2. Copy text, a link or a picture in any app.
+3. Hold **⌘** and click the middle mouse button for the list next to your pointer, or hold **⌥⌘** and left-click for the side panel.
+
+Click an item to paste it into the app in front, or hold **⌥** and click to paste it as plain text. You can also press **⌘1** to **⌘9** for the item with that number on its card. Hold **⌥** while you press **Return** or **⌘1** to **⌘9** to paste as plain text. Right-click an item for **Paste**, **Paste as Plain Text**, **Pin** (or **Unpin**) and **Delete**. Pinned items stay at the top, and they stay when old items are removed. Press **Esc** or click outside to close.
+
+In the list next to your pointer, **↑** and **↓** pick an item and **Return** pastes it. **P** pins or unpins the item and **Delete** deletes it. **→** or scrolling down shows older items, and **←** or scrolling up goes back.
+
+The side panel opens at the edge of your screen. Type to search your copies by their text or by the app they came from. Its buttons close the panel, keep it open after you paste or click outside (**Keep open**), open it next to your pointer instead of at the edge (**Move: open near the pointer**) and open **Cursor Board Settings**.
+
+In the side panel, **↑** and **↓** pick an item and **Return** pastes it. **⌘P** pins or unpins it and **⌘Delete** deletes it. When the panel sits at the **Bottom** or **Top** of your screen, **←** and **→** pick an item instead of **↑** and **↓**.
+
+In the **Panel** tab, **Position** puts the side panel on the **Left**, **Bottom**, **Top** or **Right** of your screen. With **Open at screen edge** on, push the pointer against that edge to open the panel. macOS uses some edges for the Dock, the menu bar or Stage Manager, so the panel does not open from those. **Items in list** sets the most items the list next to your pointer shows at once. On a short screen it shows fewer, and the rest go to the next page.
+
+The **Shortcuts** tab has **Show Recent Items** for the list and **Show Cursor Board** for the side panel. Each row takes a key, or a mouse click. A left or right click needs a modifier key held, so normal clicks keep working. A key needs **⌃** or **⌘** held, or **⇧⌘** with a number from the top row. MaCursor beeps and refuses a key that macOS or most apps use, or one that Global Shortcuts, Cursor Shaker, Cursor Capture or the other row already uses. It refuses a click that Cursor Capture, Cursor Translator or the other row already uses.
+
+In the **General** tab, **Keep history** saves your copies on this Mac, so they are still there after a restart. Turn it off to keep them only while MaCursor runs. While it is on, **Keep history for** and **Keep up to** set how long and how many items stay. **Clear History…** deletes every item except the pinned ones. Pictures over 32 MB are not kept.
+
+Copies that an app marks as secret, such as passwords, are never kept. To keep the copies from an app out of Cursor Board, add it with **Add App…** in the **Ignored Apps** tab.
 
 ## Cursor Translator
 
@@ -261,7 +294,7 @@ A frame opens around the pointer, and the text inside it turns into your languag
 
 With **Frame Stays**, the frame stays where you put it. Hold **⇧⌘** and drag with the right button to draw a frame of any size, drag its name tag to move it, and drag its corner to resize it. Click a language on the name tag to change it, and the frame translates again. With **Follows the Pointer**, the frame moves with your pointer and reads the text when the pointer stops. Its name tag shows the two languages, for example **Japanese → English**.
 
-**Trigger** changes the keys and the mouse button, and **Frame Colors** changes the color of the frame. **Text Size** and **Line Spacing** set the size of the translated text and the space between its lines.
+**Hold Keys** changes the keys, **Mouse Button** changes the mouse button, and **Device** picks **Mouse**, **Trackpad** or **Both**. **Frame Colors** changes the color of the frame. **Text Size** and **Line Spacing** set the size of the translated text and the space between its lines.
 
 **Apple Translation** works on your Mac and needs macOS 15 or later. Click **Translation Languages…** to open Language & Region in System Settings. Click **Translation Languages** there, then click **Download** for each language you read.
 
@@ -286,7 +319,7 @@ While you draw, a label next to the pointer shows the gesture that matches and h
 
 In the **Gestures** tab, **New Gesture** makes your own gesture, and a click on a gesture edits it. **Draw New** in the **Shapes** tab adds a shape you draw yourself, and **New Custom Action** in the **Actions** tab adds a shortcut, text, app or website action. To keep gestures off in one app, add it under **Ignored Apps** in the **General** tab.
 
-The **System** group of actions also has the Cursor Capture commands: **Screenshot of an Area**, **Capture Previous Area**, **Capture Fullscreen**, **Self-Timer**, **Capture Text (OCR)**, **Open…**, **Open from Clipboard**, **Pin to the Screen…** and **Capture History…**. While **Cursor Capture** is off, these actions open Settings on the **Cursor Capture** tab instead. The **MaCursor** group can turn **Cursor Shadow**, **Focus on Hover**, **Cursor Translator**, **Cursor Shaker**, **Cursor Trails** and **Per-App Themes** on or off.
+The **System** group of actions also has the Cursor Capture commands: **Screenshot of an Area**, **Capture Previous Area**, **Capture Fullscreen**, **Self-Timer**, **Capture Text (OCR)**, **Open…**, **Open from Clipboard**, **Pin to the Screen…** and **Capture History…**. While **Cursor Capture** is off, these actions open Settings on the **Cursor Capture** tab instead. The **MaCursor** group can turn **Cursor Shadow**, **Focus on Hover**, **Cursor Translator**, **Cursor Shaker**, **Cursor Trails** and **Per-App Themes** on or off. The **Clipboard** group also has **Show Recent Items**, which opens the list next to your pointer, and **Show Cursor Board**, which opens the side panel. While **Cursor Board** is off, they open Settings on the **Cursor Board** tab instead.
 
 To try a new shape before you save it, click **Draw New** in the **Shapes** tab, draw the shape, give it a name and click **Next & Test**. Draw the shape again in the same window. You see **Matches** or **Does Not Match** and how close it is in percent. If you see **Too small to match.**, draw it bigger. **Strictness** in the **General** tab decides how close a match must be. The **Back** button shows your first drawing again, and **Save** keeps the shape and closes the window.
 
@@ -349,7 +382,7 @@ Import `.cursor` theme files by double-clicking, dragging onto the library windo
 
 ### Upscale
 
-MaCursor makes a **2×** picture for a cursor that has only a **1×** picture. It does this when you import a `.cursor` theme and when you convert a Windows, Linux or Mousecape theme with **File → Convert Theme…**. Themes that are already in your library stay as they are.
+MaCursor makes a **2×** picture for a cursor that has only a **1×** picture. It does this when you import a `.cursor` theme and when you convert a Windows, Linux or Mousecape theme with **File → Convert Theme…**. Themes that are already in your library stay as they are. In an imported `.cursor` theme, a cursor whose **1×** picture is wider or taller than 256 pixels gets no **2×** picture.
 
 ### Windows Cursors That Look Blurry or Will Not Import
 

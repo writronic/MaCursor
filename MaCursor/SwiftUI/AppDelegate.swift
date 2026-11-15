@@ -9,6 +9,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var shakerAccessRequestObserver: NSObjectProtocol?
     private var translatorAccessRequestObserver: NSObjectProtocol?
     private var screenshotAccessRequestObserver: NSObjectProtocol?
+    private var boardAccessRequestObserver: NSObjectProtocol?
 
     var isViewReady = false
 
@@ -25,6 +26,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         startCursorShakerAccessRequests()
         startCursorTranslatorAccessRequests()
         startCursorScreenshotAccessRequests()
+        startCursorBoardAccessRequests()
 
         MACCursorCapture.shared.capture(to: MACCursorCapture.systemDefaultPath)
 
@@ -164,6 +166,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard MACPreferences.flag(MACPreferences.pendingScreenshotAccessWindowKey) else { return }
         MACPreferences.setFlag(false, forKey: MACPreferences.pendingScreenshotAccessWindowKey)
         AccessWindowController.cursorScreenshot.present()
+    }
+
+    private func startCursorBoardAccessRequests() {
+        boardAccessRequestObserver = DistributedNotificationCenter.default().addObserver(
+            forName: .MACCursorBoardShowAccessWindow,
+            object: nil,
+            queue: .main
+        ) { _ in
+            AccessWindowController.cursorBoard.present()
+        }
+        guard MACPreferences.flag(MACPreferences.pendingBoardAccessWindowKey) else { return }
+        MACPreferences.setFlag(false, forKey: MACPreferences.pendingBoardAccessWindowKey)
+        AccessWindowController.cursorBoard.present()
     }
 
 }

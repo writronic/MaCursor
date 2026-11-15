@@ -236,7 +236,8 @@ class CursorModel: ObservableObject, Identifiable, Hashable {
         guard hasOnlyOneXRepresentation,
               let rep = backingCursor.representation(for: .scale100),
               rep.pixelsHigh.isMultiple(of: max(1, frameCount)),
-              let framePixels = CursorGeometry.framePixelHeight(of: rep, frameCount: frameCount) else { return false }
+              let framePixels = CursorGeometry.framePixelHeight(of: rep, frameCount: frameCount),
+              rep.pixelsWide <= 256, framePixels <= 256 else { return false }
         return CGFloat(rep.pixelsWide) == size.width && CGFloat(framePixels) == size.height
     }
 

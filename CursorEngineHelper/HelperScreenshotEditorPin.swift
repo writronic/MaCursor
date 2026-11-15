@@ -1,7 +1,6 @@
 import AppKit
 
 private enum CursorScreenshotPinMetrics {
-    static let screenShare: CGFloat = 0.5
     static let closeSize: CGFloat = 20
     static let closeIcon: CGFloat = 14
     static let closeInset: CGFloat = 5
@@ -44,15 +43,9 @@ final class CursorScreenshotPin: NSObject, NSWindowDelegate {
     private static var open: [CursorScreenshotPin] = []
     private let panel: NSPanel
 
-    static func placed(_ image: CGImage, scale: CGFloat, on screen: CGRect) -> CGRect {
-        let room = CGSize(width: screen.width * CursorScreenshotPinMetrics.screenShare, height: screen.height * CursorScreenshotPinMetrics.screenShare)
-        let size = CursorScreenshotRender.placed(CGSize(width: image.width, height: image.height), in: room, backing: scale).size
-        return CGRect(x: screen.midX - size.width / 2, y: screen.midY - size.height / 2, width: size.width, height: size.height)
-    }
-
     static func show(_ image: CGImage, scale: CGFloat, on screen: NSScreen?) {
         let area = (screen ?? NSScreen.main)?.visibleFrame ?? CGRect(x: 0, y: 0, width: image.width, height: image.height)
-        open.append(CursorScreenshotPin(image: image, frame: placed(image, scale: scale, on: area)))
+        open.append(CursorScreenshotPin(image: image, frame: CursorScreenshotRender.pinFrame(CGSize(width: image.width, height: image.height), backing: scale, on: area)))
     }
 
     private init(image: CGImage, frame: CGRect) {

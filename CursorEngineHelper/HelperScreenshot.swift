@@ -52,11 +52,11 @@ final class CursorScreenshotController {
         CursorScreenshotHistory.start()
     }
 
-    func takeWholeScreen(allowed: () -> Bool, clicked: Bool) {
+    func takeWholeScreen(allowed: () -> Bool, keys: UInt?) {
         guard !working else { return }
         guard allowed() else { return MenuBarService.requestCursorScreenshotAccess() }
         let config = CursorScreenshotConfig.load()
-        let pressed = clicked ? config.wholeScreenClick.keys : config.wholeScreenShortcut?.modifierFlagsRaw
+        let pressed = keys ?? config.wholeScreenShortcut?.modifierFlagsRaw
         let point = NSEvent.mouseLocation
         guard let screen = NSScreen.screens.first(where: { NSMouseInRect(point, $0.frame, false) }) ?? NSScreen.main else { return NSSound.beep() }
         working = true
@@ -109,7 +109,7 @@ final class CursorScreenshotController {
         CursorTranslatorReader.warm()
     }
 
-    func repeatArea(allowed: () -> Bool, clicked: Bool) {
+    func repeatArea(allowed: () -> Bool, keys: UInt?) {
         guard !working else { return }
         guard allowed() else { return MenuBarService.requestCursorScreenshotAccess() }
         let config = CursorScreenshotConfig.load()
@@ -117,7 +117,7 @@ final class CursorScreenshotController {
         guard let area = config.lastArea, let box = CursorScreenshotBox.repeated(area, displays: frames),
               let screen = NSScreen.screens.first(where: { Self.displayID($0) == area.display }) else { return openOverlay(config: config) }
         working = true
-        retake(box, on: screen, config: config, showsCursor: false, pressed: clicked ? config.repeatClick.keys : config.repeatShortcut?.modifierFlagsRaw)
+        retake(box, on: screen, config: config, showsCursor: false, pressed: keys ?? config.repeatShortcut?.modifierFlagsRaw)
     }
 
     private func retake(_ box: CGRect, on screen: NSScreen, config: CursorScreenshotConfig, showsCursor: Bool, pressed: UInt?) {

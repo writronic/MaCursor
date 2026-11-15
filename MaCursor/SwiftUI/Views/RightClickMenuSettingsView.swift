@@ -100,6 +100,13 @@ struct RightClickMenuSettingsView: View {
     @ObservedObject private var manager = FinderExtensionManager.shared
     @State private var requestTask: Task<Void, Never>?
     @State private var selectedApplication: String?
+    @State private var selectedFile: RightClickMenuFile?
+    @State private var addingFile = false
+    @State private var editedFile: String?
+    @State private var deletingFile: RightClickMenuFile?
+    @State private var draftMenuName = ""
+    @State private var draftName = ""
+    @State private var draftExtension = ""
     @State private var errorMessage: String?
 
     private var isOn: Bool {
@@ -254,6 +261,7 @@ struct RightClickMenuSettingsView: View {
         .onDisappear { requestTask?.cancel() }
         .onChangeCompat(of: manager.selectedTab) { _ in
             selectedApplication = nil
+            selectedFile = nil
             errorMessage = nil
         }
         .onChangeCompat(of: manager.election) { _ in errorMessage = nil }
@@ -386,7 +394,7 @@ struct RightClickMenuSettingsView: View {
         switch item {
         case .group(let group): return group.title
         case .action(let action): return action.title
-        case .file(let type): return type.itemTitle
+        case .file(let file): return file.name
         case .application(let list, let identifier): return list.itemTitle(applicationName(identifier))
         }
     }
@@ -450,21 +458,128 @@ struct RightClickMenuSettingsView: View {
     }
 
     private var newFileTable: some View {
-        VStack(spacing: 0) {
+        let files = manager.settings.files
+        return VStack(spacing: 0) {
             optionsHeading("File Type")
             Divider()
-            ForEach(Array(RightClickMenuFileType.allCases.enumerated()), id: \.element) { index, type in
-                HStack(spacing: 0) {
-                    Text(verbatim: "\(type.name) (.\(type.fileExtension))")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    rowOptions(enabled: fileBinding(type, \.enabled), addToMainMenu: fileBinding(type, \.addToMainMenu), submenu: .newFile)
+            List(selection: $selectedFile) {
+                ForEach(Array(files.enumerated()), id: \.element) { index, file in
+                    HStack(spacing: 0) {
+                        Text(verbatim: file.rowTitle)
+                            .lineLimit(1)
+                            .help(file.rowTitle)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        rowOptions(enabled: fileBinding(file, \.enabled), addToMainMenu: fileBinding(file, \.addToMainMenu), submenu: .newFile)
+                    }
+                    .padding(.horizontal, RightClickMenuLayout.inset)
+                    .frame(height: RightClickMenuLayout.rowHeight)
+                    .contentShape(Rectangle())
+                    .contextMenu {
+                        Button("Edit…") { editFile(file.key) }
+                        Button("Delete") { deletingFile = file }
+                    }
+                    .tag(file)
+                    .rightClickMenuListRow(index)
                 }
-                .padding(.horizontal, RightClickMenuLayout.inset)
-                .frame(height: RightClickMenuLayout.rowHeight)
-                .background(Self.stripe(index))
+            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            .scrollDisabled(true)
+            .frame(height: CGFloat(files.count) * RightClickMenuLayout.rowHeight)
+            Divider()
+            addRemoveBar(add: "Add File Type…", remove: "Remove File Type", canAdd: files.count < RightClickMenuSettings.maximumFileTypes,
+                         canRemove: selectedFile.map(manager.settings.files.contains) ?? false) {
+                editedFile = nil
+                draftMenuName = ""
+                draftName = ""
+                draftExtension = ""
+                addingFile = true
+            } onRemove: {
+                deletingFile = selectedFile
             }
         }
         .rightClickMenuCard()
+        .sheet(isPresented: $addingFile) { addFileSheet }
+        .alert("Are you sure you want to delete “\(deletingFile?.name ?? "")”?",
+               isPresented: Binding(get: { deletingFile != nil }, set: { if !$0 { deletingFile = nil } })) {
+            Button("Delete", role: .destructive) {
+                if let deletingFile { removeFile(deletingFile.key) }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    private func editFile(_ id: String) {
+        guard let file = manager.settings.addedFiles.first(where: { $0.id == id }) else { return }
+        editedFile = id
+        draftMenuName = file.menuName
+        draftName = file.name
+        draftExtension = file.fileExtension
+        addingFile = true
+    }
+
+    private func removeFile(_ id: String) {
+        if save({ try manager.change { $0.addedFiles.removeAll { $0.id == id } } }), selectedFile?.key == id {
+            selectedFile = nil
+        }
+    }
+
+    private var addFileSheet: some View {
+        let added: RightClickMenuAddedFile?, reason: String?
+        switch manager.settings.addedFile(menuName: draftMenuName, name: draftName, fileExtension: draftExtension, replacing: editedFile) {
+        case .success(let file): (added, reason) = (file, nil)
+        case .failure(let problem): (added, reason) = (nil, problem.reason)
+        }
+        return VStack(alignment: .leading, spacing: 16) {
+            Text(editedFile == nil ? "Add File Type" : "Edit File Type")
+            Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 8, verticalSpacing: 10) {
+                GridRow {
+                    Text("Menu Name")
+                        .gridColumnAlignment(.trailing)
+                    TextField("Menu Name", text: $draftMenuName, prompt: Text(verbatim: "Swift File"))
+                        .labelsHidden()
+                }
+                GridRow {
+                    Text("File Name")
+                    TextField("File Name", text: $draftName, prompt: Text(verbatim: "hello"))
+                        .labelsHidden()
+                }
+                GridRow {
+                    Text("Extension")
+                    TextField("Extension", text: $draftExtension, prompt: Text(verbatim: "swift"))
+                        .labelsHidden()
+                }
+            }
+            if let reason {
+                Text(reason)
+                    .font(.callout)
+                    .foregroundStyle(.orange)
+            }
+            HStack {
+                Spacer()
+                Button("Cancel") { addingFile = false }
+                    .keyboardShortcut(.cancelAction)
+                Button(editedFile == nil ? "Add" : "Save") {
+                    guard let added else { return }
+                    addingFile = false
+                    if save({
+                        try manager.change {
+                            if let editedFile {
+                                try $0.editFile(editedFile, menuName: added.menuName, name: added.name, fileExtension: added.fileExtension)
+                            } else {
+                                try $0.addFile(menuName: added.menuName, name: added.name, fileExtension: added.fileExtension)
+                            }
+                        }
+                    }) {
+                        selectedFile = added.file
+                    }
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(added == nil)
+            }
+        }
+        .padding(20)
+        .frame(width: 320)
     }
 
     private func appList(_ list: RightClickMenuAppList) -> some View {
@@ -506,34 +621,43 @@ struct RightClickMenuSettingsView: View {
                 .frame(height: appListHeight(rows))
             }
             Divider()
-            HStack(spacing: 0) {
-                Button { presentAppPicker(for: list) } label: {
-                    Image(systemName: "plus")
-                        .frame(width: 24, height: 22)
+            addRemoveBar(add: "Add App…", remove: "Remove App",
+                         canRemove: manager.settings[keyPath: list.keyPath].contains { $0.id == selectedApplication }) {
+                presentAppPicker(for: list)
+            } onRemove: {
+                guard let selectedApplication else { return }
+                if save({ try manager.change({ $0[keyPath: list.keyPath].removeAll { $0.id == selectedApplication } }) }) {
+                    self.selectedApplication = nil
                 }
-                .accessibilityLabel("Add App…")
-                .help("Add App…")
-                Divider()
-                    .frame(height: 14)
-                Button {
-                    guard let selectedApplication else { return }
-                    if save({ try manager.change({ $0[keyPath: list.keyPath].removeAll { $0.id == selectedApplication } }) }) {
-                        self.selectedApplication = nil
-                    }
-                } label: {
-                    Image(systemName: "minus")
-                        .frame(width: 24, height: 22)
-                }
-                .accessibilityLabel("Remove App")
-                .help("Remove App")
-                .disabled(!manager.settings[keyPath: list.keyPath].contains { $0.id == selectedApplication })
-                Spacer()
             }
-            .buttonStyle(.borderless)
-            .padding(.horizontal, 6)
-            .frame(height: RightClickMenuLayout.rowHeight)
         }
         .rightClickMenuCard()
+    }
+
+    private func addRemoveBar(add: LocalizedStringKey, remove: LocalizedStringKey, canAdd: Bool = true, canRemove: Bool,
+                              onAdd: @escaping () -> Void, onRemove: @escaping () -> Void) -> some View {
+        HStack(spacing: 0) {
+            Button(action: onAdd) {
+                Image(systemName: "plus")
+                    .frame(width: 24, height: 22)
+            }
+            .accessibilityLabel(add)
+            .help(add)
+            .disabled(!canAdd)
+            Divider()
+                .frame(height: 14)
+            Button(action: onRemove) {
+                Image(systemName: "minus")
+                    .frame(width: 24, height: 22)
+            }
+            .accessibilityLabel(remove)
+            .help(remove)
+            .disabled(!canRemove)
+            Spacer()
+        }
+        .buttonStyle(.borderless)
+        .padding(.horizontal, 6)
+        .frame(height: RightClickMenuLayout.rowHeight)
     }
 
     private func appListHeight(_ rows: [RightClickMenuAppRow]) -> CGFloat {
@@ -574,10 +698,10 @@ struct RightClickMenuSettingsView: View {
         .labelsHidden()
     }
 
-    private func fileBinding(_ type: RightClickMenuFileType, _ field: WritableKeyPath<RightClickMenuRowOptions, Bool>) -> Binding<Bool> {
+    private func fileBinding(_ file: RightClickMenuFile, _ field: WritableKeyPath<RightClickMenuRowOptions, Bool>) -> Binding<Bool> {
         Binding(
-            get: { manager.settings[keyPath: type.keyPath][keyPath: field] },
-            set: { value in save { try manager.change { $0[keyPath: type.keyPath][keyPath: field] = value } } }
+            get: { manager.settings[file: file][keyPath: field] },
+            set: { value in save { try manager.change { $0[file: file][keyPath: field] = value } } }
         )
     }
 

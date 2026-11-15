@@ -1045,8 +1045,8 @@ struct CursorScreenshotSettingsView: View {
     }
 
     @ViewBuilder private var shortcutsPart: some View {
-        Section("Screenshots") {
-            if !screenshot.clicks.isEmpty && !trusted {
+        if !screenshot.clicks.isEmpty && !trusted {
+            Section {
                 HStack(spacing: 10) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundStyle(.orange)
@@ -1062,19 +1062,23 @@ struct CursorScreenshotSettingsView: View {
                     }
                 }
             }
-
-            LabeledContent("Capture Area") { shortcut(\.areaShortcut, \.areaClick) }
-
-            LabeledContent("Capture Previous Area") { shortcut(\.repeatShortcut, \.repeatClick) }
-
-            LabeledContent("Capture Fullscreen") { shortcut(\.wholeScreenShortcut, \.wholeScreenClick) }
-
-            LabeledContent("Self-Timer") { shortcut(\.selfTimerShortcut, \.selfTimerClick) }
+            .disabled(!helperManager.isInstalled)
         }
+
+        Section("Capture Area") { shortcut(\.areaShortcut, \.areaClick) }
         .disabled(!helperManager.isInstalled)
 
-        Section("OCR") {
-            LabeledContent("Capture Text") { shortcut(\.textShortcut, \.textClick) }
+        Section("Capture Previous Area") { shortcut(\.repeatShortcut, \.repeatClick) }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Capture Fullscreen") { shortcut(\.wholeScreenShortcut, \.wholeScreenClick) }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Self-Timer") { shortcut(\.selfTimerShortcut, \.selfTimerClick) }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Capture Text") {
+            shortcut(\.textShortcut, \.textClick)
 
             Text("Drag a box, and the text in it goes to your clipboard. No picture is saved.")
                 .font(.caption)
@@ -1348,35 +1352,20 @@ struct CursorScreenshotSettingsView: View {
     }
 
     private func shortcut(_ key: WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?>, _ click: WritableKeyPath<CursorScreenshotConfig, CursorGestureTrigger>) -> some View {
-        VStack(alignment: .trailing, spacing: 8) {
-            recorder(key)
-
-            TranslatorTriggerEditor(trigger: Binding(
-                get: { screenshot[keyPath: click] },
-                set: { chosen in
-                    guard !CursorScreenshot.refuses(chosen, held: screenshot.clicks(besides: click)) else { return NSSound.beep() }
-                    saving(click).wrappedValue = chosen
-                }
-            ), clicks: true)
-
-            if screenshot[keyPath: click].button != nil && !CursorTranslator.usable(screenshot[keyPath: click]) {
-                Text("Hold a key with the left or right button, so normal clicks still work.")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
+        CursorTriggerRows(trigger: Binding(
+            get: { CursorTrigger(key: screenshot[keyPath: key], click: screenshot[keyPath: click],
+                                 shadowed: screenshot[keyPath: key].map { screenshot.heldElsewhere($0, besides: key) } ?? false) },
+            set: { chosen in
+                screenshot = CursorScreenshotConfig.load()
+                screenshot[keyPath: key] = chosen.key
+                screenshot[keyPath: click] = chosen.click
+                screenshot.save()
             }
-        }
-    }
-
-    private func recorder(_ field: WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?>) -> some View {
-        KeyRecorderView(shortcut: saving(field), isTaken: { heldElsewhere($0, besides: field) },
-                        isShadowed: screenshot[keyPath: field].map { heldElsewhere($0, besides: field) } ?? false)
-    }
-
-    private func heldElsewhere(_ candidate: KeyboardShortcutData, besides field: WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?>) -> Bool {
-        let data = MACPreferences.value(forKey: MACPreferences.favoriteCursorsKey) as? Data
-        let slots = data.flatMap { try? JSONDecoder().decode([FavoriteCursorSlot].self, from: $0) } ?? []
-        let held = slots.filter { $0.themeIdentifier != nil }.compactMap(\.shortcut) + [CursorShakerConfig.load().shortcut].compactMap { $0 } + screenshot.keys(besides: field)
-        return CursorScreenshot.refuses(candidate, held: held)
+        ), isTaken: { next in
+            (next.key != screenshot[keyPath: key] && next.key.map { screenshot.heldElsewhere($0, besides: key) } == true)
+                || (next.click != screenshot[keyPath: click] && (CursorScreenshot.refuses(next.click, held: screenshot.clicks(besides: click))
+                    || CursorScreenshot.refuses(next.click, held: CursorBoardConfig.load().triggers)))
+        }, window: SettingsWindowController.shared.window)
     }
 
     private func chooseFolder() {
@@ -1549,15 +1538,13 @@ struct CursorTranslatorSettingsView: View {
 
             if translatorOn {
                 Section {
-                    LabeledContent("Trigger") {
-                        TranslatorTriggerEditor(trigger: Binding(
-                            get: { translator.trigger },
-                            set: {
-                                translator.trigger = $0
-                                translator.save()
-                            }
-                        ))
-                    }
+                    CursorTriggerRows(trigger: Binding(
+                        get: { CursorTrigger(click: translator.trigger) },
+                        set: {
+                            translator.trigger = $0.click
+                            translator.save()
+                        }
+                    ), capture: false, isTaken: { $0.click != translator.trigger && CursorScreenshot.refuses($0.click, held: CursorBoardConfig.load().triggers) })
 
                     if !CursorTranslator.usable(translator.trigger) {
                         Text("Hold a key with the right button, so normal right-clicks still work.")
@@ -2537,5 +2524,442 @@ private struct CursorScreenshotWindowBackgroundChoice: View {
         .buttonStyle(.plain)
         .accessibilityLabel(Text(title))
         .accessibilityAddTraits(choice == value ? .isSelected : [])
+    }
+}
+
+enum CursorBoardTab: CaseIterable {
+    case general
+    case shortcuts
+    case panel
+    case ignoredApps
+
+    @MainActor static var selected = CursorBoardTab.general
+
+    var title: String {
+        switch self {
+        case .general: return String(localized: "General")
+        case .shortcuts: return String(localized: "Shortcuts")
+        case .panel: return String(localized: "Panel")
+        case .ignoredApps: return String(localized: "Ignored Apps")
+        }
+    }
+}
+
+extension CursorBoardEdge {
+    var title: String {
+        switch self {
+        case .left: return String(localized: "Left")
+        case .bottom: return String(localized: "Bottom")
+        case .top: return String(localized: "Top")
+        case .right: return String(localized: "Right")
+        }
+    }
+}
+
+extension CursorBoardKeep {
+    var title: String {
+        switch self {
+        case .day: return String(localized: "1 day")
+        case .week: return String(localized: "1 week")
+        case .month: return String(localized: "1 month")
+        case .threeMonths: return String(localized: "3 months")
+        case .sixMonths: return String(localized: "6 months")
+        case .year: return String(localized: "1 year")
+        case .forever: return String(localized: "Forever")
+        }
+    }
+}
+
+struct CursorBoardSettingsView: View {
+    @ObservedObject private var helperManager = HelperToolManager.shared
+    @State private var board = CursorBoardConfig.load()
+    @State private var capture = CursorScreenshotConfig.load()
+    @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
+    @State private var tab = CursorBoardTab.selected
+    @State private var clearing = false
+
+    private var usable: Bool { trusted && helperManager.isRunning }
+
+    private var boardOn: Bool { FocusFollowsMouseConfig.isOn(enabled: board.enabled, trusted: usable) }
+
+    var body: some View {
+        GeometryReader { pane in
+            let column = RightClickMenuLayout.tableWidth(contentWidth: pane.size.width - 2 * RightClickMenuLayout.pageMargin)
+            VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: RightClickMenuLayout.blockSpacing) {
+                    switchCard
+
+                    if boardOn {
+                        TabBar(
+                            titles: CursorBoardTab.allCases.map(\.title),
+                            label: String(localized: "Cursor Board"),
+                            selection: Binding(
+                                get: { CursorBoardTab.allCases.firstIndex(of: tab) ?? 0 },
+                                set: { tab = CursorBoardTab.allCases[$0]; CursorBoardTab.selected = tab }
+                            )
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
+                }
+                .frame(width: column)
+                .padding(.leading, (pane.size.width - column) / 2)
+                .padding(.top, RightClickMenuLayout.pageMargin)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                if boardOn {
+                    Form {
+                        switch tab {
+                        case .general: generalPart
+                        case .shortcuts: shortcutsPart
+                        case .panel: panelPart
+                        case .ignoredApps: ignoredPart
+                        }
+                    }
+                    .formStyle(.grouped)
+                }
+            }
+        }
+        .navigationTitle("Cursor Board")
+        .onAppear(perform: recheck)
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in recheck() }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorBoardDidChange)) { _ in refresh() }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorScreenshotDidChange)) { _ in refresh() }
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACFocusFollowsMouseStatusDidChange)) { _ in refresh() }
+    }
+
+    @ViewBuilder private var switchCard: some View {
+        Group {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text("Cursor Board")
+                    Text("Keep what you copy, and paste it from a list next to your pointer.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+                Toggle("Cursor Board", isOn: Binding(
+                    get: { boardOn },
+                    set: { _ in
+                        guard helperManager.isRunning else { return }
+                        CursorBoardConfig.setEnabled(!board.enabled)
+                        refresh()
+                    }
+                ))
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .controlSize(.mini)
+            }
+            .padding(RightClickMenuLayout.inset)
+            .frame(minHeight: RightClickMenuLayout.twoLineRowHeight)
+            .rightClickMenuCard()
+
+            if board.enabled && !trusted {
+                HStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+
+                    Text("Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Spacer(minLength: 6)
+
+                    Button("Open System Settings") {
+                        FocusFollowsMouseConfig.requestAccessibility()
+                    }
+                }
+                .padding(.horizontal, RightClickMenuLayout.inset)
+            }
+        }
+        .disabled(!helperManager.isInstalled)
+
+        if !helperManager.isInstalled {
+            HStack(spacing: 10) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .foregroundStyle(.yellow)
+
+                Text("Cursor Board requires the Helper Tool. You can install it from General → Helper Tool.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, RightClickMenuLayout.inset)
+        }
+    }
+
+    @ViewBuilder private var generalPart: some View {
+        Section("History") {
+            Toggle("Keep history", isOn: saving(\.keepsHistory))
+
+            Group {
+                if board.keepsHistory {
+                    Text("Copies are saved on this Mac and are still there after a restart.")
+                } else {
+                    Text("Copies are kept only while MaCursor runs. Nothing is saved on this Mac.")
+                }
+            }
+            .font(.caption)
+            .foregroundStyle(.tertiary)
+
+            if board.keepsHistory {
+                Picker("Keep history for", selection: saving(\.keep)) {
+                    ForEach(CursorBoardKeep.allCases, id: \.self) { Text($0.title).tag($0) }
+                }
+
+                Text("Older items are removed automatically. Pinned items stay.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+
+                Picker("Keep up to", selection: saving(\.limit)) {
+                    ForEach(CursorBoardConfig.limits, id: \.self) { Text("\($0) items").tag($0) }
+                }
+
+                Text("When the list is full, the oldest item goes.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+
+            LabeledContent {
+                Button("Clear History...") { clearing = true }
+            } label: {
+                Text("Keeps text, links and pictures. Pictures over 32 MB are not kept.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .disabled(!helperManager.isInstalled)
+        .alert("Delete all copied items? Pinned items stay.", isPresented: $clearing) {
+            Button("Delete", role: .destructive) { CursorBoardConfig.clearHistory() }
+            Button("Cancel", role: .cancel) {}
+        }
+    }
+
+    @ViewBuilder private var shortcutsPart: some View {
+        Section("Show Recent Items") {
+            trigger(\.listShortcut, \.listClick)
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section("Show Cursor Board") {
+            trigger(\.panelShortcut, \.panelClick)
+
+            Text("The Cursor Gestures action “Show Cursor Board” also opens the panel.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .disabled(!helperManager.isInstalled)
+    }
+
+    private func trigger(_ field: WritableKeyPath<CursorBoardConfig, KeyboardShortcutData?>, _ click: WritableKeyPath<CursorBoardConfig, CursorGestureTrigger>) -> some View {
+        CursorTriggerRows(trigger: Binding(
+            get: { CursorTrigger(key: board[keyPath: field], click: board[keyPath: click], shadowed: board[keyPath: field].map { keyTaken($0, besides: field) } ?? false) },
+            set: { chosen in
+                change {
+                    $0[keyPath: field] = chosen.key
+                    $0[keyPath: click] = chosen.click
+                }
+            }
+        ), isTaken: { taken($0, field: field, click: click) }, window: SettingsWindowController.shared.window)
+    }
+
+    private var edgeLine: String {
+        guard !CursorBoard.edgeClash(board.position) else {
+            return String(localized: "macOS uses this edge for the Dock, the menu bar or Stage Manager, so the panel does not open there. The click and the gesture still open it.")
+        }
+        switch board.position {
+        case .left: return String(localized: "Push the pointer against the left edge of the screen to open the panel.")
+        case .right: return String(localized: "Push the pointer against the right edge of the screen to open the panel.")
+        case .bottom, .top: return String(localized: "Push the pointer against the bottom edge of the screen to open the panel.")
+        }
+    }
+
+    @ViewBuilder private var panelPart: some View {
+        Section("Side Panel") {
+            Picker("Position", selection: saving(\.position)) {
+                ForEach(CursorBoardEdge.allCases, id: \.self) { Text($0.title).tag($0) }
+            }
+
+            Toggle(isOn: saving(\.opensAtEdge)) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Open at screen edge")
+                    Text(edgeLine)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+        }
+        .disabled(!helperManager.isInstalled)
+
+        Section {
+            Picker("Items in list", selection: saving(\.listSize)) {
+                ForEach(CursorBoardConfig.listSizes, id: \.self) { Text($0, format: .number).tag($0) }
+            }
+
+            Text("→ or scrolling down shows older items. ← or scrolling up goes back.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        } header: {
+            Text("List Next to the Pointer")
+        } footer: {
+            Text("The panel and the list follow MaCursor’s Appearance setting (System, Light or Dark).")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .disabled(!helperManager.isInstalled)
+    }
+
+    @ViewBuilder private var ignoredPart: some View {
+        Section("Ignored Apps") {
+            if board.ignored.isEmpty {
+                Text("No apps yet.")
+                    .foregroundStyle(.secondary)
+            }
+
+            ForEach(board.ignored, id: \.self) { app in
+                HStack(spacing: 8) {
+                    Image(nsImage: NSWorkspace.shared.urlForApplication(withBundleIdentifier: app).map { NSWorkspace.shared.icon(forFile: $0.path) }
+                        ?? NSWorkspace.shared.icon(for: .applicationBundle))
+                        .resizable()
+                        .frame(width: 18, height: 18)
+
+                    Text(verbatim: CursorGestures.appName(app))
+                        .lineLimit(1)
+
+                    Spacer(minLength: 6)
+
+                    Button {
+                        change { $0.ignored.removeAll { $0 == app } }
+                    } label: {
+                        Image(systemName: "minus.circle.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.borderless)
+                    .accessibilityLabel("Remove App")
+                }
+            }
+
+            LabeledContent {
+                Button("Add App…") {
+                    guard let app = NSOpenPanel.choose(applications: true).flatMap({ Bundle(url: $0)?.bundleIdentifier }) else { return }
+                    change { if !$0.ignored.contains(app) { $0.ignored.append(app) } }
+                }
+            } label: {
+                Text("Copies from these apps are never kept.")
+            }
+
+            Text("Copies an app marks as secret, such as passwords, are always skipped, from any app.")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .disabled(!helperManager.isInstalled)
+    }
+
+    private func taken(_ next: CursorTrigger, field: WritableKeyPath<CursorBoardConfig, KeyboardShortcutData?>, click: WritableKeyPath<CursorBoardConfig, CursorGestureTrigger>) -> Bool {
+        let clicks = [capture.wholeScreenClick, capture.areaClick, capture.repeatClick, capture.textClick, capture.selfTimerClick, CursorTranslatorConfig.load().trigger]
+            + board.triggers(besides: click)
+        return (next.key != board[keyPath: field] && next.key.map { keyTaken($0, besides: field) } == true)
+            || (next.click != board[keyPath: click] && CursorScreenshot.refuses(next.click, held: clicks))
+    }
+
+    private func keyTaken(_ candidate: KeyboardShortcutData, besides field: WritableKeyPath<CursorBoardConfig, KeyboardShortcutData?>) -> Bool {
+        let held = [CursorShakerConfig.load().shortcut, capture.wholeScreenShortcut, capture.areaShortcut, capture.repeatShortcut,
+                    capture.textShortcut, capture.selfTimerShortcut].compactMap { $0 } + board.keys(besides: field)
+        return CursorScreenshot.refuses(candidate, held: MACFavoriteKeys(MACPreferences.value(forKey: MACPreferences.favoriteCursorsKey)) + held)
+    }
+
+    private func saving<Value>(_ field: WritableKeyPath<CursorBoardConfig, Value>) -> Binding<Value> {
+        Binding(get: { board[keyPath: field] }, set: { value in change { $0[keyPath: field] = value } })
+    }
+
+    private func change(_ edit: (inout CursorBoardConfig) -> Void) {
+        board = CursorBoardConfig.load()
+        edit(&board)
+        board.save()
+    }
+
+    private func recheck() {
+        helperManager.refreshStatus()
+        refresh()
+    }
+
+    private func refresh() {
+        board = CursorBoardConfig.load()
+        capture = CursorScreenshotConfig.load()
+        trusted = FocusFollowsMouseConfig.accessibilityTrusted
+    }
+}
+
+extension AccessWindowController {
+    static let cursorBoard = AccessWindowController(title: String(localized: "Cursor Board")) {
+        NSHostingController(rootView: CursorBoardAccessView())
+    }
+}
+
+private struct CursorBoardAccessView: View {
+    @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
+    @State private var didRequest = false
+    private let waitTicker = Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
+
+    var body: some View {
+        AccessDialog(title: Text("Allow Accessibility Access")) {
+            Text("MaCursorHelper needs Accessibility access to paste into the app in front. The item is already on the clipboard, so ⌘V pastes it now. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if trusted {
+                Label("Access granted", systemImage: "checkmark.circle.fill")
+                    .font(.callout)
+                    .foregroundStyle(Color.green)
+
+                Button("Let’s Go!") {
+                    CursorBoardConfig.setEnabled(true)
+                    AccessWindowController.cursorBoard.dismiss()
+                }
+                .keyboardShortcut(.defaultAction)
+            } else {
+                if didRequest {
+                    Text("Waiting for access. This window updates as soon as MaCursorHelper is allowed.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                HStack(spacing: 12) {
+                    Button("Not Now") {
+                        AccessWindowController.cursorBoard.dismiss()
+                    }
+
+                    Button("Allow for Accessibility") {
+                        didRequest = true
+                        FocusFollowsMouseConfig.requestAccessibility()
+                    }
+                    .keyboardShortcut(.defaultAction)
+                }
+            }
+        }
+        .onAppear(perform: refresh)
+        .onReceive(DistributedNotificationCenter.default().publisher(for: .MACFocusFollowsMouseStatusDidChange)) { _ in
+            trusted = FocusFollowsMouseConfig.accessibilityTrusted
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.didBecomeKeyNotification)) { _ in
+            guard AccessWindowController.cursorBoard.window?.isVisible == true else { return }
+            refresh()
+        }
+        .onReceive(waitTicker) { _ in
+            guard !trusted, AccessWindowController.cursorBoard.window?.isVisible == true else { return }
+            refresh()
+        }
+        .onReceive(ModalWindowCoordinator.shared.activeModalDidChange) { _ in
+            AccessWindowController.cursorBoard.reanchor()
+        }
+    }
+
+    private func refresh() {
+        CursorBoardConfig.notifyHelper()
+        trusted = FocusFollowsMouseConfig.accessibilityTrusted
     }
 }

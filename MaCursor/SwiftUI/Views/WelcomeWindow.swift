@@ -35,10 +35,15 @@ final class WelcomeWindowController: NSWindowController, NSWindowDelegate, Obser
     private func present(library: LibraryViewModel) {
         guard let window else { return }
         page = WelcomePage.resumed()?.shown(menuBar: HelperToolManager.shared.isInstalled && MACPreferences.flag(MACPreferences.showMenuBarIconKey)) ?? .welcome
-        let content = NSHostingController(rootView: WelcomeView(controller: self, library: library))
+        let screen = window.screen ?? NSScreen.main
+        let size = WelcomeLayout.contentSize(visibleHeight: screen?.visibleFrame.height ?? .infinity)
+        let content = NSHostingController(rootView: WelcomeView(controller: self, library: library, height: size.height))
         window.contentViewController = content
-        window.setContentSize(WelcomeLayout.contentSize)
+        window.setContentSize(size)
         window.center()
+        if let visible = screen?.visibleFrame {
+            window.setFrameOrigin(ModalWindowPlacement.centeredOrigin(size: window.frame.size, over: window.frame, constrainedTo: visible))
+        }
         ModalWindowCoordinator.shared.register(window, as: .modal)
         window.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
@@ -86,11 +91,13 @@ final class WelcomeWindowController: NSWindowController, NSWindowDelegate, Obser
 private struct WelcomeView: View {
     @ObservedObject var controller: WelcomeWindowController
     let library: LibraryViewModel
+    let height: CGFloat
     @ObservedObject private var helperManager = HelperToolManager.shared
     @ObservedObject private var manager = FinderExtensionManager.shared
     @State private var hover = FocusFollowsMouseConfig.load()
     @State private var gestures = CursorGesturesConfig.load()
     @State private var shaker = CursorShakerConfig.load()
+    @State private var board = CursorBoardConfig.load()
     @State private var translator = CursorTranslatorConfig.load()
     @State private var screenshot = CursorScreenshotConfig.load()
     @State private var trails = CursorTrailsConfig.load()
@@ -111,7 +118,7 @@ private struct WelcomeView: View {
         if manager.settings.hasFullDiskAccess { granted.insert(.fullDiskAccess) }
         let stored: [(WelcomeFeature, Bool)] = [
             (.showMenuBarIcon, menuBarIcon), (.cursorTrails, trails.enabled), (.cursorShadow, shadow),
-            (.focusOnHover, hover.enabled), (.cursorGestures, gestures.enabled), (.cursorShaker, shaker.enabled),
+            (.focusOnHover, hover.enabled), (.cursorGestures, gestures.enabled), (.cursorShaker, shaker.enabled), (.cursorBoard, board.enabled),
             (.cursorTranslator, translator.enabled), (.cursorCapture, screenshot.enabled),
             (.rightClickMenu, RightClickMenuState.isOn(settings: manager.settings, election: manager.election)),
         ]
@@ -125,7 +132,7 @@ private struct WelcomeView: View {
     }
 
     var body: some View {
-        WelcomeContent(page: controller.page, snapshot: snapshot, toggle: toggle, grant: grant, turn: turn(to:), pressMain: pressMainButton)
+        WelcomeContent(page: controller.page, snapshot: snapshot, toggle: toggle, grant: grant, turn: turn(to:), pressMain: pressMainButton, height: height)
             .overlay {
                 Button("") { controller.closeFromEscape() }
                     .keyboardShortcut(.cancelAction)
@@ -172,6 +179,7 @@ private struct WelcomeView: View {
         case .focusOnHover: AccessWindowController.tapFocusFollowsMouse(enabled: hover.enabled, trusted: usable)
         case .cursorGestures: AccessWindowController.tapCursorGestures(enabled: gestures.enabled, usable: usable)
         case .cursorShaker: AccessWindowController.tapCursorShaker(enabled: shaker.enabled, usable: usable)
+        case .cursorBoard: CursorBoardConfig.tap(enabled: board.enabled, usable: usable)
         case .cursorTranslator: AccessWindowController.tapCursorTranslator(enabled: translator.enabled, usable: usable)
         case .cursorCapture: AccessWindowController.tapCursorScreenshot(enabled: screenshot.enabled, usable: usable)
         case .rightClickMenu: AccessWindowController.tapRightClickMenu(save: saveRightClickMenu)
@@ -243,6 +251,7 @@ private struct WelcomeView: View {
         hover = FocusFollowsMouseConfig.load()
         gestures = CursorGesturesConfig.load()
         shaker = CursorShakerConfig.load()
+        board = CursorBoardConfig.load()
         translator = CursorTranslatorConfig.load()
         screenshot = CursorScreenshotConfig.load()
         trails = CursorTrailsConfig.load()

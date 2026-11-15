@@ -53,8 +53,8 @@ struct CursorScreenshotNaming: Codable, Equatable, Sendable {
     static let defaultFormat = "MaCursor %x at %H.%M.%S %p"
     static let longest = 200
     private static let pictureExtensions: Set<String> = Set(CursorScreenshotFormat.allCases.map(\.fileExtension) + ["jpeg"])
-    private static let illegal = CharacterSet(charactersIn: "\\:*?\"<>|")
-    private static let banned = CharacterSet.controlCharacters.union(CharacterSet(charactersIn: "/"))
+    private static let illegal = CharacterSet(charactersIn: "\\:?%*|\"<>\n\r\t")
+    private static let banned = CharacterSet.controlCharacters.subtracting(CharacterSet(charactersIn: "\u{200C}\u{200D}")).union(CharacterSet(charactersIn: "/"))
 
     var asksForName = false
     var format = defaultFormat
@@ -71,7 +71,11 @@ struct CursorScreenshotNaming: Codable, Equatable, Sendable {
     }
 
     func name(_ context: CursorScreenshotNameContext, scale: CGFloat, output: CursorScreenshotOutput) -> CursorScreenshotFileName {
-        CursorScreenshotFileName(stem: stem(context), number: counts ? nextNumber : nil, retina: addsRetinaSuffix && output.shownScale(scale) > 1)
+        CursorScreenshotFileName(stem: stem(context), number: counts ? nextNumber : nil, retina: retina(at: output.shownScale(scale)))
+    }
+
+    func retina(at scale: CGFloat) -> Bool {
+        addsRetinaSuffix && scale.rounded() > 1
     }
 
     func stem(_ context: CursorScreenshotNameContext) -> String {
@@ -159,8 +163,18 @@ struct CursorScreenshotNaming: Codable, Equatable, Sendable {
     }
 
     private func cleaned(_ text: String) -> String {
-        let banned = removesIllegalCharacters ? Self.banned.union(Self.illegal) : Self.banned
-        var kept = String(String.UnicodeScalarView(text.unicodeScalars.filter { !banned.contains($0) })).trimmingCharacters(in: .whitespaces)
+        var kept = ""
+        for scalar in text.unicodeScalars {
+            if removesIllegalCharacters && Self.illegal.contains(scalar) {
+                kept.unicodeScalars.append("_")
+            } else if !Self.banned.contains(scalar) {
+                kept.unicodeScalars.append(scalar)
+            }
+        }
+        if removesIllegalCharacters {
+            kept = kept.replacingOccurrences(of: "_{2,}", with: "_", options: .regularExpression).trimmingCharacters(in: CharacterSet.whitespaces.union(CharacterSet(charactersIn: ".")))
+        }
+        kept = kept.trimmingCharacters(in: .whitespaces)
         while kept.hasPrefix(".") {
             kept = String(kept.dropFirst()).trimmingCharacters(in: .whitespaces)
         }

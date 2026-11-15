@@ -1649,7 +1649,7 @@
 "Wallpapers" = "Wallpapers";
 "Hold Command ⌘ to disable snapping." = "Hold Command ⌘ to disable snapping.";
 
-/* Settings > Cursor Capture, in CleanShot X's order: the tabs, the section headings and the rows. Auto-close is a switch; Interval is the time menu under it. Position on screen says where the card sits. Self-Timer interval is the wait before the picture. OCR is the section that holds Capture Text */
+/* Settings > Cursor Capture, in CleanShot X's order: the tabs, the section headings and the rows. Auto-close is a switch; Interval is the time menu under it. Position on screen says where the card sits. Self-Timer interval is the wait before the picture. */
 "Quick Access" = "Quick Access";
 "Screenshots" = "Screenshots";
 "Advanced" = "Advanced";
@@ -1659,7 +1659,6 @@
 "Behavior" = "Behavior";
 "Capture" = "Capture";
 "Window Screenshots" = "Window Screenshots";
-"OCR" = "OCR";
 "Play sounds" = "Play sounds";
 "Export location" = "Export location";
 "Show Quick Access Overlay" = "Show Quick Access Overlay";
@@ -1784,6 +1783,8 @@
 "MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them." = "MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them.";
 "Cursor Look" = "Cursor Look";
 "When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied.";
+"Cursor Canvas Padding" = "Cursor Canvas Padding";
+"Try this if custom cursors revert to the system pointer in some windows. It adds transparent space around the cursor artwork." = "Try this if custom cursors revert to the system pointer in some windows. It adds transparent space around the cursor artwork.";
 "Install the Helper Tool on the first page to use Cursor Trails." = "Install the Helper Tool on the first page to use Cursor Trails.";
 "Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings.";
 "Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings.";
@@ -1826,6 +1827,79 @@
 "Use Colors on Glow" = "Use Colors on Glow";
 "Use Colors with Style" = "Use Colors with Style";
 
-"Cursor Canvas Padding" = "Cursor Canvas Padding";
+/* Settings > Cursor Capture > Shortcuts and Cursor Translator: one row per part of a trigger. Hold Keys are the modifier keys held with the key or the click. Record Key is the empty key field; Press a key… shows while it records. Result is the last row and reads the whole trigger, for example "⌃ + ⇧ + 4 or ⌃ + ⇧ + Right Click"; %1$@ is the keyboard shortcut and %2$@ the click */
+"Hold Keys" = "Hold Keys";
+"Mouse Button" = "Mouse Button";
+"Result" = "Result";
+"Record Key" = "Record Key";
+"Press a key…" = "Press a key…";
+"Middle Click" = "Middle Click";
+"%1$@ or %2$@" = "%1$@ or %2$@";
+"Hold ⌃ or ⌘, and pick a shortcut that macOS and most apps do not use." = "Hold ⌃ or ⌘, and pick a shortcut that macOS and most apps do not use.";
+"Clear Keyboard Shortcut" = "Clear Keyboard Shortcut";
 
-"Try this if custom cursors revert to the system pointer in some windows. It adds transparent space around the cursor artwork." = "Try this if custom cursors revert to the system pointer in some windows. It adds transparent space around the cursor artwork.";
+/* Cursor Board (clipboard history): the Settings tab, its General, Shortcuts, Panel and Ignored Apps tabs, the Cursor Gestures action, and the list of copied items next to the pointer. "Pinned" and "Picture" are VoiceOver labels on a card. "%lld items" is a choice of "Keep up to". */
+"Cursor Board" = "Cursor Board";
+"Keep what you copy, and paste it from a list next to your pointer." = "Keep what you copy, and paste it from a list next to your pointer.";
+"Cursor Board requires the Helper Tool. You can install it from General → Helper Tool." = "Cursor Board requires the Helper Tool. You can install it from General → Helper Tool.";
+"Panel" = "Panel";
+"History" = "History";
+"Copies are saved on this Mac and are still there after a restart." = "Copies are saved on this Mac and are still there after a restart.";
+"Copies are kept only while MaCursor runs. Nothing is saved on this Mac." = "Copies are kept only while MaCursor runs. Nothing is saved on this Mac.";
+"Keep history for" = "Keep history for";
+"Older items are removed automatically. Pinned items stay." = "Older items are removed automatically. Pinned items stay.";
+"3 months" = "3 months";
+"6 months" = "6 months";
+"1 year" = "1 year";
+"Forever" = "Forever";
+"Keep up to" = "Keep up to";
+"When the list is full, the oldest item goes." = "When the list is full, the oldest item goes.";
+"%lld items" = "%lld items";
+"Keeps text, links and pictures. Pictures over 32 MB are not kept." = "Keeps text, links and pictures. Pictures over 32 MB are not kept.";
+"Delete all copied items? Pinned items stay." = "Delete all copied items? Pinned items stay.";
+"Show Recent Items" = "Show Recent Items";
+"List Next to the Pointer" = "List Next to the Pointer";
+"Items in list" = "Items in list";
+"→ or scrolling down shows older items. ← or scrolling up goes back." = "→ or scrolling down shows older items. ← or scrolling up goes back.";
+"No apps yet." = "No apps yet.";
+"Copies from these apps are never kept." = "Copies from these apps are never kept.";
+"Copies an app marks as secret, such as passwords, are always skipped, from any app." = "Copies an app marks as secret, such as passwords, are always skipped, from any app.";
+"Show your last copies next to the pointer" = "Show your last copies next to the pointer";
+"Paste as Plain Text" = "Paste as Plain Text";
+"Unpin" = "Unpin";
+"No copied items yet." = "No copied items yet.";
+"Newer items" = "Newer items";
+"Older items" = "Older items";
+"Pinned" = "Pinned";
+"Picture" = "Picture";
+"Show Cursor Board" = "Show Cursor Board";
+"The Cursor Gestures action “Show Cursor Board” also opens the panel." = "The Cursor Gestures action “Show Cursor Board” also opens the panel.";
+"Side Panel" = "Side Panel";
+"Position" = "Position";
+"Open at screen edge" = "Open at screen edge";
+"Push the pointer against the left edge of the screen to open the panel." = "Push the pointer against the left edge of the screen to open the panel.";
+"Push the pointer against the right edge of the screen to open the panel." = "Push the pointer against the right edge of the screen to open the panel.";
+"Push the pointer against the bottom edge of the screen to open the panel." = "Push the pointer against the bottom edge of the screen to open the panel.";
+"macOS uses this edge for the Dock, the menu bar or Stage Manager, so the panel does not open there. The click and the gesture still open it." = "macOS uses this edge for the Dock, the menu bar or Stage Manager, so the panel does not open there. The click and the gesture still open it.";
+"Close Cursor Board" = "Close Cursor Board";
+"Keep open" = "Keep open";
+"Move: open near the pointer" = "Move: open near the pointer";
+"Cursor Board Settings" = "Cursor Board Settings";
+"No items match." = "No items match.";
+"Open the panel at the screen edge" = "Open the panel at the screen edge";
+"Search Cursor Board" = "Search Cursor Board";
+"The panel and the list follow MaCursor’s Appearance setting (System, Light or Dark)." = "The panel and the list follow MaCursor’s Appearance setting (System, Light or Dark).";
+"MaCursorHelper needs Accessibility access to paste into the app in front. The item is already on the clipboard, so ⌘V pastes it now. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelper needs Accessibility access to paste into the app in front. The item is already on the clipboard, so ⌘V pastes it now. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility.";
+"Add File Type…" = "Add File Type…";
+"Remove File Type" = "Remove File Type";
+"Add File Type" = "Add File Type";
+"Extension" = "Extension";
+"Add" = "Add";
+"Menu Name" = "Menu Name";
+"This name is already used." = "This name is already used.";
+"The file name can’t contain “/” or “:”." = "The file name can’t contain “/” or “:”.";
+"This file name is too long." = "This file name is too long.";
+"The extension can use up to 16 letters, numbers, - or _." = "The extension can use up to 16 letters, numbers, - or _.";
+"Edit…" = "Edit…";
+"Edit File Type" = "Edit File Type";
+"Are you sure you want to delete “%@”?" = "Are you sure you want to delete “%@”?";

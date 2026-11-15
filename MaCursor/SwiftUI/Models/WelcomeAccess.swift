@@ -38,6 +38,7 @@ enum WelcomeFeature: CaseIterable {
     case focusOnHover
     case cursorGestures
     case cursorShaker
+    case cursorBoard
     case cursorTranslator
     case cursorCapture
     case rightClickMenu
@@ -50,6 +51,7 @@ enum WelcomeFeature: CaseIterable {
         case .focusOnHover: return String(localized: "Focus on Hover")
         case .cursorGestures: return String(localized: "Cursor Gestures")
         case .cursorShaker: return String(localized: "Cursor Shaker")
+        case .cursorBoard: return String(localized: "Cursor Board")
         case .cursorTranslator: return String(localized: "Cursor Translator")
         case .cursorCapture: return String(localized: "Cursor Capture")
         case .rightClickMenu: return String(localized: "Right-Click Menu")
@@ -64,6 +66,7 @@ enum WelcomeFeature: CaseIterable {
         case .focusOnHover: return String(localized: "When you hover over a window with the cursor, MaCursor raises it to the front and hands it the focus after a short delay.")
         case .cursorGestures: return String(localized: "Draw a shape with the pointer to run an action.")
         case .cursorShaker: return String(localized: "While you are away, the pointer moves one pixel and back, and the display stays on, so your apps keep showing you as active.")
+        case .cursorBoard: return String(localized: "Keep what you copy, and paste it from a list next to your pointer.")
         case .cursorTranslator: return String(localized: "Click with the trigger to open a frame. The text inside it turns into your language and keeps up as it changes.")
         case .cursorCapture: return String(localized: "Press the shortcut to take a picture of your screen.")
         case .rightClickMenu: return String(localized: "Adds MaCursor’s shortcuts to the right-click menu in Finder and on the Desktop.")
@@ -73,7 +76,7 @@ enum WelcomeFeature: CaseIterable {
     var accesses: [WelcomeAccess] {
         switch self {
         case .showMenuBarIcon, .cursorTrails, .cursorShadow: return []
-        case .focusOnHover, .cursorGestures, .cursorShaker: return [.accessibility]
+        case .focusOnHover, .cursorGestures, .cursorShaker, .cursorBoard: return [.accessibility]
         case .cursorTranslator: return [.screenRecording, .accessibility]
         case .cursorCapture: return [.screenRecording]
         case .rightClickMenu: return [.finderExtension, .fullDiskAccess]
@@ -88,7 +91,7 @@ enum WelcomeFeature: CaseIterable {
         case .cursorGestures: return [.cursorGestures]
         case .cursorShaker: return [.cursorShaker]
         case .cursorTranslator: return [.cursorTranslator]
-        case .showMenuBarIcon, .cursorCapture, .rightClickMenu: return []
+        case .showMenuBarIcon, .cursorBoard, .cursorCapture, .rightClickMenu: return []
         }
     }
 
@@ -100,7 +103,7 @@ enum WelcomeFeature: CaseIterable {
         switch self {
         case .cursorShadow, .rightClickMenu: return .none
         case .showMenuBarIcon: return .installed
-        case .cursorTrails, .focusOnHover, .cursorGestures, .cursorShaker, .cursorTranslator, .cursorCapture: return .running
+        case .cursorTrails, .focusOnHover, .cursorGestures, .cursorShaker, .cursorBoard, .cursorTranslator, .cursorCapture: return .running
         }
     }
 }

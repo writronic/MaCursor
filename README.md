@@ -31,6 +31,7 @@ Requires **macOS 13 Ventura** or later.
 - **Right-Click Menu** — Get more from your right-click in Finder and on the Desktop: copy a path, make a new file, open files in the app you choose, and more
 - **Focus on Hover** — The window under your pointer becomes active after a short pause, without clicking
 - **Cursor Capture** — Press a shortcut to take a picture of your screen, an area or a window, with your cursor in it if you want. Mark it up in an editor, or copy the text in it
+- **Cursor Board** — Keep what you copy, and paste it from a list next to your pointer or a panel at the edge of your screen
 - **Cursor Translator** — A frame over any text on your screen shows it in your language, and keeps up as the text changes
 - **Cursor Gestures** — Hold modifier keys or a mouse button and draw a shape to run an action, such as a keyboard shortcut, typed text, an app, a website or a window action
 - **Cursor Trails** — A smooth line follows your pointer and shrinks back into it when you stop, in ready-to-use styles
@@ -71,6 +72,60 @@ Requires **macOS 13 Ventura** or later.
 - **Cursor Shaker** — While you are away, your pointer moves one pixel and back, and the display stays on, so apps like Slack and Microsoft Teams keep showing you as active
 
 </details>
+
+## Gallery
+
+<table>
+  <tr>
+    <td width="35%" valign="middle">
+      <b>Import & Apply</b><br>
+      One double-click on a theme replaces every system cursor
+    </td>
+    <td width="65%"><img src="docs/media/apply-a-theme.gif" width="100%" alt="Importing and applying a cursor theme"></td>
+  </tr>
+  <tr>
+    <td width="35%" valign="middle">
+      <b>Cursor Capture</b><br>
+      Press a shortcut to take a picture of your screen, an area or a window
+    </td>
+    <td width="65%"><img src="docs/media/cursor-capture.gif" width="100%" alt="Cursor Capture"></td>
+  </tr>
+  <tr>
+    <td width="35%" valign="middle">
+      <b>Cursor Board</b><br>
+      Keep what you copy, and paste it from a list next to your pointer or a panel at the edge of your screen
+    </td>
+    <td width="65%"><img src="docs/media/cursor-board.gif" width="100%" alt="Cursor Board"></td>
+  </tr>
+  <tr>
+    <td width="35%" valign="middle">
+      <b>Cursor Translator</b><br>
+      A frame over any text on your screen shows it in your language
+    </td>
+    <td width="65%"><img src="docs/media/cursor-translator.gif" width="100%" alt="Cursor Translator"></td>
+  </tr>
+  <tr>
+    <td width="35%" valign="middle">
+      <b>Cursor Gestures</b><br>
+      Hold modifier keys or a mouse button and draw a shape to run an action
+    </td>
+    <td width="65%"><img src="docs/media/cursor-gestures.gif" width="100%" alt="Cursor Gestures"></td>
+  </tr>
+  <tr>
+    <td width="35%" valign="middle">
+      <b>Right-Click Menu</b><br>
+      Get more from your right-click in Finder and on the Desktop
+    </td>
+    <td width="65%"><img src="docs/media/right-click-menu.gif" width="100%" alt="Right-Click Menu"></td>
+  </tr>
+  <tr>
+    <td width="35%" valign="middle">
+      <b>Cursor Trails</b><br>
+      A smooth line follows your pointer and shrinks back into it when you stop
+    </td>
+    <td width="65%"><img src="docs/media/cursor-trails.gif" width="100%" alt="Cursor Trails"></td>
+  </tr>
+</table>
 
 ## Quick Start
 
