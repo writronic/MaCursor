@@ -365,7 +365,7 @@
 
 <img src="screenshots/M3ECursorBlue.png" alt="M3E Cursor Blue">
 
-*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+*Created by XDan ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
 
 ---
 
@@ -373,7 +373,7 @@
 
 <img src="screenshots/M3ECursorGraphite.png" alt="M3E Cursor Graphite">
 
-*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+*Created by XDan ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
 
 ---
 
@@ -381,7 +381,7 @@
 
 <img src="screenshots/M3ECursorGreen.png" alt="M3E Cursor Green">
 
-*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+*Created by XDan ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
 
 ---
 
@@ -389,7 +389,7 @@
 
 <img src="screenshots/M3ECursorLightBlue.png" alt="M3E Cursor Light Blue">
 
-*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+*Created by XDan ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
 
 ---
 
@@ -397,7 +397,7 @@
 
 <img src="screenshots/M3ECursorOrange.png" alt="M3E Cursor Orange">
 
-*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+*Created by XDan ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
 
 ---
 
@@ -405,7 +405,7 @@
 
 <img src="screenshots/M3ECursorPaleBlue.png" alt="M3E Cursor Pale Blue">
 
-*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+*Created by XDan ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
 
 ---
 
@@ -413,7 +413,7 @@
 
 <img src="screenshots/M3ECursorPink.png" alt="M3E Cursor Pink">
 
-*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+*Created by XDan ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
 
 ---
 
@@ -421,7 +421,7 @@
 
 <img src="screenshots/M3ECursorPurple.png" alt="M3E Cursor Purple">
 
-*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+*Created by XDan ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
 
 ---
 
@@ -429,7 +429,7 @@
 
 <img src="screenshots/M3ECursorRed.png" alt="M3E Cursor Red">
 
-*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+*Created by XDan ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
 
 ---
 
@@ -437,7 +437,7 @@
 
 <img src="screenshots/M3ECursorTeal.png" alt="M3E Cursor Teal">
 
-*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+*Created by XDan ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
 
 ---
 
