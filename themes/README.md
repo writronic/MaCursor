@@ -6,7 +6,7 @@
 
 **Browse 80+ cursor themes — click any name to download, or grab them all from the [Releases page](https://github.com/writronic/MaCursor/releases/latest).**
 
-![Themes](https://img.shields.io/badge/Themes-87-brightgreen?style=flat-square)
+![Themes](https://img.shields.io/badge/Themes-97-brightgreen?style=flat-square)
 [![Contribute a Theme](https://img.shields.io/badge/Contribute%20a%20Theme-8A2BE2?style=flat-square)](https://github.com/writronic/MaCursor/blob/main/.github/CONTRIBUTING.md#submitting-a-theme-to-the-gallery)
 
 </div>
@@ -358,6 +358,86 @@
 ### [LyraY](https://github.com/writronic/MaCursor/blob/main/themes/LyraY.cursor)
 
 <img src="screenshots/LyraY.png" alt="LyraY">
+
+---
+
+### [M3E Cursor Blue](https://github.com/writronic/MaCursor/blob/main/themes/M3ECursorBlue.cursor)
+
+<img src="screenshots/M3ECursorBlue.png" alt="M3E Cursor Blue">
+
+*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+
+---
+
+### [M3E Cursor Graphite](https://github.com/writronic/MaCursor/blob/main/themes/M3ECursorGraphite.cursor)
+
+<img src="screenshots/M3ECursorGraphite.png" alt="M3E Cursor Graphite">
+
+*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+
+---
+
+### [M3E Cursor Green](https://github.com/writronic/MaCursor/blob/main/themes/M3ECursorGreen.cursor)
+
+<img src="screenshots/M3ECursorGreen.png" alt="M3E Cursor Green">
+
+*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+
+---
+
+### [M3E Cursor Light Blue](https://github.com/writronic/MaCursor/blob/main/themes/M3ECursorLightBlue.cursor)
+
+<img src="screenshots/M3ECursorLightBlue.png" alt="M3E Cursor Light Blue">
+
+*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+
+---
+
+### [M3E Cursor Orange](https://github.com/writronic/MaCursor/blob/main/themes/M3ECursorOrange.cursor)
+
+<img src="screenshots/M3ECursorOrange.png" alt="M3E Cursor Orange">
+
+*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+
+---
+
+### [M3E Cursor Pale Blue](https://github.com/writronic/MaCursor/blob/main/themes/M3ECursorPaleBlue.cursor)
+
+<img src="screenshots/M3ECursorPaleBlue.png" alt="M3E Cursor Pale Blue">
+
+*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+
+---
+
+### [M3E Cursor Pink](https://github.com/writronic/MaCursor/blob/main/themes/M3ECursorPink.cursor)
+
+<img src="screenshots/M3ECursorPink.png" alt="M3E Cursor Pink">
+
+*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+
+---
+
+### [M3E Cursor Purple](https://github.com/writronic/MaCursor/blob/main/themes/M3ECursorPurple.cursor)
+
+<img src="screenshots/M3ECursorPurple.png" alt="M3E Cursor Purple">
+
+*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+
+---
+
+### [M3E Cursor Red](https://github.com/writronic/MaCursor/blob/main/themes/M3ECursorRed.cursor)
+
+<img src="screenshots/M3ECursorRed.png" alt="M3E Cursor Red">
+
+*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
+
+---
+
+### [M3E Cursor Teal](https://github.com/writronic/MaCursor/blob/main/themes/M3ECursorTeal.cursor)
+
+<img src="screenshots/M3ECursorTeal.png" alt="M3E Cursor Teal">
+
+*Created by XDanfr ([GitHub](https://github.com/XDanfr/M3E-Cursors))*
 
 ---
 
