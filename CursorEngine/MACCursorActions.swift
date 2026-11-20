@@ -3,6 +3,32 @@ import AppKit
 struct MACCursorImageOperations {
     var makeContext: (Int, Int) -> CGContext? = { MACCursorShadow.makeContext(width: $0, height: $1) }
     var crop: (CGImage, CGRect) -> CGImage? = { $0.cropping(to: $1) }
+
+    struct Layout {
+        let scale: Int
+        let width: Int
+        let frameHeight: Int
+        let isSheet: Bool
+    }
+
+    private static func withinTolerance(_ actual: Int, _ nominal: CGFloat, _ scale: Int) -> Bool {
+        abs(CGFloat(actual) - nominal * CGFloat(scale)) <= 0.5 * CGFloat(scale)
+    }
+
+    static func layout(of image: CGImage, frameCount: Int, pointSize: CGSize) -> Layout? {
+        let rounded = (CGFloat(image.width) / pointSize.width).rounded()
+        guard rounded >= 1, rounded <= 16 else { return nil }
+        let scale = Int(rounded)
+        guard withinTolerance(image.width, pointSize.width, scale) else { return nil }
+        if frameCount > 1, image.height % frameCount == 0 {
+            let height = image.height / frameCount
+            if height > 0, withinTolerance(height, pointSize.height, scale) {
+                return Layout(scale: scale, width: image.width, frameHeight: height, isSheet: true)
+            }
+        }
+        guard withinTolerance(image.height, pointSize.height, scale) else { return nil }
+        return Layout(scale: scale, width: image.width, frameHeight: image.height, isSheet: false)
+    }
 }
 
 @MainActor
@@ -12,6 +38,7 @@ struct MACCursorActions {
         let shadow: Bool
         let leftHanded: Bool
         let renderScale: Float
+        let padCursorCanvas: Bool
     }
 
     struct Registration {
@@ -78,9 +105,11 @@ struct MACCursorActions {
     var imageOperations = MACCursorImageOperations()
 
     private func context(identifiers: Set<String>, shadow: Bool) -> ApplyContext {
-        ApplyContext(identifiers: identifiers, shadow: shadow,
-                     leftHanded: (operations.readPreference(MACPreferences.handednessKey) as? NSNumber)?.boolValue ?? false,
-                     renderScale: (operations.readPreference(MACPreferences.cursorScaleKey) as? NSNumber)?.floatValue ?? 0)
+        let padCursorCanvas = (operations.readPreference(MACPreferences.padCursorCanvasKey) as? NSNumber)?.boolValue ?? false
+        return ApplyContext(identifiers: identifiers, shadow: shadow,
+                            leftHanded: (operations.readPreference(MACPreferences.handednessKey) as? NSNumber)?.boolValue ?? false,
+                            renderScale: (operations.readPreference(MACPreferences.cursorScaleKey) as? NSNumber)?.floatValue ?? 0,
+                            padCursorCanvas: operations.isTahoe() && padCursorCanvas)
     }
 
     private func register(_ cursor: Registration, context: ApplyContext) -> Bool {
@@ -150,13 +179,64 @@ struct MACCursorActions {
         var frameDuration = CGFloat((cursor[MACCursorDefinitions.frameDurationKey] as? NSNumber)?.doubleValue ?? 0)
         images = Self.prepareImages(images, size: size, frameCount: &frameCount,
                                     frameDuration: &frameDuration, operations: imageOperations)
+        let renderScale = declaredSize.width > 0 ? size.width / declaredSize.width : 1
         if context.shadow, let shadowed = MACCursorShadow.shadowedImages(images, frameCount: frameCount, pointSize: declaredSize) {
-            let scale = declaredSize.width > 0 ? size.width / declaredSize.width : 1
-            MACCursorShadow.adjustRegistration(size: &size, hotSpot: &hotSpot, margins: shadowed.margins, scale: scale)
+            MACCursorShadow.adjustRegistration(size: &size, hotSpot: &hotSpot, margins: shadowed.margins, scale: renderScale)
             images = shadowed.images
+        }
+        if context.padCursorCanvas, !restore, renderScale > 0 {
+            let pointSize = CGSize(width: size.width / renderScale, height: size.height / renderScale)
+            if let padded = Self.paddedCursorCanvas(images, frameCount: frameCount, pointSize: pointSize,
+                                                   operations: imageOperations) {
+                let paddedSize = CGSize(width: padded.size.width * renderScale, height: padded.size.height * renderScale)
+                let registration = Registration(identifier: identifier, frameCount: frameCount,
+                                                frameDuration: frameDuration, hotSpot: hotSpot,
+                                                size: paddedSize, images: padded.images)
+                if register(registration, context: context) { return true }
+            }
         }
         return register(Registration(identifier: identifier, frameCount: frameCount,
                                       frameDuration: frameDuration, hotSpot: hotSpot, size: size, images: images), context: context)
+    }
+
+    nonisolated static func paddedCursorCanvas(_ images: [CGImage], frameCount: UInt, pointSize: CGSize,
+                                              operations: MACCursorImageOperations = MACCursorImageOperations())
+        -> (size: CGSize, images: [CGImage])? {
+        let minimum: CGFloat = 96
+        guard pointSize.width.isFinite, pointSize.height.isFinite,
+              pointSize.width > 0, pointSize.height > 0,
+              pointSize.width < minimum || pointSize.height < minimum,
+              frameCount >= 1, frameCount <= MACCursorDefinitions.maxFrameCount else { return nil }
+
+        let size = CGSize(width: max(minimum, pointSize.width), height: max(minimum, pointSize.height))
+        let count = Int(frameCount)
+        let layouts = images.compactMap { MACCursorImageOperations.layout(of: $0, frameCount: count, pointSize: pointSize) }
+        guard layouts.count == images.count, let first = layouts.first,
+              layouts.allSatisfy({ $0.isSheet == first.isSheet }),
+              first.isSheet || count == 1 || images.count == count else { return nil }
+
+        let framesPerImage = first.isSheet ? count : 1
+        var output: [CGImage] = []
+        for (image, layout) in zip(images, layouts) {
+            let width = max(layout.width, Int((size.width * CGFloat(layout.scale)).rounded()))
+            let frameHeight = max(layout.frameHeight, Int((size.height * CGFloat(layout.scale)).rounded()))
+            guard let bitmap = operations.makeContext(width, frameHeight * framesPerImage) else { return nil }
+            bitmap.clear(CGRect(x: 0, y: 0, width: width, height: frameHeight * framesPerImage))
+            bitmap.interpolationQuality = .none
+            for index in 0..<framesPerImage {
+                let frame = first.isSheet
+                    ? operations.crop(image, CGRect(x: 0, y: index * layout.frameHeight,
+                                                    width: layout.width, height: layout.frameHeight))
+                    : image
+                guard let frame else { return nil }
+                // CGContext uses a bottom-left origin. Keep each frame's artwork anchored at its top left.
+                let y = (framesPerImage - index) * frameHeight - layout.frameHeight
+                bitmap.draw(frame, in: CGRect(x: 0, y: y, width: layout.width, height: layout.frameHeight))
+            }
+            guard let padded = bitmap.makeImage() else { return nil }
+            output.append(padded)
+        }
+        return (size, output)
     }
 
     func applyTheme(atPath path: String) -> Bool {

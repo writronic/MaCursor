@@ -18,13 +18,6 @@ enum MACCursorShadow {
         let bottom: CGFloat
     }
 
-    private struct Layout {
-        let scale: Int
-        let width: Int
-        let frameHeight: Int
-        let isSheet: Bool
-    }
-
     static func margins(for params: Parameters) -> Margins {
         Margins(left: max(0, params.supportRadius - params.offsetX),
                 top: max(0, params.supportRadius - params.offsetY),
@@ -37,25 +30,6 @@ enum MACCursorShadow {
         size.height += (margins.top + margins.bottom) * scale
         hotSpot.x += margins.left * scale
         hotSpot.y += margins.top * scale
-    }
-
-    private static func withinTolerance(_ actual: Int, _ nominal: CGFloat, _ scale: Int) -> Bool {
-        abs(CGFloat(actual) - nominal * CGFloat(scale)) <= 0.5 * CGFloat(scale)
-    }
-
-    private static func classify(_ image: CGImage, frameCount: Int, pointSize: CGSize) -> Layout? {
-        let rounded = (CGFloat(image.width) / pointSize.width).rounded()
-        guard rounded >= 1, rounded <= 16 else { return nil }
-        let scale = Int(rounded)
-        guard withinTolerance(image.width, pointSize.width, scale) else { return nil }
-        if frameCount > 1, image.height % frameCount == 0 {
-            let height = image.height / frameCount
-            if height > 0, withinTolerance(height, pointSize.height, scale) {
-                return Layout(scale: scale, width: image.width, frameHeight: height, isSheet: true)
-            }
-        }
-        guard withinTolerance(image.height, pointSize.height, scale) else { return nil }
-        return Layout(scale: scale, width: image.width, frameHeight: image.height, isSheet: false)
     }
 
     static func makeContext(width: Int, height: Int) -> CGContext? {
@@ -75,7 +49,7 @@ enum MACCursorShadow {
               params.offsetX.isFinite, params.offsetY.isFinite, params.alpha.isFinite else { return nil }
         let count = Int(frameCount)
         let margins = margins(for: params)
-        let layouts = images.compactMap { classify($0, frameCount: count, pointSize: pointSize) }
+        let layouts = images.compactMap { MACCursorImageOperations.layout(of: $0, frameCount: count, pointSize: pointSize) }
         guard layouts.count == images.count, let first = layouts.first,
               layouts.allSatisfy({ $0.isSheet == first.isSheet }),
               first.isSheet || count == 1 || images.count == count else { return nil }
