@@ -60,6 +60,7 @@ struct MACCursorActions {
         let getScale: () -> Float?
         let setScale: (Float) -> Bool
         let isTahoe: () -> Bool
+        let isMacBookNeo: () -> Bool
         let tahoeAliases: (String) -> [String]
         let browserAliases: (String) -> [String]
         let readFile: (String) -> Data?
@@ -91,6 +92,7 @@ struct MACCursorActions {
                 return CGSGetCursorScale(CGSMainConnectionID(), &scale) == .success ? scale : nil
             }, setScale: { CGSSetCursorScale(CGSMainConnectionID(), $0) == .success },
             isTahoe: { MACCursorDefinitions.isTahoeOrLater },
+            isMacBookNeo: { MACCursorDefinitions.isMacBookNeoOnTahoe },
             tahoeAliases: { MACCursorDefinitions.isTahoeOrLater ? MACCursorDefinitions.tahoeAliases(for: $0) : [] },
             browserAliases: { MACCursorDefinitions.browserAliasMap[$0] ?? [] },
             readFile: { try? Data(contentsOf: URL(fileURLWithPath: $0)) },
@@ -105,11 +107,11 @@ struct MACCursorActions {
     var imageOperations = MACCursorImageOperations()
 
     private func context(identifiers: Set<String>, shadow: Bool) -> ApplyContext {
-        let padCursorCanvas = (operations.readPreference(MACPreferences.padCursorCanvasKey) as? NSNumber)?.boolValue ?? false
+        let padCursorCanvas = (operations.readPreference(MACPreferences.padCursorCanvasKey) as? NSNumber)?.boolValue ?? true
         return ApplyContext(identifiers: identifiers, shadow: shadow,
                             leftHanded: (operations.readPreference(MACPreferences.handednessKey) as? NSNumber)?.boolValue ?? false,
                             renderScale: (operations.readPreference(MACPreferences.cursorScaleKey) as? NSNumber)?.floatValue ?? 0,
-                            padCursorCanvas: operations.isTahoe() && padCursorCanvas)
+                            padCursorCanvas: operations.isMacBookNeo() && padCursorCanvas)
     }
 
     private func register(_ cursor: Registration, context: ApplyContext) -> Bool {
@@ -229,7 +231,6 @@ struct MACCursorActions {
                                                     width: layout.width, height: layout.frameHeight))
                     : image
                 guard let frame else { return nil }
-                // CGContext uses a bottom-left origin. Keep each frame's artwork anchored at its top left.
                 let y = (framesPerImage - index) * frameHeight - layout.frameHeight
                 bitmap.draw(frame, in: CGRect(x: 0, y: y, width: layout.width, height: layout.frameHeight))
             }

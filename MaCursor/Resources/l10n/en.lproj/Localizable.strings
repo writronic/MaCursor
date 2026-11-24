@@ -1784,7 +1784,7 @@
 "Cursor Look" = "Cursor Look";
 "When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied.";
 "Cursor Canvas Padding" = "Cursor Canvas Padding";
-"Try this if custom cursors revert to the system pointer in some windows. It adds transparent space around the cursor artwork." = "Try this if custom cursors revert to the system pointer in some windows. It adds transparent space around the cursor artwork.";
+"Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork." = "Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork.";
 "Install the Helper Tool on the first page to use Cursor Trails." = "Install the Helper Tool on the first page to use Cursor Trails.";
 "Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings.";
 "Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings.";

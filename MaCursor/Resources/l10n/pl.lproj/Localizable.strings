@@ -1899,3 +1899,5 @@
 "Edit…" = "Edytuj…";
 "Edit File Type" = "Edytuj typ pliku";
 "Are you sure you want to delete “%@”?" = "Czy na pewno chcesz usunąć „%@”?";
+"Cursor Canvas Padding" = "Margines kursora";
+"Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork." = "Zapobiega powracaniu niestandardowych kursorów do kursora systemowego na MacBooku Neo. Dodaje przezroczysty obszar wokół grafiki kursora.";

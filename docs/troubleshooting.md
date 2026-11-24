@@ -11,8 +11,6 @@ If your theme applies but the pointer snaps back to the macOS arrow as soon as y
 3. Set **Pointer outline color** and **Pointer fill color** back to their defaults, a black outline and a white fill.
 4. Return to MaCursor and apply your theme again.
 
-On macOS Tahoe, if a custom pointer still switches back in parts of the screen, try **Cursor Canvas Padding** under **Settings → Cursor Control → Appearance**. It is off by default. The extra space is transparent so the artwork keeps its size and click position.
-
 ## Cursors MaCursor Cannot Replace
 
 MaCursor replaces the cursors macOS itself registers. An app that paints its own pointer keeps painting it, and no cursor tool can change that. Expect these to stay as they are:

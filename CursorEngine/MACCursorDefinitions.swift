@@ -15,6 +15,19 @@ final class MACCursorDefinitions: NSObject {
     static let windowDismissDelay: TimeInterval = 0.05
     static let maxCoreCursorID: Int32 = 43
     static let isTahoeOrLater = ProcessInfo.processInfo.operatingSystemVersion.majorVersion >= 26
+    static let macBookNeoModels: Set<String> = ["Mac17,5"]
+    static let hardwareModel: String = {
+        var size = 0
+        guard sysctlbyname("hw.model", nil, &size, nil, 0) == 0, size > 0 else { return "" }
+        var bytes = [CChar](repeating: 0, count: size)
+        guard sysctlbyname("hw.model", &bytes, &size, nil, 0) == 0 else { return "" }
+        return bytes.withUnsafeBufferPointer { String(cString: $0.baseAddress!) }
+    }()
+    static let isMacBookNeoOnTahoe = isTahoeOrLater && isMacBookNeo(model: hardwareModel)
+
+    static func isMacBookNeo(model: String) -> Bool {
+        macBookNeoModels.contains(model)
+    }
 
     static let defaultCursors = [
         "com.apple.coregraphics.Arrow",

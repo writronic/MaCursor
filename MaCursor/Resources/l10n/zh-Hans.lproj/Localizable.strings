@@ -1772,7 +1772,7 @@
 "Cursor Look" = "指针外观";
 "When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "启用后，会在指针下方绘制柔和的投影。该阴影在应用指针主题时显示。";
 "Cursor Canvas Padding" = "指针画布留边";
-"Try this if custom cursors revert to the system pointer in some windows. It adds transparent space around the cursor artwork." = "如果自定义指针在某些窗口中变回系统指针，可以试试此设置。它会在指针图案周围填充透明区域。";
+"Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork." = "防止自定义指针在 MacBook Neo 上变回系统指针。它会在指针图案周围添加透明区域。";
 "Install the Helper Tool on the first page to use Cursor Trails." = "请在第一页安装“辅助工具”以使用指针轨迹。";
 "Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "此页面上的功能需要 MaCursorHelper 的辅助功能权限。如果缺少该权限，请选择“授予权限”以打开“系统设置”。";
 "Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "此页面上的功能需要 MaCursor 的录屏权限。指针翻译还需要 MaCursorHelper 的辅助功能权限。如果缺少权限，请选择“授予权限”以打开“系统设置”。";

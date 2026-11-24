@@ -1887,3 +1887,5 @@
 "Edit…" = "تحرير…";
 "Edit File Type" = "تحرير نوع الملف";
 "Are you sure you want to delete “%@”?" = "هل تريد بالتأكيد حذف «%@»؟";
+"Cursor Canvas Padding" = "هامش المؤشر";
+"Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork." = "يمنع عودة المؤشرات المخصصة إلى مؤشر النظام على جهاز MacBook Neo. ويضيف مساحة شفافة حول صورة المؤشر.";

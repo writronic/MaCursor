@@ -14,7 +14,7 @@ struct CursorSettingsView: View {
     @State private var hideTahoeCursors: Bool = MACPreferences.hideTahoeCursors
     @State private var isLeftHanded: Bool = MACPreferences.isLeftHanded
     @State private var cursorShadow: Bool = MACPreferences.flag(MACPreferences.cursorShadowKey)
-    @State private var padCursorCanvas = MACPreferences.flag(MACPreferences.padCursorCanvasKey)
+    @State private var padCursorCanvas = MACPreferences.padCursorCanvas
 
     @ObservedObject private var helperManager = HelperToolManager.shared
     @State private var autoSwitch: AutoSwitchConfig = AutoSwitchConfig.load()
@@ -110,15 +110,15 @@ struct CursorSettingsView: View {
                     .font(.caption)
                     .foregroundStyle(.tertiary)
 
-                if MACCursorDefinitions.isTahoeOrLater {
+                if MACCursorDefinitions.isMacBookNeoOnTahoe {
                     Toggle("Cursor Canvas Padding", isOn: $padCursorCanvas)
                         .onChangeCompat(of: padCursorCanvas) { newValue in
-                            guard newValue != MACPreferences.flag(MACPreferences.padCursorCanvasKey) else { return }
+                            guard newValue != MACPreferences.padCursorCanvas else { return }
                             MACPreferences.setFlag(newValue, forKey: MACPreferences.padCursorCanvasKey)
                             reapplyActiveThemeIfNeeded()
                         }
 
-                    Text("Try this if custom cursors revert to the system pointer in some windows. It adds transparent space around the cursor artwork.")
+                    Text("Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork.")
                         .font(.caption)
                         .foregroundStyle(.tertiary)
                 }
@@ -344,7 +344,7 @@ struct CursorSettingsView: View {
             isLeftHanded = MACPreferences.isLeftHanded
             hideTahoeCursors = MACPreferences.hideTahoeCursors
             cursorShadow = MACPreferences.flag(MACPreferences.cursorShadowKey)
-            padCursorCanvas = MACPreferences.flag(MACPreferences.padCursorCanvasKey)
+            padCursorCanvas = MACPreferences.padCursorCanvas
             autoSwitch = AutoSwitchConfig.load()
             focusFollowsMouse = FocusFollowsMouseConfig.load()
             ffmAccessibilityTrusted = FocusFollowsMouseConfig.accessibilityTrusted

@@ -105,6 +105,10 @@ enum MACPreferences {
         (value(forKey: hideTahoeCursorsKey) as? NSNumber)?.boolValue ?? true
     }
 
+    static var padCursorCanvas: Bool {
+        (value(forKey: padCursorCanvasKey) as? NSNumber)?.boolValue ?? true
+    }
+
     static var advancedEditorLayout: String {
         (value(forKey: advancedEditorLayoutKey) as? String) ?? "list"
     }

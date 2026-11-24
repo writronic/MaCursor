@@ -1887,3 +1887,5 @@
 "Edit…" = "Düzenle…";
 "Edit File Type" = "Dosya Türünü Düzenle";
 "Are you sure you want to delete “%@”?" = "“%@” dosya türünü silmek istediğinizden emin misiniz?";
+"Cursor Canvas Padding" = "İmleç Kenar Boşluğu";
+"Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork." = "MacBook Neo'da özel imleçlerin yeniden sistem imlecine dönmesini önler. İmleç resminin çevresine saydam bir alan ekler.";
