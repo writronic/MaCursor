@@ -14,6 +14,7 @@ struct CursorSettingsView: View {
     @State private var hideTahoeCursors: Bool = MACPreferences.hideTahoeCursors
     @State private var isLeftHanded: Bool = MACPreferences.isLeftHanded
     @State private var cursorShadow: Bool = MACPreferences.flag(MACPreferences.cursorShadowKey)
+    @State private var padCursorCanvas = MACPreferences.padCursorCanvas
 
     @ObservedObject private var helperManager = HelperToolManager.shared
     @State private var autoSwitch: AutoSwitchConfig = AutoSwitchConfig.load()
@@ -108,6 +109,19 @@ struct CursorSettingsView: View {
                 Text("When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied.")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
+
+                if MACCursorDefinitions.isMacBookNeoOnTahoe {
+                    Toggle("Cursor Canvas Padding", isOn: $padCursorCanvas)
+                        .onChangeCompat(of: padCursorCanvas) { newValue in
+                            guard newValue != MACPreferences.padCursorCanvas else { return }
+                            MACPreferences.setFlag(newValue, forKey: MACPreferences.padCursorCanvasKey)
+                            reapplyActiveThemeIfNeeded()
+                        }
+
+                    Text("Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork.")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                }
             }
 
             Section {
@@ -330,6 +344,7 @@ struct CursorSettingsView: View {
             isLeftHanded = MACPreferences.isLeftHanded
             hideTahoeCursors = MACPreferences.hideTahoeCursors
             cursorShadow = MACPreferences.flag(MACPreferences.cursorShadowKey)
+            padCursorCanvas = MACPreferences.padCursorCanvas
             autoSwitch = AutoSwitchConfig.load()
             focusFollowsMouse = FocusFollowsMouseConfig.load()
             ffmAccessibilityTrusted = FocusFollowsMouseConfig.accessibilityTrusted

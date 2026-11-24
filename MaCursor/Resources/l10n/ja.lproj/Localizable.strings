@@ -1887,3 +1887,5 @@
 "Edit…" = "編集…";
 "Edit File Type" = "ファイルの種類を編集";
 "Are you sure you want to delete “%@”?" = "「%@」を削除してもよろしいですか？";
+"Cursor Canvas Padding" = "カーソルの余白";
+"Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork." = "MacBook Neoで、カスタムカーソルがシステムカーソルに戻るのを防ぎます。カーソル画像の周りに透明な余白を追加します。";
