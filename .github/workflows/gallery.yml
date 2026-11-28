@@ -1,0 +1,40 @@
+name: Gallery
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "themes/**"
+      - "docs/media/theme-previews/**"
+      - ".github/gallery-index.py"
+      - ".github/workflows/gallery.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gallery
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build the index
+        run: python3 .github/gallery-index.py themes docs/media/theme-previews > "$RUNNER_TEMP/gallery.json"
+
+      - name: Create the Gallery release
+        run: |
+          gh release view gallery > /dev/null 2>&1 || gh release create gallery --latest=false --title "Theme Gallery" --notes "Theme files for the Theme Gallery in MaCursor."
+
+      - name: Upload themes and pictures
+        run: gh release upload gallery themes/*.cursor docs/media/theme-previews/*.png --clobber
+
+      - name: Upload the index
+        run: gh release upload gallery "$RUNNER_TEMP/gallery.json" --clobber

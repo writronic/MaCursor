@@ -119,9 +119,22 @@ struct CursorPreviewView: View {
     }
 }
 
+struct CursorPictureBox<Picture: View>: View {
+    @ViewBuilder let picture: Picture
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: 8, style: .continuous)
+            .fill(Color.editThemeTile)
+            .frame(width: 40, height: 40)
+            .overlay { picture.padding(6) }
+            .accessibilityHidden(true)
+    }
+}
+
 struct CursorThumbnailView: View {
     @ObservedObject var cursor: CursorModel
     var size: CGFloat = 24
+    var trimmed = false
 
     private var thumbnailImage: NSImage? {
         if cursor.frameCount > 1 {
@@ -132,7 +145,12 @@ struct CursorThumbnailView: View {
 
     var body: some View {
         ZStack {
-            if let image = thumbnailImage {
+            if trimmed, let picture = cursor.trimmedPicture {
+                Image(decorative: picture, scale: 1)
+                    .resizable()
+                    .interpolation(.high)
+                    .aspectRatio(contentMode: .fit)
+            } else if let image = thumbnailImage {
                 Image(nsImage: image)
                     .resizable()
                     .interpolation(.high)

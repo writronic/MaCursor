@@ -57,6 +57,10 @@ actor CursorScreenshotHistoryStore {
             var marked = root
             try marked.setResourceValues(values)
             try files.createDirectory(at: folder, withIntermediateDirectories: false)
+        } catch {
+            return
+        }
+        do {
             try picture.write(to: folder.appendingPathComponent(Self.pictureName))
             try thumbnail?.write(to: folder.appendingPathComponent(Self.thumbnailName))
             try JSONEncoder().encode(entry).write(to: folder.appendingPathComponent(Self.entryName), options: .atomic)

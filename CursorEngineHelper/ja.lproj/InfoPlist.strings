@@ -1,3 +1,3 @@
-"NSAppleEventsUsageDescription" = "これにより、FinderのツールバーにあるMaCursorボタンがiCloudフォルダ内で機能します。";
-"NSScreenCaptureUsageDescription" = "カーソル翻訳は枠の中のテキストを読み取り、テキストは選択した翻訳サービスにのみ送信されます。カーソルキャプチャは、指示したときに画面の画像を撮影し、画像はお使いのMacから外に出ません。";
+"NSAppleEventsUsageDescription" = "これにより、FinderのツールバーにあるMaCursorボタンがiCloudフォルダ内で機能し、カーソルジェスチャで他のアプリを操作するスクリプトを実行できます。";
+"NSScreenCaptureUsageDescription" = "カーソル翻訳は枠の中のテキストを読み取り、テキストは選択した翻訳サービスにのみ送信されます。カーソルキャプチャは、指示したときに画面の画像を撮影し、画像はお使いのMacから外に出ません。カーソルのハイライトは、拡大鏡がオンの間、ポインタの周りの画面を拡大し、何も保存しません。";
 "NSDesktopFolderUsageDescription" = "カーソルキャプチャは、指示したときに画像をデスクトップに保存します。";

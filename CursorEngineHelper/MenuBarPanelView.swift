@@ -19,6 +19,7 @@ struct MenuBarPanelView: View {
     @AppStorage("MACMenuBarCursorCaptureExpanded") private var captureExpanded = false
     @AppStorage("MACMenuBarQuickControlsExpanded") private var controlsExpanded = false
     @AppStorage("MACMenuBarCursorTrailsExpanded") private var trailsExpanded = false
+    @AppStorage("MACMenuBarCursorHighlightExpanded") private var highlightExpanded = false
     @AppStorage("MACMenuBarFocusOnHoverExpanded") private var ffmDelayExpanded = false
 
     var body: some View {
@@ -47,7 +48,7 @@ struct MenuBarPanelView: View {
                 proxy.scrollTo("top", anchor: .top)
             }
         }
-        .background(Color(nsColor: .windowBackgroundColor).opacity(model.panelBackdropAlpha))
+        .background(Color(nsColor: .windowFill).opacity(model.panelBackdropAlpha))
     }
 
     @ViewBuilder
@@ -58,6 +59,7 @@ struct MenuBarPanelView: View {
         case .controls(let items): quickControlsSection(items)
         case .cursorCapture(let rows): cursorCaptureSection(rows)
         case .cursorTrails: cursorTrailsSection
+        case .cursorHighlight: cursorHighlightSection
         }
     }
 
@@ -364,7 +366,7 @@ struct MenuBarPanelView: View {
                     .font(.system(size: 11))
                 }
             }
-        case .themes, .activeApp, .quickControls, .cursorTrails:
+        case .themes, .activeApp, .quickControls, .cursorTrails, .cursorHighlight:
             EmptyView()
         }
     }
@@ -452,6 +454,46 @@ struct MenuBarPanelView: View {
             get: { model.cursorScale },
             set: { model.previewCursorScale($0) }
         )
+    }
+
+    private var cursorHighlightSection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            sectionTitle(MenuBarL("Cursor Highlight"), isExpanded: $highlightExpanded)
+            if highlightExpanded {
+                VStack(spacing: 0) {
+                    highlightRow(MenuBarL("Cursor Highlight"), icon: "cursorarrow.click.2", key: \.enabled, isOn: model.cursorHighlight.enabled)
+                    Divider().padding(.leading, 41).padding(.trailing, 10)
+                    highlightRow(MenuBarL("Spotlight (Cursor Highlight)"), icon: "light.max", key: \.spotlight, isOn: model.cursorHighlight.spotlight)
+                    Divider().padding(.leading, 41).padding(.trailing, 10)
+                    highlightRow(MenuBarL("Flashlight Mode"), icon: "moon.fill", key: \.flashlight, isOn: model.cursorHighlight.flashlight)
+                    Divider().padding(.leading, 41).padding(.trailing, 10)
+                    highlightRow(MenuBarL("Click Ripple"), icon: "circle.circle", key: \.ripple, isOn: model.cursorHighlight.ripple)
+                }
+                .toggleStyle(.switch)
+                .controlSize(.small)
+                .panelCard(padding: 0)
+            }
+        }
+    }
+
+    private func highlightRow(_ title: String, icon: String, key: WritableKeyPath<CursorHighlightConfig, Bool>, isOn: Bool) -> some View {
+        let enabled = model.cursorHighlight.canSet(key)
+        return Toggle(isOn: binding(isOn) { model.setCursorHighlight(key, $0) }) {
+            HStack(spacing: 9) {
+                Image(systemName: icon)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(Color(nsColor: !enabled ? .tertiaryLabelColor : isOn ? .controlAccentColor : .secondaryLabelColor))
+                    .frame(width: 22)
+                    .accessibilityHidden(true)
+                Text(title)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(enabled ? .primary : .tertiary)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .disabled(!enabled)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
     }
 
     private var scaleLabel: String {

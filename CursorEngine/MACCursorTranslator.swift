@@ -88,6 +88,7 @@ struct CursorTranslatorConfig: Codable, Equatable {
     static let languageSettings = "x-apple.systempreferences:com.apple.Localization-Settings.extension"
 
     var enabled = false
+    var shortcut: KeyboardShortcutData?
     var trigger = CursorTranslatorConfig.defaultTrigger
     var color = CursorTrailsPalette.cobalt
     var target: String?
@@ -105,6 +106,24 @@ struct CursorTranslatorConfig: Codable, Equatable {
         other.source = source
         other.target = target
         return other == self
+    }
+
+    var works: Bool {
+        CursorTranslator.usable(trigger) || shortcut.map { MACCaptureShortcutIsAllowed($0.modifierFlagsRaw, $0.keyCode) } ?? false
+    }
+
+    func heldElsewhere(_ candidate: KeyboardShortcutData, favorites: Any? = MACPreferences.value(forKey: MACPreferences.favoriteCursorsKey),
+                       shaker: CursorShakerConfig = .load(), capture: CursorScreenshotConfig = .load(), board: CursorBoardConfig = .load(),
+                       highlight: CursorHighlightConfig = .load()) -> Bool {
+        let held = MACFavoriteKeys(favorites) + [shaker.shortcut].compactMap { $0 } + highlight.keys + capture.keys(besides: nil) + board.keys(besides: nil)
+        return CursorScreenshot.refuses(candidate, held: held)
+    }
+
+    func isTaken(_ next: CursorTrigger, favorites: Any? = MACPreferences.value(forKey: MACPreferences.favoriteCursorsKey),
+                 shaker: CursorShakerConfig = .load(), capture: CursorScreenshotConfig = .load(), board: CursorBoardConfig = .load(),
+                 highlight: CursorHighlightConfig = .load()) -> Bool {
+        (next.key != shortcut && next.key.map { heldElsewhere($0, favorites: favorites, shaker: shaker, capture: capture, board: board, highlight: highlight) } == true)
+            || (next.click != trigger && CursorScreenshot.refuses(next.click, held: board.triggers + highlight.triggers))
     }
 
     static var appleTranslation: Bool {
@@ -213,7 +232,8 @@ extension CursorTranslatorConfig {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.init()
         enabled = (try? container.decode(Bool.self, forKey: .enabled)) ?? false
-        if let trigger = try? container.decode(CursorGestureTrigger.self, forKey: .trigger), trigger.button != nil, !trigger.twoFinger {
+        shortcut = try? container.decode(KeyboardShortcutData.self, forKey: .shortcut)
+        if let trigger = try? container.decode(CursorGestureTrigger.self, forKey: .trigger), !trigger.twoFinger {
             self.trigger = trigger
         }
         if let color = try? container.decode(CursorTrailsPalette.self, forKey: .color), Self.colors.contains(color) {
@@ -315,13 +335,13 @@ enum CursorTranslatorStatus: Error, Equatable, Sendable {
         case .needsScreenRecording: return "Needs Screen Recording"
         case .unreadable: return "Cannot read the screen"
         case .notRead: return "Could not read the text. Trying again…"
-        case .missingLanguage: return "Language not downloaded. Open Settings › Cursor Translator › Translation Languages…"
+        case .missingLanguage: return "Language not downloaded. Open MaCursor › Cursor Translator › Translation Languages…"
         case .unavailable: return "Translation is not available"
         case .noText: return "No text here"
-        case .badAddress: return "Add the server address in Settings › Cursor Translator"
+        case .badAddress: return "Add the server address in MaCursor › Cursor Translator"
         case .noConnection: return "No connection"
         case .pair: return "%1$@ → %2$@"
-        case .missingKey: return "Add your %@ key in Settings › Cursor Translator"
+        case .missingKey: return "Add your %@ key in MaCursor › Cursor Translator"
         case .keyRefused: return "%@ refused the key"
         case .serviceFailed: return "%@ could not translate"
         case .notUnderstood: return "%@ sent a reply that cannot be read"
@@ -660,6 +680,7 @@ final class CursorTranslatorChild: @unchecked Sendable {
 }
 
 enum CursorTranslator {
+    static let hotKeyID = CursorShaker.hotKeyID - 8
     static let clickSize = CGSize(width: 480, height: 200)
     static let followSize = CGSize(width: 440, height: 180)
     static let minimumSize = CGSize(width: 120, height: 60)

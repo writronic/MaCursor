@@ -8,10 +8,11 @@ class LibraryViewModel: ObservableObject {
     @Published var cursorThemes: [CursorThemeModel] = []
     @Published var appliedThemeId: String?
     @Published var favoriteThemeIds: Set<String>
+    @Published var showsConvertHint = false
     let conversion = ThemeConversionCoordinator()
 
     private let backingController: LibraryController
-    private let preferences: MACPreferences.Operations
+    let preferences: MACPreferences.Operations
     private let upscaleModelURL: URL?
     private let postDistributed: (Notification.Name) -> Void
     private var conversionForwarder: AnyCancellable?
@@ -36,7 +37,7 @@ class LibraryViewModel: ObservableObject {
             appendPathComponent: "MaCursor/cursors"
         )) ?? ""
 
-        backingController = LibraryController(url: libraryDirectory ?? URL(fileURLWithPath: cursorsPath))
+        backingController = LibraryController(url: libraryDirectory ?? URL(fileURLWithPath: cursorsPath), preferences: preferences)
         reload()
 
         conversionForwarder = conversion.objectWillChange.sink { [weak self] _ in
@@ -77,8 +78,8 @@ class LibraryViewModel: ObservableObject {
         }
     }
 
-    private func syncAppliedThemeFromPreferences() {
-        let storedId = MACPreferences.value(forKey: MACPreferences.appliedCursorKey) as? String
+    func syncAppliedThemeFromPreferences() {
+        let storedId = MACPreferences.value(forKey: MACPreferences.appliedCursorKey, operations: preferences) as? String
         if let storedId, !storedId.isEmpty {
             backingController.appliedTheme = backingController.themes.first { $0.identifier == storedId }
         } else {
@@ -130,6 +131,25 @@ class LibraryViewModel: ObservableObject {
     func theme(withId id: String?) -> CursorThemeModel? {
         guard let id else { return nil }
         return cursorThemes.first { $0.id == id }
+    }
+
+    var themesLayout: EditThemeSidebarLayout {
+        get { layout(forKey: MACPreferences.themesLayoutKey) ?? .list }
+        set { saveLayout(newValue, forKey: MACPreferences.themesLayoutKey) }
+    }
+
+    var galleryLayout: EditThemeSidebarLayout {
+        get { layout(forKey: MACPreferences.galleryLayoutKey) ?? .grid }
+        set { saveLayout(newValue, forKey: MACPreferences.galleryLayoutKey) }
+    }
+
+    private func layout(forKey key: String) -> EditThemeSidebarLayout? {
+        (MACPreferences.value(forKey: key, operations: preferences) as? String).flatMap(EditThemeSidebarLayout.init(rawValue:))
+    }
+
+    private func saveLayout(_ layout: EditThemeSidebarLayout, forKey key: String) {
+        objectWillChange.send()
+        MACPreferences.set(layout.rawValue, forKey: key, operations: preferences)
     }
 
     func isFavorite(_ cursorTheme: CursorThemeModel) -> Bool {
@@ -245,8 +265,49 @@ class LibraryViewModel: ObservableObject {
 
     @discardableResult
     func importTheme(at url: URL) -> Task<Void, Never>? {
-        guard let lib = CursorLibrary(contentsOfURL: url), landTheme(lib) != nil else { return nil }
+        guard let lib = CursorLibrary(contentsOfURL: url) else { return nil }
+        return importTheme(lib)
+    }
+
+    @discardableResult
+    private func importTheme(_ lib: CursorLibrary) -> Task<Void, Never>? {
+        guard landTheme(lib) != nil else { return nil }
         return Task { await addTwoXPictures(to: lib) }
+    }
+
+    var isEditingTheme: Bool {
+        cursorThemes.contains { $0.openEditorCount > 0 }
+    }
+
+    func importSettingsThemes(_ themes: [CursorLibrary], favorites: Set<String>,
+                              apply: (CursorLibrary) -> Bool = { CursorService.applyTheme(from: $0) }) -> (failed: [String], landed: [String: String]) {
+        guard !isEditingTheme else { return (themes.map(\.name), [:]) }
+        let inUse = MACPreferences.value(forKey: MACPreferences.appliedCursorKey, operations: preferences) as? String
+        var failed: [String] = []
+        var landed: [CursorLibrary] = []
+        var identifiers: [String: String] = [:]
+        var shown: CursorLibrary?
+        let stars = favoriteThemeIds
+        for lib in themes {
+            let incoming = lib.identifier
+            let starred = favorites.contains(incoming)
+            let old = LibraryController.existingTheme(sameNameAs: incoming, in: backingController.themes, excluding: landed)
+            guard backingController.replaceOrAdd(lib, replacing: old) else {
+                failed.append(lib.name)
+                continue
+            }
+            landed.append(lib)
+            identifiers[incoming] = lib.identifier
+            if starred { favoriteThemeIds.insert(lib.identifier) }
+            if old != nil, lib.identifier == inUse { shown = lib }
+        }
+        if favoriteThemeIds != stars { saveFavorites() }
+        reload()
+        if let shown { _ = apply(shown) }
+        for lib in landed {
+            Task { [weak self] in await self?.addTwoXPictures(to: lib) }
+        }
+        return (failed, identifiers)
     }
 
     private func addTwoXPictures(to lib: CursorLibrary) async {
@@ -341,24 +402,24 @@ class LibraryViewModel: ObservableObject {
     }
 
 
-    func handleDrop(_ providers: [NSItemProvider]) -> Bool {
-        let _ = Task { @MainActor [weak self] in
-            guard let self else { return }
-            for provider in providers {
-                if let item = try? await provider.loadItem(forTypeIdentifier: "public.file-url", options: nil),
-                   let data = item as? Data,
-                   let url = URL(dataRepresentation: data, relativeTo: nil) {
-
-                    if url.pathExtension.lowercased() == "cursor" {
-                        self.importTheme(at: url)
-                    } else {
-                        await self.conversion.convert(url)
-                        break
-                    }
-                }
-            }
+    func handleDrop(_ urls: [URL]) -> Bool {
+        let folders = urls.filter { $0.isFileURL && (try? $0.resourceValues(forKeys: [.isDirectoryKey]))?.isDirectory == true }
+        let files = urls.filter { !folders.contains($0) }
+        let settings = files.filter { $0.isFileURL && $0.pathExtension.lowercased() == "macursor" }
+        let themes = files.compactMap { $0.isFileURL && $0.pathExtension.lowercased() == "cursor" ? CursorLibrary(contentsOfURL: $0) : nil }
+        if themes.count + settings.count < files.count {
+            showsConvertHint = true
         }
-        return true
+        for lib in themes {
+            importTheme(lib)
+        }
+        if let folder = folders.first {
+            Task { await conversion.convert(folder) }
+        }
+        if let file = settings.first {
+            NSApplication.shared.delegate?.application?(NSApplication.shared, open: [file])
+        }
+        return !themes.isEmpty || !folders.isEmpty || !settings.isEmpty
     }
 }
 

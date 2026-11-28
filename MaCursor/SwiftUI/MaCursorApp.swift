@@ -12,6 +12,7 @@ struct MaCursorApp: App {
     private let updaterController: SPUStandardUpdaterController
 
     init() {
+        MACForceOverlayScrollers()
         updaterController = SPUStandardUpdaterController(
             startingUpdater: true,
             updaterDelegate: nil,
@@ -21,19 +22,20 @@ struct MaCursorApp: App {
 
     var body: some Scene {
         WindowGroup("MaCursor") {
-            LibraryView()
+            MainWindowView(updater: updaterController.updater)
                 .background(MainWindowHoldAccessor { WelcomeWindowController.shared.presentAtLaunchIfNeeded(library: library) })
                 .environmentObject(library)
                 .environmentObject(appearanceManager)
                 .environmentObject(languageManager)
                 .onAppear {
+                    configureSettingsFiles()
                     appearanceManager.applyOnLaunch()
 
                     appDelegate.isViewReady = true
 
                     let pendingURLs = appDelegate.consumePendingImports()
                     for url in pendingURLs {
-                        library.importTheme(at: url)
+                        openFile(url)
                     }
 
                     drainPendingSettingsRequest()
@@ -44,17 +46,16 @@ struct MaCursorApp: App {
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .macursorImportFile)) { notification in
                     if let url = notification.userInfo?["url"] as? URL {
-                        library.importTheme(at: url)
+                        openFile(url)
                     }
                 }
                 .handlesExternalEvents(preferring: ["*"], allowing: ["*"])
         }
         .handlesExternalEvents(matching: [])
-        .defaultSize(width: 1200, height: 850)
+        .defaultSize(MainWindowLayout.defaultSize)
         .commands {
             CommandGroup(replacing: .appInfo) {
                 Button("About MaCursor") {
-                    SettingsWindowController.shared.window?.close()
                     openWindow(id: "about")
                 }
             }
@@ -65,7 +66,7 @@ struct MaCursorApp: App {
 
             CommandGroup(replacing: .appSettings) {
                 Button("Settings...") {
-                    openSettingsWindow()
+                    openMainPage(.settings, tab: 0)
                 }
                 .keyboardShortcut(",", modifiers: .command)
             }
@@ -80,6 +81,8 @@ struct MaCursorApp: App {
                 LibraryFindCommand()
             }
 
+            CommandGroup(before: .toolbar) { MainWindowBackCommand() }
+
             CommandGroup(replacing: .help) {
                 Button("MaCursor Help") {
                     if let url = URL(string: "https://github.com/writronic/MaCursor") {
@@ -89,27 +92,6 @@ struct MaCursorApp: App {
                 .keyboardShortcut("/", modifiers: .command)
             }
         }
-
-        WindowGroup("Edit Theme", for: String.self) { $themeId in
-            if let themeId, let cursorTheme = library.theme(withId: themeId) {
-                CursorThemeEditorView(cursorTheme: cursorTheme)
-                    .environmentObject(library)
-                    .onReceive(NotificationCenter.default.publisher(for: .cursorLibraryIdentifierDidChange)) { note in
-                        guard let oldId = note.userInfo?["oldId"] as? String,
-                              let newId = note.userInfo?["newId"] as? String,
-                              themeId == oldId else { return }
-                        $themeId.wrappedValue = newId
-                    }
-            } else {
-                UnavailableContent(
-                    title: Text("Theme Not Found"),
-                    systemImage: "exclamationmark.triangle",
-                    description: Text("The cursor theme could not be loaded.")
-                )
-            }
-        }
-        .defaultSize(width: 1000, height: 700)
-        .handlesExternalEvents(matching: [])
 
         Window("About MaCursor", id: "about") {
             if #available(macOS 15, *) {
@@ -127,23 +109,34 @@ struct MaCursorApp: App {
 }
 
 private extension MaCursorApp {
-    func openSettingsWindow() {
+    func openMainPage(_ page: MainPage, tab: Int? = nil) {
         AboutWindowView.window?.close()
-        SettingsWindowController.shared.configure(library: library,
-                                                  appearanceManager: appearanceManager,
-                                                  languageManager: languageManager,
-                                                  updater: updaterController.updater)
-        SettingsWindowController.shared.showWindow(nil)
-        NSApp.activate(ignoringOtherApps: true)
+        ModalWindowCoordinator.shared.runIfMainWindowIsUsable {
+            guard MainWindowRouter.shared.open(page, tab: tab) else { return }
+            guard !ModalWindowCoordinator.shared.holdsMainWindow else { return }
+            ModalWindowCoordinator.shared.resolvedMainWindow?.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+        }
+    }
+
+    func configureSettingsFiles() {
+        SettingsFileWindowController.shared.effects = .app(library: library, appearanceManager: appearanceManager,
+                                                           updater: updaterController.updater)
+        SettingsFileWindowController.shared.library = library
+    }
+
+    func openFile(_ url: URL) {
+        guard url.pathExtension.lowercased() == "macursor" else {
+            library.importTheme(at: url)
+            return
+        }
+        configureSettingsFiles()
+        SettingsFileWindowController.shared.presentImport(url)
     }
 
     func openRequestedSettings() {
-        CFPreferencesSynchronize(MACPreferences.domain, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
-        MACPreferences.setFlag(false, forKey: MACPreferences.pendingOpenSettingsKey)
-        let tab = (MACPreferences.value(forKey: MACPreferences.pendingSettingsTabKey) as? String).flatMap(SettingsTab.init(rawValue:))
-        MACPreferences.set(nil, forKey: MACPreferences.pendingSettingsTabKey)
-        openSettingsWindow()
-        if let tab { SettingsWindowController.shared.select(tab) }
+        guard let request = MainPage.takePendingSettingsRequest() else { return }
+        openMainPage(request.page, tab: request.tab)
     }
 
     func drainPendingSettingsRequest() {
@@ -156,25 +149,34 @@ private struct LibraryFileCommands: View {
     let library: LibraryViewModel
 
     @ObservedObject private var coordinator = ModalWindowCoordinator.shared
+    @ObservedObject private var router = MainWindowRouter.shared
 
     var body: some View {
         Button("New Theme") {
-            coordinator.runIfMainWindowIsUsable { library.addNewTheme() }
+            coordinator.runIfMainWindowIsUsable {
+                if let id = library.addNewTheme() {
+                    MainWindowRouter.shared.selectedThemeId = id
+                    MainWindowRouter.shared.open(.themes)
+                }
+            }
         }
         .keyboardShortcut("n")
-        .disabled(coordinator.isMainWindowBlocked)
+        .disabled(coordinator.isMainWindowBlocked || router.editor != nil)
 
         Button("Import Theme...") {
             coordinator.runIfMainWindowIsUsable { library.showImportPanel() }
         }
         .keyboardShortcut("o")
-        .disabled(coordinator.isMainWindowBlocked)
+        .disabled(coordinator.isMainWindowBlocked || router.editor != nil)
 
         Button("Convert Theme...") {
             coordinator.runIfMainWindowIsUsable { library.showConvertPanel() }
         }
         .keyboardShortcut("o", modifiers: [.command, .shift])
-        .disabled(coordinator.isMainWindowBlocked)
+        .disabled(coordinator.isMainWindowBlocked || router.editor != nil)
+
+        Button("Restore") { coordinator.runIfMainWindowIsUsable { library.restoreCursors() } }
+            .disabled(coordinator.isMainWindowBlocked || router.editor != nil)
     }
 }
 
@@ -182,10 +184,17 @@ private struct LibraryFindCommand: View {
     @FocusedValue(\.librarySearch) private var search
 
     @ObservedObject private var coordinator = ModalWindowCoordinator.shared
+    @ObservedObject private var router = MainWindowRouter.shared
 
     var body: some View {
-        Button("Search Themes") { search?() }
-            .keyboardShortcut("f")
-            .disabled(search == nil || coordinator.isMainWindowBlocked)
+        Button("Search") {
+            if router.page == .themes {
+                search?()
+            } else {
+                MainWindowRouter.shared.focusSearch()
+            }
+        }
+        .keyboardShortcut("f")
+        .disabled(coordinator.isMainWindowBlocked || router.editor != nil || (router.page == .themes && search == nil))
     }
 }

@@ -56,6 +56,8 @@ struct MACCursorActions {
         let unregisterAll: () -> Void
         let selectCore: (Int32) -> Void
         let selectArrow: () -> Void
+        let hidePointer: () -> Void
+        let showPointer: () -> Void
         let dockOverride: (Bool) -> Void
         let getScale: () -> Float?
         let setScale: (Float) -> Bool
@@ -86,6 +88,8 @@ struct MACCursorActions {
             }, unregisterAll: { _ = CoreCursorUnregisterAll(CGSMainConnectionID()) },
             selectCore: { _ = CoreCursorSet(CGSMainConnectionID(), $0) },
             selectArrow: { _ = CGSSetSystemDefinedCursor(CGSMainConnectionID(), 0) },
+            hidePointer: { _ = CGSHideCursor(CGSMainConnectionID()) },
+            showPointer: { _ = CGSShowCursor(CGSMainConnectionID()) },
             dockOverride: { CGSSetDockCursorOverride(CGSMainConnectionID(), $0) },
             getScale: {
                 var scale: Float = 1
@@ -250,6 +254,8 @@ struct MACCursorActions {
 
     func applyTheme(_ theme: NSDictionary) -> Bool {
         autoreleasepool {
+            operations.hidePointer()
+            defer { operations.showPointer() }
             let cursors = theme[MACCursorDefinitions.cursorsKey] as? NSDictionary ?? [:]
             let shadow = (operations.readPreference(MACPreferences.cursorShadowKey) as? NSNumber)?.boolValue ?? false
             operations.unregisterAll()

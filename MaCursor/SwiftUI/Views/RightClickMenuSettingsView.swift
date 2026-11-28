@@ -2,7 +2,7 @@ import SwiftUI
 
 extension View {
     func rightClickMenuCard() -> some View {
-        background(Color.quaternaryFill, in: RoundedRectangle(cornerRadius: RightClickMenuLayout.cardRadius, style: .continuous))
+        background(Color.boxFill, in: RoundedRectangle(cornerRadius: RightClickMenuLayout.cardRadius, style: .continuous))
             .clipShape(RoundedRectangle(cornerRadius: RightClickMenuLayout.cardRadius, style: .continuous))
     }
 
@@ -18,59 +18,6 @@ extension View {
                                  bottom: 0, trailing: -RightClickMenuSettingsView.listCellInset))
             .listRowSeparator(.hidden)
             .listRowBackground(RightClickMenuSettingsView.stripe(index))
-    }
-}
-
-final class EqualWhenFitsSegmentedControl: NSSegmentedControl {
-    var widestLabel: CGFloat = 0
-
-    override func layout() {
-        let distribution: NSSegmentedControl.Distribution =
-            RightClickMenuLayout.segmentsAreEqual(width: bounds.width, count: segmentCount, widestLabel: widestLabel) ? .fillEqually : .fill
-        if segmentDistribution != distribution { segmentDistribution = distribution }
-        super.layout()
-    }
-}
-
-struct TabBar: NSViewRepresentable {
-    let titles: [String]
-    let label: String
-    @Binding var selection: Int
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator(selection: $selection)
-    }
-
-    func makeNSView(context: Context) -> EqualWhenFitsSegmentedControl {
-        let control = EqualWhenFitsSegmentedControl(labels: titles, trackingMode: .selectOne, target: context.coordinator,
-                                                    action: #selector(Coordinator.changed(_:)))
-        control.setAccessibilityLabel(label)
-        control.widestLabel = titles.map { RightClickMenuSettingsView.textWidth($0, size: RightClickMenuLayout.bodyFontSize) }.max() ?? 0
-        return control
-    }
-
-    func updateNSView(_ control: EqualWhenFitsSegmentedControl, context: Context) {
-        context.coordinator.selection = $selection
-        control.selectedSegment = selection
-    }
-
-    func sizeThatFits(_ proposal: ProposedViewSize, nsView: EqualWhenFitsSegmentedControl, context: Context) -> CGSize? {
-        let ideal = nsView.fittingSize
-        let width = proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? ideal.width
-        return CGSize(width: width, height: ideal.height)
-    }
-
-    @MainActor
-    final class Coordinator: NSObject {
-        var selection: Binding<Int>
-
-        init(selection: Binding<Int>) {
-            self.selection = selection
-        }
-
-        @objc func changed(_ sender: NSSegmentedControl) {
-            selection.wrappedValue = sender.selectedSegment
-        }
     }
 }
 
@@ -126,98 +73,22 @@ struct RightClickMenuSettingsView: View {
     }
 
     var body: some View {
-        GeometryReader { pane in
-            let column = RightClickMenuLayout.tableWidth(contentWidth: pane.size.width - 2 * RightClickMenuLayout.pageMargin)
-            ScrollView {
-                VStack(alignment: .leading, spacing: RightClickMenuLayout.blockSpacing) {
-                    HStack(spacing: 12) {
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text("Right-Click Menu")
-                            Text("Adds MaCursor’s shortcuts to the right-click menu in Finder and on the Desktop.")
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        Spacer(minLength: 0)
-                        Toggle("Right-Click Menu", isOn: Binding(
-                            get: { isOn },
-                            set: { _ in toggle() }
-                        ))
-                        .labelsHidden()
-                        .toggleStyle(.switch)
-                        .controlSize(.mini)
-                        .disabled(manager.isBusy || (manager.isTranslocated && !isOn))
-                    }
-                    .padding(RightClickMenuLayout.inset)
-                    .frame(minHeight: RightClickMenuLayout.twoLineRowHeight)
-                    .rightClickMenuCard()
-
-                    if showsAccessWarning || showsFullDiskAccessWarning || showsRegistrationFailure || manager.isTranslocated || errorMessage != nil {
-                        VStack(alignment: .leading, spacing: 8) {
-                            if showsAccessWarning {
-                                Label("The Finder extension is turned off.", systemImage: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(.orange)
-                                    .font(.callout)
-                                FinderExtensionAccessControls()
-                            }
-
-                            if showsFullDiskAccessWarning {
-                                Label("Full Disk Access is turned off.", systemImage: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(.orange)
-                                    .font(.callout)
-                                Text("MaCursor needs Full Disk Access. Turn on MaCursor in System Settings, then quit and reopen MaCursor if macOS asks.")
-                                    .font(.callout)
-                                    .foregroundStyle(.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                Button("Open System Settings") { manager.openFullDiskAccessSettings() }
-                            }
-
-                            if showsRegistrationFailure {
-                                HStack {
-                                    Text("MaCursor could not register its Finder extension.")
-                                        .font(.callout)
-                                    Spacer()
-                                    Button("Try Again") { manager.registerIfNeeded() }
-                                        .disabled(manager.isTranslocated)
-                                }
-                            }
-
-                            if manager.isTranslocated {
-                                Text("Move MaCursor to the Applications folder to use the Right-Click Menu.")
-                                    .font(.callout)
-                                    .foregroundStyle(.secondary)
-                            }
-
-                            if let errorMessage {
-                                Text(errorMessage)
-                                    .font(.callout)
-                                    .foregroundStyle(.red)
-                            }
-                        }
-                        .padding(.horizontal, RightClickMenuLayout.inset)
-                    }
-
-                    if RightClickMenuState.showsItems(settings: manager.settings, election: manager.election) {
-                        TabBar(
-                            titles: RightClickMenuTab.allCases.map(\.title),
-                            label: String(localized: "Right-Click Menu"),
-                            selection: Binding(
-                                get: { RightClickMenuTab.allCases.firstIndex(of: manager.selectedTab) ?? 0 },
-                                set: { manager.selectedTab = RightClickMenuTab.allCases[$0] }
-                            )
-                        )
-                        .frame(maxWidth: .infinity)
-
+        FeaturePageFrame(header: {
+            header
+        }, tabs: {
+            if RightClickMenuState.showsItems(settings: manager.settings, election: manager.election) {
+                FeatureTabList(titles: RightClickMenuTab.allCases.map(\.title), styles: FeatureTabCatalog.styles(for: .rightClickMenu),
+                               label: String(localized: "Right-Click Menu"),
+                               selection: Binding(get: { RightClickMenuTab.allCases.firstIndex(of: manager.selectedTab) ?? 0 },
+                                                  set: { manager.selectedTab = RightClickMenuTab.allCases[$0] }))
+            }
+        }, pane: {
+            if RightClickMenuState.showsItems(settings: manager.settings, election: manager.election) {
+                GeometryReader { pane in
+                    let column = RightClickMenuLayout.tableWidth(contentWidth: pane.size.width - 2 * RightClickMenuLayout.pageMargin)
+                    ScrollView {
                         VStack(alignment: .leading, spacing: RightClickMenuLayout.blockSpacing) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(manager.selectedTab.title)
-                                    .fontWeight(.semibold)
-                                Text(manager.selectedTab.note)
-                                    .font(.callout)
-                                    .foregroundStyle(.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            .padding(.horizontal, RightClickMenuLayout.inset)
+                            ExplainerCard(manager.selectedTab.note)
 
                             switch manager.selectedTab {
                             case .mainMenu:
@@ -233,20 +104,19 @@ struct RightClickMenuSettingsView: View {
                             }
 
                             Text("If the menu does not appear right away, quit and reopen Finder.")
-                                .font(.callout)
+                                .font(.system(size: 11))
                                 .foregroundStyle(.secondary)
                                 .fixedSize(horizontal: false, vertical: true)
                                 .padding(.horizontal, RightClickMenuLayout.inset)
                         }
-                        .padding(.top, RightClickMenuLayout.headerSpacing - RightClickMenuLayout.blockSpacing)
+                        .frame(width: column)
+                        .padding(.leading, (pane.size.width - column) / 2)
+                        .padding(.vertical, RightClickMenuLayout.pageMargin)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-                .frame(width: column)
-                .padding(.leading, (pane.size.width - column) / 2)
-                .padding(.vertical, RightClickMenuLayout.pageMargin)
-                .frame(maxWidth: .infinity, alignment: .leading)
             }
-        }
+        })
         .onAppear { manager.refresh() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
             manager.refresh()
@@ -255,7 +125,7 @@ struct RightClickMenuSettingsView: View {
             requestTask?.cancel()
             manager.refresh()
         }
-        .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification, object: SettingsWindowController.shared.window)) { _ in
+        .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification, object: ModalWindowCoordinator.shared.resolvedMainWindow)) { _ in
             errorMessage = nil
         }
         .onDisappear { requestTask?.cancel() }
@@ -265,6 +135,63 @@ struct RightClickMenuSettingsView: View {
             errorMessage = nil
         }
         .onChangeCompat(of: manager.election) { _ in errorMessage = nil }
+    }
+
+    private var header: some View {
+        VStack(spacing: 10) {
+            FeatureOnOffBox(title: String(localized: "Right-Click Menu"),
+                            subtitle: String(localized: "Adds MaCursor’s shortcuts to the right-click menu in Finder and on the Desktop."),
+                            symbol: "contextualmenu.and.cursorarrow", tint: .indigo, isOn: Binding(
+                                get: { isOn },
+                                set: { _ in toggle() }
+                            ))
+            .disabled(manager.isBusy || (manager.isTranslocated && !isOn))
+
+            if showsAccessWarning || showsFullDiskAccessWarning || showsRegistrationFailure || manager.isTranslocated || errorMessage != nil {
+                VStack(alignment: .leading, spacing: 8) {
+                    if showsAccessWarning {
+                        Label("The Finder extension is turned off.", systemImage: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                            .font(.callout)
+                        FinderExtensionAccessControls()
+                    }
+
+                    if showsFullDiskAccessWarning {
+                        Label("Full Disk Access is turned off.", systemImage: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+                            .font(.callout)
+                        Text("MaCursor needs Full Disk Access. Turn on MaCursor in System Settings, then quit and reopen MaCursor if macOS asks.")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Button("Open System Settings") { manager.openFullDiskAccessSettings() }
+                    }
+
+                    if showsRegistrationFailure {
+                        HStack {
+                            Text("MaCursor could not register its Finder extension.")
+                                .font(.callout)
+                            Spacer()
+                            Button("Try Again") { manager.registerIfNeeded() }
+                                .disabled(manager.isTranslocated)
+                        }
+                    }
+
+                    if manager.isTranslocated {
+                        Text("Move MaCursor to the Applications folder to use the Right-Click Menu.")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(.callout)
+                            .foregroundStyle(.red)
+                    }
+                }
+                .featureNotice()
+            }
+        }
     }
 
     private var mainMenuTable: some View {
@@ -323,6 +250,8 @@ struct RightClickMenuSettingsView: View {
 
     private func mainMenuRow(_ item: RightClickMenuItem, at index: Int, in items: [RightClickMenuItem], itemWidth: CGFloat) -> some View {
         let contents = itemContents(item)
+        var anchor = ""
+        if case .group(let group) = item { anchor = "rcm.\(group.rawValue)" }
         return HStack(spacing: 0) {
             Image(systemName: "line.3.horizontal")
                 .font(.system(size: 11))
@@ -350,6 +279,7 @@ struct RightClickMenuSettingsView: View {
                     .help(contents)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text(RightClickMenuShowsOn(item).title)
+                    .foregroundStyle(.secondary)
                     .lineLimit(1)
                     .frame(width: Self.showsOnColumnWidth, alignment: .leading)
             }
@@ -365,6 +295,7 @@ struct RightClickMenuSettingsView: View {
                 .disabled(index == items.count - 1)
         }
         .rightClickMenuListRow(index)
+        .searchAnchor(anchor)
     }
 
     @ViewBuilder
@@ -452,6 +383,7 @@ struct RightClickMenuSettingsView: View {
                 }
                 .padding(.horizontal, RightClickMenuLayout.inset)
                 .frame(height: RightClickMenuLayout.twoLineRowHeight)
+                .searchAnchor("rcm.\(action.rawValue)")
             }
         }
         .rightClickMenuCard()

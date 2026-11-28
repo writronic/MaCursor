@@ -200,9 +200,9 @@ func MACMenuBarFavoriteCatalog(_ catalog: [MACMenuBarThemeEntry]?, _ stored: Any
 }
 
 enum MACMenuBarItem: String, CaseIterable, Sendable {
-    case themes, activeApp, quickControls, cursorScale, cursorShadow, focusOnHover, cursorGestures, cursorTranslator, cursorShaker, cursorTrails
+    case themes, activeApp, quickControls, cursorScale, cursorShadow, focusOnHover, cursorGestures, cursorTranslator, cursorShaker, cursorTrails, cursorHighlight
 
-    static let panelItems: [MACMenuBarItem] = [.themes, .activeApp, .quickControls, .cursorTrails]
+    static let panelItems: [MACMenuBarItem] = [.themes, .activeApp, .quickControls, .cursorTrails, .cursorHighlight]
     static let quickControlItems: [MACMenuBarItem] = [.cursorScale, .cursorShadow, .focusOnHover, .cursorGestures, .cursorTranslator, .cursorShaker]
 }
 
@@ -242,6 +242,7 @@ enum MACMenuBarPanelBlock: Hashable, Sendable {
     case controls([MACMenuBarItem])
     case cursorCapture([MACMenuBarCaptureRow])
     case cursorTrails
+    case cursorHighlight
 }
 
 enum MACMenuBarCaptureItem: CaseIterable, Sendable {
@@ -292,10 +293,11 @@ enum MACMenuBarCaptureItem: CaseIterable, Sendable {
     }
 
     func shownShortcut(in config: CursorScreenshotConfig, favorites: Any? = MACPreferences.value(forKey: MACPreferences.favoriteCursorsKey),
-                       shaker: CursorShakerConfig = .load(), board: CursorBoardConfig = .load()) -> KeyboardShortcutData? {
+                       shaker: CursorShakerConfig = .load(), board: CursorBoardConfig = .load(), translator: CursorTranslatorConfig = .load(),
+                       highlight: CursorHighlightConfig = .load()) -> KeyboardShortcutData? {
         shortcut(in: config).flatMap {
             MACCaptureShortcutIsAllowed($0.modifierFlagsRaw, $0.keyCode)
-                && !config.heldElsewhere($0, besides: field, favorites: favorites, shaker: shaker, board: board) ? $0 : nil
+                && !config.heldElsewhere($0, besides: field, favorites: favorites, shaker: shaker, board: board, translator: translator, highlight: highlight) ? $0 : nil
         }
     }
 }
@@ -367,6 +369,7 @@ func MACMenuBarRows(turnedOnBy key: String) -> (items: [MACMenuBarItem], capture
     case MACPreferences.cursorTranslatorKey: return ([.cursorTranslator], [])
     case MACPreferences.cursorShakerKey: return ([.cursorShaker], [])
     case MACPreferences.cursorTrailsKey: return ([.cursorTrails], [])
+    case MACPreferences.cursorHighlightKey: return ([.cursorHighlight], [])
     case MACPreferences.cursorScreenshotKey: return ([], MACMenuBarCaptureRow.allCases)
     case MACPreferences.autoSwitchRulesKey: return ([.activeApp], [])
     default: return nil
@@ -407,6 +410,7 @@ func MACMenuBarPanelBlocks(order: [MACMenuBarItem], hidden: Set<MACMenuBarItem>,
         case .themes: return [.themes]
         case .activeApp: return [.activeApp]
         case .cursorTrails: return [.cursorTrails]
+        case .cursorHighlight: return [.cursorHighlight]
         case .cursorScale, .cursorShadow, .focusOnHover, .cursorGestures, .cursorTranslator, .cursorShaker: return []
         }
     }
@@ -657,6 +661,12 @@ struct ThemeCard<Preview: View>: View {
         .accessibilityLabel(name)
         .accessibilityAddTraits(isApplied ? .isSelected : [])
     }
+}
+
+func MACForceOverlayScrollers() {
+    var arguments = UserDefaults.standard.volatileDomain(forName: UserDefaults.argumentDomain)
+    arguments["AppleShowScrollBars"] = "WhenScrolling"
+    UserDefaults.standard.setVolatileDomain(arguments, forName: UserDefaults.argumentDomain)
 }
 
 extension View {

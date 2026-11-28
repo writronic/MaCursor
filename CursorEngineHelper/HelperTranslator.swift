@@ -34,8 +34,19 @@ final class CursorTranslatorController {
 
     var wantsTrust: Bool { config.enabled }
 
+    private var on: Bool {
+        trusted && screenRecording && CursorTranslatorConfig.isOn(enabled: config.enabled, usable: config.works)
+    }
+
     var trigger: CursorGestureTrigger? {
-        trusted && screenRecording && CursorTranslatorConfig.isOn(enabled: config.enabled, usable: CursorTranslator.usable(config.trigger)) ? config.trigger : nil
+        on && CursorTranslator.usable(config.trigger) ? config.trigger : nil
+    }
+
+    func keyPressed() {
+        trusted = HelperTrustProbe.isTrusted()
+        probe()
+        guard trusted && screenRecording else { return MenuBarService.requestCursorTranslatorAccess() }
+        received(.click(NSEvent.mouseLocation))
     }
 
     func probeAhead() {
@@ -58,7 +69,7 @@ final class CursorTranslatorController {
         frame?.recolor(latest.color)
         frame?.retarget(latest.source, latest.resolvedTarget)
         if config.enabled { probe(ahead) } else if let ahead { _ = HelperTrustProbe.screenRecordingAllowed(ahead) }
-        if trigger == nil { close() }
+        if !on { close() }
     }
 
     func configChanged() -> Bool {
@@ -86,7 +97,7 @@ final class CursorTranslatorController {
     }
 
     func received(_ note: CursorTranslatorNote) {
-        guard trigger != nil else { return }
+        guard on else { return }
         let open = frame
         if config.mode == .follows {
             switch note {

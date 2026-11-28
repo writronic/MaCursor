@@ -64,15 +64,16 @@ struct CursorScreenshotConfig: Codable, Equatable {
         folder.isEmpty ? FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)[0] : URL(fileURLWithPath: folder, isDirectory: true)
     }
 
-    func keys(besides field: WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?>) -> [KeyboardShortcutData] {
+    func keys(besides field: WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?>?) -> [KeyboardShortcutData] {
         let rows: [WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?>] = [\.wholeScreenShortcut, \.areaShortcut, \.repeatShortcut, \.textShortcut, \.selfTimerShortcut]
         return rows.filter { $0 != field }.compactMap { self[keyPath: $0] }
     }
 
     func heldElsewhere(_ candidate: KeyboardShortcutData, besides field: WritableKeyPath<CursorScreenshotConfig, KeyboardShortcutData?>,
                        favorites: Any? = MACPreferences.value(forKey: MACPreferences.favoriteCursorsKey),
-                       shaker: CursorShakerConfig = .load(), board: CursorBoardConfig = .load()) -> Bool {
-        let held = MACFavoriteKeys(favorites) + [shaker.shortcut].compactMap { $0 } + board.keys(besides: nil) + keys(besides: field)
+                       shaker: CursorShakerConfig = .load(), board: CursorBoardConfig = .load(), translator: CursorTranslatorConfig = .load(),
+                       highlight: CursorHighlightConfig = .load()) -> Bool {
+        let held = MACFavoriteKeys(favorites) + [shaker.shortcut, translator.shortcut].compactMap { $0 } + highlight.keys + board.keys(besides: nil) + keys(besides: field)
         return CursorScreenshot.refuses(candidate, held: held)
     }
 
@@ -692,7 +693,7 @@ final class CursorScreenshotPictures {
     private var arrived: ((UInt32, CGImage) -> Void)?
     private var settled: ((Bool) -> Void)?
     private var left: Int
-    private var any = false
+    private var all = true
 
     init(_ takes: [(display: UInt32, take: @MainActor () async -> CGImage?)], freezes: Bool,
          arrived: @escaping (UInt32, CGImage) -> Void, settled: @escaping (Bool) -> Void) {
@@ -729,10 +730,11 @@ final class CursorScreenshotPictures {
         guard let arrived, let settled else { return }
         left -= 1
         if let image {
-            any = true
             arrived(display, image)
+        } else {
+            all = false
         }
-        if left == 0 { settled(any) }
+        if left == 0 { settled(all) }
     }
 }
 
@@ -908,6 +910,7 @@ struct CursorScreenshotWindow: Equatable, Sendable {
     var shown: CGRect
     var owner: String?
     var title: String?
+    var family: CGRect? = nil
 }
 
 struct CursorScreenshotPick: Equatable {
@@ -923,8 +926,10 @@ enum CursorScreenshotWindows {
     static let wallpaperPadding: CGFloat = 90
     static let wallpaperStyle = CursorScreenshotBackgroundStyle(fill: .desktop, padding: wallpaperPadding)
 
-    static func isChrome(layer: Int) -> Bool {
-        layer > chromeAbove
+    static let highlightLevel = Int(CGWindowLevelForKey(.screenSaverWindow))
+
+    static func isChrome(layer: Int, appKitLevel: Int? = nil, keepsHighlight: Bool = true) -> Bool {
+        [layer, appKitLevel ?? 0].contains { $0 > chromeAbove && ($0 != highlightLevel || !keepsHighlight) }
     }
 
     static func isDesktopIconOrWidget(bundle: String?, layer: Int) -> Bool {
@@ -965,8 +970,25 @@ enum CursorScreenshotWindows {
 
     static func front(at point: CGPoint, in windows: [CursorScreenshotWindow], on display: CGRect) -> CursorScreenshotPick? {
         guard NSMouseInRect(point, display, false), let window = windows.first(where: { NSMouseInRect(point, $0.shown, false) }) else { return nil }
-        let box = window.shown.intersection(display)
+        let box = (window.family ?? window.shown).intersection(display)
         return CursorScreenshotBox.isTooSmall(box) ? nil : CursorScreenshotPick(box: box, window: window)
+    }
+
+    static func pictureSize(of frame: CGRect, content: CGRect?, pad: CGFloat, scale: CGFloat) -> (width: Int, height: Int) {
+        let drawn = CGRect(x: 0, y: 0, width: max(frame.width, content?.width ?? 0), height: max(frame.height, content?.height ?? 0))
+        return CursorTranslator.pixels(drawn.insetBy(dx: -pad, dy: -pad), scale: scale)
+    }
+
+    static func families(_ windows: [CursorScreenshotWindow], content: [CGWindowID: CGRect], primaryHeight: CGFloat) -> [CursorScreenshotWindow] {
+        windows.map { window in
+            guard let area = content[window.id] else { return window }
+            let flipped = CGRect(x: area.minX, y: primaryHeight - area.maxY, width: area.width, height: area.height)
+            guard flipped.insetBy(dx: -1, dy: -1).contains(window.frame),
+                  flipped.width > window.frame.width + 1 || flipped.height > window.frame.height + 1 else { return window }
+            var kept = window
+            kept.family = flipped
+            return kept
+        }
     }
 
     static func display(holding frame: CGRect, among displays: [UInt32: CGRect]) -> UInt32? {

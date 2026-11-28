@@ -16,18 +16,18 @@
 
 ---
 
-MaCursor gives you control over system cursors on macOS. You can replace macOS cursors with your own artwork or with ready-made themes, fine-tune every detail in the visual editor, and switch between them instantly with global hotkeys.
+MaCursor gives you control over system cursors on macOS. Pick a custom cursor theme from the Theme Gallery or make your own in the editor, then use the tools that work at your pointer: screenshots, a clipboard history, a screen translator, mouse gestures, cursor trails and more.
 
 Requires **macOS 13 Ventura** or later.
 
 <p align="center">
-  <img src="docs/screenshot.png" alt="MaCursor Screenshot">
+  <img src="docs/media/readme/screenshot.png" alt="MaCursor Screenshot">
 </p>
 
 ## Features
 
-- **80+ Ready-to-Apply Themes** — Browse and download curated cursor themes from the Theme Gallery
-- **Menu Bar Panel** — Your favorite themes, the cursor for the app in front, and the cursor scale, Cursor Shadow, Focus on Hover, Cursor Shaker, Cursor Translator, Cursor Gestures and Cursor Trails controls, all in the menu bar without opening the window
+- **100+ Ready-to-Apply Themes** — Browse and download curated cursor themes from the Theme Gallery
+- **Menu Bar Panel** — Your favorite themes, the cursor for the app in front, and the cursor scale, Cursor Shadow, Focus on Hover, Cursor Shaker, Cursor Translator, Cursor Gestures, Cursor Trails and Cursor Highlight controls, all in the menu bar without opening the window
 - **Right-Click Menu** — Get more from your right-click in Finder and on the Desktop: copy a path, make a new file, open files in the app you choose, and more
 - **Focus on Hover** — The window under your pointer becomes active after a short pause, without clicking
 - **Cursor Capture** — Press a shortcut to take a picture of your screen, an area or a window, with your cursor in it if you want. Mark it up in an editor, or copy the text in it
@@ -35,6 +35,7 @@ Requires **macOS 13 Ventura** or later.
 - **Cursor Translator** — A frame over any text on your screen shows it in your language, and keeps up as the text changes
 - **Cursor Gestures** — Hold modifier keys or a mouse button and draw a shape to run an action, such as a keyboard shortcut, typed text, an app, a website or a window action
 - **Cursor Trails** — A smooth line follows your pointer and shrinks back into it when you stop, in ready-to-use styles
+- **Cursor Highlight** — A spotlight dims the screen around your pointer, and a ripple shows where you click
 - **Per-App Themes** — Each app can have its own cursor theme, and MaCursor switches to it when that app comes to the front
 - **Convert Windows, Linux & Mousecape Themes** — A Windows cursor folder (`.cur` / `.ani`), a Linux Xcursor theme folder or a Mousecape `.cape` file becomes a native `.cursor` theme, with every mapped cursor listed for review before it reaches your library
 - **Full Theme Editor** — A split-pane editor for building and refining themes: metadata, cursor list, per-cursor image slots, hotspot editing, and animated cursor preview
@@ -42,7 +43,7 @@ Requires **macOS 13 Ventura** or later.
 - **Left / Right Hand Mode** — Cursor orientation for left-handed or right-handed mouse use
 
 <details>
-<summary><b>Full feature list</b>: 15 more, including the editor tools, the app languages, and macOS Tahoe support</summary>
+<summary><b>Full feature list</b>: 16 more, including the editor tools, the app languages, and macOS Tahoe support</summary>
 
 ### Applying & Switching
 
@@ -70,6 +71,7 @@ Requires **macOS 13 Ventura** or later.
 - **Auto-Updates** — Built-in Sparkle integration for over-the-air updates
 - **macOS Tahoe & Golden Gate Ready** — Full support for macOS 26 Tahoe and macOS 27 Golden Gate, including automatic handling of new S-variant cursor identifiers
 - **Cursor Shaker** — While you are away, your pointer moves one pixel and back, and the display stays on, so apps like Slack and Microsoft Teams keep showing you as active
+- **Import & Export Settings** — Save your settings and themes to a `.macursor` file and bring them into MaCursor on another Mac
 
 </details>
 
@@ -81,49 +83,56 @@ Requires **macOS 13 Ventura** or later.
       <b>Import & Apply</b><br>
       One double-click on a theme replaces every system cursor
     </td>
-    <td width="65%"><img src="docs/media/apply-a-theme.gif" width="100%" alt="Importing and applying a cursor theme"></td>
+    <td width="65%"><img src="docs/media/readme/apply-a-theme.gif" width="100%" alt="Importing and applying a cursor theme"></td>
   </tr>
   <tr>
     <td width="35%" valign="middle">
       <b>Cursor Capture</b><br>
       Press a shortcut to take a picture of your screen, an area or a window
     </td>
-    <td width="65%"><img src="docs/media/cursor-capture.gif" width="100%" alt="Cursor Capture"></td>
+    <td width="65%"><img src="docs/media/readme/cursor-capture.gif" width="100%" alt="Cursor Capture"></td>
   </tr>
   <tr>
     <td width="35%" valign="middle">
       <b>Cursor Board</b><br>
       Keep what you copy, and paste it from a list next to your pointer or a panel at the edge of your screen
     </td>
-    <td width="65%"><img src="docs/media/cursor-board.gif" width="100%" alt="Cursor Board"></td>
+    <td width="65%"><img src="docs/media/readme/cursor-board.gif" width="100%" alt="Cursor Board"></td>
   </tr>
   <tr>
     <td width="35%" valign="middle">
       <b>Cursor Translator</b><br>
       A frame over any text on your screen shows it in your language
     </td>
-    <td width="65%"><img src="docs/media/cursor-translator.gif" width="100%" alt="Cursor Translator"></td>
+    <td width="65%"><img src="docs/media/readme/cursor-translator.gif" width="100%" alt="Cursor Translator"></td>
   </tr>
   <tr>
     <td width="35%" valign="middle">
       <b>Cursor Gestures</b><br>
       Hold modifier keys or a mouse button and draw a shape to run an action
     </td>
-    <td width="65%"><img src="docs/media/cursor-gestures.gif" width="100%" alt="Cursor Gestures"></td>
+    <td width="65%"><img src="docs/media/readme/cursor-gestures.gif" width="100%" alt="Cursor Gestures"></td>
   </tr>
   <tr>
     <td width="35%" valign="middle">
       <b>Right-Click Menu</b><br>
       Get more from your right-click in Finder and on the Desktop
     </td>
-    <td width="65%"><img src="docs/media/right-click-menu.gif" width="100%" alt="Right-Click Menu"></td>
+    <td width="65%"><img src="docs/media/readme/right-click-menu.gif" width="100%" alt="Right-Click Menu"></td>
   </tr>
   <tr>
     <td width="35%" valign="middle">
       <b>Cursor Trails</b><br>
       A smooth line follows your pointer and shrinks back into it when you stop
     </td>
-    <td width="65%"><img src="docs/media/cursor-trails.gif" width="100%" alt="Cursor Trails"></td>
+    <td width="65%"><img src="docs/media/readme/cursor-trails.gif" width="100%" alt="Cursor Trails"></td>
+  </tr>
+  <tr>
+    <td width="35%" valign="middle">
+      <b>Cursor Highlight</b><br>
+      Dims the screen around the pointer and shows a ripple where you click
+    </td>
+    <td width="65%"><img src="docs/media/readme/cursor-highlight.gif" width="100%" alt="Cursor Highlight"></td>
   </tr>
 </table>
 
@@ -147,11 +156,11 @@ The first time you open MaCursor, the Welcome window walks you through the setup
 
 ### 3. Get Themes
 
-Browse `.cursor` theme files in the [Theme Gallery](https://github.com/writronic/MaCursor/blob/main/themes/README.md) or grab them all from the [Releases page](https://github.com/writronic/MaCursor/releases/latest). Already have a Windows or Linux cursor theme? Use **File → Convert Theme…** instead.
+On the **Overview**, click **Browse Gallery…** on the **Theme Gallery** card. In the **Theme Gallery**, select a theme and click **Get**. You can also browse the themes on [GitHub](https://github.com/writronic/MaCursor/blob/main/themes/README.md) or grab them all from the [Releases page](https://github.com/writronic/MaCursor/releases/latest). Already have a Windows or Linux cursor theme? Use **File → Convert Theme…** instead.
 
 ### 4. Import & Apply
 
-Double-click any `.cursor` file, drag & drop it onto the MaCursor library window, or use **File → Import Theme…**. Then select the theme and click **Apply**.
+Double-click any `.cursor` file, drag & drop it onto the MaCursor window, or use **File → Import Theme…**. Then open **Cursor Themes**, select the theme and click **Apply**.
 
 ### 5. Make It Permanent (Recommended)
 

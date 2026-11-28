@@ -9,9 +9,7 @@ enum ModalWindowRole {
 
 private enum ModalWindowTitles {
     static let mainWindow = "MaCursor"
-    static let editThemePrefix = "Edit Theme"
     static let aboutPrefix = "About MaCursor"
-    static let settingsIdentifiers = ["Settings", "Preferences"]
 }
 
 enum ModalWindowPlacement {
@@ -211,6 +209,7 @@ final class ModalWindowCoordinator: ObservableObject {
         switch role {
         case .main:
             guard !isRegisteredMain(window) else { return }
+            window.useMacOS27Background()
             pruneRegistrations()
             registeredModals.removeAll { $0.window === window }
             if modalStack.contains(where: { $0.window === window }) {
@@ -223,6 +222,7 @@ final class ModalWindowCoordinator: ObservableObject {
             window.isRestorable = false
             let alreadyRegistered = isRegisteredModal(window)
             if !alreadyRegistered {
+                window.useMacOS27Background()
                 pruneRegistrations()
                 registeredMain.removeAll { $0.window === window }
                 registeredModals.append(WeakWindow(window: window))
@@ -269,15 +269,7 @@ final class ModalWindowCoordinator: ObservableObject {
 
         let title = window.title
 
-        if title.hasPrefix(ModalWindowTitles.editThemePrefix) { return true }
         if title.hasPrefix(ModalWindowTitles.aboutPrefix) { return true }
-
-        let className = String(describing: type(of: window))
-        for identifier in ModalWindowTitles.settingsIdentifiers {
-            if title.contains(identifier) || className.contains(identifier) {
-                return true
-            }
-        }
 
         return false
     }

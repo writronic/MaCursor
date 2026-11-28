@@ -2,275 +2,73 @@ import AppKit
 import Sparkle
 import SwiftUI
 
-private class SettingsPanel: NSWindow {
-    override func cancelOperation(_ sender: Any?) {
-        close()
-    }
-}
-
-enum SettingsTab: String, CaseIterable, Identifiable {
-    case general  = "General"
-    case cursor   = "Cursor Control"
-    case cursorScreenshot = "Cursor Capture"
-    case cursorBoard = "Cursor Board"
-    case cursorTranslator = "Cursor Translator"
-    case cursorGestures = "Cursor Gestures"
-    case cursorTrails = "Cursor Trails"
-    case rightClickMenu   = "Right-Click Menu"
-    case shortcut = "Shortcut"
-    case about    = "About"
-
-    var id: String { rawValue }
-
-    var localizedName: String {
-        switch self {
-        case .general:  return String(localized: "General")
-        case .cursor:   return String(localized: "Cursor Control")
-        case .cursorScreenshot: return String(localized: "Cursor Capture")
-        case .cursorBoard: return String(localized: "Cursor Board")
-        case .cursorTranslator: return String(localized: "Cursor Translator")
-        case .cursorGestures: return String(localized: "Cursor Gestures")
-        case .cursorTrails: return String(localized: "Cursor Trails")
-        case .rightClickMenu:   return String(localized: "Right-Click Menu")
-        case .shortcut: return String(localized: "Shortcut")
-        case .about:    return String(localized: "About")
-        }
-    }
-
-    var icon: String {
-        switch self {
-        case .general:  return "gear"
-        case .cursor:   return "cursorarrow"
-        case .cursorScreenshot: return "camera.viewfinder"
-        case .cursorBoard: return "list.clipboard"
-        case .cursorTranslator: return "character.bubble"
-        case .cursorGestures: return "scribble.variable"
-        case .cursorTrails: return "cursorarrow.motionlines"
-        case .rightClickMenu:   return "contextualmenu.and.cursorarrow"
-        case .shortcut: return "star"
-        case .about:    return "info.circle"
+extension SettingsFileEffects {
+    @MainActor static func app(library: LibraryViewModel, appearanceManager: AppearanceManager, updater: SPUUpdater?) -> SettingsFileEffects {
+        SettingsFileEffects { groups in
+            if groups.contains(.general) {
+                let mode = (MACPreferences.value(forKey: MACPreferences.appearanceModeKey) as? NSNumber)?.intValue ?? 0
+                appearanceManager.currentMode = AppearanceMode(rawValue: mode) ?? .system
+                updater?.automaticallyChecksForUpdates = MACPreferences.flag(SettingsFileGroup.automaticChecksKey)
+                NotificationCenter.default.post(name: .cursorIdentifiersChanged, object: nil)
+                FollowReduceMotionSection.notifyHelper()
+            }
+            if groups.contains(.cursorControl) {
+                AutoSwitchConfig.notifyHelper()
+                NotificationCenter.default.post(name: .macAutoSwitchConfigDidChange, object: nil)
+                FocusFollowsMouseConfig.notifyHelper()
+                CursorShakerConfig.notifyHelper()
+                let scale = CursorScaleInput.clamp((MACPreferences.value(forKey: MACPreferences.cursorScaleKey) as? NSNumber)?.doubleValue ?? 1)
+                CursorService.setScale(Float(max(1.0, scale)))
+                if let applied = library.cursorThemes.first(where: { $0.isApplied }) {
+                    library.apply(applied)
+                } else {
+                    CursorService.restoreAll()
+                }
+                NotificationCenter.default.post(name: .hideTahoeCursorsChanged, object: nil)
+            }
+            if groups.contains(.cursorCapture) { CursorScreenshotConfig.notifyHelper() }
+            if groups.contains(.cursorBoard) { CursorBoardConfig.notifyHelper() }
+            if groups.contains(.cursorTranslator) { CursorTranslatorConfig.notifyHelper() }
+            if groups.contains(.cursorGestures) { CursorGesturesConfig.notifyHelper() }
+            if groups.contains(.cursorTrails) { CursorTrailsConfig.notifyHelper() }
+            if groups.contains(.cursorHighlight) { CursorHighlightConfig.notifyHelper() }
+            if groups.contains(.rightClickMenu) { FinderExtensionManager.shared.refresh() }
+            if groups.contains(.shortcut) { ShortcutManager.shared.notifyConfigChanged() }
+            DistributedNotificationCenter.default().postNotificationName(.MACMenuBarDidChange, object: nil, userInfo: nil, deliverImmediately: true)
+            MainWindowRouter.shared.reloadPage()
         }
     }
 }
 
-struct SettingsSidebarView: View {
-    static let rowFontSize: CGFloat = 14
-    static let rowContentHeight: CGFloat = 24
+enum SettingsPageTab: Int, CaseIterable {
+    case general, about
 
-    @Binding var selectedTab: SettingsTab
+    @MainActor static var selected = SettingsPageTab.general
+
+    var title: String {
+        switch self {
+        case .general: return String(localized: "General")
+        case .about: return String(localized: "About")
+        }
+    }
+}
+
+struct SettingsPageView: View {
+    var updater: SPUUpdater?
+
+    @State private var tab = SettingsPageTab.selected
 
     var body: some View {
-        List(SettingsTab.allCases, selection: $selectedTab) { tab in
-            Label {
-                Text(tab.localizedName)
-            } icon: {
-                Color.clear.frame(width: 24, height: 9).overlay(Image(systemName: tab.icon).fixedSize())
+        FeaturePageFrame(header: { EmptyView() }, tabs: {
+            FeatureTabList(titles: SettingsPageTab.allCases.map(\.title), styles: FeatureTabCatalog.styles(for: .settings), label: String(localized: "Settings"),
+                           selection: Binding(get: { tab.rawValue },
+                                              set: { tab = SettingsPageTab(rawValue: $0) ?? .general; SettingsPageTab.selected = tab }))
+        }, pane: {
+            switch tab {
+            case .general: GeneralSettingsView(updater: updater)
+            case .about: AboutSettingsView()
             }
-                .font(.system(size: Self.rowFontSize))
-                .imageScale(.large)
-                .frame(height: Self.rowContentHeight)
-                .tag(tab)
-        }
-        .listStyle(.sidebar)
-        .scrollContentTopMargin(12)
-        .environment(\.sidebarRowSize, .medium)
-    }
-}
-
-final class SettingsWindowController: NSWindowController, NSToolbarDelegate {
-    static let shared = SettingsWindowController()
-
-    private let splitVC = NSSplitViewController()
-    private static let sidebarTrackingID = NSToolbarItem.Identifier("sidebarTracking")
-
-    private var library: LibraryViewModel?
-    private var appearanceManager: AppearanceManager?
-    private var languageManager: LanguageManager?
-    private var updater: SPUUpdater?
-
-    private var selectedTab: SettingsTab = .general {
-        didSet {
-            updateDetailView()
-        }
-    }
-
-    private init() {
-        let window = SettingsPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 978, height: 604),
-            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
-            backing: .buffered, defer: false
-        )
-
-        window.titleVisibility = .hidden
-        window.title = String(localized: "Settings")
-        window.titlebarAppearsTransparent = true
-        window.titlebarSeparatorStyle = .none
-        window.isMovableByWindowBackground = true
-        window.isReleasedWhenClosed = false
-
-        let toolbar = NSToolbar(identifier: "SettingsSplitToolbar")
-        toolbar.showsBaselineSeparator = false
-        toolbar.displayMode = .iconOnly
-        if #available(macOS 15, *) {
-            toolbar.allowsDisplayModeCustomization = false
-        }
-        window.toolbar = toolbar
-        window.toolbarStyle = .unified
-
-        super.init(window: window)
-
-        toolbar.delegate = self
-
-        let sidebarVC = NSHostingController(rootView: AnyView(EmptyView()))
-        let detailVC = NSHostingController(rootView: AnyView(EmptyView()))
-
-        let sidebarItem = NSSplitViewItem(sidebarWithViewController: sidebarVC)
-        sidebarItem.canCollapse = false
-        sidebarItem.minimumThickness = 240
-        sidebarItem.maximumThickness = 240
-        sidebarItem.allowsFullHeightLayout = true
-
-        let detailItem = NSSplitViewItem(viewController: detailVC)
-
-        splitVC.splitViewItems = [sidebarItem, detailItem]
-        splitVC.splitView.dividerStyle = .thin
-
-        window.contentViewController = splitVC
-
-        let minimumSize = NSSize(width: 850, height: 525)
-        window.setContentSize(NSSize(width: 978, height: 604))
-        window.minSize = minimumSize
-
-        updateSidebarView()
-        updateDetailView()
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    func configure(library: LibraryViewModel, appearanceManager: AppearanceManager, languageManager: LanguageManager, updater: SPUUpdater? = nil) {
-        self.library = library
-        self.appearanceManager = appearanceManager
-        self.languageManager = languageManager
-        self.updater = updater
-        updateDetailView()
-    }
-
-    func select(_ tab: SettingsTab) {
-        selectedTab = tab
-        updateSidebarView()
-    }
-
-    override func showWindow(_ sender: Any?) {
-        let wasAlreadyVisible = window?.isVisible ?? false
-        super.showWindow(sender)
-
-        if let window {
-            ModalWindowCoordinator.shared.register(window, as: .modal)
-        }
-
-        if !wasAlreadyVisible {
-            centerOnMainWindow()
-        }
-    }
-
-    private func centerOnMainWindow() {
-        guard let settingsWindow = window else { return }
-
-        guard let mainWindow = ModalWindowCoordinator.shared.resolvedMainWindow,
-              mainWindow !== settingsWindow else {
-            settingsWindow.center()
-            return
-        }
-
-        let mainFrame = mainWindow.frame
-        guard let visibleFrame = mainWindow.screen?.visibleFrame
-                ?? NSScreen.screens.first(where: { $0.frame.intersects(mainFrame) })?.visibleFrame
-                ?? NSScreen.main?.visibleFrame else {
-            settingsWindow.center()
-            return
-        }
-
-        settingsWindow.setFrameOrigin(ModalWindowPlacement.centeredOrigin(
-            size: settingsWindow.frame.size,
-            over: mainFrame,
-            constrainedTo: visibleFrame
-        ))
-    }
-
-
-    private func updateSidebarView() {
-        let sidebarView = SettingsSidebarView(selectedTab: Binding(
-            get: { self.selectedTab },
-            set: { self.selectedTab = $0 }
-        ))
-
-        if let vc = splitVC.splitViewItems[0].viewController as? NSHostingController<AnyView> {
-            vc.rootView = AnyView(sidebarView)
-        }
-    }
-
-    private func updateDetailView() {
-        guard let library = library, let appearanceManager = appearanceManager, let languageManager = languageManager else { return }
-
-        var detailView: AnyView
-        switch selectedTab {
-        case .general:
-            detailView = AnyView(GeneralSettingsView(updater: updater))
-        case .cursor:
-            detailView = AnyView(CursorSettingsView())
-        case .cursorScreenshot:
-            detailView = AnyView(CursorScreenshotSettingsView())
-        case .cursorBoard:
-            detailView = AnyView(CursorBoardSettingsView())
-        case .cursorTranslator:
-            detailView = AnyView(CursorTranslatorSettingsView())
-        case .cursorGestures:
-            detailView = AnyView(CursorGesturesSettingsView())
-        case .cursorTrails:
-            detailView = AnyView(CursorTrailsSettingsView())
-        case .shortcut:
-            detailView = AnyView(ShortcutSettingsView())
-        case .rightClickMenu:
-            detailView = AnyView(RightClickMenuSettingsView())
-        case .about:
-            detailView = AnyView(AboutSettingsView())
-        }
-
-        let injectedView = AnyView(
-            detailView
-                .environmentObject(library)
-                .environmentObject(appearanceManager)
-                .environmentObject(languageManager)
-                .frame(minWidth: 265, maxWidth: .infinity, minHeight: 350, maxHeight: .infinity)
-        )
-
-        if let vc = splitVC.splitViewItems[1].viewController as? NSHostingController<AnyView> {
-            vc.rootView = injectedView
-        }
-    }
-
-
-    func toolbar(_ toolbar: NSToolbar,
-                 itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier,
-                 willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
-        if itemIdentifier == Self.sidebarTrackingID {
-            return NSTrackingSeparatorToolbarItem(
-                identifier: itemIdentifier,
-                splitView: splitVC.splitView,
-                dividerIndex: 0
-            )
-        }
-        return nil
-    }
-
-    func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        [Self.sidebarTrackingID]
-    }
-
-    func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        toolbarDefaultItemIdentifiers(toolbar)
+        })
     }
 }
 
@@ -285,11 +83,16 @@ struct GeneralSettingsView: View {
     @State private var showRestartAlert = false
     @ObservedObject private var helperManager = HelperToolManager.shared
     @State private var showMenuBarIcon = MACPreferences.flag(MACPreferences.showMenuBarIconKey)
+    @State private var showCursorIdentifiers = MACPreferences.showCursorIdentifiers
     @State private var panelBackground = MACMenuBarPanelBackgroundLevel(MACPreferences.value(forKey: MACPreferences.menuBarPanelBackgroundKey))
 
     var body: some View {
         Form {
-            Section("Appearance") {
+            if let explainer = FeatureTabCatalog.styles(for: .settings)[SettingsPageTab.general.rawValue].explainer {
+                ExplainerSection(explainer)
+            }
+
+            FeatureSection("Appearance") {
                 Picker("Appearance", selection: $appearanceManager.currentMode) {
                     ForEach(AppearanceMode.allCases) { mode in
                         Label(mode.label, systemImage: mode.icon)
@@ -297,27 +100,46 @@ struct GeneralSettingsView: View {
                     }
                 }
                 .pickerStyle(.segmented)
+                .searchAnchor("setAppearance")
+
+                Toggle("Show Cursor Identifiers", isOn: $showCursorIdentifiers)
+                    .onChangeCompat(of: showCursorIdentifiers) { newValue in
+                        MACPreferences.setFlag(newValue, forKey: MACPreferences.showCursorIdentifiersKey)
+                        NotificationCenter.default.post(name: .cursorIdentifiersChanged, object: nil)
+                    }
+                    .searchAnchor("setIdentifiers")
             }
 
-            Section("Language") {
+            CursorCanvasPaddingSection {
+                if let applied = library.cursorThemes.first(where: { $0.isApplied }) {
+                    library.apply(applied)
+                }
+            }
+
+            FollowReduceMotionSection()
+
+            FeatureSection("Language") {
                 Picker("Language", selection: $languageManager.currentLanguage) {
                     ForEach(AppLanguage.allCases) { language in
                         Text(language.displayName)
                             .tag(language)
                     }
                 }
+                .searchAnchor("setLanguage")
             }
 
-            Section("Helper Tool") {
+            FeatureSection("Helper Tool") {
                 HelperToolStatusView()
+                    .searchAnchor("setHelper")
             }
 
-            Section("Menu Bar") {
+            FeatureSection("Menu Bar", footer: "Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section.") {
                 Toggle("Show Menu Bar Icon", isOn: $showMenuBarIcon)
                     .disabled(!helperManager.isInstalled)
                     .onChangeCompat(of: showMenuBarIcon) { newValue in
                         GeneralSettingsView.setShowMenuBarIcon(newValue)
                     }
+                    .searchAnchor("setMenuIcon")
 
                 if !helperManager.isInstalled {
                     HStack(spacing: 10) {
@@ -329,18 +151,17 @@ struct GeneralSettingsView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+            }
 
-                Text("Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section.")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-
-                if showMenuBarIcon && helperManager.isInstalled {
+            if showMenuBarIcon && helperManager.isInstalled {
+                FeatureSection {
                     MenuBarItemsSettingsView()
+                } footer: {
                     MenuBarItemsSettingsView.caption
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
                 }
+            }
 
+            FeatureSection(footer: "Sets how see-through the menu bar panel is: the middle of the slider is the standard frosted glass, the minimum is clear, the maximum is solid.") {
                 HStack(spacing: 12) {
                     Text("Panel Background")
                     Slider(value: $panelBackground, in: 0...1)
@@ -354,22 +175,22 @@ struct GeneralSettingsView: View {
                 .onChangeCompat(of: panelBackground) { newValue in
                     MACPreferences.set(NSNumber(value: newValue), forKey: MACPreferences.menuBarPanelBackgroundKey)
                 }
-
-                Text("Sets how see-through the menu bar panel is: the middle of the slider is the standard frosted glass, the minimum is clear, the maximum is solid.")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+                .searchAnchor("setPanelBg")
             }
 
             if let updater = updater {
-                Section("Software Updates") {
+                FeatureSection("Software Updates") {
                     Toggle("Automatically check for updates", isOn: Binding(
                         get: { updater.automaticallyChecksForUpdates },
                         set: { updater.automaticallyChecksForUpdates = $0 }
                     ))
+                    .searchAnchor("setUpdates")
                 }
             }
 
-            Section("Reset Settings") {
+            SettingsFileSection()
+
+            FeatureSection("Reset Settings") {
                 HStack {
                     Text("Reset all settings to default values (cannot be undone)")
                         .font(.callout)
@@ -389,10 +210,10 @@ struct GeneralSettingsView: View {
                     }
                     .buttonStyle(.plain)
                 }
+                .searchAnchor("setReset")
             }
         }
         .formStyle(.grouped)
-        .navigationTitle("General")
         .alert("Reset All Settings?", isPresented: $showResetConfirmation) {
             Button("Cancel", role: .cancel) { }
             Button("Reset", role: .destructive) {
@@ -416,6 +237,7 @@ struct GeneralSettingsView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .cursorSettingsDidReset)) { _ in
             showMenuBarIcon = MACPreferences.flag(MACPreferences.showMenuBarIconKey)
+            showCursorIdentifiers = MACPreferences.showCursorIdentifiers
             panelBackground = MACMenuBarPanelBackgroundLevel(nil)
         }
     }
@@ -432,12 +254,11 @@ struct GeneralSettingsView: View {
     }
 
     private func performFullReset() {
+        var errors: [any Error] = []
         do {
             try library.removeAllThemes()
         } catch {
-            DispatchQueue.main.async {
-                NSApp.presentError(error)
-            }
+            errors.append(error)
         }
 
         CursorService.setScale(CursorService.defaultScale())
@@ -454,6 +275,7 @@ struct GeneralSettingsView: View {
         AutoSwitchConfig.notifyHelper()
         FocusFollowsMouseConfig.notifyHelper()
         CursorTrailsConfig.notifyHelper()
+        CursorHighlightConfig.notifyHelper()
         CursorGesturesConfig.notifyHelper()
         CursorShakerConfig.notifyHelper()
         CursorScreenshotConfig.notifyHelper()
@@ -463,13 +285,12 @@ struct GeneralSettingsView: View {
         do {
             try FinderExtensionManager.shared.resetSettings()
         } catch {
-            DispatchQueue.main.async {
-                NSApp.presentError(error)
-            }
+            errors.append(error)
         }
 
         appearanceManager.currentMode = .system
         languageManager.currentLanguage = .system
+        languageManager.needsRestart = false
         UserDefaults.standard.removeObject(forKey: "AppleLanguages")
         UserDefaults.standard.synchronize()
 
@@ -482,10 +303,13 @@ struct GeneralSettingsView: View {
         NotificationCenter.default.post(name: .cursorSettingsDidReset, object: nil)
 
         let helperManager = HelperToolManager.shared
+        var uninstall: (@Sendable () async -> Void)?
         if helperManager.isInstalled {
-            Task {
-                try? await helperManager.uninstall()
-            }
+            uninstall = { try? await helperManager.uninstall() }
+        }
+        Task { [errors, uninstall] in
+            await WelcomePage.relaunch(afterReset: errors, uninstallingHelper: uninstall,
+                                       present: { NSApp.presentError($0) }, relaunch: { languageManager.restartApp() })
         }
     }
 

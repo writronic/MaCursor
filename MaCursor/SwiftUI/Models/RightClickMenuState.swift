@@ -143,7 +143,6 @@ enum RightClickMenuLayout {
     static let inset: CGFloat = 10
     static let cardRadius: CGFloat = 12
     static let blockSpacing: CGFloat = 10
-    static let headerSpacing: CGFloat = 30
     static let rowHeight: CGFloat = 40
     static let twoLineRowHeight: CGFloat = 52
     static let handleColumn: CGFloat = 20
@@ -155,7 +154,6 @@ enum RightClickMenuLayout {
     static let itemColumnCap: CGFloat = 270
     static let miniSwitchWidth: CGFloat = 36
     static let popUpChrome: CGFloat = 48
-    static let segmentPadding: CGFloat = 16
     static let bodyFontSize: CGFloat = 13
     static let calloutFontSize: CGFloat = 12
 
@@ -183,9 +181,5 @@ enum RightClickMenuLayout {
 
     static func appTextColumnWidth(tableWidth: CGFloat, enable: CGFloat, showIn: CGFloat) -> CGFloat {
         tableWidth - 2 * inset - iconSize - 2 * iconGap - enable - columnSpacing - showIn
-    }
-
-    static func segmentsAreEqual(width: CGFloat, count: Int, widestLabel: CGFloat) -> Bool {
-        width / CGFloat(max(count, 1)) >= widestLabel + segmentPadding
     }
 }

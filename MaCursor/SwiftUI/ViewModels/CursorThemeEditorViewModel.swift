@@ -115,11 +115,33 @@ class CursorThemeEditorViewModel: ObservableObject {
     }
 
     private var isClosed = false
+    private var pendingLeave: (() -> Void)?
 
     func close() {
         guard !isClosed else { return }
         isClosed = true
         cursorTheme.openEditorCount -= 1
+    }
+
+    func leave(then next: @escaping () -> Void) {
+        guard isDirty else {
+            close()
+            next()
+            return
+        }
+        pendingLeave = next
+        isShowingUnsavedAlert = true
+    }
+
+    func finishLeave() {
+        guard let next = pendingLeave else { return }
+        pendingLeave = nil
+        close()
+        next()
+    }
+
+    func cancelLeave() {
+        pendingLeave = nil
     }
 
     deinit {

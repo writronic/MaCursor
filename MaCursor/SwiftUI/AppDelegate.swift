@@ -10,6 +10,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var translatorAccessRequestObserver: NSObjectProtocol?
     private var screenshotAccessRequestObserver: NSObjectProtocol?
     private var boardAccessRequestObserver: NSObjectProtocol?
+    private var magnifierAccessRequestObserver: NSObjectProtocol?
 
     var isViewReady = false
 
@@ -21,12 +22,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         ModalWindowCoordinator.shared.start()
         TextEditingFocusCoordinator.shared.start()
         EditorTextShortcutCoordinator.shared.start()
+        HiddenEditMenuItems.shared.start()
         startFocusFollowsMouseAccessRequests()
         startCursorGesturesAccessRequests()
         startCursorShakerAccessRequests()
         startCursorTranslatorAccessRequests()
         startCursorScreenshotAccessRequests()
         startCursorBoardAccessRequests()
+        startCursorMagnifierAccessRequests()
 
         MACCursorCapture.shared.capture(to: MACCursorCapture.systemDefaultPath)
 
@@ -80,7 +83,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
 
     func application(_ application: NSApplication, open urls: [URL]) {
-        for url in urls where url.pathExtension.lowercased() == "cursor" {
+        for url in urls where ["cursor", "macursor"].contains(url.pathExtension.lowercased()) {
             enqueueOrImport(url)
         }
     }
@@ -179,6 +182,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         guard MACPreferences.flag(MACPreferences.pendingBoardAccessWindowKey) else { return }
         MACPreferences.setFlag(false, forKey: MACPreferences.pendingBoardAccessWindowKey)
         AccessWindowController.cursorBoard.present()
+    }
+
+    private func startCursorMagnifierAccessRequests() {
+        magnifierAccessRequestObserver = DistributedNotificationCenter.default().addObserver(
+            forName: .MACCursorMagnifierShowAccessWindow,
+            object: nil,
+            queue: .main
+        ) { _ in
+            AccessWindowController.cursorMagnifier.present()
+        }
+        guard MACPreferences.flag(MACPreferences.pendingMagnifierAccessWindowKey) else { return }
+        MACPreferences.setFlag(false, forKey: MACPreferences.pendingMagnifierAccessWindowKey)
+        AccessWindowController.cursorMagnifier.present()
     }
 
 }

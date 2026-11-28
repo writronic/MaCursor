@@ -27,7 +27,7 @@ enum WelcomePage: Int, CaseIterable {
     var features: [WelcomeFeature] {
         switch self {
         case .welcome: return [.showMenuBarIcon]
-        case .cursorLook: return [.cursorTrails, .cursorShadow]
+        case .cursorLook: return [.cursorTrails, .cursorHighlight, .cursorShadow]
         case .accessibility: return [.focusOnHover, .cursorGestures, .cursorShaker, .cursorBoard]
         case .screenRecording: return [.cursorTranslator, .cursorCapture]
         case .rightClickMenu: return [.rightClickMenu]
@@ -77,6 +77,20 @@ enum WelcomePage: Int, CaseIterable {
 
     static func clearSaved(operations: MACPreferences.Operations = .live) {
         MACPreferences.set(nil, forKey: MACPreferences.welcomePageKey, operations: operations)
+    }
+
+    @MainActor
+    static func relaunch(afterReset errors: [any Error], uninstallingHelper uninstall: (@Sendable () async -> Void)?, waitingAtMost seconds: TimeInterval = 5,
+                         present: (any Error) -> Void, relaunch: () -> Void) async {
+        if let uninstall {
+            let first = AsyncStream<Void> { end in
+                Task { await uninstall(); end.yield() }
+                Task { try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000)); end.yield() }
+            }
+            for await _ in first { break }
+        }
+        errors.forEach(present)
+        relaunch()
     }
 }
 
@@ -288,8 +302,9 @@ struct WelcomePageView: View {
         appIcon
         title(.cursorLook)
         card(.cursorTrails)
+        card(.cursorHighlight)
         card(.cursorShadow)
-        helperNote(Text("Install the Helper Tool on the first page to use Cursor Trails."))
+        helperNote(Text("Install the Helper Tool on the first page to use Cursor Trails and Cursor Highlight."))
     }
 
     @ViewBuilder
@@ -378,7 +393,7 @@ struct WelcomePageView: View {
             .font(.system(size: 64))
             .accessibilityHidden(true)
         title(.allSet)
-        Text("You can change any of this later in Settings.")
+        Text("You can change any of this later in the main MaCursor window.")
             .fixedSize(horizontal: false, vertical: true)
     }
 

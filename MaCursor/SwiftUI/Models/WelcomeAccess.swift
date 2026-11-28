@@ -34,6 +34,7 @@ enum WelcomeGrant: Equatable {
 enum WelcomeFeature: CaseIterable {
     case showMenuBarIcon
     case cursorTrails
+    case cursorHighlight
     case cursorShadow
     case focusOnHover
     case cursorGestures
@@ -47,6 +48,7 @@ enum WelcomeFeature: CaseIterable {
         switch self {
         case .showMenuBarIcon: return String(localized: "Show Menu Bar Icon")
         case .cursorTrails: return String(localized: "Cursor Trails")
+        case .cursorHighlight: return String(localized: "Cursor Highlight")
         case .cursorShadow: return String(localized: "Cursor Shadow")
         case .focusOnHover: return String(localized: "Focus on Hover")
         case .cursorGestures: return String(localized: "Cursor Gestures")
@@ -61,7 +63,8 @@ enum WelcomeFeature: CaseIterable {
     var caption: String {
         switch self {
         case .showMenuBarIcon: return String(localized: "Shows a MaCursor icon in the menu bar for quick access. If it does not appear, open System Settings and look in the Menu Bar section.")
-        case .cursorTrails: return String(localized: "A trail follows the cursor as it moves and fades when it stops. The trail stays hidden while Reduce motion is on.")
+        case .cursorTrails: return String(localized: "A trail follows the cursor as it moves and fades when it stops.")
+        case .cursorHighlight: return String(localized: "Dims the screen around the pointer and shows a ripple where you click.")
         case .cursorShadow: return String(localized: "When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied.")
         case .focusOnHover: return String(localized: "When you hover over a window with the cursor, MaCursor raises it to the front and hands it the focus after a short delay.")
         case .cursorGestures: return String(localized: "Draw a shape with the pointer to run an action.")
@@ -75,7 +78,7 @@ enum WelcomeFeature: CaseIterable {
 
     var accesses: [WelcomeAccess] {
         switch self {
-        case .showMenuBarIcon, .cursorTrails, .cursorShadow: return []
+        case .showMenuBarIcon, .cursorTrails, .cursorHighlight, .cursorShadow: return []
         case .focusOnHover, .cursorGestures, .cursorShaker, .cursorBoard: return [.accessibility]
         case .cursorTranslator: return [.screenRecording, .accessibility]
         case .cursorCapture: return [.screenRecording]
@@ -86,6 +89,7 @@ enum WelcomeFeature: CaseIterable {
     var menuBarItems: [MACMenuBarItem] {
         switch self {
         case .cursorTrails: return [.cursorTrails]
+        case .cursorHighlight: return [.cursorHighlight]
         case .cursorShadow: return [.cursorShadow]
         case .focusOnHover: return [.focusOnHover]
         case .cursorGestures: return [.cursorGestures]
@@ -103,7 +107,7 @@ enum WelcomeFeature: CaseIterable {
         switch self {
         case .cursorShadow, .rightClickMenu: return .none
         case .showMenuBarIcon: return .installed
-        case .cursorTrails, .focusOnHover, .cursorGestures, .cursorShaker, .cursorBoard, .cursorTranslator, .cursorCapture: return .running
+        case .cursorTrails, .cursorHighlight, .focusOnHover, .cursorGestures, .cursorShaker, .cursorBoard, .cursorTranslator, .cursorCapture: return .running
         }
     }
 }

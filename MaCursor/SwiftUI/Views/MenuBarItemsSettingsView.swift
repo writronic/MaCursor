@@ -13,6 +13,7 @@ private extension MACMenuBarItem {
         case .cursorTranslator: return String(localized: "Cursor Translator")
         case .cursorShaker: return String(localized: "Cursor Shaker")
         case .cursorTrails: return String(localized: "Cursor Trails")
+        case .cursorHighlight: return String(localized: "Cursor Highlight")
         }
     }
 }

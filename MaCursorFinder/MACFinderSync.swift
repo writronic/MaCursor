@@ -87,6 +87,21 @@ final class MACFinderSync: FIFinderSync, RightClickMenuActionTarget {
         changeVisibility(hidden: false, context: .container)
     }
 
+    @objc func cutSelectedItems() {
+        do {
+            try RightClickMenuActions.cutItems(FIFinderSyncController.default().selectedItemURLs() ?? [])
+        } catch {
+            NSSound.beep()
+        }
+    }
+
+    @objc func pasteHere() {
+        guard let folder = targetFolder else { return NSSound.beep() }
+        let result = RightClickMenuActions.pasteCutItems(into: folder)
+        if !result.moved.isEmpty { NSWorkspace.shared.activateFileViewerSelecting(result.moved) }
+        if result.failureCount > 0 { NSSound.beep() }
+    }
+
     private func changeVisibility(hidden: Bool, context: RightClickMenuContext) {
         let result = RightClickMenuActions.changeVisibility(
             hidden: hidden, context: context, target: targetFolder,

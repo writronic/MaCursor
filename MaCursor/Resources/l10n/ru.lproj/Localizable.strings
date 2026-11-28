@@ -32,10 +32,6 @@
 
 /* Button: add new theme */
 "Add Theme" = "Добавить тему";
-
-/* Section: animation settings */
-"Animation" = "Анимация";
-
 /* Label: appearance picker */
 "Appearance" = "Оформление";
 
@@ -103,10 +99,6 @@
 
 /* Undo suffix: cursor type */
 "cursor type" = "тип курсора";
-
-/* Label: cursor type picker */
-"Cursor Type:" = "Тип курсора:";
-
 /* Appearance mode: dark */
 "Dark" = "Тёмное";
 
@@ -137,16 +129,8 @@
 
 /* Undo suffix: frame count */
 "frame count" = "количество кадров";
-
-/* Label: frame count */
-"Frame Count:" = "Количество кадров:";
-
 /* Undo suffix: frame duration */
 "frame duration" = "длительность кадра";
-
-/* Label: frame duration */
-"Frame Duration:" = "Длительность кадра:";
-
 /* Settings tab: general */
 "General" = "Основные";
 
@@ -161,10 +145,6 @@
 
 /* Checkbox: HiDPI cursors */
 "HiDPI" = "HiDPI";
-
-/* Section: hot spot coordinates */
-"Hot Spot" = "Активная точка";
-
 /* Undo suffix: hotspot */
 "hotspot" = "активная точка";
 
@@ -347,13 +327,6 @@
 
 /* Link: website */
 "Visit Website" = "Посетить сайт";
-
-/* Label: hotspot X coordinate */
-"X:" = "X:";
-
-/* Label: hotspot Y coordinate */
-"Y:" = "Y:";
-
 /* Alert message: unsaved changes */
 "Your changes will be discarded if you don't save them." = "Если не сохранить изменения, они будут потеряны.";
 
@@ -709,9 +682,6 @@
 /* Welcome window: heading of the last page */
 "You’re All Set" = "Всё готово";
 
-/* Welcome window: text of the last page */
-"You can change any of this later in Settings." = "Всё это можно изменить позже в настройках.";
-
 /* Welcome window: text of the Helper Tool page */
 "The Helper Tool starts when you log in. It keeps your cursors after a restart and runs most features on the next pages. Install it now, or later in Settings → General." = "Вспомогательный инструмент запускается при входе в систему. Он сохраняет ваши курсоры после перезагрузки и обеспечивает работу большинства функций на следующих страницах. Установите его сейчас или позже в разделе «Настройки» → «Основные».";
 
@@ -720,9 +690,6 @@
 
 /* Welcome window: title of the warning shown before the window closes */
 "Are you sure you want to close this window?" = "Вы действительно хотите закрыть это окно?";
-
-/* Welcome window: text of the warning shown before the window closes */
-"You can change these features in Settings. This window opens again only after Reset All Settings." = "Эти функции можно изменить в настройках. Это окно откроется снова только после сброса всех настроек.";
 
 /* Empty search result in the Edit Theme sidebar; %@ is the search text */
 "No Results for “%@”" = "Нет результатов по запросу «%@»";
@@ -914,9 +881,6 @@
 /* Warning under the Cursor Trails switch when the helper is missing */
 "Cursor Trails requires the Helper Tool. You can install it from General → Helper Tool." = "Для функции «След курсора» требуется Вспомогательный инструмент. Его можно установить в разделе «Основные» → «Вспомогательный инструмент».";
 
-/* Caption under the Cursor Trails switch; "Reduce motion" is the macOS Accessibility → Display setting, use the system's own name */
-"A trail follows the cursor as it moves and fades when it stops. The trail stays hidden while Reduce motion is on." = "За движущимся курсором тянется след, который исчезает, когда курсор останавливается. Пока включён параметр «Уменьшить движение», след скрыт.";
-
 /* Label of the slider that sets how long the cursor trail is */
 "Length" = "Длина";
 
@@ -983,14 +947,11 @@
 /* Grey note under the greyed-out Use Graphics Hardware switch on a Mac without Metal graphics */
 "This Mac has no Metal graphics, so the processor draws the trail." = "На этом Mac нет графики Metal, поэтому след рисует процессор.";
 
-/* Label of the pop-up menu above the trail Length slider; it picks how the trail is drawn: Line or Soft Dots */
+/* Label of the pop-up menu above the trail Length slider; it picks how the trail is drawn: Line, Echoes or a particle style */
 "Style" = "Стиль";
 
 /* Trail style: one smooth line that follows the pointer */
 "Line" = "Линия";
-
-/* Trail style: soft round dots that drift behind the pointer */
-"Soft Dots" = "Мягкие точки";
 
 /* Switch under the trail Width slider: while the pointer rests, a soft round glow in the card's colours stays under it until the pointer moves */
 "Glow when still" = "Свечение в покое";
@@ -1283,9 +1244,7 @@
 "What It Does" = "Что делает";
 "Keyboard Shortcut" = "Сочетание клавиш";
 "Typed Text" = "Вводимый текст";
-"Website" = "Веб-сайт";
 "Pick an App…" = "Выбрать приложение…";
-"Website Address" = "Адрес веб-сайта";
 /* Cursor Gestures action sheet: limit of the text an action types */
 "Up to 500 characters." = "Не более 500 символов.";
 /* Cursor Gestures action sheet: shown next to the shortcut button while it records */
@@ -1385,7 +1344,6 @@
 "Allow Screen Recording" = "Разрешить запись экрана";
 "Download the languages you read in Language & Region → Translation Languages…, so Apple Translation can use them." = "Загрузите нужные языки в разделе «Язык и регион» → «Языки перевода…», чтобы перевод Apple мог их использовать.";
 "A Cursor Gestures trigger uses the same keys and button. Cursor Translator takes it." = "Триггер «Жестов курсора» использует те же клавиши и кнопку. Приоритет у «Переводчика курсора».";
-"Hold a key with the right button, so normal right-clicks still work." = "Удерживайте клавишу вместе с правой кнопкой, чтобы обычные щелчки правой кнопкой продолжали работать.";
 "MaCursorHelper needs Accessibility access to see the trigger click and to keep the right-click menu of the app closed. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "Программе MaCursorHelper нужен «Универсальный доступ», чтобы видеть щелчок триггером и не давать открываться контекстному меню приложения. Выберите «Разрешить Универсальный доступ», затем включите MaCursorHelper в разделе «Конфиденциальность и безопасность» → «Универсальный доступ».";
 "MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "Программе MaCursor нужна «Запись экрана», чтобы читать текст в рамке. Ничего не сохраняется, а текст отправляется только в выбранную вами службу перевода. Выберите «Разрешить запись экрана», затем включите MaCursor в разделе «Конфиденциальность и безопасность» → «Запись экрана и системного звука».";
 "Needs Screen Recording access" = "Требуется Запись экрана";
@@ -1394,7 +1352,6 @@
 "Needs Screen Recording" = "Нужна запись экрана";
 "Cannot read the screen" = "Не удаётся прочитать экран";
 "Could not read the text. Trying again…" = "Не удаётся прочитать текст. Повторная попытка…";
-"Language not downloaded. Open Settings › Cursor Translator › Translation Languages…" = "Язык не загружен. Откройте Настройки › Переводчик курсора › Языки перевода…";
 "Translation is not available" = "Перевод недоступен";
 "No text here" = "Здесь нет текста";
 /* Cursor Translator: name tag of the frame; %1$@ is the language of the text on screen, %2$@ the language it is translated to (for example “Japanese → English”) */
@@ -1416,8 +1373,6 @@
 "Server Address" = "Адрес сервера";
 "Not needed for a local server" = "Не нужен для локального сервера";
 /* Cursor Translator: short messages in the name tag when an online service cannot translate; %@ is the service name, for example “DeepL refused the key” */
-"Add your %@ key in Settings › Cursor Translator" = "Добавьте ключ %@ в Настройки › Переводчик курсора";
-"Add the server address in Settings › Cursor Translator" = "Добавьте адрес сервера в Настройки › Переводчик курсора";
 "%@ refused the key" = "%@: ключ отклонён";
 "No connection" = "Нет подключения";
 "%@ could not translate" = "%@: перевод не удался";
@@ -1771,7 +1726,6 @@
 "MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them." = "MaCursor даёт вам контроль над системными курсорами macOS. На следующих страницах можно включить дополнительные функции или пропустить их.";
 "Cursor Look" = "Вид курсора";
 "When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "Когда включено, под курсором отрисовывается мягкая тень. Тень отображается, пока применена тема курсора.";
-"Install the Helper Tool on the first page to use Cursor Trails." = "Установите Вспомогательный инструмент на первой странице, чтобы использовать «След курсора».";
 "Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "Функциям на этой странице нужно разрешение «Универсальный доступ» для MaCursorHelper. Если его нет, нажмите «Дать разрешение», чтобы открыть Системные настройки.";
 "Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "Функциям на этой странице нужно разрешение «Запись экрана» для MaCursor. Переводчику курсора также нужно разрешение «Универсальный доступ» для MaCursorHelper. Если разрешения нет, нажмите «Дать разрешение», чтобы открыть Системные настройки.";
 "Press the shortcut to take a picture of your screen." = "Нажмите сочетание клавиш, чтобы сделать снимок экрана.";
@@ -1887,5 +1841,595 @@
 "Edit…" = "Редактировать…";
 "Edit File Type" = "Редактировать тип файла";
 "Are you sure you want to delete “%@”?" = "Вы действительно хотите удалить «%@»?";
+/* Alert after a library window drop that held something other than a .cursor file. Use macOS's own File menu name and this file's "Convert Theme..." text. */
+"To convert this, use File > Convert Theme…" = "Для преобразования воспользуйтесь командой «Файл > Преобразовать тему…»";
+/* Settings > General: the Import Settings and Export Settings cards, and the Export and Import windows for a .macursor settings file. %@ is a file name or a list of names. "MaCursor Settings" is the suggested file name in the Save panel. */
+"Import Settings" = "Импорт настроек";
+"Export Settings" = "Экспорт настроек";
+"Import…" = "Импортировать…";
+"Export…" = "Экспортировать…";
+"Import Settings…" = "Импортировать настройки…";
+"Export Settings…" = "Экспортировать настройки…";
+"Choose what goes into the file." = "Выберите, что войдёт в файл.";
+"Choose what to import from “%@”." = "Выберите, что импортировать из «%@».";
+"Your API keys stay on this Mac." = "Ваши ключи API остаются на этом Mac.";
+"This is too big for one file. Untick some themes or history." = "Это слишком много для одного файла. Снимите флажки с некоторых тем или истории.";
+"MaCursor could not export the settings." = "MaCursor не удалось экспортировать настройки.";
+"MaCursor could not read this settings file." = "MaCursor не удалось прочитать этот файл настроек.";
+"This file is from a newer version of MaCursor. Update MaCursor, then try again." = "Этот файл создан в более новой версии MaCursor. Обновите MaCursor и повторите попытку.";
+"Import?" = "Импортировать?";
+"Settings that are replaced: %@" = "Настройки, которые будут заменены: %@";
+"You can’t undo this." = "Это действие нельзя отменить.";
+"Import finished." = "Импорт завершён.";
+"MaCursor could not import: %@" = "MaCursor не удалось импортировать: %@";
+"Shortcuts already used by another feature were cleared: %@" = "Сочетания клавиш, которые уже использует другая функция, удалены: %@";
+"MaCursor Settings" = "Настройки MaCursor";
+/* Edit Theme pane: label of the cursor type picker */
+"Cursor Type" = "Тип курсора";
+/* Edit Theme pane: label of the frame count field */
+"Frame Count" = "Количество кадров";
+/* Edit Theme pane: label of the frame duration field, in seconds */
+"Frame Duration" = "Длительность кадра";
+/* Edit Theme pane: label of the hot spot X coordinate field */
+"X" = "X";
+/* Edit Theme pane: label of the hot spot Y coordinate field */
+"Y" = "Y";
+/* Edit Theme pane: title of the box that holds the hot spot and animation fields */
+"Animation and Hot Spot" = "Анимация и активная точка";
+/* Edit Theme pane: title of the alert shown before Clear Slot removes the cursor */
+"Clear This Slot?" = "Очистить эту ячейку?";
+/* Edit Theme pane: message of the Clear Slot alert. The removal happens on Save. */
+"The cursor in this slot is removed from the theme when you save." = "Курсор в этой ячейке будет удалён из темы при сохранении.";
+/* Import and Export Settings windows: tick box for the cursor themes in the file */
+"Themes" = "Темы";
+/* Import Settings window: grey text after a theme name when this Mac has a theme with the same name */
+"Replaces yours" = "Заменит вашу";
+/* Import? confirm: %@ is a list of theme names */
+"Themes that are replaced: %@" = "Темы, которые будут заменены: %@";
+/* Import? confirm: shown when a ticked theme is new on this Mac */
+"New themes are added." = "Новые темы будут добавлены.";
+/* Import Settings window: red line while an Edit Theme window is open and Themes is ticked */
+"Close the Edit Theme window, then try again." = "Закройте окно «Изменить тему», затем повторите попытку.";
+/* Import and Export Settings windows: the history tick box under Cursor Board */
+"Cursor Board History" = "История буфера курсора";
+/* Export Settings window: caption under Capture History */
+"Your past screenshots. Anyone who gets the file can see them." = "Ваши прошлые снимки. Любой, кто получит файл, сможет их увидеть.";
+/* Export Settings window: caption under Cursor Board History */
+"Your copied text and pictures. Anyone who gets the file can see them." = "Ваши скопированные тексты и изображения. Любой, кто получит файл, сможет их увидеть.";
+/* Import Settings window: caption under each history tick box; Keep history is the setting's name */
+"Items older than your Keep history setting are not added." = "Элементы старше срока в настройке «Хранить историю» не добавляются.";
+/* Import Settings result: Capture History was ticked but nothing was added; Keep history is the setting's name and Disabled its value */
+"Capture History was not added: Keep history is set to Disabled." = "История снимков не добавлена: в настройке «Хранить историю» выбрано «Выключено».";
+/* Import Settings result: Cursor Board History was ticked but nothing was added; Keep history is the setting's name, a switch that is off */
+"Cursor Board History was not added: Keep history is off." = "История буфера курсора не добавлена: настройка «Хранить историю» выключена.";
+/* Settings > Cursor Gestures > New Custom Action: the What It Does choice that opens any link, such as a web page or an app's link */
+"Open Link" = "Открыть ссылку";
+/* Settings > Cursor Gestures > New Custom Action: placeholder of the field for the link to open */
+"Link Address" = "Адрес ссылки";
+/* Settings > Cursor Gestures > New Custom Action: the What It Does choice that runs an AppleScript */
+"Run AppleScript" = "Запустить AppleScript";
+/* Settings > Cursor Gestures > New Custom Action: placeholder of the field for the AppleScript text */
+"Script" = "Скрипт";
+/* Settings > Cursor Gestures > New Custom Action: button that picks an AppleScript file */
+"Pick a Script File…" = "Выбрать файл скрипта…";
+/* Settings > Cursor Gestures > New Custom Action: note under the script field; macOS asks for Automation permission the first time */
+"Up to 500 characters, or a script file. The first time a script controls an app, macOS asks you to allow it." = "Не более 500 символов или файл скрипта. Когда скрипт впервые управляет приложением, macOS просит вас разрешить это.";
+/* Settings > Cursor Gestures > New Custom Action: the What It Does choice that runs a shortcut from the Shortcuts app, not a keyboard shortcut */
+"Run Shortcut" = "Запустить быструю команду";
+/* Settings > Cursor Gestures > New Custom Action: first item of the menu of shortcuts from the Shortcuts app */
+"Pick a Shortcut…" = "Выбрать быструю команду…";
+/* Settings > Cursor Gestures > New Custom Action: note shown when the Shortcuts app lists no shortcuts */
+"No shortcuts found in the Shortcuts app." = "В приложении «Команды» не найдено быстрых команд.";
+/* Settings > Cursor Gestures > New Custom Action: placeholder of the field for the name of a shortcut from the Shortcuts app */
+"Shortcut Name" = "Название быстрой команды";
+/* Settings > Cursor Gestures > New Custom Action: the What It Does choice that runs a command in the shell (zsh) */
+"Run Shell Command" = "Запустить команду оболочки";
+/* Settings > Cursor Gestures > New Custom Action: placeholder of the field for the shell command */
+"Command" = "Команда";
+/* Import Settings: note under Cursor Gestures; gestures can open apps and links, and run scripts and commands */
+"Gestures can open apps and links, and run scripts and commands. Import only files you trust." = "Жесты могут открывать приложения и ссылки, а также запускать скрипты и команды. Импортируйте только файлы, которым доверяете.";
+
+/* Import Settings: message of the script alert; below it the alert lists each action's name and its first lines */
+"These actions run with your rights and can change or delete your files. Import only files you trust." = "Эти действия выполняются с вашими правами и могут изменить или удалить ваши файлы. Импортируйте только файлы, которым доверяете.";
+
+/* Import Settings: first button of the script alert; imports the file even though it has script and command actions */
+"Import Anyway" = "Всё равно импортировать";
+
+/* Import Settings: last line of the script alert's action list when it has more than 5 actions; %lld is how many are not listed */
+"and %lld more" = "и ещё %lld";
+
+/* Main window tab list: grey line under Cursor Control › Cursor Control */
+"Scale, hand and shadow" = "Масштаб, рука и тень";
+
+/* Main window tab list: grey line under Cursor Control › Per-App Themes */
+"A theme for each app" = "Своя тема для каждого приложения";
+
+/* Main window tab list: grey line under Cursor Control › Theme Automation */
+"Follow Light, Dark or the clock" = "Светлое, тёмное или по времени";
+
+/* Main window tab list: grey line under Cursor Control › Focus on Hover */
+"Focus follows the pointer" = "Фокус следует за указателем";
+
+/* Main window tab list: grey line under Cursor Control › Cursor Shaker */
+"Start, stop and shortcut" = "Запуск, остановка и сочетание клавиш";
+
+/* Main window tab list: grey line under Cursor Capture › General */
+"Sounds, export, after capture" = "Звуки, экспорт, после снимка";
+
+/* Main window tab list: grey line under Cursor Capture › Shortcuts */
+"Area, previous area, fullscreen" = "Область, предыдущая, весь экран";
+
+/* Main window tab list: grey line under Cursor Capture › Quick Access */
+"Where the overlay sits" = "Где показывается панель";
+
+/* Main window tab list: grey line under Cursor Capture › Screenshots */
+"Format, cursor, freeze" = "Формат, курсор, заморозка";
+
+/* Main window tab list: grey line under Cursor Capture › Advanced */
+"File name and history" = "Имя файла и история";
+
+/* Main window tab list: grey line under Cursor Board › General */
+"How long and how many" = "Как долго и сколько";
+
+/* Main window tab list: grey line under Cursor Board › Shortcuts */
+"Recent items and the panel" = "Недавние элементы и панель";
+
+/* Main window tab list: grey line under Cursor Board › Panel */
+"Position and screen edge" = "Положение и край экрана";
+
+/* Main window tab list: grey line under Cursor Board › Ignored Apps */
+"Apps Cursor Board skips" = "Приложения без Буфера курсора";
+
+/* Main window tab list: grey line under Cursor Gestures › General */
+"Line, color, strictness" = "Линия, цвет, строгость";
+
+/* Main window tab list: grey line under Cursor Gestures › Gestures */
+"Search and add gestures" = "Поиск и добавление жестов";
+
+/* Main window tab list: grey line under Cursor Gestures › Shapes */
+"Draw and name shapes" = "Рисование и названия фигур";
+
+/* Main window tab list: grey line under Cursor Gestures › Actions */
+"Make your own actions" = "Создание своих действий";
+
+/* Main window tab list: grey line under Right-Click Menu › Main Menu; the three names are the other tabs */
+"Open With, New File, Common Apps" = "Открыть в приложении, Новый файл…";
+
+/* Main window tab list: grey line under Right-Click Menu › Actions */
+"Copy path, hide and unhide files" = "Копировать путь, скрыть и показать";
+
+/* Main window tab list: grey line under Right-Click Menu › New File */
+"File types for New File" = "Типы файлов для «Новый файл»";
+
+/* Main window tab list: grey line under Right-Click Menu › Open With */
+"Apps for the selected files" = "Приложения для выбранных файлов";
+
+/* Main window tab list: grey line under Right-Click Menu › Common Apps */
+"Apps for the current folder" = "Приложения для текущей папки";
+
+/* Main window tab list: grey line under Settings › General */
+"Appearance, language, updates" = "Оформление, язык, обновления";
+
+/* Main window tab list: grey line under Settings › About */
+"Version and license" = "Версия и лицензия";
+
+/* Main window: explainer card at the top of Cursor Control › Cursor Control */
+"Choose how big the cursor is, which hand it is drawn for and whether it casts a shadow." = "Выберите размер курсора, руку, для которой он нарисован, и отбрасывает ли он тень.";
+
+/* Main window: explainer card at the top of Cursor Control › Cursor Shaker */
+"Choose when the shaker starts and stops, and which shortcut runs it." = "Выберите, когда Встряска курсора запускается и останавливается и какое сочетание клавиш её включает.";
+
+/* Main window: explainer card at the top of Cursor Capture › General */
+"Choose the sounds, where files go and what happens right after a capture." = "Выберите звуки, папку для файлов и что происходит сразу после снимка.";
+
+/* Main window: explainer card at the top of Cursor Capture › Shortcuts */
+"Give each kind of capture a keyboard shortcut or a mouse button." = "Назначьте каждому виду снимка сочетание клавиш или кнопку мыши.";
+
+/* Main window: explainer card at the top of Cursor Capture › Quick Access */
+"The overlay shows your latest capture. Choose where it sits on the screen." = "Панель показывает последний снимок. Выберите, где она находится на экране.";
+
+/* Main window: explainer card at the top of Cursor Capture › Screenshots */
+"Choose the file format and what a screenshot includes." = "Выберите формат файла и что входит в снимок экрана.";
+
+/* Main window: explainer card at the top of Cursor Capture › Advanced */
+"Choose how files are named and how long Capture keeps its history." = "Выберите, как называются файлы и как долго Снимок курсора хранит историю.";
+
+/* Main window: explainer card at the top of Cursor Board › General */
+"Choose how long Cursor Board keeps what you copy, and how many items it holds." = "Выберите, как долго Буфер курсора хранит скопированное и сколько элементов он вмещает.";
+
+/* Main window: explainer card at the top of Cursor Board › Shortcuts */
+"Set the shortcuts that show recent items and the Cursor Board panel." = "Задайте сочетания клавиш для недавних элементов и панели Буфера курсора.";
+
+/* Main window: explainer card at the top of Cursor Board › Panel */
+"Choose where the side panel opens." = "Выберите, где открывается боковая панель.";
+
+/* Main window: explainer card at the top of Cursor Board › Ignored Apps */
+"Cursor Board does not keep what you copy in these apps." = "Буфер курсора не сохраняет то, что вы копируете в этих приложениях.";
+
+/* Main window: explainer card at the top of Settings › General */
+"Choose how MaCursor looks, which language it uses and how it keeps itself up to date." = "Выберите, как выглядит MaCursor, какой язык он использует и как обновляется.";
+
+/* Main window: heading of the Overview, the first page */
+"Overview" = "Обзор";
+
+/* Main window: Overview section header over the Capture, Board, Translator, Gestures and Right-Click Menu cards */
+"Cursor Tools" = "Инструменты курсора";
+
+/* Main window: status line on the Right-Click Menu card when the Finder extension is off */
+"Needs the Finder extension" = "Требуется расширение Finder";
+
+/* Main window: status line on the Right-Click Menu card when Full Disk Access is missing */
+"Needs Full Disk Access" = "Требуется Доступ к диску";
+
+/* Cursor Translator: name tag text when a translation language is not downloaded; “MaCursor › Cursor Translator › Translation Languages…” is the way to that button in the main window */
+"Language not downloaded. Open MaCursor › Cursor Translator › Translation Languages…" = "Язык не загружен. Откройте MaCursor › Переводчик курсора › Языки перевода…";
+
+/* Cursor Translator: name tag text when an online service has no key or no server address; %@ is the service name, for example “DeepL”; “MaCursor › Cursor Translator” is the page in the main window */
+"Add your %@ key in MaCursor › Cursor Translator" = "Добавьте ключ %@ в MaCursor › Переводчик курсора";
+"Add the server address in MaCursor › Cursor Translator" = "Добавьте адрес сервера в MaCursor › Переводчик курсора";
+
+/* Welcome window: text of the last page; the main MaCursor window holds every feature page and Settings */
+"You can change any of this later in the main MaCursor window." = "Всё это можно изменить позже в главном окне MaCursor.";
+
+/* Welcome window: text of the warning shown before the window closes; the main MaCursor window holds every feature page and Settings */
+"You can change these features in the main MaCursor window. This window opens again only after Reset All Settings." = "Эти функции можно изменить в главном окне MaCursor. Это окно откроется снова только после сброса всех настроек.";
+
+/* Alert title before a cursor theme is deleted */
+"Delete “%@”?" = "Удалить «%@»?";
+
+/* Settings › General › Appearance switch: shows each cursor's system identifier (such as cursor.3) under its name */
+"Show Cursor Identifiers" = "Показывать идентификаторы курсоров";
+
+/* Cursor Themes top bar button (label and tooltip) that opens the Theme Gallery page, and that page's title in the top bar */
+"Theme Gallery" = "Галерея тем";
+
+/* Theme Gallery card button that downloads a theme and adds it to Cursor Themes, like Get in the App Store */
+"Get" = "Загрузить";
+
+/* Theme Gallery card button, disabled, shown once the theme is in Cursor Themes */
+"In Library" = "В библиотеке";
+
+/* Theme Gallery title when the theme list cannot be downloaded */
+"Cannot Load the Gallery" = "Не удаётся загрузить галерею";
+
+/* Theme Gallery help line under “Cannot Load the Gallery” */
+"Check your internet connection, then try again." = "Проверьте подключение к интернету, а затем повторите попытку.";
+
+/* Theme Gallery card line after Get failed */
+"Could not add this theme." = "Не удалось добавить эту тему.";
+
+/* Theme Gallery title in the right pane when the selected theme's cursors cannot be shown */
+"Cannot Load the Preview" = "Не удаётся загрузить предпросмотр";
+
+/* Theme Gallery line under “Cannot Load the Preview” */
+"MaCursor could not download or open this theme." = "MaCursor не удалось загрузить или открыть эту тему.";
+
+/* Theme Gallery right pane line before a theme is clicked */
+"Select a theme to see its cursors." = "Выберите тему, чтобы просмотреть её курсоры.";
+
+/* Overview: line on the Theme Gallery card, right of the Cursor Themes card */
+"Find more cursor themes and add them to your library." = "Найдите другие темы курсора и добавьте их в свою библиотеку.";
+
+/* Overview: button on the Theme Gallery card that opens the Theme Gallery page */
+"Browse Gallery…" = "Просмотреть галерею…";
+
+/* Trail style: five-pointed stars that spin away from the pointer */
+"Star" = "Звезда";
+
+/* Trail style: round bubbles (rings) that float up from the pointer */
+"Bubble" = "Пузырь";
+
+/* Trail style: glowing dots that add up to a bright neon light where they overlap */
+"Neon" = "Неон";
+
+/* Trail style: snowflakes that drift down from the pointer */
+"Snow" = "Снег";
+
+/* Trail style: small hearts that float up from the pointer */
+"Heart" = "Сердце";
+
+/* Trail style: flickering bolts that fly out from the pointer */
+"Lightning" = "Молния";
+
+/* Trail style: four-pointed twinkles that grow and shrink around the pointer */
+"Magic" = "Магия";
+
+/* Cursor Highlight: the feature's name on its page, the Overview card, the Welcome card and the menu bar panel */
+"Cursor Highlight" = "Подсветка курсора";
+
+/* Cursor Highlight: one-line description under the page title and on the Welcome card */
+"Dims the screen around the pointer and shows a ripple where you click." = "Затемняет экран вокруг указателя и показывает волну в месте щелчка.";
+
+/* Cursor Highlight page: note shown while the Helper Tool is not installed; "General → Helper Tool" is the place in Settings */
+"Cursor Highlight requires the Helper Tool. You can install it from General → Helper Tool." = "Для функции «Подсветка курсора» требуется Вспомогательный инструмент. Его можно установить в разделе «Основные» → «Вспомогательный инструмент».";
+
+/* Cursor Highlight switch: dims the screen and leaves a clear circle of light around the pointer; the key keeps it apart from macOS Spotlight search */
+"Spotlight (Cursor Highlight)" = "Прожектор";
+
+/* Cursor Highlight switch: makes the dim almost black and the light circle half as big, like a flashlight in a dark room */
+"Flashlight Mode" = "Режим фонарика";
+
+/* Cursor Highlight switch: draws a short animation where you click */
+"Click Ripple" = "Волна при щелчке";
+
+/* Spotlight slider: how dark the screen gets outside the light */
+"Dim" = "Затемнение";
+
+/* Spotlight slider: how wide the soft fade at the edge of the light is */
+"Soft Edge" = "Мягкий край";
+
+/* Click Ripple menu: which animation is drawn at a click */
+"Look" = "Вид";
+
+/* Click Ripple look: three rings that grow out one after another */
+"Ripple" = "Волны";
+
+/* Click Ripple look: one ring that grows out */
+"Ring" = "Кольцо";
+
+/* Click Ripple look: a ring that shrinks into the click point */
+"Pulse" = "Пульс";
+
+/* Click Ripple look: a filled circle that grows out; the key keeps it apart from other Circle labels */
+"Circle (Click Ripple)" = "Круг";
+
+/* Click Ripple look: a short filled flash that grows out fast */
+"Burst" = "Вспышка";
+
+/* Click Ripple slider: how many times its start size the ripple grows */
+"Grow Size" = "Рост";
+
+/* Click Ripple slider: how solid the ripple looks; low values are see-through */
+"Opacity" = "Непрозрачность";
+
+/* Cursor Gestures action: turns the Spotlight switch of Cursor Highlight on or off */
+"Highlight Spotlight" = "Подсветка: прожектор";
+
+/* Cursor Gestures action: turns the Flashlight Mode switch of Cursor Highlight on or off */
+"Highlight Flashlight" = "Подсветка: фонарик";
+
+/* Cursor Gestures action: turns the Click Ripple switch of Cursor Highlight on or off */
+"Highlight Click Ripple" = "Подсветка: волна при щелчке";
+
+/* Settings › General switch: when on, Cursor Highlight and Cursor Trails hide while the macOS Reduce motion setting is on; use the system's own name for Reduce motion */
+"Follow Reduce Motion" = "Учитывать «Уменьшить движение»";
+
+/* Note under the Follow Reduce Motion switch; "Reduce motion" is the macOS Accessibility → Display setting, use the system's own name */
+"When Reduce motion is on in System Settings, Cursor Highlight and Cursor Trails stay hidden." = "Пока в Системных настройках включён параметр «Уменьшить движение», «Подсветка курсора» и «След курсора» скрыты.";
+
+/* Caption under the Cursor Trails switch and on its Welcome card */
+"A trail follows the cursor as it moves and fades when it stops." = "За движущимся курсором тянется след, который исчезает, когда курсор останавливается.";
+
+/* Welcome, Cursor Look page: note shown while the Helper Tool is not installed */
+"Install the Helper Tool on the first page to use Cursor Trails and Cursor Highlight." = "Установите Вспомогательный инструмент на первой странице, чтобы использовать «След курсора» и «Подсветку курсора».";
+
+/* Cursor Trails › Style: the trail style built from your own particle layers */
+"Custom Particles" = "Свои частицы";
+
+/* Cursor Trails › Custom Particles: name of a particle layer that has no name of its own; %lld is its place in the list */
+"Layer %lld" = "Слой %lld";
+
+/* Cursor Trails › Custom Particles: a layer row's summary; %lld particles a second, %@ is the lifetime in seconds */
+"%lld/s · life %@ s" = "%lld/с · время жизни %@ с";
+
+/* Cursor Trails › Custom Particles: switch that turns one particle layer on or off */
+"Enabled" = "Включён";
+
+/* Cursor Trails › Custom Particles: slider that moves a layer sideways from the pointer */
+"Layer Offset X" = "Смещение слоя по X";
+
+/* Cursor Trails › Custom Particles: slider that moves a layer up or down from the pointer */
+"Layer Offset Y" = "Смещение слоя по Y";
+
+/* Cursor Trails › Custom Particles: slider, how many particles a layer makes each second */
+"Birth Rate" = "Частота появления";
+
+/* Cursor Trails › Custom Particles: slider, how long each particle lives */
+"Lifetime" = "Время жизни";
+
+/* Cursor Trails › Custom Particles: slider, how much the lifetime varies between particles */
+"Lifetime Range" = "Разброс времени жизни";
+
+/* Cursor Trails › Custom Particles: slider, the direction particles fly, in degrees */
+"Angle" = "Угол";
+
+/* Cursor Trails › Custom Particles: slider, how wide the spread of directions is */
+"Angle Range" = "Разброс угла";
+
+/* Cursor Trails › Custom Particles: slider, tilts the particles toward you or away from you */
+"Latitude" = "Широта";
+
+/* Cursor Trails › Custom Particles: slider, how much the tilt varies between particles */
+"Latitude Range" = "Разброс широты";
+
+/* Cursor Trails › Custom Particles: slider, how fast particles fly */
+"Velocity" = "Скорость";
+
+/* Cursor Trails › Custom Particles: slider, how much the speed varies between particles */
+"Velocity Range" = "Разброс скорости";
+
+/* Cursor Trails › Custom Particles: slider, pushes particles left or right over their life */
+"X Acceleration" = "Ускорение по X";
+
+/* Cursor Trails › Custom Particles: slider, pushes particles up or down over their life */
+"Y Acceleration" = "Ускорение по Y";
+
+/* Cursor Trails › Custom Particles: field for the name of an SF Symbol, for example star.fill */
+"Symbol Name" = "Название символа";
+
+/* Cursor Trails › Custom Particles: grey note under the symbol name when no symbol has that name */
+"This Mac has no SF Symbol with this name." = "На этом Mac нет символа SF с таким названием.";
+
+/* Cursor Trails › Custom Particles: switch; on, the layer takes its colours from the Colors card chosen on the page */
+"Use Colors Card" = "Использовать карточку «Цвета»";
+
+/* Cursor Trails › Custom Particles: slider, how much the size varies between particles */
+"Size Range" = "Разброс размера";
+
+/* Cursor Trails › Custom Particles: slider, how fast each particle turns */
+"Spin" = "Вращение";
+
+/* Cursor Trails › Custom Particles: slider, how much the turning speed varies between particles */
+"Spin Range" = "Разброс вращения";
+
+/* Cursor Trails › Custom Particles › Picture: a soft round dot */
+"Soft Dot" = "Мягкая точка";
+
+/* Cursor Trails › Custom Particles › Picture: a snowflake shape */
+"Snowflake" = "Снежинка";
+
+/* Cursor Trails › Custom Particles › Picture: a lightning bolt shape */
+"Bolt" = "Молния";
+
+/* Cursor Trails › Custom Particles › Picture: a four-pointed twinkle shape */
+"Twinkle" = "Мерцание";
+
+/* Cursor Trails › Custom Particles › Picture: draw an SF Symbol whose name you type */
+"SF Symbol" = "Символ SF";
+
+/* Cursor Trails › Custom Particles: a slider value in seconds; %@ is the number */
+"%@ s" = "%@ с";
+
+/* Cursor Trails › Custom Particles: a slider value in degrees */
+"%lld°" = "%lld°";
+
+/* Cursor Trails › Custom Particles: a speed in points a second */
+"%lld pt/s" = "%lld пт/с";
+
+/* Cursor Trails › Custom Particles: an acceleration in points a second squared */
+"%lld pt/s²" = "%lld пт/с²";
+
+/* Cursor Trails › Custom Particles: a turning speed in degrees a second */
+"%lld°/s" = "%lld°/с";
+
+/* Cursor Trails › Custom Particles: particles a second */
+"%lld/s" = "%lld/с";
+
+/* Settings › General, shown only on a MacBook Neo: the switch that adds transparent space around each cursor picture */
 "Cursor Canvas Padding" = "Поля вокруг курсора";
+
+/* Settings › General, shown only on a MacBook Neo: the note under the Cursor Canvas Padding switch */
 "Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork." = "Не даёт пользовательским курсорам снова превращаться в системный курсор на MacBook Neo. Вокруг изображения курсора добавляется прозрачное пространство.";
+
+/* Custom Particles style page: step 1 title (the particle layers of a style) */
+"Layers" = "Слои";
+
+/* Custom Particles style page: step 2 title (how many particles are born and how long they live) */
+"Birth" = "Появление";
+
+/* Custom Particles style page: step 3 title (which way the particles fly) */
+"Direction" = "Направление";
+
+/* Custom Particles style page: step 4 title (how fast the particles move) */
+"Motion" = "Движение";
+
+/* Custom Particles style page: label of the menu that picks the layer being changed */
+"Layer" = "Слой";
+
+/* Cursor Trails › Custom Particles: button and page title for a new style */
+"New Style" = "Новый стиль";
+
+/* Cursor Trails › Custom Particles: page title when changing a saved style */
+"Edit Style" = "Изменить стиль";
+
+/* Cursor Trails › Custom Particles: name of a style the user did not name, by its place in the list */
+"Custom Style %lld" = "Свой стиль %lld";
+
+/* Custom Particles style page: note under the Layers step title */
+"A style is made of layers. Each layer is its own kind of particle." = "Стиль состоит из слоёв. Каждый слой — отдельный вид частиц.";
+
+/* Custom Particles style page: note under the Birth step title */
+"How many particles appear, and how long each one lives." = "Сколько частиц появляется и как долго живёт каждая.";
+
+/* Custom Particles style page: note under the Direction step title */
+"Which way the particles fly when they are born." = "В каком направлении летят частицы после появления.";
+
+/* Custom Particles style page: note under the Motion step title */
+"How fast they move, and what pushes them on the way." = "С какой скоростью они движутся и что толкает их по пути.";
+
+/* Custom Particles style page: note under the Look step title */
+"What each particle looks like: picture, color, size, spin and fade." = "Вид каждой частицы: изображение, цвет, размер, вращение и затухание.";
+
+/* Custom Particles style page: note under the Details step title */
+"Name the style. The name shows on its card." = "Назовите стиль. Название показывается на его карточке.";
+
+/* Cursor Highlight: switch for the round lens that enlarges the screen around the pointer */
+"Magnifier" = "Лупа";
+
+/* Cursor Trails: slider for how far the pointer must move in a straight line before the trail starts */
+"Start After Moving" = "Начинать после перемещения";
+
+/* Cursor Trails: Start After Moving slider, left end, the trail starts at once */
+"At Once" = "Сразу";
+
+/* Cursor Trails: Start After Moving slider, right end, the pointer must move far first */
+"Far" = "Далеко";
+
+/* Custom Particles editor, Look step: menu for how a particle's size changes over its life */
+"Size Over Life" = "Размер за время жизни";
+
+/* Size Over Life menu item: the size stays the same */
+"Steady" = "Постоянный";
+
+/* Size Over Life menu item: the particle grows from a quarter of its size to its full size */
+"Grow" = "Рост";
+
+/* Size Over Life menu item: the particle shrinks from its full size to a quarter */
+"Shrink" = "Уменьшение";
+
+/* Size Over Life menu item: small, big in the middle of its life, small at the end */
+"Small-Big-Small" = "Рост и уменьшение";
+
+/* Size Over Life menu item: big, small in the middle of its life, big at the end */
+"Big-Small-Big" = "Уменьшение и рост";
+
+/* Custom Particles editor: grey note under Size Over Life while one of the two curves is picked */
+"The processor draws this curve, so this style does not use the graphics hardware." = "Эту кривую рисует процессор, поэтому этот стиль не использует видеокарту.";
+
+/* Cursor Trails: grey note under Use Graphics Hardware while the style in use has a size curve */
+"A layer in this style uses a size curve, so the processor draws the trail." = "Слой этого стиля использует кривую размера, поэтому след рисует процессор.";
+
+/* Cursor Trails: Picture menu item and row label for the user's own image; it must read differently from "Picture" */
+"Image" = "Своё изображение";
+
+/* Cursor Trails: grey note under the Image row once an image is chosen */
+"The image keeps its own colors." = "Изображение сохраняет свои цвета.";
+
+/* Cursor Trails: grey note under the Image row while no image is chosen */
+"Choose an image for this layer." = "Выберите изображение для этого слоя.";
+
+/* Cursor Trails: menu that picks where on the cursor the trail starts */
+"Trail Starts At" = "Начало следа";
+
+/* Cursor Trails › Trail Starts At: the cursor's click point, the same term as Edit Theme's hot spot */
+"Hot Spot" = "Активная точка";
+
+/* Cursor Trails › Trail Starts At: the middle of the cursor picture */
+"Cursor Center" = "Центр курсора";
+
+/* Cursor Trails › Trail Starts At: a point the user drags on the arrow */
+"Custom Spot" = "Своя точка";
+
+/* Cursor Trails: grey note beside the Custom Spot box */
+"Drag the dot to where the trail starts." = "Перетащите точку в место, откуда начинается след.";
+
+/* Cursor Trails: grey note under Trail Starts At while it is not Hot Spot */
+"The spot is set on the arrow. Other cursors, like the text cursor, use the same shift." = "Точка устанавливается на стрелке. Другие курсоры, например текстовый курсор, используют тот же сдвиг.";
+
+/* Cursor Trails: grey note under Trail Starts At for the Echoes style */
+"Echoes stay on the cursor. Only the glow moves to this spot." = "Эхо остаётся на курсоре. В эту точку перемещается только свечение.";
+
+/* Import Settings: title of the red alert shown before importing a file whose Cursor Gestures part has Run AppleScript, Run Shell Command, Run Shortcut or Open Link actions */
+"This file has actions that run scripts, shortcuts or commands, or open links" = "В этом файле есть действия, которые запускают скрипты, быстрые команды или команды оболочки либо открывают ссылки";
+
+/* Cursor Gestures: grey note under Link Address of the Open Link action. A name without a dot plus a port (nas:5000) must start with https. Keep both web addresses exactly as written. */
+"For a name without a dot, type https:// before it, for example https://nas:5000." = "Если в имени нет точки, введите перед ним https://, например https://nas:5000.";
+
+/* Right-Click Menu: Finder menu item on empty space. Moves the items you chose Cut on into this folder. */
+"Paste Here" = "Вставить сюда";
+
+/* Cursor Themes: the number of themes the left list shows, at the right end of its bottom bar */
+"%lld themes" = "Тем: %lld";
+
+"MaCursor needs Screen Recording access to enlarge the screen around the pointer. Nothing is saved. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "Программе MaCursor нужна «Запись экрана», чтобы увеличивать экран вокруг указателя. Ничего не сохраняется. Выберите «Разрешить запись экрана», затем включите MaCursor в разделе «Конфиденциальность и безопасность» → «Запись экрана и системного звука».";
+"MaCursor needs Screen Recording access to enlarge the screen around the pointer. Nothing is saved. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "Программе MaCursor нужна «Запись экрана», чтобы увеличивать экран вокруг указателя. Ничего не сохраняется. Выберите «Разрешить запись экрана», затем включите MaCursor в разделе «Конфиденциальность и безопасность» → «Запись экрана».";

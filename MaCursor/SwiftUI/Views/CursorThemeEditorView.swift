@@ -3,33 +3,66 @@ import UniformTypeIdentifiers
 
 struct CursorThemeEditorView: View {
     @StateObject private var viewModel: CursorThemeEditorViewModel
+    @EnvironmentObject private var router: MainWindowRouter
     @State private var isListDropTargeted = false
     @State private var editorWindow: NSWindow?
-    @State private var sidebarLayout =
-        EditThemeSidebarLayout(rawValue: MACPreferences.advancedEditorLayout) ?? .list
+    @State private var sidebarLayout: EditThemeSidebarLayout
     @State private var showAllSlots = false
+    @State private var showsCursorIdentifiers: Bool
     @State private var sidebarSearchText = ""
     @State private var metadataFieldsEnabled = false
     @State private var hasPendingFieldEdit = false
+    @State private var columnVisibility = NavigationSplitViewVisibility.all
+    private let showsPageBar: Bool
+    private let preferences: MACPreferences.Operations
 
-    init(cursorTheme: CursorThemeModel) {
+    init(cursorTheme: CursorThemeModel, showsPageBar: Bool = false, preferences: MACPreferences.Operations = .live) {
         self._viewModel = StateObject(wrappedValue: CursorThemeEditorViewModel(cursorTheme: cursorTheme))
+        self._sidebarLayout = State(initialValue: EditThemeSidebarLayout(rawValue: MACPreferences.advancedEditorLayout(operations: preferences)) ?? .grid)
+        self._showsCursorIdentifiers = State(initialValue: MACPreferences.flag(MACPreferences.showCursorIdentifiersKey, operations: preferences))
+        self.showsPageBar = showsPageBar
+        self.preferences = preferences
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            themeMetadataSection
-                .disabled(!metadataFieldsEnabled)
+        NavigationSplitView(columnVisibility: $columnVisibility) {
+            Group {
+                if showsPageBar {
+                    cursorListPane
+                        .toolbarTitleItem("MaCursor")
+                        .toolbar {
+                            ToolbarItem {
+                                Button { router.back() } label: {
+                                    Label("Back", systemImage: "chevron.backward")
+                                }
+                                .help("Back")
+                            }
+                        }
+                } else {
+                    cursorListPane
+                }
+            }
+            .background(Color(nsColor: .textBackgroundColor))
+            .sidebarToggleRemoved()
+            .navigationSplitViewColumnWidth(min: 310, ideal: 330, max: 380)
+        } detail: {
+            VStack(alignment: .leading, spacing: 0) {
+                themeMetadataSection
+                    .disabled(!metadataFieldsEnabled)
 
-            Divider()
-
-            HSplitView {
-                cursorListPane
-                    .frame(minWidth: 310, idealWidth: 330, maxWidth: 380)
+                Divider().overlay(Color.editThemeLine)
 
                 cursorDetailPane
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .onChangeCompat(of: columnVisibility) { newValue in
+            if newValue != .all {
+                columnVisibility = .all
+            }
+        }
+        .environment(\.showsCursorIdentifiers, showsCursorIdentifiers)
+        .onReceive(NotificationCenter.default.publisher(for: .cursorIdentifiersChanged)) { _ in
+            showsCursorIdentifiers = MACPreferences.flag(MACPreferences.showCursorIdentifiersKey, operations: preferences)
         }
         .environment(\.numericFieldPendingEdit) { pending in
             DispatchQueue.main.async {
@@ -37,13 +70,19 @@ struct CursorThemeEditorView: View {
             }
         }
         .onAppear {
+            let window = $editorWindow
+            router.leaveEditor = { [weak viewModel] next in
+                guard let viewModel else { return next() }
+                window.wrappedValue?.makeFirstResponder(nil)
+                viewModel.leave(then: next)
+            }
             DispatchQueue.main.async {
                 metadataFieldsEnabled = true
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(ToolbarConfigurator())
         .toolbar {
+            ToolbarItem(placement: .cancellationAction) { Spacer() }
             ToolbarItem(placement: .confirmationAction) {
                 Button("Save") {
                     commitPendingEdits()
@@ -55,17 +94,11 @@ struct CursorThemeEditorView: View {
             }
 
             ToolbarItem(placement: .cancellationAction) {
-                Button("Close") {
-                    commitPendingEdits()
-                    if viewModel.isDirty {
-                        viewModel.isShowingUnsavedAlert = true
-                    } else {
-                        closeWindow()
-                    }
-                }
-                .keyboardShortcut(.cancelAction)
+                Button("Close") { router.back() }
+                    .keyboardShortcut(.cancelAction)
             }
         }
+        .toolbarTitleItem("Edit Theme", placement: .cancellationAction)
         .alert("Unsaved Changes", isPresented: $viewModel.isShowingUnsavedAlert) {
             Button("Save") {
                 if let error = viewModel.save() {
@@ -73,26 +106,21 @@ struct CursorThemeEditorView: View {
                         NSApp.presentError(error)
                     }
                 } else {
-                    closeWindow()
+                    viewModel.finishLeave()
                 }
             }
             Button("Discard", role: .destructive) {
                 viewModel.revertToSaved()
-                closeWindow()
+                viewModel.finishLeave()
             }
-            Button("Cancel", role: .cancel) { }
+            Button("Cancel", role: .cancel) { viewModel.cancelLeave() }
         } message: {
             Text("Your changes will be discarded if you don't save them.")
         }
         .background(WindowAccessor(window: $editorWindow, onCloseAttempt: {
-            commitPendingEdits()
-            if viewModel.isDirty {
-                viewModel.isShowingUnsavedAlert = true
-                return false
-            }
-            return true
+            router.back()
+            return false
         }))
-        .background(WindowRoleAccessor(role: .modal))
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { note in
             if let window = editorWindow, note.object as? NSWindow === window { viewModel.close() }
         }
@@ -100,10 +128,6 @@ struct CursorThemeEditorView: View {
             guard let window else { return }
             redirectInitialFocus(in: window)
         }
-    }
-
-    private func closeWindow() {
-        editorWindow?.close()
     }
 
     private func commitPendingEdits() {
@@ -122,7 +146,7 @@ struct CursorThemeEditorView: View {
     }
 
     private func releaseSpontaneousTextFocus(in window: NSWindow) {
-        guard window.firstResponder is NSTextView,
+        guard window.firstResponder is NSTextView || window.firstResponder === window,
               let content = window.contentView else { return }
         if let table = firstDescendant(ofType: NSTableView.self, in: content) {
             window.makeFirstResponder(table)
@@ -177,6 +201,7 @@ struct CursorThemeEditorView: View {
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
+        .frame(minHeight: 40)
         .background(.bar)
     }
 
@@ -215,13 +240,13 @@ struct CursorThemeEditorView: View {
                 .fixedSize()
                 .onChangeCompat(of: sidebarLayout) { newLayout in
                     MACPreferences.set(newLayout.rawValue,
-                                       forKey: MACPreferences.advancedEditorLayoutKey)
+                                       forKey: MACPreferences.advancedEditorLayoutKey, operations: preferences)
                 }
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
 
-            Divider()
+            Divider().overlay(Color.editThemeLine)
 
             Group {
                 if sidebarRows.isEmpty && !trimmedSearchText.isEmpty {
@@ -237,7 +262,7 @@ struct CursorThemeEditorView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            Divider()
+            Divider().overlay(Color.editThemeLine)
 
             HStack(spacing: 4) {
                 Toggle(NSLocalizedString("Show All", comment: "Show all slots checkbox"),
@@ -279,7 +304,6 @@ struct CursorThemeEditorView: View {
             .frame(minHeight: 24)
             .padding(.horizontal, 12)
             .padding(.vertical, 4)
-            .background(.bar)
         }
         .onChangeCompat(of: showAllSlots) { showing in
             if !showing, viewModel.selectedEmptySlotIdentifier != nil {
@@ -335,17 +359,18 @@ struct CursorThemeEditorView: View {
                 } else {
                     ZStack {
                         RoundedRectangle(cornerRadius: 6)
-                            .fill(.quaternary.opacity(0.4))
+                            .fill(Color.editThemeTile)
                         Image(systemName: "plus")
                             .font(.system(size: 11))
                             .foregroundStyle(.tertiary)
                     }
                     .frame(width: 24, height: 24)
                 }
-                VStack(alignment: .leading, spacing: 1) {
+                CursorNameLines(shown: showsCursorIdentifiers || cursor.identifier.isEmpty) {
                     Text(cursor.name)
                         .lineLimit(1)
                         .font(.system(size: 12, weight: .medium))
+                } identifier: {
                     Text(cursor.cursorTypeName)
                         .lineLimit(1)
                         .font(.system(size: 10))
@@ -439,13 +464,57 @@ struct CursorThemeEditorView: View {
                 )
             }
         }
-        .frame(minWidth: 380, idealWidth: 500, maxWidth: .infinity, maxHeight: .infinity)
+        .frame(minWidth: 446, idealWidth: 500, maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(nsColor: .textBackgroundColor))
+    }
+}
+
+private struct ShowsCursorIdentifiersKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    fileprivate var showsCursorIdentifiers: Bool {
+        get { self[ShowsCursorIdentifiersKey.self] }
+        set { self[ShowsCursorIdentifiersKey.self] = newValue }
+    }
+}
+
+private struct CursorNameLines<Name: View, Identifier: View>: View {
+    let shown: Bool
+    let alignment: Alignment
+    let spacing: CGFloat
+    let name: Name
+    let identifier: Identifier
+
+    init(shown: Bool, alignment: Alignment = .leading, spacing: CGFloat = 1,
+         @ViewBuilder name: () -> Name, @ViewBuilder identifier: () -> Identifier) {
+        self.shown = shown
+        self.alignment = alignment
+        self.spacing = spacing
+        self.name = name()
+        self.identifier = identifier()
+    }
+
+    var body: some View {
+        ZStack(alignment: alignment) {
+            VStack(alignment: alignment.horizontal, spacing: spacing) {
+                name
+                identifier
+            }
+            .opacity(shown ? 1 : 0)
+            .accessibilityHidden(!shown)
+            if !shown {
+                name
+            }
+        }
     }
 }
 
 private struct EmptySlotRowView: View {
     let identifier: String
     let displayName: String
+    @Environment(\.showsCursorIdentifiers) private var showsIdentifier
 
     private var identifierTail: String {
         identifier.replacingOccurrences(of: "com.apple.", with: "")
@@ -455,17 +524,18 @@ private struct EmptySlotRowView: View {
         HStack(spacing: 8) {
             ZStack {
                 RoundedRectangle(cornerRadius: 6)
-                    .fill(.quaternary.opacity(0.4))
+                    .fill(Color.editThemeTile)
                 Image(systemName: "plus")
                     .font(.system(size: 11))
                     .foregroundStyle(.tertiary)
             }
             .frame(width: 24, height: 24)
 
-            VStack(alignment: .leading, spacing: 1) {
+            CursorNameLines(shown: showsIdentifier) {
                 Text(displayName)
                     .font(.system(size: 12, weight: .medium))
                     .lineLimit(1)
+            } identifier: {
                 Text(identifierTail)
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
@@ -483,6 +553,7 @@ private struct CursorGridCellView: View {
     let onSelect: () -> Void
     let onDuplicate: () -> Void
     let onDelete: () -> Void
+    @Environment(\.showsCursorIdentifiers) private var showsIdentifier
 
     private var identifierTail: String {
         cursor.identifier.replacingOccurrences(of: "com.apple.", with: "")
@@ -492,7 +563,7 @@ private struct CursorGridCellView: View {
         VStack(spacing: 6) {
             ZStack {
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(.quaternary.opacity(0.4))
+                    .fill(Color.editThemeTile)
                 if cursor.hasRepresentations {
                     CursorThumbnailView(cursor: cursor, size: 60)
                         .padding(8)
@@ -506,13 +577,16 @@ private struct CursorGridCellView: View {
                 RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(isSelected ? Color.accentColor : .clear, lineWidth: 2)
             }
-            Text(cursor.name)
-                .font(.caption)
-                .lineLimit(1)
-            Text(identifierTail)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
+            CursorNameLines(shown: showsIdentifier, alignment: .top, spacing: 6) {
+                Text(cursor.name)
+                    .font(.caption)
+                    .lineLimit(1)
+            } identifier: {
+                Text(identifierTail)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture(perform: onSelect)
@@ -530,6 +604,7 @@ private struct EmptySlotCellView: View {
     let displayName: String
     var isSelected: Bool = false
     var onSelect: (() -> Void)? = nil
+    @Environment(\.showsCursorIdentifiers) private var showsIdentifier
 
     private var identifierTail: String {
         identifier.replacingOccurrences(of: "com.apple.", with: "")
@@ -539,7 +614,7 @@ private struct EmptySlotCellView: View {
         VStack(spacing: 6) {
             ZStack {
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(.quaternary.opacity(0.4))
+                    .fill(Color.editThemeTile)
                 Image(systemName: "plus")
                     .foregroundStyle(.tertiary)
             }
@@ -548,13 +623,16 @@ private struct EmptySlotCellView: View {
                 RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(isSelected ? Color.accentColor : .clear, lineWidth: 2)
             }
-            Text(displayName)
-                .font(.caption)
-                .lineLimit(1)
-            Text(identifierTail)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(1)
+            CursorNameLines(shown: showsIdentifier, alignment: .top, spacing: 6) {
+                Text(displayName)
+                    .font(.caption)
+                    .lineLimit(1)
+            } identifier: {
+                Text(identifierTail)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
         }
         .contentShape(Rectangle())
         .onTapGesture { onSelect?() }
@@ -567,6 +645,7 @@ private struct EmptySlotDetailView: View {
     let onAssign: (URL) -> Bool
 
     @State private var isDropTargeted = false
+    @Environment(\.showsCursorIdentifiers) private var showsIdentifier
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -574,9 +653,11 @@ private struct EmptySlotDetailView: View {
                 Text(CursorIdentifier.displayName(for: identifier))
                     .font(.title2)
                     .bold()
-                Text(identifier)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                if showsIdentifier {
+                    Text(identifier)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
 
             UnavailableContent(
@@ -624,7 +705,7 @@ private struct EmptySlotDetailView: View {
     }
 }
 
-private struct WindowAccessor: NSViewRepresentable {
+struct WindowAccessor: NSViewRepresentable {
     @Binding var window: NSWindow?
     var onCloseAttempt: () -> Bool
 
@@ -647,10 +728,17 @@ private struct WindowAccessor: NSViewRepresentable {
         installDelegate(on: nsView.window, coordinator: context.coordinator)
     }
 
+    static func dismantleNSView(_ nsView: NSView, coordinator: Coordinator) {
+        if let window = coordinator.window, window.delegate === coordinator {
+            window.delegate = coordinator.originalDelegate
+        }
+    }
+
     private func installDelegate(on window: NSWindow?, coordinator: Coordinator) {
         guard let window else { return }
         if window.delegate as? Coordinator !== coordinator {
-            coordinator.originalDelegate = window.delegate
+            coordinator.window = window
+            coordinator.originalDelegate = (window.delegate as? Coordinator)?.originalDelegate ?? window.delegate
             window.delegate = coordinator
         }
     }
@@ -658,6 +746,7 @@ private struct WindowAccessor: NSViewRepresentable {
     final class Coordinator: NSObject, NSWindowDelegate {
         var onCloseAttempt: () -> Bool
         weak var originalDelegate: (any NSWindowDelegate)?
+        weak var window: NSWindow?
 
         init(onCloseAttempt: @escaping () -> Bool) {
             self.onCloseAttempt = onCloseAttempt
@@ -667,16 +756,12 @@ private struct WindowAccessor: NSViewRepresentable {
             return onCloseAttempt()
         }
 
-        func windowWillClose(_ notification: Notification) {
-            originalDelegate?.windowWillClose?(notification)
+        override func responds(to aSelector: Selector!) -> Bool {
+            super.responds(to: aSelector) || originalDelegate?.responds(to: aSelector) == true
         }
 
-        func windowDidBecomeKey(_ notification: Notification) {
-            originalDelegate?.windowDidBecomeKey?(notification)
-        }
-
-        func windowDidResignKey(_ notification: Notification) {
-            originalDelegate?.windowDidResignKey?(notification)
+        override func forwardingTarget(for aSelector: Selector!) -> Any? {
+            originalDelegate
         }
     }
 }
@@ -685,6 +770,9 @@ struct ToolbarConfigurator: NSViewRepresentable {
     func makeNSView(context: Context) -> NSView {
         let view = NSView()
         DispatchQueue.main.async {
+            if let window = view.window {
+                window.titlebarAppearsTransparent = !OpaqueTitleBar.Marker.holds(window)
+            }
             if #available(macOS 15, *) {
                 view.window?.toolbar?.allowsDisplayModeCustomization = false
             }

@@ -50,6 +50,10 @@ final class MenuBarController: NSObject, NSPopoverDelegate {
         if popover != nil { MenuBarPanelModel.shared.reloadTrails() }
     }
 
+    func refreshHighlight() {
+        if popover != nil { MenuBarPanelModel.shared.reloadHighlight() }
+    }
+
     func refreshShaker() {
         if popover != nil { MenuBarPanelModel.shared.reloadShaker() }
     }

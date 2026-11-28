@@ -140,6 +140,23 @@ final class CursorBoardController {
         forget(history.clear(), in: store)
     }
 
+    func reloadHistory() {
+        guard let store, store.root != nil else { return }
+        let held = Set(history.items.map(\.id))
+        queue.async { [weak self] in
+            let items = store.load()
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    guard let self, self.store === store else { return }
+                    self.history.reload(items, held: held)
+                    self.prune()
+                    self.refresh()
+                    self.loadThumbnails()
+                }
+            }
+        }
+    }
+
     private func open(_ config: CursorBoardConfig) {
         let next = CursorBoardStore(config, support: Self.support)
         if next.root == nil { CursorBoardStore(root: Self.support.appendingPathComponent(CursorBoard.folder, isDirectory: true)).removeAll() }

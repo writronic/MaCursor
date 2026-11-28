@@ -126,7 +126,7 @@ final class FinderExtensionManager: ObservableObject {
         await run("/usr/bin/pluginkit", arguments)
     }
 
-    nonisolated private static func run(_ executable: String, _ arguments: [String]) async -> String? {
+    nonisolated static func run(_ executable: String, _ arguments: [String]) async -> String? {
         let process = Process()
         let pipe = Pipe()
         process.executableURL = URL(fileURLWithPath: executable)

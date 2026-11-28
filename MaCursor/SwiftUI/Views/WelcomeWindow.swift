@@ -77,7 +77,7 @@ final class WelcomeWindowController: NSWindowController, NSWindowDelegate, Obser
         guard sender.attachedSheet == nil else { return false }
         let alert = NSAlert()
         alert.messageText = String(localized: "Are you sure you want to close this window?")
-        alert.informativeText = String(localized: "You can change these features in Settings. This window opens again only after Reset All Settings.")
+        alert.informativeText = String(localized: "You can change these features in the main MaCursor window. This window opens again only after Reset All Settings.")
         alert.addButton(withTitle: String(localized: "Close"))
         alert.addButton(withTitle: String(localized: "Cancel")).keyEquivalent = "\u{1b}"
         alert.beginSheetModal(for: sender) { response in
@@ -101,6 +101,7 @@ private struct WelcomeView: View {
     @State private var translator = CursorTranslatorConfig.load()
     @State private var screenshot = CursorScreenshotConfig.load()
     @State private var trails = CursorTrailsConfig.load()
+    @State private var highlight = CursorHighlightConfig.load()
     @State private var menuBarIcon = MACPreferences.flag(MACPreferences.showMenuBarIconKey)
     @State private var shadow = MACPreferences.flag(MACPreferences.cursorShadowKey)
     @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
@@ -117,7 +118,7 @@ private struct WelcomeView: View {
         if manager.election == .elected { granted.insert(.finderExtension) }
         if manager.settings.hasFullDiskAccess { granted.insert(.fullDiskAccess) }
         let stored: [(WelcomeFeature, Bool)] = [
-            (.showMenuBarIcon, menuBarIcon), (.cursorTrails, trails.enabled), (.cursorShadow, shadow),
+            (.showMenuBarIcon, menuBarIcon), (.cursorTrails, trails.enabled), (.cursorHighlight, highlight.enabled), (.cursorShadow, shadow),
             (.focusOnHover, hover.enabled), (.cursorGestures, gestures.enabled), (.cursorShaker, shaker.enabled), (.cursorBoard, board.enabled),
             (.cursorTranslator, translator.enabled), (.cursorCapture, screenshot.enabled),
             (.rightClickMenu, RightClickMenuState.isOn(settings: manager.settings, election: manager.election)),
@@ -175,6 +176,7 @@ private struct WelcomeView: View {
         case .cursorTrails:
             var trails = CursorTrailsConfig.load()
             CursorTrailsConfig.tap(&trails)
+        case .cursorHighlight: CursorHighlightConfig.tap()
         case .cursorShadow: CursorSettingsView.setCursorShadow(!shadow, library: library)
         case .focusOnHover: AccessWindowController.tapFocusFollowsMouse(enabled: hover.enabled, trusted: usable)
         case .cursorGestures: AccessWindowController.tapCursorGestures(enabled: gestures.enabled, usable: usable)
@@ -255,6 +257,7 @@ private struct WelcomeView: View {
         translator = CursorTranslatorConfig.load()
         screenshot = CursorScreenshotConfig.load()
         trails = CursorTrailsConfig.load()
+        highlight = CursorHighlightConfig.load()
         menuBarIcon = MACPreferences.flag(MACPreferences.showMenuBarIconKey)
         shadow = MACPreferences.flag(MACPreferences.cursorShadowKey)
         trusted = FocusFollowsMouseConfig.accessibilityTrusted

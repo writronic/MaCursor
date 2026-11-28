@@ -13,19 +13,13 @@ struct ShortcutSettingsView: View {
                 HStack(spacing: 10) {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundStyle(.yellow)
-                        .font(.title3)
 
                     Text("Shortcuts require the Helper Tool to be installed. You can install it from General → Helper Tool.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
-                .padding(12)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(.yellow.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .strokeBorder(.yellow.opacity(0.25), lineWidth: 1)
-                )
+                .featureNotice()
                 .padding(.horizontal, 20)
                 .padding(.top, 16)
                 .padding(.bottom, 4)
@@ -101,7 +95,6 @@ struct ShortcutSettingsView: View {
             .padding(.vertical, 6)
             .disabled(!helperManager.isInstalled)
         }
-        .navigationTitle("Shortcut")
         .onAppear {
             loadSlots()
         }
@@ -126,7 +119,7 @@ struct ShortcutSettingsView: View {
     private func isShortcut(_ candidate: KeyboardShortcutData, takenByOtherThan id: UUID) -> Bool {
         slots.filter { $0.id != id }.compactMap(\.shortcut).contains {
             MACShortcutsCollide($0.keyCode, $0.modifierFlagsRaw, candidate.keyCode, candidate.modifierFlagsRaw)
-        }
+        } || CursorHighlightConfig.load().keys.contains { MACShortcutsCollide($0.keyCode, $0.modifierFlagsRaw, candidate.keyCode, candidate.modifierFlagsRaw) }
     }
 
     private func isShortcutShadowed(_ slot: FavoriteCursorSlot) -> Bool {
@@ -201,6 +194,7 @@ private struct SlotCardView: View {
                 .frame(maxWidth: .infinity, minHeight: 25, alignment: .leading)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            .searchAnchor("scTheme")
 
             Divider()
                 .frame(height: 32)
@@ -213,6 +207,7 @@ private struct SlotCardView: View {
                 KeyRecorderView(shortcut: $slot.shortcut, isTaken: isTaken, isShadowed: isShadowed)
             }
             .fixedSize(horizontal: true, vertical: false)
+            .searchAnchor("scKey")
         }
         .shortcutCard(selected: isSelected)
     }
@@ -269,7 +264,7 @@ struct KeyRecorderView: View {
             }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification,
-                                                        object: SettingsWindowController.shared.window)) { _ in
+                                                        object: ModalWindowCoordinator.shared.resolvedMainWindow)) { _ in
             stopRecording()
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in
@@ -309,7 +304,8 @@ struct KeyRecorderView: View {
             )
             guard event.specialKey == nil,
                   MACShortcutIsAllowed(candidate.modifierFlagsRaw, candidate.keyCode),
-                  !isTaken(candidate) else {
+                  !isTaken(candidate),
+                  !Self.heldElsewhere(candidate) else {
                 NSSound.beep()
                 return nil
             }
@@ -318,6 +314,11 @@ struct KeyRecorderView: View {
             stopRecording()
             return nil
         }
+    }
+
+    static func heldElsewhere(_ candidate: KeyboardShortcutData, capture: CursorScreenshotConfig = .load(), board: CursorBoardConfig = .load(),
+                              translator: CursorTranslatorConfig = .load()) -> Bool {
+        CursorScreenshot.refuses(candidate, held: capture.keys(besides: nil) + board.keys(besides: nil) + [translator.shortcut].compactMap { $0 })
     }
 
     private func stopRecording() {

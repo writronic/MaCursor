@@ -52,12 +52,14 @@ struct AboutSettingsView: View {
             Text("GPL-3.0")
                 .font(.system(size: 14))
                 .foregroundStyle(.tertiary)
-
-            Spacer()
         }
-        .padding(.top, 24)
+        .padding(.vertical, 32)
+        .frame(maxWidth: .infinity)
+        .background(Color.boxFill, in: RoundedRectangle(cornerRadius: FeaturePageLayout.cardRadius, style: .continuous))
+        .frame(maxWidth: FeaturePageLayout.formColumn)
+        .padding(.horizontal, FeaturePageLayout.sideMargin)
+        .padding(.top, FeaturePageLayout.formTopInset)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-        .navigationTitle("About")
     }
 }
 

@@ -34,21 +34,39 @@ extension View {
         }
     }
 
+    func toolbarTitleItem(_ title: LocalizedStringKey, placement: ToolbarItemPlacement = .automatic) -> some View {
+        toolbarTitleItem(Text(title), placement: placement)
+    }
+
     @ViewBuilder
-    func sidebarToggleRemoved() -> some View {
+    func toolbarTitleItem(_ title: Text, placement: ToolbarItemPlacement = .automatic, gap: CGFloat = 0) -> some View {
+        if #available(macOS 26, *) {
+            toolbar {
+                ToolbarItem(placement: placement) { title.font(.title3.weight(.semibold)).padding(.leading, gap) }
+                    .sharedBackgroundVisibility(.hidden)
+            }
+        } else {
+            toolbar {
+                ToolbarItem(placement: placement) { title.font(.headline) }
+            }
+        }
+    }
+
+    @ViewBuilder
+    func focusEffectDisabledCompat() -> some View {
         if #available(macOS 14, *) {
-            toolbar(removing: .sidebarToggle)
+            focusEffectDisabled()
         } else {
             self
         }
     }
 
     @ViewBuilder
-    func scrollContentTopMargin(_ length: CGFloat) -> some View {
+    func sidebarToggleRemoved() -> some View {
         if #available(macOS 14, *) {
-            contentMargins(.top, length, for: .scrollContent)
+            toolbar(removing: .sidebarToggle)
         } else {
-            safeAreaInset(edge: .top, spacing: 0) { Color.clear.frame(height: length) }
+            self
         }
     }
 }
@@ -99,11 +117,45 @@ extension NSWindow {
     }
 }
 
+extension NSWindow {
+    func useMacOS27Background() {
+        if #unavailable(macOS 27) { backgroundColor = .windowFill }
+    }
+}
+
+extension NSColor {
+    static var secondaryFill: NSColor {
+        if #available(macOS 14, *) {
+            return .secondarySystemFill
+        }
+        return .quaternaryLabelColor
+    }
+
+    static func fixedGrey(_ value: CGFloat) -> NSColor {
+        NSColor(srgbRed: value / 255, green: value / 255, blue: value / 255, alpha: 1)
+    }
+
+    static func olderMacOSLook(_ system: NSColor, light: NSColor, dark: NSColor,
+                               increaseContrast: @escaping () -> Bool = { NSWorkspace.shared.accessibilityDisplayShouldIncreaseContrast }) -> NSColor {
+        NSColor(name: nil) { appearance in
+            if increaseContrast() { return system }
+            return appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light
+        }
+    }
+
+    static func macOS27(_ system: NSColor, light: NSColor, dark: NSColor) -> NSColor {
+        if #available(macOS 27, *) { return system }
+        return olderMacOSLook(system, light: light, dark: dark)
+    }
+
+    static let windowFill = macOS27(.windowBackgroundColor, light: fixedGrey(255), dark: fixedGrey(30))
+}
+
 extension Color {
     static var quaternaryFill: Color {
         if #available(macOS 14, *) {
             return Color(nsColor: .quaternarySystemFill)
         }
-        return Color(nsColor: .quaternaryLabelColor)
+        return Color(nsColor: .olderMacOSLook(.quaternaryLabelColor, light: NSColor(srgbRed: 0, green: 0, blue: 0, alpha: 7 / 255), dark: NSColor(srgbRed: 1, green: 1, blue: 1, alpha: 7 / 255)))
     }
 }

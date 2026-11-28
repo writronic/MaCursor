@@ -105,6 +105,7 @@ struct CursorScreenshotHistoryView: View {
                     ForEach(model.items) { cell($0) }
                 }
                 .padding(12)
+                .overlayScrollers()
             }
         }
     }

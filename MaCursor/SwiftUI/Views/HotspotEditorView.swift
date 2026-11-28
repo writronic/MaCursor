@@ -9,7 +9,7 @@ struct HotspotEditorView: View {
             let image = displayImage
             let fitted = Self.fittedRect(imagePointSize: image?.size, in: geo.size)
             ZStack(alignment: .topLeading) {
-                CheckerboardTile()
+                RoundedRectangle(cornerRadius: 8).strokeBorder(Color.secondary, lineWidth: 2)
                 if let image {
                     Image(nsImage: image)
                         .resizable()
@@ -35,8 +35,8 @@ struct HotspotEditorView: View {
                         }
                     })
         }
-        .aspectRatio(1, contentMode: .fit)
-        .frame(maxWidth: 256, maxHeight: 256)
+        .frame(width: 160, height: 160)
+        .environment(\.layoutDirection, .leftToRight)
     }
 
     private var displayImage: NSImage? {
@@ -73,21 +73,5 @@ struct HotspotMarker: View {
             Circle().fill(.red.opacity(0.55)).frame(width: 9, height: 9)
             Circle().fill(.blue).frame(width: 2.5, height: 2.5)
         }
-    }
-}
-
-struct CheckerboardTile: View {
-    var body: some View {
-        Canvas { context, size in
-            let tile: CGFloat = 8
-            for row in 0..<Int(ceil(size.height / tile)) {
-                for col in 0..<Int(ceil(size.width / tile)) where (row + col).isMultiple(of: 2) {
-                    context.fill(Path(CGRect(x: CGFloat(col) * tile, y: CGFloat(row) * tile,
-                                             width: tile, height: tile)),
-                                 with: .color(.gray.opacity(0.25)))
-                }
-            }
-        }
-        .background(.gray.opacity(0.1))
     }
 }

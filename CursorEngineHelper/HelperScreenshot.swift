@@ -257,13 +257,24 @@ final class CursorScreenshotController {
         pictures = CursorScreenshotPictures(screens.map { screen in
             (Self.displayID(screen), { @MainActor [self] in
                 await handingBack?.value
-                return try? await Self.shot(of: screen, showsCursor: false, hidesDesktopIcons: config.hidesDesktopIcons)
+                return try? await Self.shot(of: screen, showsCursor: false, hidesDesktopIcons: config.hidesDesktopIcons, keepsHighlight: !readsText)
             })
-        }, freezes: config.freezesScreen, arrived: { shown.freeze($1, on: $0) }, settled: { [self] any in
-            guard !any else { return takeFront() }
-            closeOverlay()
-            NSSound.beep()
+        }, freezes: config.freezesScreen, arrived: { shown.freeze($1, on: $0) }, settled: { [self] complete in
+            guard complete else {
+                closeOverlay()
+                NSSound.beep()
+                return
+            }
+            takeFront()
         })
+        if #available(macOS 14, *) {
+            Task { [weak shown] in
+                guard let content = try? await CursorTranslatorOnce.within(CursorScreenshot.limit, { try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true) }) else { return }
+                let ids = Set(windows.map(\.id))
+                let areas = Dictionary(content.windows.filter { ids.contains($0.windowID) }.map { ($0.windowID, SCContentFilter(desktopIndependentWindow: $0).contentRect) }, uniquingKeysWith: { first, _ in first })
+                shown?.list(CursorScreenshotWindows.families(windows, content: areas, primaryHeight: NSScreen.screens.first?.frame.height ?? 0))
+            }
+        }
         guard !config.freezesScreen, config.crosshair.mode != .disabled, config.crosshair.showsMagnifier else { return }
         screens.forEach { screen in
             let display = Self.displayID(screen)
@@ -489,8 +500,9 @@ final class CursorScreenshotController {
         }
     }
 
-    private static func shot(of screen: NSScreen, showsCursor: Bool, hidesDesktopIcons: Bool) async throws -> CGImage {
+    private static func shot(of screen: NSScreen, showsCursor: Bool, hidesDesktopIcons: Bool, keepsHighlight: Bool = true) async throws -> CGImage {
         let display = displayID(screen)
+        let levels = Dictionary(NSApp.windows.map { ($0.windowNumber, $0.level.rawValue) }, uniquingKeysWith: { first, _ in first })
         let content = try await CursorTranslatorOnce.within(CursorScreenshot.limit) { try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: false) }
         try Task.checkCancellation()
         guard let shown = content.displays.first(where: { $0.displayID == display }) else { throw CocoaError(.featureUnsupported) }
@@ -500,7 +512,7 @@ final class CursorScreenshotController {
         let own = content.applications.filter { left.contains($0.processID) }
         let kept = content.windows.filter { window in
             guard let owner = window.owningApplication?.processID, left.contains(owner) else { return false }
-            return owner == me ? !CursorScreenshotWindows.isChrome(layer: window.windowLayer) : !hidden.contains { $0.windowID == window.windowID }
+            return owner == me ? !CursorScreenshotWindows.isChrome(layer: window.windowLayer, appKitLevel: levels[Int(window.windowID)], keepsHighlight: keepsHighlight) : !hidden.contains { $0.windowID == window.windowID }
         }
         let filter = SCContentFilter(display: shown, excludingApplications: own, exceptingWindows: kept)
         let configuration = SCStreamConfiguration()
@@ -526,14 +538,17 @@ final class CursorScreenshotController {
         configuration.showsCursor = false
         configuration.scalesToFit = false
         let shadowed: Bool
+        let drawn: CGRect?
         if #available(macOS 14, *) {
             configuration.ignoreShadowsSingleWindow = !shadow
             shadowed = shadow
+            drawn = filter.contentRect
         } else {
             shadowed = false
+            drawn = nil
         }
         let pad = shadowed ? CursorScreenshotWindows.shadowPadding : 0
-        let size = CursorTranslator.pixels(CGRect(origin: .zero, size: target.frame.size).insetBy(dx: -pad, dy: -pad), scale: screen.backingScaleFactor)
+        let size = CursorScreenshotWindows.pictureSize(of: target.frame, content: drawn, pad: pad, scale: screen.backingScaleFactor)
         configuration.width = size.width
         configuration.height = size.height
         let image: CGImage
@@ -551,7 +566,7 @@ struct CursorScreenshotStill {
     let frame: CGRect
     var width: Int
     var height: Int
-    let windows: [CursorScreenshotWindow]
+    var windows: [CursorScreenshotWindow]
     var remembered: CGRect? = nil
 }
 
@@ -813,6 +828,10 @@ final class CursorScreenshotOverlayView: NSView {
         redraw()
     }
 
+    func list(_ windows: [CursorScreenshotWindow]) {
+        still.windows = windows
+    }
+
     func takeWindow(at point: CGPoint) {
         hover(at: point)
         if let windowPick { done(windowPick) }
@@ -962,6 +981,10 @@ final class CursorScreenshotOverlay {
         panels.first { $0.view.display == display }?.view.magnify(picture)
     }
 
+    func list(_ windows: [CursorScreenshotWindow]) {
+        panels.forEach { $0.view.list(windows) }
+    }
+
     private func switchMode() {
         picksWindows.toggle()
         panels.forEach { $0.view.pickWindows(picksWindows) }
@@ -1075,7 +1098,7 @@ final class CursorScreenshotCountdown {
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = true
-        panel.level = NSWindow.Level(rawValue: NSWindow.Level.popUpMenu.rawValue + 1)
+        panel.level = NSWindow.Level(rawValue: NSWindow.Level.screenSaver.rawValue + 1)
         panel.ignoresMouseEvents = true
         panel.canHide = false
         panel.hidesOnDeactivate = false

@@ -334,6 +334,91 @@ struct LimitedLengthTextField: NSViewRepresentable {
     }
 }
 
+struct GesturePlainTextView: NSViewRepresentable {
+    let text: String
+    let set: (String) -> Void
+    let cancel: () -> Void
+
+    func makeNSView(context: Context) -> NSScrollView {
+        context.coordinator.makeView()
+    }
+
+    func updateNSView(_ scroll: NSScrollView, context: Context) {
+        context.coordinator.set = set
+        context.coordinator.cancel = cancel
+        context.coordinator.show(text, in: scroll)
+    }
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(set: set, cancel: cancel)
+    }
+
+    @MainActor
+    final class Coordinator: NSObject, NSTextViewDelegate {
+        var set: (String) -> Void
+        var cancel: () -> Void
+        private let undo = UndoManager()
+        private weak var view: NSTextView?
+
+        init(set: @escaping (String) -> Void, cancel: @escaping () -> Void) {
+            self.set = set
+            self.cancel = cancel
+            super.init()
+            NotificationCenter.default.addObserver(self, selector: #selector(undone), name: .NSUndoManagerDidUndoChange, object: undo)
+            NotificationCenter.default.addObserver(self, selector: #selector(undone), name: .NSUndoManagerDidRedoChange, object: undo)
+        }
+
+        @objc private func undone() {
+            guard let view else { return }
+            set(view.string)
+        }
+
+        func makeView() -> NSScrollView {
+            let scroll = NSTextView.scrollableTextView()
+            scroll.drawsBackground = false
+            if let view = scroll.documentView as? NSTextView {
+                view.isRichText = false
+                view.allowsUndo = true
+                view.drawsBackground = false
+                view.font = .systemFont(ofSize: NSFont.systemFontSize)
+                view.isAutomaticQuoteSubstitutionEnabled = false
+                view.isAutomaticDashSubstitutionEnabled = false
+                view.isAutomaticTextReplacementEnabled = false
+                view.isAutomaticSpellingCorrectionEnabled = false
+                view.delegate = self
+                self.view = view
+            }
+            return scroll
+        }
+
+        func show(_ text: String, in scroll: NSScrollView) {
+            guard let view = scroll.documentView as? NSTextView, view.string != text else { return }
+            view.string = text
+            undo.removeAllActions()
+        }
+
+        func undoManager(for view: NSTextView) -> UndoManager? {
+            undo
+        }
+
+        func textView(_ view: NSTextView, doCommandBy selector: Selector) -> Bool {
+            guard selector == #selector(NSResponder.cancelOperation(_:)) || selector == #selector(NSResponder.complete(_:)) else { return false }
+            cancel()
+            return true
+        }
+
+        func textDidChange(_ notification: Notification) {
+            guard let view = notification.object as? NSTextView else { return }
+            set(view.string)
+        }
+
+        func textViewDidChangeSelection(_ notification: Notification) {
+            guard let view = notification.object as? NSTextView, view.hasMarkedText() else { return }
+            set(view.string)
+        }
+    }
+}
+
 private struct NumericFieldPendingEditKey: EnvironmentKey {
     static var defaultValue: @MainActor (Bool) -> Void { { _ in } }
 }

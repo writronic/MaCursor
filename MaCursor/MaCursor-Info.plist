@@ -16,6 +16,18 @@
 				<string>com.writronic.macursor.cursor</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>MaCursor Settings</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.writronic.macursor.settings</string>
+			</array>
+		</dict>
 	</array>
 	<key>NSAppTransportSecurity</key>
 	<dict>
@@ -26,6 +38,8 @@
 	<string>6.0</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>MACGalleryIndexURL</key>
+	<string>$(GALLERY_INDEX_URL)</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2026 Writronic. All rights reserved.</string>
 	<key>SUFeedURL</key>
@@ -53,6 +67,24 @@
 				<key>public.filename-extension</key>
 				<array>
 					<string>cursor</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+				<string>public.content</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>MaCursor Settings</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.writronic.macursor.settings</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>macursor</string>
 				</array>
 			</dict>
 		</dict>

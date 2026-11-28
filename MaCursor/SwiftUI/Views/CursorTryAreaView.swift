@@ -76,7 +76,7 @@ struct CursorTryAreaView: View {
 
     private var tryArea: some View {
         ZStack {
-            GeometryReader { geo in
+            GeometryReader { _ in
                 HStack(spacing: 0) {
                     Rectangle().fill(.white)
                     Rectangle().fill(.black)
@@ -84,16 +84,9 @@ struct CursorTryAreaView: View {
                 if let clickPoint {
                     Bullseye().position(clickPoint)
                 }
-                Text(NSLocalizedString("Hover to try the cursor — click to check the hotspot",
-                                       comment: "Try area hint"))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(4)
-                    .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 6))
-                    .position(x: geo.size.width / 2, y: geo.size.height - 14)
             }
         }
-        .frame(height: 120)
+        .frame(height: 132)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .overlay(RoundedRectangle(cornerRadius: 8).strokeBorder(.quaternary))
     }

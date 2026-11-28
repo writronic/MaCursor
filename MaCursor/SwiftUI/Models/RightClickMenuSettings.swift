@@ -164,6 +164,8 @@ enum RightClickMenuGroup: String, CaseIterable {
 
 enum RightClickMenuSwitch: String, CaseIterable {
     case copyPath
+    case cut
+    case pasteHere
     case hideSelected
     case unhideSelected
     case hideAll
@@ -172,6 +174,8 @@ enum RightClickMenuSwitch: String, CaseIterable {
     var keyPath: WritableKeyPath<RightClickMenuSettings, Bool> {
         switch self {
         case .copyPath: return \.copyPathEnabled
+        case .cut: return \.cutEnabled
+        case .pasteHere: return \.pasteHereEnabled
         case .hideSelected: return \.hideSelectedFilesEnabled
         case .unhideSelected: return \.unhideSelectedFilesEnabled
         case .hideAll: return \.hideAllFilesInPathEnabled
@@ -182,6 +186,8 @@ enum RightClickMenuSwitch: String, CaseIterable {
     var title: String {
         switch self {
         case .copyPath: return String(localized: "Copy Path")
+        case .cut: return String(localized: "Cut")
+        case .pasteHere: return String(localized: "Paste Here")
         case .hideSelected: return String(localized: "Hide Selected File(s)")
         case .unhideSelected: return String(localized: "Unhide Selected Files")
         case .hideAll: return String(localized: "Hide All Files in Path")
@@ -192,6 +198,8 @@ enum RightClickMenuSwitch: String, CaseIterable {
     var symbolName: String {
         switch self {
         case .copyPath: return "doc.on.doc"
+        case .cut: return "scissors"
+        case .pasteHere: return "doc.on.clipboard"
         case .hideSelected, .hideAll: return "eye.slash"
         case .unhideSelected, .unhideAll: return "eye"
         }
@@ -205,7 +213,7 @@ enum RightClickMenuItem: Hashable, Encodable {
     case file(RightClickMenuFile)
 
     static var defaultOrder: [RightClickMenuItem] {
-        [.group(.openWith), .action(.copyPath), .group(.newFile), .group(.commonApps),
+        [.group(.openWith), .action(.copyPath), .action(.cut), .action(.pasteHere), .group(.newFile), .group(.commonApps),
          .action(.hideSelected), .action(.unhideSelected), .action(.hideAll), .action(.unhideAll)]
     }
 
@@ -238,9 +246,9 @@ enum RightClickMenuItem: Hashable, Encodable {
 
     func shows(in context: RightClickMenuContext) -> Bool {
         switch self {
-        case .group(.openWith), .application(.openWith, _), .action(.hideSelected), .action(.unhideSelected):
+        case .group(.openWith), .application(.openWith, _), .action(.cut), .action(.hideSelected), .action(.unhideSelected):
             return context == .items
-        case .action(.hideAll), .action(.unhideAll):
+        case .action(.pasteHere), .action(.hideAll), .action(.unhideAll):
             return context == .container
         default:
             return true
@@ -269,6 +277,8 @@ struct RightClickMenuSettings: Codable, Equatable {
     var isEnabled = false
     var hasFullDiskAccess = false
     var copyPathEnabled = true
+    var cutEnabled = true
+    var pasteHereEnabled = true
     var hideSelectedFilesEnabled = false
     var unhideSelectedFilesEnabled = false
     var hideAllFilesInPathEnabled = false
@@ -349,10 +359,13 @@ struct RightClickMenuSettings: Codable, Equatable {
          commonApps: [RightClickMenuAppRow] = [RightClickMenuAppRow(bundleIdentifier: "com.apple.Terminal", addToMainMenu: true)],
          hideSelectedFilesEnabled: Bool = false, unhideSelectedFilesEnabled: Bool = false,
          hideAllFilesInPathEnabled: Bool = false, unhideAllFilesInPathEnabled: Bool = false,
+         cutEnabled: Bool = true, pasteHereEnabled: Bool = true,
          menuOrder: [RightClickMenuItem] = RightClickMenuItem.defaultOrder) {
         self.isEnabled = isEnabled
         self.hasFullDiskAccess = hasFullDiskAccess
         self.copyPathEnabled = copyPathEnabled
+        self.cutEnabled = cutEnabled
+        self.pasteHereEnabled = pasteHereEnabled
         self.hideSelectedFilesEnabled = hideSelectedFilesEnabled
         self.unhideSelectedFilesEnabled = unhideSelectedFilesEnabled
         self.hideAllFilesInPathEnabled = hideAllFilesInPathEnabled
@@ -369,6 +382,8 @@ struct RightClickMenuSettings: Codable, Equatable {
         isEnabled = try container.decodeIfPresent(Bool.self, forKey: .isEnabled) ?? false
         hasFullDiskAccess = try container.decodeIfPresent(Bool.self, forKey: .hasFullDiskAccess) ?? false
         copyPathEnabled = try container.decodeIfPresent(Bool.self, forKey: .copyPathEnabled) ?? true
+        cutEnabled = try container.decodeIfPresent(Bool.self, forKey: .cutEnabled) ?? true
+        pasteHereEnabled = try container.decodeIfPresent(Bool.self, forKey: .pasteHereEnabled) ?? true
         hideSelectedFilesEnabled = try container.decodeIfPresent(Bool.self, forKey: .hideSelectedFilesEnabled) ?? false
         unhideSelectedFilesEnabled = try container.decodeIfPresent(Bool.self, forKey: .unhideSelectedFilesEnabled) ?? false
         hideAllFilesInPathEnabled = try container.decodeIfPresent(Bool.self, forKey: .hideAllFilesInPathEnabled) ?? false

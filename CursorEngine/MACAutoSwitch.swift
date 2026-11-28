@@ -140,8 +140,12 @@ struct MACAutoSwitchEffects {
         DistributedNotificationCenter.default().postNotificationName(.MACAutoSwitchAppliedThemeDidChange,
                                                                      object: nil, userInfo: nil, deliverImmediately: true)
     }
+    static func refreshWindowFrame(at point: NSPoint) -> NSRect {
+        NSRect(x: point.x - 1, y: point.y - 1, width: 2, height: 2)
+    }
+
     var showRefreshWindow: @MainActor () -> Void = {
-        let window = NSWindow(contentRect: NSRect(origin: NSEvent.mouseLocation, size: NSSize(width: 1, height: 1)),
+        let window = NSWindow(contentRect: MACAutoSwitchEffects.refreshWindowFrame(at: NSEvent.mouseLocation),
                               styleMask: .borderless, backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.isOpaque = false

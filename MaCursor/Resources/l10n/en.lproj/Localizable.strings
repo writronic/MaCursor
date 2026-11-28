@@ -33,9 +33,6 @@
 /* Button: add new theme */
 "Add Theme" = "Add Theme";
 
-/* Section: animation settings */
-"Animation" = "Animation";
-
 /* Label: appearance picker */
 "Appearance" = "Appearance";
 
@@ -103,10 +100,6 @@
 
 /* Undo suffix: cursor type */
 "cursor type" = "cursor type";
-
-/* Label: cursor type picker */
-"Cursor Type:" = "Cursor Type:";
-
 /* Appearance mode: dark */
 "Dark" = "Dark";
 
@@ -137,16 +130,8 @@
 
 /* Undo suffix: frame count */
 "frame count" = "frame count";
-
-/* Label: frame count */
-"Frame Count:" = "Frame Count:";
-
 /* Undo suffix: frame duration */
 "frame duration" = "frame duration";
-
-/* Label: frame duration */
-"Frame Duration:" = "Frame Duration:";
-
 /* Settings tab: general */
 "General" = "General";
 
@@ -161,10 +146,6 @@
 
 /* Checkbox: HiDPI cursors */
 "HiDPI" = "HiDPI";
-
-/* Section: hot spot coordinates */
-"Hot Spot" = "Hot Spot";
-
 /* Undo suffix: hotspot */
 "hotspot" = "hotspot";
 
@@ -347,13 +328,6 @@
 
 /* Link: website */
 "Visit Website" = "Visit Website";
-
-/* Label: hotspot X coordinate */
-"X:" = "X:";
-
-/* Label: hotspot Y coordinate */
-"Y:" = "Y:";
-
 /* Alert message: unsaved changes */
 "Your changes will be discarded if you don't save them." = "Your changes will be discarded if you don't save them.";
 
@@ -724,9 +698,6 @@
 /* Welcome window: heading of the last page */
 "You’re All Set" = "You’re All Set";
 
-/* Welcome window: text of the last page */
-"You can change any of this later in Settings." = "You can change any of this later in Settings.";
-
 /* Welcome window: text of the Helper Tool page */
 "The Helper Tool starts when you log in. It keeps your cursors after a restart and runs most features on the next pages. Install it now, or later in Settings → General." = "The Helper Tool starts when you log in. It keeps your cursors after a restart and runs most features on the next pages. Install it now, or later in Settings → General.";
 
@@ -735,9 +706,6 @@
 
 /* Welcome window: title of the warning shown before the window closes */
 "Are you sure you want to close this window?" = "Are you sure you want to close this window?";
-
-/* Welcome window: text of the warning shown before the window closes */
-"You can change these features in Settings. This window opens again only after Reset All Settings." = "You can change these features in Settings. This window opens again only after Reset All Settings.";
 
 /* Alert title when a chosen or dropped file cannot become a cursor or slot image */
 "Could Not Use File" = "Could Not Use File";
@@ -926,9 +894,6 @@
 /* Warning under the Cursor Trails switch when the helper is missing */
 "Cursor Trails requires the Helper Tool. You can install it from General → Helper Tool." = "Cursor Trails requires the Helper Tool. You can install it from General → Helper Tool.";
 
-/* Caption under the Cursor Trails switch; "Reduce motion" is the macOS Accessibility → Display setting, use the system's own name */
-"A trail follows the cursor as it moves and fades when it stops. The trail stays hidden while Reduce motion is on." = "A trail follows the cursor as it moves and fades when it stops. The trail stays hidden while Reduce motion is on.";
-
 /* Label of the slider that sets how long the cursor trail is */
 "Length" = "Length";
 
@@ -995,14 +960,11 @@
 /* Grey note under the greyed-out Use Graphics Hardware switch on a Mac without Metal graphics */
 "This Mac has no Metal graphics, so the processor draws the trail." = "This Mac has no Metal graphics, so the processor draws the trail.";
 
-/* Label of the pop-up menu above the trail Length slider; it picks how the trail is drawn: Line or Soft Dots */
+/* Label of the pop-up menu above the trail Length slider; it picks how the trail is drawn: Line, Echoes or a particle style */
 "Style" = "Style";
 
 /* Trail style: one smooth line that follows the pointer */
 "Line" = "Line";
-
-/* Trail style: soft round dots that drift behind the pointer */
-"Soft Dots" = "Soft Dots";
 
 /* Switch under the trail Width slider: while the pointer rests, a soft round glow in the card's colours stays under it until the pointer moves */
 "Glow when still" = "Glow when still";
@@ -1295,9 +1257,7 @@
 "What It Does" = "What It Does";
 "Keyboard Shortcut" = "Keyboard Shortcut";
 "Typed Text" = "Typed Text";
-"Website" = "Website";
 "Pick an App…" = "Pick an App…";
-"Website Address" = "Website Address";
 /* Cursor Gestures action sheet: limit of the text an action types */
 "Up to 500 characters." = "Up to 500 characters.";
 /* Cursor Gestures action sheet: shown next to the shortcut button while it records */
@@ -1397,7 +1357,6 @@
 "Allow Screen Recording" = "Allow Screen Recording";
 "Download the languages you read in Language & Region → Translation Languages…, so Apple Translation can use them." = "Download the languages you read in Language & Region → Translation Languages…, so Apple Translation can use them.";
 "A Cursor Gestures trigger uses the same keys and button. Cursor Translator takes it." = "A Cursor Gestures trigger uses the same keys and button. Cursor Translator takes it.";
-"Hold a key with the right button, so normal right-clicks still work." = "Hold a key with the right button, so normal right-clicks still work.";
 "MaCursorHelper needs Accessibility access to see the trigger click and to keep the right-click menu of the app closed. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility." = "MaCursorHelper needs Accessibility access to see the trigger click and to keep the right-click menu of the app closed. Choose Allow for Accessibility, then turn on MaCursorHelper in Privacy & Security → Accessibility.";
 "MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "MaCursor needs Screen Recording access to read the text inside the frame. Nothing is saved, and the text goes only to the Translation Service you choose. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording.";
 "Needs Screen Recording access" = "Needs Screen Recording access";
@@ -1406,7 +1365,6 @@
 "Needs Screen Recording" = "Needs Screen Recording";
 "Cannot read the screen" = "Cannot read the screen";
 "Could not read the text. Trying again…" = "Could not read the text. Trying again…";
-"Language not downloaded. Open Settings › Cursor Translator › Translation Languages…" = "Language not downloaded. Open Settings › Cursor Translator › Translation Languages…";
 "Translation is not available" = "Translation is not available";
 "No text here" = "No text here";
 /* Cursor Translator: name tag of the frame; %1$@ is the language of the text on screen, %2$@ the language it is translated to (for example “Japanese → English”) */
@@ -1428,8 +1386,6 @@
 "Server Address" = "Server Address";
 "Not needed for a local server" = "Not needed for a local server";
 /* Cursor Translator: short messages in the name tag when an online service cannot translate; %@ is the service name, for example “DeepL refused the key” */
-"Add your %@ key in Settings › Cursor Translator" = "Add your %@ key in Settings › Cursor Translator";
-"Add the server address in Settings › Cursor Translator" = "Add the server address in Settings › Cursor Translator";
 "%@ refused the key" = "%@ refused the key";
 "No connection" = "No connection";
 "%@ could not translate" = "%@ could not translate";
@@ -1783,9 +1739,6 @@
 "MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them." = "MaCursor gives you control over system cursors on macOS. On the next pages you can turn on extra features, or skip them.";
 "Cursor Look" = "Cursor Look";
 "When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied." = "When enabled, a soft drop shadow is drawn under the cursor. The shadow appears while a cursor theme is applied.";
-"Cursor Canvas Padding" = "Cursor Canvas Padding";
-"Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork." = "Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork.";
-"Install the Helper Tool on the first page to use Cursor Trails." = "Install the Helper Tool on the first page to use Cursor Trails.";
 "Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings." = "Features on this page need Accessibility access for MaCursorHelper. If it is missing, choose Grant Permission to open System Settings.";
 "Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings." = "Features on this page need Screen Recording access for MaCursor. Cursor Translator also needs Accessibility access for MaCursorHelper. If access is missing, choose Grant Permission to open System Settings.";
 "Press the shortcut to take a picture of your screen." = "Press the shortcut to take a picture of your screen.";
@@ -1903,3 +1856,595 @@
 "Edit…" = "Edit…";
 "Edit File Type" = "Edit File Type";
 "Are you sure you want to delete “%@”?" = "Are you sure you want to delete “%@”?";
+/* Alert after a library window drop that held something other than a .cursor file. Use macOS's own File menu name and this file's "Convert Theme..." text. */
+"To convert this, use File > Convert Theme…" = "To convert this, use File > Convert Theme…";
+/* Settings > General: the Import Settings and Export Settings cards, and the Export and Import windows for a .macursor settings file. %@ is a file name or a list of names. "MaCursor Settings" is the suggested file name in the Save panel. */
+"Import Settings" = "Import Settings";
+"Export Settings" = "Export Settings";
+"Import…" = "Import…";
+"Export…" = "Export…";
+"Import Settings…" = "Import Settings…";
+"Export Settings…" = "Export Settings…";
+"Choose what goes into the file." = "Choose what goes into the file.";
+"Choose what to import from “%@”." = "Choose what to import from “%@”.";
+"Your API keys stay on this Mac." = "Your API keys stay on this Mac.";
+"This is too big for one file. Untick some themes or history." = "This is too big for one file. Untick some themes or history.";
+"MaCursor could not export the settings." = "MaCursor could not export the settings.";
+"MaCursor could not read this settings file." = "MaCursor could not read this settings file.";
+"This file is from a newer version of MaCursor. Update MaCursor, then try again." = "This file is from a newer version of MaCursor. Update MaCursor, then try again.";
+"Import?" = "Import?";
+"Settings that are replaced: %@" = "Settings that are replaced: %@";
+"You can’t undo this." = "You can’t undo this.";
+"Import finished." = "Import finished.";
+"MaCursor could not import: %@" = "MaCursor could not import: %@";
+"Shortcuts already used by another feature were cleared: %@" = "Shortcuts already used by another feature were cleared: %@";
+"MaCursor Settings" = "MaCursor Settings";
+/* Edit Theme pane: label of the cursor type picker */
+"Cursor Type" = "Cursor Type";
+/* Edit Theme pane: label of the frame count field */
+"Frame Count" = "Frame Count";
+/* Edit Theme pane: label of the frame duration field, in seconds */
+"Frame Duration" = "Frame Duration";
+/* Edit Theme pane: label of the hot spot X coordinate field */
+"X" = "X";
+/* Edit Theme pane: label of the hot spot Y coordinate field */
+"Y" = "Y";
+/* Edit Theme pane: title of the box that holds the hot spot and animation fields */
+"Animation and Hot Spot" = "Animation and Hot Spot";
+/* Edit Theme pane: title of the alert shown before Clear Slot removes the cursor */
+"Clear This Slot?" = "Clear This Slot?";
+/* Edit Theme pane: message of the Clear Slot alert. The removal happens on Save. */
+"The cursor in this slot is removed from the theme when you save." = "The cursor in this slot is removed from the theme when you save.";
+/* Import and Export Settings windows: tick box for the cursor themes in the file */
+"Themes" = "Themes";
+/* Import Settings window: grey text after a theme name when this Mac has a theme with the same name */
+"Replaces yours" = "Replaces yours";
+/* Import? confirm: %@ is a list of theme names */
+"Themes that are replaced: %@" = "Themes that are replaced: %@";
+/* Import? confirm: shown when a ticked theme is new on this Mac */
+"New themes are added." = "New themes are added.";
+/* Import Settings window: red line while an Edit Theme window is open and Themes is ticked */
+"Close the Edit Theme window, then try again." = "Close the Edit Theme window, then try again.";
+/* Import and Export Settings windows: the history tick box under Cursor Board */
+"Cursor Board History" = "Cursor Board History";
+/* Export Settings window: caption under Capture History */
+"Your past screenshots. Anyone who gets the file can see them." = "Your past screenshots. Anyone who gets the file can see them.";
+/* Export Settings window: caption under Cursor Board History */
+"Your copied text and pictures. Anyone who gets the file can see them." = "Your copied text and pictures. Anyone who gets the file can see them.";
+/* Import Settings window: caption under each history tick box; Keep history is the setting's name */
+"Items older than your Keep history setting are not added." = "Items older than your Keep history setting are not added.";
+/* Import Settings result: Capture History was ticked but nothing was added; Keep history is the setting's name and Disabled its value */
+"Capture History was not added: Keep history is set to Disabled." = "Capture History was not added: Keep history is set to Disabled.";
+/* Import Settings result: Cursor Board History was ticked but nothing was added; Keep history is the setting's name, a switch that is off */
+"Cursor Board History was not added: Keep history is off." = "Cursor Board History was not added: Keep history is off.";
+/* Settings > Cursor Gestures > New Custom Action: the What It Does choice that opens any link, such as a web page or an app's link */
+"Open Link" = "Open Link";
+/* Settings > Cursor Gestures > New Custom Action: placeholder of the field for the link to open */
+"Link Address" = "Link Address";
+/* Settings > Cursor Gestures > New Custom Action: the What It Does choice that runs an AppleScript */
+"Run AppleScript" = "Run AppleScript";
+/* Settings > Cursor Gestures > New Custom Action: placeholder of the field for the AppleScript text */
+"Script" = "Script";
+/* Settings > Cursor Gestures > New Custom Action: button that picks an AppleScript file */
+"Pick a Script File…" = "Pick a Script File…";
+/* Settings > Cursor Gestures > New Custom Action: note under the script field; macOS asks for Automation permission the first time */
+"Up to 500 characters, or a script file. The first time a script controls an app, macOS asks you to allow it." = "Up to 500 characters, or a script file. The first time a script controls an app, macOS asks you to allow it.";
+/* Settings > Cursor Gestures > New Custom Action: the What It Does choice that runs a shortcut from the Shortcuts app, not a keyboard shortcut */
+"Run Shortcut" = "Run Shortcut";
+/* Settings > Cursor Gestures > New Custom Action: first item of the menu of shortcuts from the Shortcuts app */
+"Pick a Shortcut…" = "Pick a Shortcut…";
+/* Settings > Cursor Gestures > New Custom Action: note shown when the Shortcuts app lists no shortcuts */
+"No shortcuts found in the Shortcuts app." = "No shortcuts found in the Shortcuts app.";
+/* Settings > Cursor Gestures > New Custom Action: placeholder of the field for the name of a shortcut from the Shortcuts app */
+"Shortcut Name" = "Shortcut Name";
+/* Settings > Cursor Gestures > New Custom Action: the What It Does choice that runs a command in the shell (zsh) */
+"Run Shell Command" = "Run Shell Command";
+/* Settings > Cursor Gestures > New Custom Action: placeholder of the field for the shell command */
+"Command" = "Command";
+/* Import Settings: note under Cursor Gestures; gestures can open apps and links, and run scripts and commands */
+"Gestures can open apps and links, and run scripts and commands. Import only files you trust." = "Gestures can open apps and links, and run scripts and commands. Import only files you trust.";
+
+/* Import Settings: message of the script alert; below it the alert lists each action's name and its first lines */
+"These actions run with your rights and can change or delete your files. Import only files you trust." = "These actions run with your rights and can change or delete your files. Import only files you trust.";
+
+/* Import Settings: first button of the script alert; imports the file even though it has script and command actions */
+"Import Anyway" = "Import Anyway";
+
+/* Import Settings: last line of the script alert's action list when it has more than 5 actions; %lld is how many are not listed */
+"and %lld more" = "and %lld more";
+
+/* Main window tab list: grey line under Cursor Control › Cursor Control */
+"Scale, hand and shadow" = "Scale, hand and shadow";
+
+/* Main window tab list: grey line under Cursor Control › Per-App Themes */
+"A theme for each app" = "A theme for each app";
+
+/* Main window tab list: grey line under Cursor Control › Theme Automation */
+"Follow Light, Dark or the clock" = "Follow Light, Dark or the clock";
+
+/* Main window tab list: grey line under Cursor Control › Focus on Hover */
+"Focus follows the pointer" = "Focus follows the pointer";
+
+/* Main window tab list: grey line under Cursor Control › Cursor Shaker */
+"Start, stop and shortcut" = "Start, stop and shortcut";
+
+/* Main window tab list: grey line under Cursor Capture › General */
+"Sounds, export, after capture" = "Sounds, export, after capture";
+
+/* Main window tab list: grey line under Cursor Capture › Shortcuts */
+"Area, previous area, fullscreen" = "Area, previous area, fullscreen";
+
+/* Main window tab list: grey line under Cursor Capture › Quick Access */
+"Where the overlay sits" = "Where the overlay sits";
+
+/* Main window tab list: grey line under Cursor Capture › Screenshots */
+"Format, cursor, freeze" = "Format, cursor, freeze";
+
+/* Main window tab list: grey line under Cursor Capture › Advanced */
+"File name and history" = "File name and history";
+
+/* Main window tab list: grey line under Cursor Board › General */
+"How long and how many" = "How long and how many";
+
+/* Main window tab list: grey line under Cursor Board › Shortcuts */
+"Recent items and the panel" = "Recent items and the panel";
+
+/* Main window tab list: grey line under Cursor Board › Panel */
+"Position and screen edge" = "Position and screen edge";
+
+/* Main window tab list: grey line under Cursor Board › Ignored Apps */
+"Apps Cursor Board skips" = "Apps Cursor Board skips";
+
+/* Main window tab list: grey line under Cursor Gestures › General */
+"Line, color, strictness" = "Line, color, strictness";
+
+/* Main window tab list: grey line under Cursor Gestures › Gestures */
+"Search and add gestures" = "Search and add gestures";
+
+/* Main window tab list: grey line under Cursor Gestures › Shapes */
+"Draw and name shapes" = "Draw and name shapes";
+
+/* Main window tab list: grey line under Cursor Gestures › Actions */
+"Make your own actions" = "Make your own actions";
+
+/* Main window tab list: grey line under Right-Click Menu › Main Menu; the three names are the other tabs */
+"Open With, New File, Common Apps" = "Open With, New File, Common Apps";
+
+/* Main window tab list: grey line under Right-Click Menu › Actions */
+"Copy path, hide and unhide files" = "Copy path, hide and unhide files";
+
+/* Main window tab list: grey line under Right-Click Menu › New File */
+"File types for New File" = "File types for New File";
+
+/* Main window tab list: grey line under Right-Click Menu › Open With */
+"Apps for the selected files" = "Apps for the selected files";
+
+/* Main window tab list: grey line under Right-Click Menu › Common Apps */
+"Apps for the current folder" = "Apps for the current folder";
+
+/* Main window tab list: grey line under Settings › General */
+"Appearance, language, updates" = "Appearance, language, updates";
+
+/* Main window tab list: grey line under Settings › About */
+"Version and license" = "Version and license";
+
+/* Main window: explainer card at the top of Cursor Control › Cursor Control */
+"Choose how big the cursor is, which hand it is drawn for and whether it casts a shadow." = "Choose how big the cursor is, which hand it is drawn for and whether it casts a shadow.";
+
+/* Main window: explainer card at the top of Cursor Control › Cursor Shaker */
+"Choose when the shaker starts and stops, and which shortcut runs it." = "Choose when the shaker starts and stops, and which shortcut runs it.";
+
+/* Main window: explainer card at the top of Cursor Capture › General */
+"Choose the sounds, where files go and what happens right after a capture." = "Choose the sounds, where files go and what happens right after a capture.";
+
+/* Main window: explainer card at the top of Cursor Capture › Shortcuts */
+"Give each kind of capture a keyboard shortcut or a mouse button." = "Give each kind of capture a keyboard shortcut or a mouse button.";
+
+/* Main window: explainer card at the top of Cursor Capture › Quick Access */
+"The overlay shows your latest capture. Choose where it sits on the screen." = "The overlay shows your latest capture. Choose where it sits on the screen.";
+
+/* Main window: explainer card at the top of Cursor Capture › Screenshots */
+"Choose the file format and what a screenshot includes." = "Choose the file format and what a screenshot includes.";
+
+/* Main window: explainer card at the top of Cursor Capture › Advanced */
+"Choose how files are named and how long Capture keeps its history." = "Choose how files are named and how long Capture keeps its history.";
+
+/* Main window: explainer card at the top of Cursor Board › General */
+"Choose how long Cursor Board keeps what you copy, and how many items it holds." = "Choose how long Cursor Board keeps what you copy, and how many items it holds.";
+
+/* Main window: explainer card at the top of Cursor Board › Shortcuts */
+"Set the shortcuts that show recent items and the Cursor Board panel." = "Set the shortcuts that show recent items and the Cursor Board panel.";
+
+/* Main window: explainer card at the top of Cursor Board › Panel */
+"Choose where the side panel opens." = "Choose where the side panel opens.";
+
+/* Main window: explainer card at the top of Cursor Board › Ignored Apps */
+"Cursor Board does not keep what you copy in these apps." = "Cursor Board does not keep what you copy in these apps.";
+
+/* Main window: explainer card at the top of Settings › General */
+"Choose how MaCursor looks, which language it uses and how it keeps itself up to date." = "Choose how MaCursor looks, which language it uses and how it keeps itself up to date.";
+
+/* Main window: heading of the Overview, the first page */
+"Overview" = "Overview";
+
+/* Main window: Overview section header over the Capture, Board, Translator, Gestures and Right-Click Menu cards */
+"Cursor Tools" = "Cursor Tools";
+
+/* Main window: status line on the Right-Click Menu card when the Finder extension is off */
+"Needs the Finder extension" = "Needs the Finder extension";
+
+/* Main window: status line on the Right-Click Menu card when Full Disk Access is missing */
+"Needs Full Disk Access" = "Needs Full Disk Access";
+
+/* Cursor Translator: name tag text when a translation language is not downloaded; “MaCursor › Cursor Translator › Translation Languages…” is the way to that button in the main window */
+"Language not downloaded. Open MaCursor › Cursor Translator › Translation Languages…" = "Language not downloaded. Open MaCursor › Cursor Translator › Translation Languages…";
+
+/* Cursor Translator: name tag text when an online service has no key or no server address; %@ is the service name, for example “DeepL”; “MaCursor › Cursor Translator” is the page in the main window */
+"Add your %@ key in MaCursor › Cursor Translator" = "Add your %@ key in MaCursor › Cursor Translator";
+"Add the server address in MaCursor › Cursor Translator" = "Add the server address in MaCursor › Cursor Translator";
+
+/* Welcome window: text of the last page; the main MaCursor window holds every feature page and Settings */
+"You can change any of this later in the main MaCursor window." = "You can change any of this later in the main MaCursor window.";
+
+/* Welcome window: text of the warning shown before the window closes; the main MaCursor window holds every feature page and Settings */
+"You can change these features in the main MaCursor window. This window opens again only after Reset All Settings." = "You can change these features in the main MaCursor window. This window opens again only after Reset All Settings.";
+
+/* Alert title before a cursor theme is deleted */
+"Delete “%@”?" = "Delete “%@”?";
+
+/* Settings › General › Appearance switch: shows each cursor's system identifier (such as cursor.3) under its name */
+"Show Cursor Identifiers" = "Show Cursor Identifiers";
+
+/* Cursor Themes top bar button (label and tooltip) that opens the Theme Gallery page, and that page's title in the top bar */
+"Theme Gallery" = "Theme Gallery";
+
+/* Theme Gallery card button that downloads a theme and adds it to Cursor Themes, like Get in the App Store */
+"Get" = "Get";
+
+/* Theme Gallery card button, disabled, shown once the theme is in Cursor Themes */
+"In Library" = "In Library";
+
+/* Theme Gallery title when the theme list cannot be downloaded */
+"Cannot Load the Gallery" = "Cannot Load the Gallery";
+
+/* Theme Gallery help line under “Cannot Load the Gallery” */
+"Check your internet connection, then try again." = "Check your internet connection, then try again.";
+
+/* Theme Gallery card line after Get failed */
+"Could not add this theme." = "Could not add this theme.";
+
+/* Theme Gallery title in the right pane when the selected theme's cursors cannot be shown */
+"Cannot Load the Preview" = "Cannot Load the Preview";
+
+/* Theme Gallery line under “Cannot Load the Preview” */
+"MaCursor could not download or open this theme." = "MaCursor could not download or open this theme.";
+
+/* Theme Gallery right pane line before a theme is clicked */
+"Select a theme to see its cursors." = "Select a theme to see its cursors.";
+
+/* Overview: line on the Theme Gallery card, right of the Cursor Themes card */
+"Find more cursor themes and add them to your library." = "Find more cursor themes and add them to your library.";
+
+/* Overview: button on the Theme Gallery card that opens the Theme Gallery page */
+"Browse Gallery…" = "Browse Gallery…";
+
+/* Trail style: five-pointed stars that spin away from the pointer */
+"Star" = "Star";
+
+/* Trail style: round bubbles (rings) that float up from the pointer */
+"Bubble" = "Bubble";
+
+/* Trail style: glowing dots that add up to a bright neon light where they overlap */
+"Neon" = "Neon";
+
+/* Trail style: snowflakes that drift down from the pointer */
+"Snow" = "Snow";
+
+/* Trail style: small hearts that float up from the pointer */
+"Heart" = "Heart";
+
+/* Trail style: flickering bolts that fly out from the pointer */
+"Lightning" = "Lightning";
+
+/* Trail style: four-pointed twinkles that grow and shrink around the pointer */
+"Magic" = "Magic";
+
+/* Cursor Highlight: the feature's name on its page, the Overview card, the Welcome card and the menu bar panel */
+"Cursor Highlight" = "Cursor Highlight";
+
+/* Cursor Highlight: one-line description under the page title and on the Welcome card */
+"Dims the screen around the pointer and shows a ripple where you click." = "Dims the screen around the pointer and shows a ripple where you click.";
+
+/* Cursor Highlight page: note shown while the Helper Tool is not installed; "General → Helper Tool" is the place in Settings */
+"Cursor Highlight requires the Helper Tool. You can install it from General → Helper Tool." = "Cursor Highlight requires the Helper Tool. You can install it from General → Helper Tool.";
+
+/* Cursor Highlight switch: dims the screen and leaves a clear circle of light around the pointer; the key keeps it apart from macOS Spotlight search */
+"Spotlight (Cursor Highlight)" = "Spotlight";
+
+/* Cursor Highlight switch: makes the dim almost black and the light circle half as big, like a flashlight in a dark room */
+"Flashlight Mode" = "Flashlight Mode";
+
+/* Cursor Highlight switch: draws a short animation where you click */
+"Click Ripple" = "Click Ripple";
+
+/* Spotlight slider: how dark the screen gets outside the light */
+"Dim" = "Dim";
+
+/* Spotlight slider: how wide the soft fade at the edge of the light is */
+"Soft Edge" = "Soft Edge";
+
+/* Click Ripple menu: which animation is drawn at a click */
+"Look" = "Look";
+
+/* Click Ripple look: three rings that grow out one after another */
+"Ripple" = "Ripple";
+
+/* Click Ripple look: one ring that grows out */
+"Ring" = "Ring";
+
+/* Click Ripple look: a ring that shrinks into the click point */
+"Pulse" = "Pulse";
+
+/* Click Ripple look: a filled circle that grows out; the key keeps it apart from other Circle labels */
+"Circle (Click Ripple)" = "Circle";
+
+/* Click Ripple look: a short filled flash that grows out fast */
+"Burst" = "Burst";
+
+/* Click Ripple slider: how many times its start size the ripple grows */
+"Grow Size" = "Grow Size";
+
+/* Click Ripple slider: how solid the ripple looks; low values are see-through */
+"Opacity" = "Opacity";
+
+/* Cursor Gestures action: turns the Spotlight switch of Cursor Highlight on or off */
+"Highlight Spotlight" = "Highlight Spotlight";
+
+/* Cursor Gestures action: turns the Flashlight Mode switch of Cursor Highlight on or off */
+"Highlight Flashlight" = "Highlight Flashlight";
+
+/* Cursor Gestures action: turns the Click Ripple switch of Cursor Highlight on or off */
+"Highlight Click Ripple" = "Highlight Click Ripple";
+
+/* Settings › General switch: when on, Cursor Highlight and Cursor Trails hide while the macOS Reduce motion setting is on; use the system's own name for Reduce motion */
+"Follow Reduce Motion" = "Follow Reduce Motion";
+
+/* Note under the Follow Reduce Motion switch; "Reduce motion" is the macOS Accessibility → Display setting, use the system's own name */
+"When Reduce motion is on in System Settings, Cursor Highlight and Cursor Trails stay hidden." = "When Reduce motion is on in System Settings, Cursor Highlight and Cursor Trails stay hidden.";
+
+/* Caption under the Cursor Trails switch and on its Welcome card */
+"A trail follows the cursor as it moves and fades when it stops." = "A trail follows the cursor as it moves and fades when it stops.";
+
+/* Welcome, Cursor Look page: note shown while the Helper Tool is not installed */
+"Install the Helper Tool on the first page to use Cursor Trails and Cursor Highlight." = "Install the Helper Tool on the first page to use Cursor Trails and Cursor Highlight.";
+
+/* Cursor Trails › Style: the trail style built from your own particle layers */
+"Custom Particles" = "Custom Particles";
+
+/* Cursor Trails › Custom Particles: name of a particle layer that has no name of its own; %lld is its place in the list */
+"Layer %lld" = "Layer %lld";
+
+/* Cursor Trails › Custom Particles: a layer row's summary; %lld particles a second, %@ is the lifetime in seconds */
+"%lld/s · life %@ s" = "%lld/s · life %@ s";
+
+/* Cursor Trails › Custom Particles: switch that turns one particle layer on or off */
+"Enabled" = "Enabled";
+
+/* Cursor Trails › Custom Particles: slider that moves a layer sideways from the pointer */
+"Layer Offset X" = "Layer Offset X";
+
+/* Cursor Trails › Custom Particles: slider that moves a layer up or down from the pointer */
+"Layer Offset Y" = "Layer Offset Y";
+
+/* Cursor Trails › Custom Particles: slider, how many particles a layer makes each second */
+"Birth Rate" = "Birth Rate";
+
+/* Cursor Trails › Custom Particles: slider, how long each particle lives */
+"Lifetime" = "Lifetime";
+
+/* Cursor Trails › Custom Particles: slider, how much the lifetime varies between particles */
+"Lifetime Range" = "Lifetime Range";
+
+/* Cursor Trails › Custom Particles: slider, the direction particles fly, in degrees */
+"Angle" = "Angle";
+
+/* Cursor Trails › Custom Particles: slider, how wide the spread of directions is */
+"Angle Range" = "Angle Range";
+
+/* Cursor Trails › Custom Particles: slider, tilts the particles toward you or away from you */
+"Latitude" = "Latitude";
+
+/* Cursor Trails › Custom Particles: slider, how much the tilt varies between particles */
+"Latitude Range" = "Latitude Range";
+
+/* Cursor Trails › Custom Particles: slider, how fast particles fly */
+"Velocity" = "Velocity";
+
+/* Cursor Trails › Custom Particles: slider, how much the speed varies between particles */
+"Velocity Range" = "Velocity Range";
+
+/* Cursor Trails › Custom Particles: slider, pushes particles left or right over their life */
+"X Acceleration" = "X Acceleration";
+
+/* Cursor Trails › Custom Particles: slider, pushes particles up or down over their life */
+"Y Acceleration" = "Y Acceleration";
+
+/* Cursor Trails › Custom Particles: field for the name of an SF Symbol, for example star.fill */
+"Symbol Name" = "Symbol Name";
+
+/* Cursor Trails › Custom Particles: grey note under the symbol name when no symbol has that name */
+"This Mac has no SF Symbol with this name." = "This Mac has no SF Symbol with this name.";
+
+/* Cursor Trails › Custom Particles: switch; on, the layer takes its colours from the Colors card chosen on the page */
+"Use Colors Card" = "Use Colors Card";
+
+/* Cursor Trails › Custom Particles: slider, how much the size varies between particles */
+"Size Range" = "Size Range";
+
+/* Cursor Trails › Custom Particles: slider, how fast each particle turns */
+"Spin" = "Spin";
+
+/* Cursor Trails › Custom Particles: slider, how much the turning speed varies between particles */
+"Spin Range" = "Spin Range";
+
+/* Cursor Trails › Custom Particles › Picture: a soft round dot */
+"Soft Dot" = "Soft Dot";
+
+/* Cursor Trails › Custom Particles › Picture: a snowflake shape */
+"Snowflake" = "Snowflake";
+
+/* Cursor Trails › Custom Particles › Picture: a lightning bolt shape */
+"Bolt" = "Bolt";
+
+/* Cursor Trails › Custom Particles › Picture: a four-pointed twinkle shape */
+"Twinkle" = "Twinkle";
+
+/* Cursor Trails › Custom Particles › Picture: draw an SF Symbol whose name you type */
+"SF Symbol" = "SF Symbol";
+
+/* Cursor Trails › Custom Particles: a slider value in seconds; %@ is the number */
+"%@ s" = "%@ s";
+
+/* Cursor Trails › Custom Particles: a slider value in degrees */
+"%lld°" = "%lld°";
+
+/* Cursor Trails › Custom Particles: a speed in points a second */
+"%lld pt/s" = "%lld pt/s";
+
+/* Cursor Trails › Custom Particles: an acceleration in points a second squared */
+"%lld pt/s²" = "%lld pt/s²";
+
+/* Cursor Trails › Custom Particles: a turning speed in degrees a second */
+"%lld°/s" = "%lld°/s";
+
+/* Cursor Trails › Custom Particles: particles a second */
+"%lld/s" = "%lld/s";
+
+/* Settings › General, shown only on a MacBook Neo: the switch that adds transparent space around each cursor picture */
+"Cursor Canvas Padding" = "Cursor Canvas Padding";
+
+/* Settings › General, shown only on a MacBook Neo: the note under the Cursor Canvas Padding switch */
+"Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork." = "Keeps custom cursors from turning back into the system pointer on MacBook Neo. It adds transparent space around the cursor artwork.";
+
+/* Custom Particles style page: step 1 title (the particle layers of a style) */
+"Layers" = "Layers";
+
+/* Custom Particles style page: step 2 title (how many particles are born and how long they live) */
+"Birth" = "Birth";
+
+/* Custom Particles style page: step 3 title (which way the particles fly) */
+"Direction" = "Direction";
+
+/* Custom Particles style page: step 4 title (how fast the particles move) */
+"Motion" = "Motion";
+
+/* Custom Particles style page: label of the menu that picks the layer being changed */
+"Layer" = "Layer";
+
+/* Cursor Trails › Custom Particles: button and page title for a new style */
+"New Style" = "New Style";
+
+/* Cursor Trails › Custom Particles: page title when changing a saved style */
+"Edit Style" = "Edit Style";
+
+/* Cursor Trails › Custom Particles: name of a style the user did not name, by its place in the list */
+"Custom Style %lld" = "Custom Style %lld";
+
+/* Custom Particles style page: note under the Layers step title */
+"A style is made of layers. Each layer is its own kind of particle." = "A style is made of layers. Each layer is its own kind of particle.";
+
+/* Custom Particles style page: note under the Birth step title */
+"How many particles appear, and how long each one lives." = "How many particles appear, and how long each one lives.";
+
+/* Custom Particles style page: note under the Direction step title */
+"Which way the particles fly when they are born." = "Which way the particles fly when they are born.";
+
+/* Custom Particles style page: note under the Motion step title */
+"How fast they move, and what pushes them on the way." = "How fast they move, and what pushes them on the way.";
+
+/* Custom Particles style page: note under the Look step title */
+"What each particle looks like: picture, color, size, spin and fade." = "What each particle looks like: picture, color, size, spin and fade.";
+
+/* Custom Particles style page: note under the Details step title */
+"Name the style. The name shows on its card." = "Name the style. The name shows on its card.";
+
+/* Cursor Highlight: switch for the round lens that enlarges the screen around the pointer */
+"Magnifier" = "Magnifier";
+
+/* Cursor Trails: slider for how far the pointer must move in a straight line before the trail starts */
+"Start After Moving" = "Start After Moving";
+
+/* Cursor Trails: Start After Moving slider, left end, the trail starts at once */
+"At Once" = "At Once";
+
+/* Cursor Trails: Start After Moving slider, right end, the pointer must move far first */
+"Far" = "Far";
+
+/* Custom Particles editor, Look step: menu for how a particle's size changes over its life */
+"Size Over Life" = "Size Over Life";
+
+/* Size Over Life menu item: the size stays the same */
+"Steady" = "Steady";
+
+/* Size Over Life menu item: the particle grows from a quarter of its size to its full size */
+"Grow" = "Grow";
+
+/* Size Over Life menu item: the particle shrinks from its full size to a quarter */
+"Shrink" = "Shrink";
+
+/* Size Over Life menu item: small, big in the middle of its life, small at the end */
+"Small-Big-Small" = "Small-Big-Small";
+
+/* Size Over Life menu item: big, small in the middle of its life, big at the end */
+"Big-Small-Big" = "Big-Small-Big";
+
+/* Custom Particles editor: grey note under Size Over Life while one of the two curves is picked */
+"The processor draws this curve, so this style does not use the graphics hardware." = "The processor draws this curve, so this style does not use the graphics hardware.";
+
+/* Cursor Trails: grey note under Use Graphics Hardware while the style in use has a size curve */
+"A layer in this style uses a size curve, so the processor draws the trail." = "A layer in this style uses a size curve, so the processor draws the trail.";
+
+/* Cursor Trails: Picture menu item and row label for the user's own image; it must read differently from "Picture" */
+"Image" = "Image";
+
+/* Cursor Trails: grey note under the Image row once an image is chosen */
+"The image keeps its own colors." = "The image keeps its own colors.";
+
+/* Cursor Trails: grey note under the Image row while no image is chosen */
+"Choose an image for this layer." = "Choose an image for this layer.";
+
+/* Cursor Trails: menu that picks where on the cursor the trail starts */
+"Trail Starts At" = "Trail Starts At";
+
+/* Cursor Trails › Trail Starts At: the cursor's click point, the same term as Edit Theme's hot spot */
+"Hot Spot" = "Hot Spot";
+
+/* Cursor Trails › Trail Starts At: the middle of the cursor picture */
+"Cursor Center" = "Cursor Center";
+
+/* Cursor Trails › Trail Starts At: a point the user drags on the arrow */
+"Custom Spot" = "Custom Spot";
+
+/* Cursor Trails: grey note beside the Custom Spot box */
+"Drag the dot to where the trail starts." = "Drag the dot to where the trail starts.";
+
+/* Cursor Trails: grey note under Trail Starts At while it is not Hot Spot */
+"The spot is set on the arrow. Other cursors, like the text cursor, use the same shift." = "The spot is set on the arrow. Other cursors, like the text cursor, use the same shift.";
+
+/* Cursor Trails: grey note under Trail Starts At for the Echoes style */
+"Echoes stay on the cursor. Only the glow moves to this spot." = "Echoes stay on the cursor. Only the glow moves to this spot.";
+
+/* Import Settings: title of the red alert shown before importing a file whose Cursor Gestures part has Run AppleScript, Run Shell Command, Run Shortcut or Open Link actions */
+"This file has actions that run scripts, shortcuts or commands, or open links" = "This file has actions that run scripts, shortcuts or commands, or open links";
+
+/* Cursor Gestures: grey note under Link Address of the Open Link action. A name without a dot plus a port (nas:5000) must start with https. Keep both web addresses exactly as written. */
+"For a name without a dot, type https:// before it, for example https://nas:5000." = "For a name without a dot, type https:// before it, for example https://nas:5000.";
+
+/* Right-Click Menu: Finder menu item on empty space. Moves the items you chose Cut on into this folder. */
+"Paste Here" = "Paste Here";
+
+/* Cursor Themes: the number of themes the left list shows, at the right end of its bottom bar */
+"%lld themes" = "%lld themes";
+
+"MaCursor needs Screen Recording access to enlarge the screen around the pointer. Nothing is saved. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording." = "MaCursor needs Screen Recording access to enlarge the screen around the pointer. Nothing is saved. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen & System Audio Recording.";
+"MaCursor needs Screen Recording access to enlarge the screen around the pointer. Nothing is saved. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording." = "MaCursor needs Screen Recording access to enlarge the screen around the pointer. Nothing is saved. Choose Allow Screen Recording, then turn on MaCursor in Privacy & Security → Screen Recording.";

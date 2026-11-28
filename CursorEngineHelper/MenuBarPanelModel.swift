@@ -22,6 +22,7 @@ final class MenuBarPanelModel: ObservableObject {
     @Published private(set) var focusFollowsMouse = false
     @Published private(set) var accessibilityTrusted = false
     @Published private(set) var cursorTrails = CursorTrailsConfig()
+    @Published private(set) var cursorHighlight = CursorHighlightConfig()
     @Published private(set) var cursorGestures = CursorGesturesConfig()
     @Published private(set) var cursorShaker = CursorShakerConfig()
     @Published private(set) var cursorTranslator = CursorTranslatorConfig()
@@ -111,6 +112,7 @@ final class MenuBarPanelModel: ObservableObject {
         ffmDelayMs = Double(snapshot.ffmDelayMs)
         panelBackdropAlpha = snapshot.panelBackdropAlpha
         cursorScreenshot = CursorScreenshotConfig.load()
+        cursorHighlight = CursorHighlightConfig.load()
         clipboardOffersImage = CursorScreenshotImageSource.offersImage(.general)
         panelBlocks = MACMenuBarPanelBlocks(
             order: MACMenuBarItemOrder(MACPreferences.value(forKey: MACPreferences.menuBarItemOrderKey)),
@@ -136,6 +138,15 @@ final class MenuBarPanelModel: ObservableObject {
 
     func reloadShaker() {
         cursorShaker = CursorShakerConfig.load()
+    }
+
+    func reloadHighlight() {
+        cursorHighlight = CursorHighlightConfig.load()
+    }
+
+    func setCursorHighlight(_ key: WritableKeyPath<CursorHighlightConfig, Bool>, _ value: Bool) {
+        MenuBarService.setCursorHighlight(key, value)
+        reload()
     }
 
     private func loadThumbnails(for identifiers: [String]) {

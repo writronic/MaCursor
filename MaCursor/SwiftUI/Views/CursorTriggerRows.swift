@@ -2,7 +2,6 @@ import SwiftUI
 
 struct CursorTriggerRows: View {
     @Binding var trigger: CursorTrigger
-    var capture = true
     var isTaken: (CursorTrigger) -> Bool = { _ in false }
     var window: NSWindow?
     @Environment(\.isEnabled) private var isEnabled
@@ -30,20 +29,16 @@ struct CursorTriggerRows: View {
             }
         }
 
-        if capture {
-            LabeledContent("Keyboard Shortcut") {
-                keyField
-            }
+        LabeledContent("Keyboard Shortcut") {
+            keyField
         }
 
         Picker("Mouse Button", selection: Binding(
             get: { trigger.button.map { min($0, 3) } ?? -1 },
             set: { value in change { $0.button = value < 0 ? nil : value == 3 ? max(trigger.button ?? 3, 3) : value } }
         )) {
-            if capture {
-                Text("None").tag(-1)
-                Text("Left Button").tag(0)
-            }
+            Text("None").tag(-1)
+            Text("Left Button").tag(0)
             Text("Right Button").tag(1)
             Text("Middle Button").tag(2)
             Text("Side Button").tag(3)
@@ -62,25 +57,23 @@ struct CursorTriggerRows: View {
             .pickerStyle(.segmented)
         }
 
-        if capture {
-            LabeledContent("Result") {
-                Text(verbatim: trigger.result)
-                    .font(.body.weight(trigger.keyName == nil && trigger.button == nil ? .regular : .semibold))
-                    .foregroundStyle(trigger.keyName == nil && trigger.button == nil ? .secondary : .primary)
-                    .multilineTextAlignment(.trailing)
-            }
+        LabeledContent("Result") {
+            Text(verbatim: trigger.result)
+                .font(.body.weight(trigger.keyName == nil && trigger.button == nil ? .regular : .semibold))
+                .foregroundStyle(trigger.keyName == nil && trigger.button == nil ? .secondary : .primary)
+                .multilineTextAlignment(.trailing)
+        }
 
-            if trigger.blocked || refused {
-                Text("Hold ⌃ or ⌘, and pick a shortcut that macOS and most apps do not use.")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-            }
+        if trigger.blocked || refused {
+            Text("Hold ⌃ or ⌘, and pick a shortcut that macOS and most apps do not use.")
+                .font(.caption)
+                .foregroundStyle(.orange)
+        }
 
-            if trigger.button != nil && !CursorTranslator.usable(trigger.click) {
-                Text("Hold a key with the left or right button, so normal clicks still work.")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-            }
+        if trigger.button != nil && !CursorTranslator.usable(trigger.click) {
+            Text("Hold a key with the left or right button, so normal clicks still work.")
+                .font(.caption)
+                .foregroundStyle(.orange)
         }
     }
 

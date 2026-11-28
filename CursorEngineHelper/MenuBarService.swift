@@ -206,6 +206,10 @@ enum MenuBarService {
         config.save()
     }
 
+    static func setCursorHighlight(_ key: WritableKeyPath<CursorHighlightConfig, Bool>, _ value: Bool) {
+        CursorHighlightConfig.set(key, value)
+    }
+
     static func setCursorGestures(_ change: (inout CursorGesturesConfig) -> Void) {
         var config = CursorGesturesConfig.load()
         change(&config)
@@ -218,6 +222,12 @@ enum MenuBarService {
 
     static func openAccessibilitySettings() {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
+            NSWorkspace.shared.open(url)
+        }
+    }
+
+    static func openAutomationSettings() {
+        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation") {
             NSWorkspace.shared.open(url)
         }
     }
@@ -281,6 +291,15 @@ enum MenuBarService {
             MACPreferences.setFlag(true, forKey: MACPreferences.pendingScreenshotAccessWindowKey)
         } else {
             postDistributed(.MACCursorScreenshotShowAccessWindow)
+        }
+        launchParentAppThenPost(nil)
+    }
+
+    static func requestCursorMagnifierAccess() {
+        if NSRunningApplication.runningApplications(withBundleIdentifier: MACAppBundleIdentifier).isEmpty {
+            MACPreferences.setFlag(true, forKey: MACPreferences.pendingMagnifierAccessWindowKey)
+        } else {
+            postDistributed(.MACCursorMagnifierShowAccessWindow)
         }
         launchParentAppThenPost(nil)
     }

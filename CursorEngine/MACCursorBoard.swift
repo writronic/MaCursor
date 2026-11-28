@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 extension Notification.Name {
     nonisolated static let MACCursorBoardDidChange = Notification.Name("MACCursorBoardDidChange")
     nonisolated static let MACCursorBoardClearHistory = Notification.Name("MACCursorBoardClearHistory")
+    nonisolated static let MACCursorBoardReloadHistory = Notification.Name("MACCursorBoardReloadHistory")
     nonisolated static let MACCursorBoardShowAccessWindow = Notification.Name("MACCursorBoardShowAccessWindow")
 }
 
@@ -107,6 +108,10 @@ struct CursorBoardConfig: Codable, Equatable {
 
     static func clearHistory() {
         post(.MACCursorBoardClearHistory)
+    }
+
+    static func reloadHistory() {
+        post(.MACCursorBoardReloadHistory)
     }
 
     private static func post(_ name: Notification.Name) {
@@ -214,6 +219,11 @@ struct CursorBoardHistory: Equatable {
         let gone = items.filter { !$0.pinned }
         items.removeAll { !$0.pinned }
         return gone
+    }
+
+    mutating func reload(_ disk: [CursorBoardItem], held: Set<UUID>) {
+        let known = held.union(items.map(\.id))
+        items = (items + disk.filter { !known.contains($0.id) }).sorted { $0.date > $1.date }
     }
 }
 
@@ -358,20 +368,42 @@ final class CursorBoardStore: @unchecked Sendable {
             for (name, data) in files { memory["\(item.id)/\(name)"] = data }
             return
         }
-        let manager = FileManager.default
         let folder = root.appendingPathComponent(item.id.uuidString, isDirectory: true)
         do {
-            try manager.createDirectory(at: folder, withIntermediateDirectories: true)
-            try manager.setAttributes([.posixPermissions: 0o700], ofItemAtPath: root.path)
-            var values = URLResourceValues()
-            values.isExcludedFromBackup = true
-            var marked = root
-            try marked.setResourceValues(values)
-            for (name, data) in files { try data.write(to: folder.appendingPathComponent(name)) }
-            try JSONEncoder().encode(item).write(to: folder.appendingPathComponent(Self.entry), options: .atomic)
+            try Self.prepare(root)
+            try Self.write(item, files: files, to: folder)
         } catch {
-            if !files.isEmpty { try? manager.removeItem(at: folder) }
+            if !files.isEmpty { try? FileManager.default.removeItem(at: folder) }
         }
+    }
+
+    func add(_ item: CursorBoardItem, files: [String: Data]) {
+        guard let root else { return save(item, files: files) }
+        let manager = FileManager.default
+        do {
+            try Self.prepare(root)
+            let staging = try manager.url(for: .itemReplacementDirectory, in: .userDomainMask, appropriateFor: root, create: true)
+            defer { try? manager.removeItem(at: staging) }
+            let folder = staging.appendingPathComponent(item.id.uuidString, isDirectory: true)
+            try Self.write(item, files: files, to: folder)
+            try manager.moveItem(at: folder, to: root.appendingPathComponent(item.id.uuidString, isDirectory: true))
+        } catch {}
+    }
+
+    private static func prepare(_ root: URL) throws {
+        let manager = FileManager.default
+        try manager.createDirectory(at: root, withIntermediateDirectories: true)
+        try manager.setAttributes([.posixPermissions: 0o700], ofItemAtPath: root.path)
+        var values = URLResourceValues()
+        values.isExcludedFromBackup = true
+        var marked = root
+        try marked.setResourceValues(values)
+    }
+
+    private static func write(_ item: CursorBoardItem, files: [String: Data], to folder: URL) throws {
+        try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+        for (name, data) in files { try data.write(to: folder.appendingPathComponent(name)) }
+        try JSONEncoder().encode(item).write(to: folder.appendingPathComponent(entry), options: .atomic)
     }
 
     func file(_ id: UUID, _ name: String) -> Data? {

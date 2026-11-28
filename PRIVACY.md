@@ -41,7 +41,9 @@ Cursor Translator with an online service (DeepL, OpenAI, Google Gemini, Claude, 
 
 **Share** in the Cursor Capture editor hands a picture to the macOS share sheet, and the service you pick receives it.
 
-Beyond Sparkle and the service you choose in Cursor Translator, MaCursor makes **zero network requests**.
+When you open Theme Gallery, MaCursor downloads the theme list, preview pictures and the themes you pick from GitHub. Nothing is sent about you.
+
+Beyond Sparkle, Theme Gallery and the service you choose in Cursor Translator, MaCursor makes **zero network requests**.
 
 ---
 

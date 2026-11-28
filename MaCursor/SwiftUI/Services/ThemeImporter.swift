@@ -227,6 +227,14 @@ public enum ThemeImporter {
         var isDirectory: ObjCBool = false
         if fm.fileExists(atPath: cursorsDir.path, isDirectory: &isDirectory),
            isDirectory.boolValue {
+            let inner = try sortedFiles(in: cursorsDir)
+            if !inner.contains(where: { fileMagic($0, matches: XCursorReader.self) }),
+               inner.contains(where: {
+                   fileMagic($0, matches: CURReader.self) || fileMagic($0, matches: ANIReader.self)
+               }) {
+                return try loadWindowsPack(cursorsDir, themeRoot: url,
+                                           infURL: preferredINF(in: url) ?? preferredINF(in: cursorsDir))
+            }
             return try loadLinuxTheme(themeRoot: url, cursorDir: cursorsDir)
         }
 
@@ -235,12 +243,12 @@ public enum ThemeImporter {
             return try loadLinuxTheme(themeRoot: url, cursorDir: url)
         }
         if let inf = preferredINF(in: url) {
-            return try loadWindowsPack(url, infURL: inf)
+            return try loadWindowsPack(url, themeRoot: url, infURL: inf)
         }
         if entries.contains(where: {
             fileMagic($0, matches: CURReader.self) || fileMagic($0, matches: ANIReader.self)
         }) {
-            return try loadWindowsPack(url, infURL: nil)
+            return try loadWindowsPack(url, themeRoot: url, infURL: nil)
         }
 
         let themes = entries.compactMap { file -> (URL, [String: Any])? in
@@ -468,10 +476,10 @@ public enum ThemeImporter {
         }
 
         let directNamed = aliasLinks.filter {
-            RoleMapper.x11NameToIdentifier[$0.lastPathComponent.lowercased()] != nil
+            CursorNameList.linuxAliases[$0.lastPathComponent.lowercased()] == nil
         }
         let aliasNamed = aliasLinks.filter {
-            RoleMapper.x11NameToIdentifier[$0.lastPathComponent.lowercased()] == nil
+            CursorNameList.linuxAliases[$0.lastPathComponent.lowercased()] != nil
         }
         for link in directNamed + aliasNamed {
             let name = link.lastPathComponent
@@ -614,13 +622,13 @@ public enum ThemeImporter {
         return (label, String(line[line.index(after: colon)...]))
     }
 
-    private static func loadWindowsPack(_ dir: URL, infURL: URL?) throws -> ImportResult {
+    private static func loadWindowsPack(_ dir: URL, themeRoot: URL, infURL: URL?) throws -> ImportResult {
         var warnings: [ImportWarning] = []
         var ignored: [ImportReport.Ignored] = []
         var candidates: [Candidate] = []
         var referencedPaths: Set<String> = []
-        let meta = folderMetadata(in: dir)
-        let themeName = meta.name ?? dir.lastPathComponent
+        let meta = folderMetadata(in: themeRoot)
+        let themeName = meta.name ?? themeRoot.lastPathComponent
 
         let entries = try sortedFiles(in: dir)
 
@@ -635,7 +643,7 @@ public enum ThemeImporter {
                     continue
                 }
                 referencedPaths.insert(file.path)
-                if RoleMapper.deliberatelyUnmappedINFRoles.contains(role) {
+                if CursorNameList.ignoredINFRoles.contains(role) {
                     ignored.append(.init(source: fileName,
                                          reason: "role '\(role)' has no macOS slot"))
                     continue
@@ -660,7 +668,8 @@ public enum ThemeImporter {
             guard fileMagic(file, matches: CURReader.self)
                     || fileMagic(file, matches: ANIReader.self) else { continue }
             let name = file.lastPathComponent
-            if RoleMapper.isDeliberatelyUnmapped(name) {
+            let match = RoleMapper.matchWindowsFileName(name)
+            if match == .ignored {
                 ignored.append(.init(source: name,
                                      reason: "no macOS equivalent (\(RoleMapper.normalize(name)))"))
                 continue
@@ -670,13 +679,8 @@ public enum ThemeImporter {
                 warnings.append(.init(.unreadable(file: name, reason: "undecodable cursor data")))
                 continue
             }
-            let stem = file.deletingPathExtension().lastPathComponent
-            if let mapping = RoleMapper.mapWindowsFriendlyName(name) {
-                candidates.append(Candidate(identifier: mapping.primary, tier: .exactName,
-                                            file: file, cursor: cursor,
-                                            secondaries: mapping.secondaries))
-            } else if let mapping = RoleMapper.mapFilenameHeuristic(stem) {
-                candidates.append(Candidate(identifier: mapping.primary, tier: .heuristic,
+            if case .slot(let mapping, let tier)? = match {
+                candidates.append(Candidate(identifier: mapping.primary, tier: tier,
                                             file: file, cursor: cursor,
                                             secondaries: mapping.secondaries))
             } else {
@@ -706,20 +710,17 @@ public enum ThemeImporter {
         }
         let name = url.lastPathComponent
         let stem = url.deletingPathExtension().lastPathComponent
-        let mapping: RoleMapping
-        let tier: MappingTier
-        if RoleMapper.isDeliberatelyUnmapped(name) {
-            mapping = RoleMapping(primary: "com.apple.coregraphics.Arrow")
-            tier = .heuristic
-        } else if let friendly = RoleMapper.mapWindowsFriendlyName(name) {
-            mapping = friendly
-            tier = .exactName
-        } else if let heuristic = RoleMapper.mapFilenameHeuristic(stem) {
-            mapping = heuristic
-            tier = .heuristic
-        } else {
-            mapping = RoleMapping(primary: "com.apple.coregraphics.Arrow")
-            tier = .heuristic
+        var (mapping, tier) = (RoleMapping(primary: "com.apple.coregraphics.Arrow"), MappingTier.heuristic)
+        if fileMagic(url, matches: CURReader.self) || fileMagic(url, matches: ANIReader.self) {
+            if case .slot(let named, let namedTier)? = RoleMapper.matchWindowsFileName(name) {
+                (mapping, tier) = (named, namedTier)
+            }
+        } else if !RoleMapper.isDeliberatelyUnmapped(name) {
+            if let named = RoleMapper.mapX11Name(stem) {
+                (mapping, tier) = (named, .exactName)
+            } else if let guess = RoleMapper.mapFilenameHeuristic(stem) {
+                mapping = guess
+            }
         }
 
         var warnings: [ImportWarning] = []

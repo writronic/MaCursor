@@ -25,19 +25,31 @@ If the text cursor is the one reverting, and it happens in dark-themed editors l
 
 ## The library is empty. Where do I get themes?
 
-MaCursor has no themes inside the app. Download `Themes.zip` from the [Releases page](https://github.com/writronic/MaCursor/releases/latest). It holds every theme in the [Theme Gallery](https://github.com/writronic/MaCursor/blob/main/themes/README.md). Unzip it, choose **File → Import Theme…** and select all the `.cursor` files at once, or drop them all on the library window. See [Importing and converting themes](README.md#importing-and-converting-themes).
+On the **Overview**, click **Browse Gallery…** on the **Theme Gallery** card. In the **Theme Gallery**, select a theme and click **Get**. See [Theme Gallery](README.md#theme-gallery). You can also download `Themes.zip` from the [Releases page](https://github.com/writronic/MaCursor/releases/latest). It holds every theme in the [Theme Gallery](https://github.com/writronic/MaCursor/blob/main/themes/README.md). Unzip it, choose **File → Import Theme…** and select all the `.cursor` files at once, or drop them all on the MaCursor window. See [Importing and converting themes](README.md#importing-and-converting-themes).
+
+## The Theme Gallery says Cannot Load the Gallery. What now?
+
+MaCursor loads the list of themes from GitHub when you open the **Theme Gallery**, so it needs an internet connection. Check your connection and click **Try Again**. You can also import the themes from `Themes.zip`, as in the question above.
 
 ## My pointer still goes back to the macOS arrow after I changed the colours back. What now?
 
 Colours you set back by hand can still leave macOS in charge of the pointer. Open **System Settings → Accessibility → Display**, and click **Reset Colors** in the **Pointer** section. You then see the black macOS arrow until you apply your theme again in MaCursor.
 
+## My custom cursor turns back into the system pointer on a MacBook Neo. What now?
+
+Open **MaCursor → Settings → General** and turn on **Cursor Canvas Padding**. It adds transparent space around the cursor artwork, and MaCursor applies your theme again. The switch shows only on a MacBook Neo with macOS 26 or later.
+
 ## Why is a feature greyed out, or why does its switch show off?
 
 Settings for features that need the Helper Tool stay greyed out until you install it in **Settings → General → Helper Tool**. A switch shows on only while the feature has the access it needs and the Helper Tool is running. If the status reads **Installed, not running**, quit and reopen MaCursor. See [Getting started](README.md#getting-started) for what each feature needs and what each status means.
 
+## Cursor Trails or Cursor Highlight do not show. Why?
+
+Both stay hidden while **Follow Reduce Motion** is on in **Settings → General** and **Reduce motion** is on in **System Settings → Accessibility**. Turn off **Follow Reduce Motion** to show them. If that is not the cause, check that the Helper Tool runs. See [Getting started](README.md#getting-started).
+
 ## My cursor is too big or too small. How do I change its size?
 
-Use the **Cursor Scale** slider in **Settings → Cursor Control**. Some themes have large pictures, so they look bigger than the macOS cursor at 1.00×, and you can lower the scale for them. See [Applying and switching themes](README.md#applying-and-switching-themes).
+Use the **Cursor Scale** slider on the **Cursor Control** page. Some themes have large pictures, so they look bigger than the macOS cursor at 1.00×, and you can lower the scale for them. See [Applying and switching themes](README.md#applying-and-switching-themes).
 
 ## How do I turn a whole Windows, Linux or Mousecape cursor pack into one theme?
 
@@ -55,9 +67,17 @@ Yes. Turn items off in **Settings → General → Menu Bar**, in the list that s
 
 Cursor Board pastes only when **MaCursorHelper** has Accessibility access, and only when the app you were using is still in front when you pick the item. Otherwise the item is on the clipboard, so press **⌘V** yourself. To give the access, see [Getting started](README.md#getting-started).
 
+## A gesture that runs a script, shortcut, command or link did nothing and my Mac beeped. Why?
+
+A beep means the action failed. Check the script, the shortcut name, the command, or that an app can open the link. If macOS blocked a script from controlling an app, MaCursor opens **System Settings → Privacy & Security → Automation**, where you can allow it. See [Cursor Gestures](README.md#cursor-gestures).
+
 ## How do I update MaCursor?
 
 Choose **Check for Updates…** in the MaCursor menu. The **Automatically check for updates** switch in **Settings → General → Software Updates** sets whether MaCursor checks by itself.
+
+## How do I move my settings to another Mac?
+
+Choose **Export…** in **Export Settings** in **MaCursor → Settings → General**, tick what goes into the file, and copy the `.macursor` file to the other Mac. There, double-click the file, or choose **Import…** in **Import Settings**. See [Exporting and importing settings](README.md#exporting-and-importing-settings).
 
 ## Restore brings back an odd or old cursor instead of the macOS one. What now?
 
@@ -65,7 +85,7 @@ Choose **Check for Updates…** in the MaCursor menu. The **Automatically check 
 
 ## How do I remove MaCursor completely, or start clean?
 
-1. In MaCursor, open **Settings → General → Reset Settings** and click **Reset**. This moves your themes to the Trash, restores the system cursors, resets every setting and uninstalls the Helper Tool.
+1. In MaCursor, open **Settings → General → Reset Settings** and click **Reset**. This moves your themes to the Trash, restores the system cursors, resets every setting and uninstalls the Helper Tool. MaCursor then restarts, and the Welcome window opens. Quit MaCursor before the next step.
 2. Remove MaCursor with an uninstaller such as AppCleaner or Pearcleaner. **Reset** does not delete `~/Library/Application Support/MaCursor/` or `~/Library/Group Containers/SP495GG2KZ.com.writronic.macursor/`, so check that both folders are gone and delete them yourself if they are not.
 3. Restart your Mac.
 4. Install the latest version from the [Releases page](https://github.com/writronic/MaCursor/releases/latest) or with Homebrew. See [the README](../README.md).
@@ -78,3 +98,5 @@ Choose **Check for Updates…** in the MaCursor menu. The **Automatically check 
 - [Menu Bar Panel](README.md#menu-bar-panel)
 - [Right-Click Menu](README.md#right-click-menu)
 - [Importing and converting themes](README.md#importing-and-converting-themes)
+- [Theme Gallery](README.md#theme-gallery)
+- [Exporting and importing settings](README.md#exporting-and-importing-settings)

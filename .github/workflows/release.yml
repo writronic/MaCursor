@@ -16,6 +16,7 @@ concurrency:
 
 jobs:
   build-sign-release:
+    if: github.event.release.tag_name != 'gallery'
     runs-on: macos-26
     steps:
       - name: Checkout

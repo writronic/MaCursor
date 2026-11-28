@@ -155,7 +155,8 @@ enum CursorGestureOperation: String, Codable, CaseIterable {
          minimize, closeWindow, hideApp, volumeUp, volumeDown, mute, brightnessUp, brightnessDown, sleep, screenSaver,
          nextFavoriteTheme, systemCursors, screenshotArea,
          capturePreviousArea, captureFullscreen, captureSelfTimer, captureText, captureOpen, captureOpenClipboard, capturePin, captureHistory,
-         cursorShadow, focusOnHover, cursorTranslator, cursorShaker, cursorTrails, switchByApp, showRecentItems, showCursorBoard
+         cursorShadow, focusOnHover, cursorTranslator, cursorShaker, cursorTrails, cursorHighlight, highlightSpotlight, highlightFlashlight, highlightRipple,
+         switchByApp, showRecentItems, showCursorBoard
 
     var capture: MACMenuBarCaptureItem? {
         switch self {
@@ -183,6 +184,12 @@ struct CursorGestureShortcut: Codable, Equatable {
     var character: String?
 }
 
+struct CursorGestureCommand: Equatable {
+    var path: String
+    var arguments: [String]
+    var readsErrors = false
+}
+
 enum CursorGestureKind: Codable, Equatable {
     case shortcut(CursorGestureShortcut)
     case text(String)
@@ -190,6 +197,19 @@ enum CursorGestureKind: Codable, Equatable {
     case website(String)
     case theme(String)
     case operation(CursorGestureOperation)
+    case appleScript(String)
+    case shortcutsApp(String)
+    case shell(String)
+
+    var command: CursorGestureCommand? {
+        switch self {
+        case .appleScript(let script):
+            CursorGestureCommand(path: "/usr/bin/osascript", arguments: CursorGestures.scriptFile(script).map { [$0] } ?? ["-e", script], readsErrors: true)
+        case .shortcutsApp(let name): CursorGestureCommand(path: "/usr/bin/shortcuts", arguments: ["run", name])
+        case .shell(let text): CursorGestureCommand(path: "/bin/zsh", arguments: ["-lc", text])
+        default: nil
+        }
+    }
 }
 
 struct CursorGestureAction: Codable, Equatable, Identifiable {
@@ -229,10 +249,18 @@ struct CursorGestureAction: Codable, Equatable, Identifiable {
         guard !name.trimmingCharacters(in: .whitespaces).isEmpty else { return false }
         switch kind {
         case .shortcut(let shortcut): return CursorGestureKeys.recordable(shortcut.keyCode, NSEvent.ModifierFlags(rawValue: shortcut.flags))
-        case .text(let text): return !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && text.count <= CursorGestures.textLimit
-        case .app(let path): return !path.isEmpty
+        case .text(let text), .appleScript(let text), .shell(let text):
+            return !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !overTextLimit
+        case .app(let value), .shortcutsApp(let value): return !value.isEmpty
         case .website(let address): return CursorGestures.website(address) != nil
         case .theme, .operation: return false
+        }
+    }
+
+    var overTextLimit: Bool {
+        switch kind {
+        case .text(let text), .appleScript(let text), .shell(let text): return text.count > CursorGestures.textLimit
+        default: return false
         }
     }
 }
@@ -271,16 +299,16 @@ struct CursorGesturesConfig: Codable, Equatable {
     var lineWidth: CGFloat = 4
     var ignorePostedClicks = true
 
-    static func load() -> CursorGesturesConfig {
-        CFPreferencesSynchronize(MACPreferences.domain, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
-        guard let data = MACPreferences.value(forKey: MACPreferences.cursorGesturesKey) as? Data,
+    static func load(operations: MACPreferences.Operations = .live) -> CursorGesturesConfig {
+        operations.synchronize(MACPreferences.domain, kCFPreferencesCurrentUser, kCFPreferencesCurrentHost)
+        guard let data = MACPreferences.value(forKey: MACPreferences.cursorGesturesKey, operations: operations) as? Data,
               let config = try? JSONDecoder().decode(CursorGesturesConfig.self, from: data) else { return CursorGesturesConfig() }
         return config
     }
 
-    func save() {
+    func save(operations: MACPreferences.Operations = .live) {
         guard let data = try? JSONEncoder().encode(self) else { return }
-        MACPreferences.set(data, forKey: MACPreferences.cursorGesturesKey)
+        MACPreferences.set(data, forKey: MACPreferences.cursorGesturesKey, operations: operations)
         CursorGesturesConfig.notifyHelper()
     }
 
@@ -289,11 +317,11 @@ struct CursorGesturesConfig: Codable, Equatable {
                                                                      userInfo: nil, deliverImmediately: true)
     }
 
-    static func setEnabled(_ enabled: Bool) {
-        var config = load()
+    static func setEnabled(_ enabled: Bool, operations: MACPreferences.Operations = .live) {
+        var config = load(operations: operations)
         guard config.enabled != enabled else { return }
         config.turn(enabled)
-        config.save()
+        config.save(operations: operations)
     }
 
     mutating func turn(_ on: Bool) {
@@ -343,6 +371,12 @@ struct CursorGesturesConfig: Codable, Equatable {
         }
     }
 
+    mutating func add(_ action: CursorGestureAction, to gesture: inout CursorGesture) {
+        put(action)
+        guard actions.contains(where: { $0.id == action.id }) else { return }
+        gesture.steps.append(CursorGestureStep(action: action.id))
+    }
+
     func uses(_ id: String) -> Bool {
         gestures.contains { $0.shape == id || $0.steps.contains { $0.action == id } }
     }
@@ -356,10 +390,10 @@ struct CursorGesturesConfig: Codable, Equatable {
 
     var padTriggers: [NSEvent.ModifierFlags] { held(twoFinger: true) }
 
-    func tapMask(clicksLeft: Bool) -> CGEventMask {
-        let left: [CGEventType] = enabled || clicksLeft ? [.leftMouseDown, .leftMouseUp, .leftMouseDragged] : []
+    func tapMask(clicksLeft: Bool, touches: Bool = false) -> CGEventMask {
+        let left: [CGEventType] = enabled || clicksLeft ? [.leftMouseDown, .leftMouseUp, .leftMouseDragged] : touches ? [.leftMouseDown] : []
         let buttons = left + [.rightMouseDown, .rightMouseUp, .rightMouseDragged, .otherMouseDown, .otherMouseUp, .otherMouseDragged]
-        return (padTriggers.isEmpty ? buttons : buttons + [.scrollWheel]).reduce(0) { $0 | 1 << $1.rawValue }
+        return (padTriggers.isEmpty && !touches ? buttons : buttons + [.scrollWheel]).reduce(0) { $0 | 1 << $1.rawValue }
     }
 
     func holds(_ trigger: CursorGestureTrigger, front: String?, pointer: @autoclosure () -> String? = nil) -> Bool {
@@ -661,6 +695,7 @@ extension CursorGestureIgnoredApp {
 extension CursorGesturesConfig {
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
+        let held = { (value: CGFloat, range: ClosedRange<CGFloat>) in min(max(value, range.lowerBound), range.upperBound) }
         self.init()
         enabled = c.value(.enabled, enabled)
         readyMadeAdded = c.value(.readyMadeAdded, readyMadeAdded)
@@ -668,8 +703,8 @@ extension CursorGesturesConfig {
         shapes = c.value(.shapes, shapes)
         actions = c.value(.actions, actions)
         ignored = c.value(.ignored, ignored)
-        strictness = c.value(.strictness, strictness)
-        minimumSize = c.value(.minimumSize, minimumSize)
+        strictness = held(c.value(.strictness, strictness), Self.strictnessRange)
+        minimumSize = held(c.value(.minimumSize, minimumSize), Self.sizeRange)
         raiseWindow = c.value(.raiseWindow, raiseWindow)
         showLine = c.value(.showLine, showLine)
         colorByResult = c.value(.colorByResult, colorByResult)
@@ -678,7 +713,7 @@ extension CursorGesturesConfig {
         repeatTrackpad = c.value(.repeatTrackpad, repeatTrackpad)
         switchWhileRepeating = c.value(.switchWhileRepeating, switchWhileRepeating)
         lineColor = c.value(.lineColor, lineColor)
-        lineWidth = c.value(.lineWidth, lineWidth)
+        lineWidth = held(c.value(.lineWidth, lineWidth), Self.widthRange)
         ignorePostedClicks = c.value(.ignorePostedClicks, ignorePostedClicks)
     }
 }
@@ -734,6 +769,7 @@ enum CursorGestures {
     static let appMargin: CGFloat = 0.2
     static let themePrefix = "theme:"
     static let textLimit = 500
+    static let stepLimit: TimeInterval = 300
 
     static let shapes: [CursorGestureShape] = {
         let u = [CGPoint(x: -1, y: 1)] + arc(0, 0, 1, 180, 360) + [CGPoint(x: 1, y: 1)]
@@ -878,6 +914,10 @@ enum CursorGestures {
         operation(.cursorTranslator, "Cursor Translator", String(localized: "Turn it on, or off when it is on"), "text.bubble", .macursor),
         operation(.cursorShaker, "Cursor Shaker", String(localized: "Turn it on, or off when it is on"), "arrow.left.and.right", .macursor),
         operation(.cursorTrails, "Cursor Trails", String(localized: "Turn it on, or off when it is on"), "cursorarrow.motionlines", .macursor),
+        operation(.cursorHighlight, "Cursor Highlight", String(localized: "Turn it on, or off when it is on"), "cursorarrow.click.2", .macursor),
+        operation(.highlightSpotlight, "Highlight Spotlight", String(localized: "Turn it on, or off when it is on"), "light.max", .macursor),
+        operation(.highlightFlashlight, "Highlight Flashlight", String(localized: "Turn it on, or off when it is on"), "moon.fill", .macursor),
+        operation(.highlightRipple, "Highlight Click Ripple", String(localized: "Turn it on, or off when it is on"), "circle.circle", .macursor),
         operation(.switchByApp, "Per-App Themes", String(localized: "Turn it on, or off when it is on"), "app.badge", .macursor),
     ]
 
@@ -916,6 +956,9 @@ enum CursorGestures {
         case .text(let text): ("text.cursor", .custom, text)
         case .app(let path): ("app", .apps, path.isEmpty ? "" : FileManager.default.displayName(atPath: path))
         case .website(let address): ("globe", .apps, address)
+        case .appleScript(let script): ("applescript", .custom, scriptFile(script).map { FileManager.default.displayName(atPath: $0) } ?? script)
+        case .shortcutsApp(let name): ("square.2.layers.3d", .custom, name)
+        case .shell(let text): ("terminal", .custom, text)
         case .theme, .operation: ("questionmark", .custom, "")
         }
         return CursorGestureAction(id: id, name: name, detail: detail, icon: icon, category: category, kind: kind)
@@ -1039,9 +1082,61 @@ enum CursorGestures {
 
     static func website(_ text: String) -> URL? {
         let text = text.trimmingCharacters(in: .whitespaces)
-        guard let url = URL(string: text.contains("://") ? text : "https://" + text),
-              ["http", "https"].contains(url.scheme?.lowercased()), url.host != nil else { return nil }
-        return url
+        let scheme = text.range(of: "^[A-Za-z][A-Za-z0-9+.-]*(?=:)", options: .regularExpression).map { text[$0].lowercased() }
+        let bare = scheme == nil || text.range(of: "^(localhost|[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+):[0-9]+([/?#]|$)", options: [.regularExpression, .caseInsensitive]) != nil
+        if bare || scheme == "http" || scheme == "https" {
+            guard let url = URL(string: bare ? "https://" + text : text), url.host?.isEmpty == false else { return nil }
+            return url
+        }
+        guard let scheme, !["file", "javascript", "data"].contains(scheme),
+              let encoded = text.addingPercentEncoding(withAllowedCharacters: CharacterSet.urlQueryAllowed.union(CharacterSet(charactersIn: "#%"))) else { return nil }
+        return URL(string: encoded)
+    }
+
+    static func launch(_ command: CursorGestureCommand, limit: TimeInterval = stepLimit) async -> (status: Int32?, errors: String) {
+        let process = Process()
+        let pipe = command.readsErrors ? Pipe() : nil
+        process.executableURL = URL(fileURLWithPath: command.path)
+        process.arguments = command.arguments
+        process.currentDirectoryURL = FileManager.default.homeDirectoryForCurrentUser
+        process.standardInput = FileHandle.nullDevice
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = pipe ?? FileHandle.nullDevice
+        let reader = pipe.map { pipe in Task.detached { pipe.fileHandleForReading.readDataToEndOfFile() } }
+        let status: Int32? = await withCheckedContinuation { continuation in
+            process.terminationHandler = { terminated in
+                continuation.resume(returning: terminated.terminationStatus)
+            }
+            do {
+                try process.run()
+                try? pipe?.fileHandleForWriting.close()
+                DispatchQueue.global().asyncAfter(deadline: .now() + limit) {
+                    guard process.isRunning else { return }
+                    process.terminate()
+                    DispatchQueue.global().asyncAfter(deadline: .now() + 1) {
+                        if process.isRunning { kill(process.processIdentifier, SIGKILL) }
+                    }
+                }
+            } catch {
+                process.terminationHandler = nil
+                try? pipe?.fileHandleForWriting.close()
+                continuation.resume(returning: nil)
+            }
+        }
+        let data = await reader?.value ?? Data()
+        try? pipe?.fileHandleForReading.close()
+        return (status, String(decoding: data, as: UTF8.self))
+    }
+
+    static func shortcutNames(_ listed: String?) -> [String] {
+        var seen = Set<String>()
+        return (listed ?? "").components(separatedBy: .newlines).filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty && seen.insert($0).inserted }
+    }
+
+    static func scriptFile(_ script: String) -> String? {
+        let trimmed = script.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.contains(where: \.isNewline), trimmed.hasPrefix("/") || trimmed.hasPrefix("~/") else { return nil }
+        return (trimmed as NSString).expandingTildeInPath
     }
 
     private static func thin(_ points: [CGPoint]) -> Bool {
@@ -1315,6 +1410,115 @@ struct CursorGestureSnapshot {
     var appAt: @Sendable (CGPoint) -> String? = CursorGestures.app(at:)
     var translator: CursorGestureTrigger?
     var captures: [(id: UInt32, trigger: CursorGestureTrigger)] = []
+
+    func taps(_ keys: UInt) -> Bool {
+        captures.contains { $0.trigger.keys == keys && CursorTwoFingerTap.uses($0.trigger) }
+            || translator.map { $0.keys == keys && CursorTwoFingerTap.uses($0) } == true
+    }
+}
+
+struct CursorTwoFingerTap {
+    struct Finger {
+        let id: AnyHashable
+        let at: CGPoint
+    }
+
+    static let length: TimeInterval = 0.4
+    static let reach: CGFloat = 0.04
+    static let lift: TimeInterval = 0.15
+    static let settle: TimeInterval = 0.06
+    static let window: TimeInterval = 0.5
+    static let touchMask = CGEventMask(1) << CGEventMask(NSEvent.EventType.gesture.rawValue)
+
+    private var started: TimeInterval?
+    private var cancelled = false
+    private var origins: [AnyHashable: CGPoint] = [:]
+    private var last = 0
+    private var firstLift: TimeInterval?
+    private var lifted: TimeInterval?
+    private var touching = 0
+    private var armed: TimeInterval?
+    private var stopped: TimeInterval?
+    private(set) var waiting: (until: TimeInterval, lift: TimeInterval, keys: UInt, at: CGPoint)?
+
+    static func uses(_ trigger: CursorGestureTrigger) -> Bool {
+        trigger.keys != 0 && trigger.button == 1 && !trigger.twoFinger && trigger.device != .mouse
+    }
+
+    static func fingers(_ event: CGEvent) -> [Finger]? {
+        guard let ns = NSEvent(cgEvent: event), ns.type == .gesture else { return nil }
+        return ns.touches(matching: .touching, in: nil).compactMap { touch in
+            (touch.identity as? NSObject).map { Finger(id: AnyHashable($0), at: touch.normalizedPosition) }
+        }
+    }
+
+    func watching(at now: TimeInterval) -> Bool {
+        waiting != nil || isArmed(at: now)
+    }
+
+    private func isArmed(at now: TimeInterval) -> Bool {
+        armed.map { now - $0 <= Self.window } == true
+    }
+
+    mutating func touched(_ fingers: [Finger]?, keys: UInt, at point: CGPoint, now: TimeInterval) {
+        guard let fingers else { return reset() }
+        touching = fingers.count
+        if let lifted, now - lifted > Self.settle { reset() }
+        guard !fingers.isEmpty else { return lift(keys: keys, at: point, now: now) }
+        if lifted != nil { (lifted, waiting) = (nil, nil) }
+        let started = self.started ?? now
+        self.started = started
+        for finger in fingers {
+            if let origin = origins[finger.id] {
+                if hypot(finger.at.x - origin.x, finger.at.y - origin.y) > Self.reach { cancelled = true }
+            } else if firstLift != nil || origins.count == 2 {
+                cancelled = true
+            } else {
+                origins[finger.id] = finger.at
+            }
+        }
+        if firstLift != nil, fingers.count > last { cancelled = true }
+        if firstLift == nil, fingers.count < last { firstLift = now }
+        last = fingers.count
+    }
+
+    private mutating func lift(keys: UInt, at point: CGPoint, now: TimeInterval) {
+        guard let started, lifted == nil else { return }
+        lifted = now
+        let fires = !cancelled && origins.count == 2 && now - started <= Self.length && now - (firstLift ?? now) <= Self.lift && !isArmed(at: now)
+            && (stopped ?? -.infinity) < started - Self.length
+        if fires { waiting = (now + Self.settle, now, keys, point) }
+    }
+
+    mutating func interrupted(at now: TimeInterval) {
+        stopped = now
+        waiting = nil
+    }
+
+    mutating func drops(touch: Bool, at now: TimeInterval) -> Bool {
+        guard let armed else { return false }
+        guard now - armed <= Self.window else {
+            self.armed = nil
+            return false
+        }
+        guard touch, touching < 2 else { return false }
+        self.armed = nil
+        return true
+    }
+
+    mutating func settle(at now: TimeInterval) -> (keys: UInt, at: CGPoint, lift: TimeInterval)? {
+        guard let waiting, now >= waiting.until else { return nil }
+        self.waiting = nil
+        return (waiting.keys, waiting.at, waiting.lift)
+    }
+
+    mutating func arm(_ lift: TimeInterval) {
+        armed = lift
+    }
+
+    mutating func reset() {
+        (started, cancelled, origins, last, firstLift, lifted) = (nil, false, [:], 0, nil, nil)
+    }
 }
 
 final class CursorGestureShared: @unchecked Sendable {
@@ -1352,6 +1556,7 @@ struct CursorGestureInput {
     private var failedOpen = false
     private var ownsScroll = false
     private var swallowing: Set<Int> = []
+    var twoFinger = CursorTwoFingerTap()
     var notes: [CursorGestureNote] = []
     var clicks: [(button: Int, at: CGPoint, keys: UInt)] = []
 
@@ -1416,14 +1621,25 @@ struct CursorGestureInput {
             if repeating?.trigger.button != nil { repeating = nil }
             leftHeld = false
             unanswered = nil
+            twoFinger.reset()
             update()
             return false
         }
         if event.getIntegerValueField(.eventSourceUserData) == CursorGestureKeys.marker { unanswered = nil }
+        guard UInt(type.rawValue) != NSEvent.EventType.gesture.rawValue else { return false }
+        if type == .scrollWheel, [CGScrollPhase.began, .changed].map({ Int64($0.rawValue) }).contains(event.getIntegerValueField(.scrollWheelEventScrollPhase)) {
+            twoFinger.interrupted(at: now)
+        }
         guard event.getIntegerValueField(.eventSourceUserData) != CursorGestureKeys.marker,
               event.getIntegerValueField(.eventSourceUserData) != CursorShaker.marker,
               snapshot.config.accepts(source: event.getIntegerValueField(.eventSourceStateID)) else { return false }
         if [.leftMouseDown, .rightMouseDown, .otherMouseDown].contains(type) {
+            if type == .rightMouseDown,
+               twoFinger.drops(touch: event.getIntegerValueField(.mouseEventSubtype) == Int64(NSEvent.EventSubtype.touch.rawValue), at: now) {
+                swallowing.insert(Int(event.getIntegerValueField(.mouseEventButtonNumber)))
+                return true
+            }
+            twoFinger.interrupted(at: now)
             let pressed = CursorGestureTrigger(keys: NSEvent.ModifierFlags(rawValue: UInt(event.flags.rawValue)).intersection(CursorGestureStroke.keys).rawValue,
                                                button: Int(event.getIntegerValueField(.mouseEventButtonNumber)),
                                                device: CursorGestureDevice(subtype: event.getIntegerValueField(.mouseEventSubtype)))
@@ -1461,14 +1677,30 @@ struct CursorGestureInput {
         switch type {
         case .leftMouseDown:
             swallowing.remove(0)
+            if framing == nil, press == nil,
+               snapshot.translator?.overlaps(CursorGestureTrigger(keys: keys.rawValue, button: 0, device: CursorGestureDevice(subtype: event.getIntegerValueField(.mouseEventSubtype)))) == true {
+                framing = CursorTranslatorPress(button: 0, start: flip(event.location, snapshot))
+                return true
+            }
             let live = current
             leftHeld = CursorGestureRepeat.holds(repeating, drawn: live.points, trigger: live.trigger, held: keys.rawValue,
                                                  at: now, config: config, front: front, pointer: snapshot.appAt(event.location))
             leftSince = now
             return leftHeld
         case .leftMouseDragged:
+            if var moving = framing, moving.button == 0 {
+                moving.dragged(to: flip(event.location, snapshot))
+                framing = moving
+                if moving.drawing { notes.append(.frame(.drawing(moving.start, moving.end))) }
+                return true
+            }
             return leftHeld || swallowing.contains(0)
         case .leftMouseUp:
+            if let ended = framing, ended.button == 0 {
+                framing = nil
+                notes.append(.frame(ended.released))
+                return true
+            }
             guard leftHeld else { return swallowing.remove(0) != nil }
             leftHeld = false
             repeatClick(snapshot, at: now)
@@ -1512,6 +1744,24 @@ struct CursorGestureInput {
             released(ended, snapshot, at: now)
             return true
         }
+    }
+
+    mutating func touched(_ fingers: [CursorTwoFingerTap.Finger]?, keys: UInt, at point: CGPoint, _ snapshot: CursorGestureSnapshot, now: TimeInterval) {
+        guard snapshot.taps(keys) || twoFinger.watching(at: now) else { return twoFinger.touched(nil, keys: keys, at: point, now: now) }
+        if let fingers { twoFinger.touched(fingers, keys: keys, at: point, now: now) }
+    }
+
+    mutating func settle(_ snapshot: CursorGestureSnapshot, at now: TimeInterval) {
+        guard let tap = twoFinger.settle(at: now) else { return }
+        let trigger = CursorGestureTrigger(keys: tap.keys, button: 1, device: .trackpad)
+        if let capture = snapshot.captures.first(where: { $0.trigger.overlaps(trigger) }) {
+            notes.append(.capture(capture.id, keys: capture.trigger.keys))
+        } else if !failedOpen, framing == nil, press == nil, snapshot.translator?.overlaps(trigger) == true {
+            notes.append(.frame(.click(flip(tap.at, snapshot))))
+        } else {
+            return
+        }
+        twoFinger.arm(tap.lift)
     }
 
     private mutating func scrolled(_ event: CGEvent, _ snapshot: CursorGestureSnapshot, at now: TimeInterval) -> Bool {

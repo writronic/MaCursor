@@ -5,13 +5,5 @@
         <link>https://github.com/writronic/macursor</link>
         <description>Most recent changes with links to updates.</description>
         <language>en</language>
-        <item>
-            <title>2.8.5</title>
-            <pubDate>Sat, 14 Nov 2026 18:57:51 +0000</pubDate>
-            <sparkle:version>17</sparkle:version>
-            <sparkle:shortVersionString>2.8.5</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
-            <enclosure url="https://github.com/writronic/MaCursor/releases/download/v2.8.5/MaCursor.dmg" length="17314993" type="application/octet-stream" sparkle:edSignature="UDLMNr0BzN7P0Xl+LFWZQi3frVv8E2YEvxy9usdVH/qx+PvUjRBDatmv+q/E/rb42qAxWQ+bWemv5NtdQtk6AA=="/>
-        </item>
     </channel>
 </rss>

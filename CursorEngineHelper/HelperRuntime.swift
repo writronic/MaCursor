@@ -45,6 +45,13 @@ private func helperDisplayCallback(
     DispatchQueue.main.async { runtime.displayChanged() }
 }
 
+private func helperTouchTapCallback(
+    _ proxy: CGEventTapProxy, _ type: CGEventType, _ event: CGEvent, _ context: UnsafeMutableRawPointer?
+) -> Unmanaged<CGEvent>? {
+    if let context { Unmanaged<CursorGestureTap>.fromOpaque(context).takeUnretainedValue().touched(type, event) }
+    return Unmanaged.passUnretained(event)
+}
+
 private func helperGestureTapCallback(
     _ proxy: CGEventTapProxy, _ type: CGEventType, _ event: CGEvent, _ context: UnsafeMutableRawPointer?
 ) -> Unmanaged<CGEvent>? {
@@ -61,6 +68,9 @@ final class CursorGestureTap: @unchecked Sendable {
     private var port: CFMachPort?
     private var source: CFRunLoopSource?
     private var loop: CFRunLoop?
+    private var timer: CFRunLoopTimer?
+    private var touchPort: CFMachPort?
+    private var touchSource: CFRunLoopSource?
 
     init(owner: CursorGesturesController, config: CursorGesturesConfig) {
         self.owner = owner
@@ -80,7 +90,38 @@ final class CursorGestureTap: @unchecked Sendable {
         ready.wait()
     }
 
+    func listen(_ port: CFMachPort) {
+        guard let source = CFMachPortCreateRunLoopSource(nil, port, 0) else {
+            CGEvent.tapEnable(tap: port, enable: false)
+            return CFMachPortInvalidate(port)
+        }
+        (touchPort, touchSource) = (port, source)
+        CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)
+    }
+
+    fileprivate func touched(_ type: CGEventType, _ event: CGEvent) {
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            if let touchPort { CGEvent.tapEnable(tap: touchPort, enable: true) }
+            return run { input, _ in input.twoFinger.reset() }
+        }
+        let fingers = CursorTwoFingerTap.fingers(event)
+        let keys = NSEvent.ModifierFlags(rawValue: UInt(event.flags.rawValue)).intersection(CursorGestureStroke.keys).rawValue
+        let (point, now) = (event.location, ProcessInfo.processInfo.systemUptime)
+        guard let loop else { return }
+        CFRunLoopPerformBlock(loop, CFRunLoopMode.commonModes.rawValue) { [self] in
+            input.touched(fingers, keys: keys, at: point, shared.snapshot, now: now)
+            send()
+            settleLater()
+        }
+        CFRunLoopWakeUp(loop)
+    }
+
     func stop() {
+        if let touchPort, let touchSource {
+            CGEvent.tapEnable(tap: touchPort, enable: false)
+            CFRunLoopRemoveSource(CFRunLoopGetMain(), touchSource, .commonModes)
+            CFMachPortInvalidate(touchPort)
+        }
         guard let loop else { return }
         CFRunLoopPerformBlock(loop, CFRunLoopMode.commonModes.rawValue) { CFRunLoopStop(CFRunLoopGetCurrent()) }
         CFRunLoopWakeUp(loop)
@@ -100,7 +141,20 @@ final class CursorGestureTap: @unchecked Sendable {
         let swallow = input.tapped(type, event, shared.snapshot, at: ProcessInfo.processInfo.systemUptime)
         if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput, let port { CGEvent.tapEnable(tap: port, enable: true) }
         send()
+        settleLater()
         return swallow
+    }
+
+    private func settleLater() {
+        guard timer == nil, let loop, let until = input.twoFinger.waiting?.until else { return }
+        let timer = CFRunLoopTimerCreateWithHandler(nil, CFAbsoluteTimeGetCurrent() + until - ProcessInfo.processInfo.systemUptime, 0, 0, 0) { [self] _ in
+            self.timer = nil
+            input.settle(shared.snapshot, at: ProcessInfo.processInfo.systemUptime)
+            send()
+            settleLater()
+        }
+        self.timer = timer
+        CFRunLoopAddTimer(loop, timer, .commonModes)
     }
 
     private func serve(_ ready: DispatchSemaphore) {
@@ -113,6 +167,7 @@ final class CursorGestureTap: @unchecked Sendable {
         CFRunLoopAddSource(loop, source, .commonModes)
         ready.signal()
         CFRunLoopRun()
+        if let timer { CFRunLoopTimerInvalidate(timer) }
         CGEvent.tapEnable(tap: port, enable: false)
         CFRunLoopRemoveSource(loop, source, .commonModes)
         CFMachPortInvalidate(port)
@@ -188,15 +243,18 @@ final class HelperRuntime {
     private var menuBarController: MenuBarController?
     private let focusController = MACFocusFollowsMouseController(trustCheck: HelperTrustProbe.isTrusted)
     private let cursorTrails = CursorTrailsController()
+    private let cursorHighlight = CursorHighlightController()
+    private let cursorMagnifier = CursorMagnifierController()
     private lazy var cursorGestures = CursorGesturesController(overlay: cursorTrails)
     private let cursorShaker = CursorShakerController()
     private let cursorTranslator = CursorTranslatorController()
     private let cursorScreenshot = CursorScreenshotController()
     private let cursorBoard = CursorBoardController()
-    private var captureClicks = CursorScreenshotConfig.load().clicks + CursorBoardConfig.load().clicks
+    private var captureClicks = CursorScreenshotConfig.load().clicks + CursorBoardConfig.load().clicks + CursorHighlightConfig.load().clicks
     private let autoSwitchSchedule = MACAutoSwitchScheduleTimer()
 
     func run() {
+        MACForceOverlayScrollers()
         MACPreferences.set(MACHelperBuildIdentityAtPath(Bundle.main.executablePath),
                            forKey: MACPreferences.helperBuildKey)
         defer { stop() }
@@ -253,6 +311,8 @@ final class HelperRuntime {
         observeDistributed(Notification.Name.MACMenuBarDidChange.rawValue)
         observeDistributed(Notification.Name.MACFocusFollowsMouseDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorTrailsDidChange.rawValue)
+        observeDistributed(Notification.Name.MACCursorHighlightDidChange.rawValue)
+        observeDistributed(Notification.Name.MACCursorTranslatorStatusDidChange.rawValue)
         observeDistributed(Notification.Name.MACAutoSwitchAppliedThemeDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorPreferencesDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorGesturesDidChange.rawValue)
@@ -261,6 +321,7 @@ final class HelperRuntime {
         observeDistributed(Notification.Name.MACCursorScreenshotDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorBoardDidChange.rawValue)
         observeDistributed(Notification.Name.MACCursorBoardClearHistory.rawValue)
+        observeDistributed(Notification.Name.MACCursorBoardReloadHistory.rawValue)
         observeDistributed(Notification.Name.MACAppearanceDidChange.rawValue)
         observeDistributed(inputSourceChanged)
         for name in RightClickMenuHandoff.requests.keys {
@@ -313,6 +374,12 @@ final class HelperRuntime {
             self.cursorTranslator.probe()
             return self.cursorTranslator.screenRecording
         }
+        cursorMagnifier.allowed = { [weak self] in
+            guard let self else { return false }
+            self.cursorTranslator.probe()
+            return self.cursorTranslator.screenRecording
+        }
+        cursorMagnifier.requestAccess = { MenuBarService.requestCursorMagnifierAccess() }
         cursorScreenshot.opened = { [weak self] in self?.cursorGestures.publish() }
         cursorGestures.raiseWindow = { [weak self] in self?.focusController.raise($0) ?? false }
         cursorGestures.windowUnderPointer = { [weak self] in self?.focusController.windowUnderPointer() }
@@ -324,6 +391,8 @@ final class HelperRuntime {
         focusController.start()
         focusController.syncTrust()
         cursorTrails.start()
+        cursorHighlight.start()
+        cursorMagnifier.start()
         cursorScreenshot.warmReader()
         CursorScreenshotEditor.imageSource = { [weak self] done in
             guard let self else { return done(nil) }
@@ -377,6 +446,8 @@ final class HelperRuntime {
             focusController.stop()
             cursorGestures.stop()
             cursorTrails.stop()
+            cursorHighlight.stop()
+            cursorMagnifier.stop()
             cursorShaker.stop()
             cursorTranslator.stop()
         }
@@ -431,6 +502,8 @@ final class HelperRuntime {
             unregisterHotKeys()
             registerHotKeys()
         case Notification.Name.MACCursorTranslatorDidChange.rawValue:
+            unregisterHotKeys()
+            registerHotKeys()
             guard !cursorTranslator.configChanged() else { break }
             if focusController.lastTrusted, CursorTranslatorConfig.load().enabled == cursorTranslator.wantsTrust {
                 focusController.trustSynced(true)
@@ -443,7 +516,7 @@ final class HelperRuntime {
             CursorScreenshotHistory.clean()
             unregisterHotKeys()
             registerHotKeys()
-            captureClicks = CursorScreenshotConfig.load().clicks + CursorBoardConfig.load().clicks
+            captureClicks = CursorScreenshotConfig.load().clicks + CursorBoardConfig.load().clicks + CursorHighlightConfig.load().clicks
             if focusController.lastTrusted {
                 cursorGestures.sync(trusted: true)
             } else {
@@ -454,7 +527,7 @@ final class HelperRuntime {
             cursorBoard.configChanged()
             unregisterHotKeys()
             registerHotKeys()
-            captureClicks = CursorScreenshotConfig.load().clicks + CursorBoardConfig.load().clicks
+            captureClicks = CursorScreenshotConfig.load().clicks + CursorBoardConfig.load().clicks + CursorHighlightConfig.load().clicks
             if focusController.lastTrusted, cursorBoard.wantsTrust == wanted {
                 cursorGestures.sync(trusted: true)
             } else {
@@ -462,6 +535,27 @@ final class HelperRuntime {
             }
         case Notification.Name.MACCursorBoardClearHistory.rawValue:
             cursorBoard.clearHistory()
+        case Notification.Name.MACCursorBoardReloadHistory.rawValue:
+            cursorBoard.reloadHistory()
+        case Notification.Name.MACCursorHighlightDidChange.rawValue:
+            cursorHighlight.start()
+            cursorMagnifier.start()
+            if CursorHighlightConfig.load().showsMagnifier, !CursorTranslatorConfig.screenRecordingAllowed { cursorTranslator.probe() }
+            menuBarController?.refreshHighlight()
+            unregisterHotKeys()
+            registerHotKeys()
+            let clicks = CursorScreenshotConfig.load().clicks + CursorBoardConfig.load().clicks + CursorHighlightConfig.load().clicks
+            let changed = clicks.map(\.id) != captureClicks.map(\.id) || clicks.map(\.trigger) != captureClicks.map(\.trigger)
+            captureClicks = clicks
+            if changed {
+                if focusController.lastTrusted {
+                    cursorGestures.sync(trusted: true)
+                } else {
+                    focusController.syncTrust()
+                }
+            }
+        case Notification.Name.MACCursorTranslatorStatusDidChange.rawValue:
+            if cursorTranslator.screenRecording { cursorMagnifier.start() }
         case Notification.Name.MACCursorTrailsDidChange.rawValue:
             cursorTrails.start()
             menuBarController?.refreshTrails()
@@ -510,6 +604,8 @@ final class HelperRuntime {
             cursorTranslator.stop()
             cursorGestures.stop()
             cursorTrails.stop()
+            cursorHighlight.stop()
+            cursorMagnifier.stop()
             cursorShaker.stop()
             return
         }
@@ -522,9 +618,13 @@ final class HelperRuntime {
         focusController.start()
         cursorGestures.stop()
         cursorTrails.stop()
+        cursorHighlight.stop()
+        cursorMagnifier.stop()
         cursorShaker.stop()
         focusController.syncTrust()
         cursorTrails.start()
+        cursorHighlight.start()
+        cursorMagnifier.start()
     }
 
     private func appActivated(_ bundleID: String?) {
@@ -573,6 +673,10 @@ final class HelperRuntime {
                 MACCursorActions.shared.assertPreferredCursorScale()
                 self.cursorTrails.stop()
                 self.cursorTrails.start()
+                self.cursorHighlight.stop()
+                self.cursorMagnifier.stop()
+                self.cursorHighlight.start()
+                self.cursorMagnifier.start()
                 self.cursorGestures.publish()
                 self.cursorTranslator.displaysChanged()
             }
@@ -595,8 +699,12 @@ final class HelperRuntime {
         focusController.start()
         cursorGestures.stop()
         cursorTrails.stop()
+        cursorHighlight.stop()
+        cursorMagnifier.stop()
         focusController.syncTrust()
         cursorTrails.start()
+        cursorHighlight.start()
+        cursorMagnifier.start()
     }
 
     private func shortcutRecordingStopped() {
@@ -625,6 +733,22 @@ final class HelperRuntime {
             }
             registeredThemes[shortcut.id] = shortcut.themeIdentifier
             hotKeyRefs.append(reference)
+        }
+        if let shortcut = CursorHighlightConfig.load().shortcut, MACShortcutIsAllowed(shortcut.modifierFlagsRaw, shortcut.keyCode) {
+            var reference: EventHotKeyRef?
+            let id = EventHotKeyID(signature: Self.hotKeySignature, id: CursorHighlight.hotKeyID)
+            if RegisterEventHotKey(UInt32(shortcut.keyCode), HelperEventPolicy.carbonModifiers(shortcut.modifierFlagsRaw), id,
+                                   GetApplicationEventTarget(), 0, &reference) == noErr, let reference {
+                hotKeyRefs.append(reference)
+            }
+        }
+        for (keyID, shortcut) in CursorHighlightConfig.load().hotKeys {
+            var reference: EventHotKeyRef?
+            let id = EventHotKeyID(signature: Self.hotKeySignature, id: keyID)
+            if RegisterEventHotKey(UInt32(shortcut.keyCode), HelperEventPolicy.carbonModifiers(shortcut.modifierFlagsRaw), id,
+                                   GetApplicationEventTarget(), 0, &reference) == noErr, let reference {
+                hotKeyRefs.append(reference)
+            }
         }
         if let shortcut = CursorShakerConfig.load().shortcut, MACShortcutIsAllowed(shortcut.modifierFlagsRaw, shortcut.keyCode) {
             var reference: EventHotKeyRef?
@@ -666,6 +790,15 @@ final class HelperRuntime {
                 hotKeyRefs.append(reference)
             }
         }
+        let translator = CursorTranslatorConfig.load()
+        if translator.enabled, let shortcut = translator.shortcut, MACCaptureShortcutIsAllowed(shortcut.modifierFlagsRaw, shortcut.keyCode) {
+            var reference: EventHotKeyRef?
+            let id = EventHotKeyID(signature: Self.hotKeySignature, id: CursorTranslator.hotKeyID)
+            if RegisterEventHotKey(UInt32(shortcut.keyCode), HelperEventPolicy.carbonModifiers(shortcut.modifierFlagsRaw), id,
+                                   GetApplicationEventTarget(), 0, &reference) == noErr, let reference {
+                hotKeyRefs.append(reference)
+            }
+        }
     }
 
     private func unregisterHotKeys() {
@@ -686,12 +819,24 @@ final class HelperRuntime {
             }
             return noErr
         }
+        if running, signature == Self.hotKeySignature, id == CursorHighlight.hotKeyID {
+            MenuBarService.setCursorHighlight(\.enabled, !CursorHighlightConfig.load().enabled)
+            return noErr
+        }
+        if running, signature == Self.hotKeySignature, let next = CursorHighlightConfig.load().pressed(id) {
+            next.save()
+            return noErr
+        }
         if running, signature == Self.hotKeySignature, id == CursorBoard.listHotKeyID {
             cursorBoard.toggleList()
             return noErr
         }
         if running, signature == Self.hotKeySignature, id == CursorBoard.panelHotKeyID {
             cursorBoard.togglePanel()
+            return noErr
+        }
+        if running, signature == Self.hotKeySignature, id == CursorTranslator.hotKeyID {
+            cursorTranslator.keyPressed()
             return noErr
         }
         if running, signature == Self.hotKeySignature,
@@ -762,6 +907,7 @@ final class CursorGesturesController {
     var cursorBoard: @MainActor () -> Void = {}
     var screenRecording: @MainActor () -> Bool = { false }
     private var clicksLeft = false
+    private var touchesWanted = false
 
     init(overlay: CursorTrailsController) {
         self.overlay = overlay
@@ -779,12 +925,14 @@ final class CursorGesturesController {
         let stored = CursorGesturesConfig.load()
         let latest = stored.enabled ? stored : CursorGesturesConfig()
         let clicks = captures()
-        let left = clicks.contains { $0.trigger.button == 0 }
+        let left = clicks.contains { $0.trigger.button == 0 } || translator()?.button == 0
+        let touches = clicks.contains { CursorTwoFingerTap.uses($0.trigger) } || translator().map(CursorTwoFingerTap.uses) == true
         let wanted = (latest.enabled || translator() != nil || !clicks.isEmpty) && trusted
         let restart = wanted != (tap != nil) || wanted && (latest.enabled != config.enabled || latest.keyTriggers != config.keyTriggers || latest.padTriggers != config.padTriggers
-            || left != clicksLeft)
+            || left != clicksLeft || touches != touchesWanted)
         config = latest
         clicksLeft = left
+        touchesWanted = touches
         strokeKeys = CursorGestureStroke(triggers: latest.keyTriggers).triggers
         guard restart else { return publish() }
         reloadThemes()
@@ -806,9 +954,13 @@ final class CursorGesturesController {
                                 return event
                             }].compactMap { $0 }
             }
-            if let port = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap, eventsOfInterest: config.tapMask(clicksLeft: left),
+            if let port = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap, eventsOfInterest: config.tapMask(clicksLeft: left, touches: touches),
                                             callback: helperGestureTapCallback, userInfo: Unmanaged.passUnretained(session).toOpaque()) {
                 session.start(port)
+                if touches, let touchPort = CGEvent.tapCreate(tap: .cgSessionEventTap, place: .headInsertEventTap, options: .defaultTap, eventsOfInterest: CursorTwoFingerTap.touchMask,
+                                                              callback: helperTouchTapCallback, userInfo: Unmanaged.passUnretained(session).toOpaque()) {
+                    session.listen(touchPort)
+                }
             }
         }
         overlay.start()
@@ -998,12 +1150,25 @@ final class CursorGesturesController {
             guard FileManager.default.fileExists(atPath: path) else { return false }
             NSWorkspace.shared.openApplication(at: URL(fileURLWithPath: path), configuration: NSWorkspace.OpenConfiguration())
         case .website(let text):
-            guard let url = CursorGestures.website(text) else { return false }
-            return NSWorkspace.shared.open(url)
+            guard let url = CursorGestures.website(text), NSWorkspace.shared.urlForApplication(toOpen: url) != nil, NSWorkspace.shared.open(url) else {
+                NSSound.beep()
+                return false
+            }
         case .theme(let identifier):
             return apply(identifier)
         case .operation(let operation):
             return operate(operation, target: target, keys: keys)
+        case .appleScript, .shortcutsApp, .shell:
+            guard let command = action.kind.command else { return false }
+            Task {
+                let result = await CursorGestures.launch(command)
+                guard result.status != 0 else { return }
+                if result.errors.contains("(-1743)") {
+                    MenuBarService.openAutomationSettings()
+                } else {
+                    NSSound.beep()
+                }
+            }
         }
         return true
     }
@@ -1063,6 +1228,14 @@ final class CursorGesturesController {
             MenuBarService.setCursorShakerEnabled(!CursorShakerConfig.load().enabled)
         case .cursorTrails:
             MenuBarService.setCursorTrails(\.enabled, !CursorTrailsConfig.load().enabled)
+        case .cursorHighlight:
+            MenuBarService.setCursorHighlight(\.enabled, !CursorHighlightConfig.load().enabled)
+        case .highlightSpotlight:
+            MenuBarService.setCursorHighlight(\.spotlight, !CursorHighlightConfig.load().spotlight)
+        case .highlightFlashlight:
+            MenuBarService.setCursorHighlight(\.flashlight, !CursorHighlightConfig.load().flashlight)
+        case .highlightRipple:
+            MenuBarService.setCursorHighlight(\.ripple, !CursorHighlightConfig.load().ripple)
         case .switchByApp:
             MenuBarService.setSwitchByApp(!((MACAutoSwitchEffects.shared.readConfig()?["switchByApp"] as? NSNumber)?.boolValue ?? false))
         default:
@@ -1123,19 +1296,24 @@ final class CursorTrailsController {
     private var samples: [CursorTrailsSample] = []
     private var dots: [CursorTrailsDot] = []
     private var restTip: CGPoint?
+    private var gate = CursorTrailsGate()
     private var stops: [UInt32] = []
     private var theme: String?
     private var copy: CursorTrailsCopy?
     private var textures: [MTLTexture] = []
     private var copyTheme: String?
+    private var followsMotion = false
 
     func start() {
         let previous = config
         config = CursorTrailsConfig.load()
+        if config != previous { gate = CursorTrailsGate() }
+        followsMotion = CursorHighlight.followsReduceMotion
         guard config.enabled || strokes?.isRunning == true else { return stop() }
         refreshStops()
-        let renderer = config.enabled && config.useGPU && config.style != .softDots ? CursorTrailsMetal.shared : nil
-        if config.style != previous.style || config.useGPU != previous.useGPU || config.enabled != previous.enabled { stop() }
+        refreshCopy()
+        let renderer = config.enabled && config.useGPU && config.recipes == nil ? CursorTrailsMetal.shared : nil
+        if config.style != previous.style || config.useGPU != previous.useGPU || config.enabled != previous.enabled || config.emits != previous.emits { stop() }
         if !config.enabled { clock?.cancel(); clock = nil; samples = []; dots = []; show([]) }
         guard monitors.isEmpty else { return settle() }
         metal = renderer
@@ -1170,6 +1348,7 @@ final class CursorTrailsController {
         settle()
         samples = []
         dots = []
+        gate = CursorTrailsGate()
         drawn = false
         shown = false
         copyTheme = nil
@@ -1192,14 +1371,15 @@ final class CursorTrailsController {
         let previous = stops
         refreshStops()
         refreshCopy()
+        if !glows.isEmpty { glow(at: NSEvent.mouseLocation) }
         guard stops != previous else { return }
         if pauseTimer != nil {
             emitters { emitter, _ in
                 emitter.emitterCells = config.particles(stops: stops)
+                config.recolour(emitter.emitterChildren, stops: stops)
                 emitter.beginTime = CACurrentMediaTime()
             }
         }
-        if !glows.isEmpty { glow(at: NSEvent.mouseLocation) }
     }
 
     private func moved() {
@@ -1209,7 +1389,11 @@ final class CursorTrailsController {
         guard restTip.map({ MACFFMMovementExceedsThreshold($0, tip, 0.5) }) ?? true else { return }
         restTip = tip
         glow(at: nil)
-        guard !NSWorkspace.shared.accessibilityDisplayShouldReduceMotion else { return }
+        guard !CursorHighlight.hidesForMotion(follows: followsMotion, reduceMotion: NSWorkspace.shared.accessibilityDisplayShouldReduceMotion) else { return }
+        guard gate.admits(tip, at: ProcessInfo.processInfo.systemUptime, distance: config.startDistance) else {
+            if pauseTimer == nil { glow(at: tip) }
+            return
+        }
         if config.emits { return emit() }
         refreshStops()
         refreshCopy()
@@ -1224,15 +1408,16 @@ final class CursorTrailsController {
     private func tick() {
         let now = ProcessInfo.processInfo.systemUptime
         let tip = NSEvent.mouseLocation
-        if config.style == .softDots {
-            (samples, dots) = CursorTrailsDot.step(samples, dots, to: tip, at: now, lifetime: config.lifetime, width: config.width, stops: stops)
+        let (spot, births) = gate.frame(tip, at: now, distance: config.startDistance, samples: samples, lead: config.drawsCopies ? nil : config.lead(tip, on: copy))
+        if let recipes = config.recipes {
+            (samples, dots) = CursorTrailsDot.step(samples, dots, to: spot, at: now, lifetime: config.lifetime, width: config.width, stops: stops, recipes: births ? recipes : [])
             show(dots, at: now)
         } else if config.drawsCopies {
-            samples = CursorTrailsCopy.advance(samples, to: tip, at: now, count: config.length)
-            show(copies: samples, tip: tip)
+            samples = CursorTrailsCopy.advance(samples, to: spot, at: now, count: config.length)
+            show(copies: samples, tip: spot)
         } else {
-            samples = CursorTrailsSample.advance(samples, to: tip, at: now, length: config.lifetime)
-            show(CursorTrailsPiece.line(samples, tip: tip, at: now, length: config.lifetime, width: CGFloat(config.width), fade: config.fade, stops: stops))
+            samples = CursorTrailsSample.advance(samples, to: spot, at: now, length: config.lifetime)
+            show(CursorTrailsPiece.line(samples, tip: spot, at: now, length: config.lifetime, width: CGFloat(config.width), fade: config.fade, stops: stops))
         }
         guard samples.isEmpty, dots.isEmpty else { return }
         clock?.cancel()
@@ -1286,6 +1471,7 @@ final class CursorTrailsController {
         let fresh = pauseTimer == nil
         if fresh {
             refreshStops()
+            refreshCopy()
             let timer = DispatchSource.makeTimerSource(queue: .main)
             timer.setEventHandler { [weak self] in MainActor.assumeIsolated { self?.rest() } }
             timer.resume()
@@ -1294,14 +1480,17 @@ final class CursorTrailsController {
         }
         emitting = true
         pauseTimer?.schedule(deadline: .now() + CursorTrailsStyle.pause)
-        let tip = NSEvent.mouseLocation
+        let tip = config.lead(NSEvent.mouseLocation, on: copy)
         emitters { emitter, origin in
             if fresh {
                 emitter.emitterCells = config.particles(stops: stops)
+                emitter.sublayers = config.layerEmitters(under: emitter, stops: stops)
                 emitter.beginTime = CACurrentMediaTime()
+                emitter.renderMode = config.style.recipe?.additive == true ? .additive : .unordered
             }
             emitter.emitterPosition = CGPoint(x: tip.x - origin.x, y: tip.y - origin.y)
             emitter.birthRate = 1
+            config.aim(emitter.emitterChildren, at: emitter.emitterPosition)
         }
     }
 
@@ -1312,7 +1501,10 @@ final class CursorTrailsController {
         }
         emitting = false
         pauseTimer?.schedule(deadline: .now() + config.lifetime)
-        emitters { emitter, _ in emitter.birthRate = 0 }
+        emitters { emitter, _ in
+            emitter.birthRate = 0
+            emitter.emitterChildren.forEach { $0.birthRate = 0 }
+        }
     }
 
     private func settle() {
@@ -1322,6 +1514,7 @@ final class CursorTrailsController {
         emitters { emitter, _ in
             emitter.birthRate = 0
             emitter.emitterCells = nil
+            emitter.sublayers = nil
         }
         glow(at: nil)
     }
@@ -1333,7 +1526,7 @@ final class CursorTrailsController {
         glows = []
         if let tip, config.glow {
             for window in windows {
-                let glow = config.glowLayer(at: tip, in: window.frame, stops: stops)
+                let glow = config.glowLayer(at: config.lead(tip, on: copy), in: window.frame, stops: stops)
                 glow.contentsScale = window.backingScaleFactor
                 window.contentView?.layer?.addSublayer(glow)
                 glows.append(glow)
@@ -1365,7 +1558,7 @@ final class CursorTrailsController {
     }
 
     private func refreshCopy() {
-        guard config.drawsCopies else { return }
+        guard config.drawsCopies || config.start != .hotSpot else { return }
         let file = themeFile()
         let scale = (MACPreferences.value(forKey: MACPreferences.cursorScaleKey) as? NSNumber)?.doubleValue ?? 1
         let leftHanded = file.path != nil && MACPreferences.isLeftHanded
@@ -1376,7 +1569,7 @@ final class CursorTrailsController {
             (try? Data(contentsOf: URL(fileURLWithPath: path))).flatMap { try? PropertyListSerialization.propertyList(from: $0, format: nil) as? [AnyHashable: Any] }
         }
         copy = CursorTrailsCopy(theme: file.path.flatMap(plist), baseline: plist(MACCursorCapture.systemDefaultPath), scale: scale, leftHanded: leftHanded).map { config.painted($0, stops: stops) }
-        textures = copy.flatMap { metal?.textures($0) } ?? []
+        textures = config.drawsCopies ? copy.flatMap { metal?.textures($0) } ?? [] : []
     }
 
     private func themeFile() -> (path: String?, key: String) {

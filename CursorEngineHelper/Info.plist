@@ -18,9 +18,9 @@
 	<key>LSUIElement</key>
 	<true/>
 	<key>NSAppleEventsUsageDescription</key>
-	<string>This lets the MaCursor button in the Finder toolbar work inside iCloud folders.</string>
+	<string>This lets the MaCursor button in the Finder toolbar work inside iCloud folders, and lets your Cursor Gestures run scripts that control other apps.</string>
 	<key>NSScreenCaptureUsageDescription</key>
-	<string>Cursor Translator reads the text inside its frame, and the text goes only to the Translation Service you choose. Cursor Capture takes a picture of your screen when you ask, and the picture stays on your Mac.</string>
+	<string>Cursor Translator reads the text inside its frame, and the text goes only to the Translation Service you choose. Cursor Capture takes a picture of your screen when you ask, and the picture stays on your Mac. Cursor Highlight enlarges the screen around the pointer while its magnifier is on, and nothing is saved.</string>
 	<key>NSDesktopFolderUsageDescription</key>
 	<string>Cursor Capture saves your pictures to your Desktop when you ask.</string>
 	<key>NSHumanReadableCopyright</key>

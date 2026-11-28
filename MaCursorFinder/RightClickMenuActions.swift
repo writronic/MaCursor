@@ -6,6 +6,8 @@ import UniformTypeIdentifiers
     func copySelectedPaths()
     func copyFolderPath()
     func newFile(_ sender: NSMenuItem)
+    func cutSelectedItems()
+    func pasteHere()
     func hideSelectedFiles()
     func unhideSelectedFiles()
     func hideAllFilesInPath()
@@ -17,6 +19,8 @@ enum RightClickMenuAction: Equatable {
     case copySelectedPaths
     case copyFolderPath
     case newFile(Int, RightClickMenuFile)
+    case cutSelectedItems
+    case pasteHere
     case hideSelectedFiles
     case unhideSelectedFiles
     case hideAllFilesInPath
@@ -27,6 +31,8 @@ enum RightClickMenuAction: Equatable {
         case .application(let list, _, let application): return list.itemTitle(application.displayName)
         case .copySelectedPaths, .copyFolderPath: return RightClickMenuSwitch.copyPath.title
         case .newFile(_, let file): return file.name
+        case .cutSelectedItems: return RightClickMenuSwitch.cut.title
+        case .pasteHere: return RightClickMenuSwitch.pasteHere.title
         case .hideSelectedFiles: return RightClickMenuSwitch.hideSelected.title
         case .unhideSelectedFiles: return RightClickMenuSwitch.unhideSelected.title
         case .hideAllFilesInPath: return RightClickMenuSwitch.hideAll.title
@@ -54,6 +60,8 @@ enum RightClickMenuAction: Equatable {
         case .application(_, _, let application): return RightClickMenuActions.applicationIcon(application)
         case .copySelectedPaths, .copyFolderPath: return RightClickMenuActions.copyPathIcon()
         case .newFile(_, let file): return RightClickMenuActions.fileIcon(for: RightClickMenuActions.contentType(UTType(filenameExtension: file.fileExtension)))
+        case .cutSelectedItems: return RightClickMenuActions.symbolIcon(RightClickMenuSwitch.cut.symbolName)
+        case .pasteHere: return RightClickMenuActions.symbolIcon(RightClickMenuSwitch.pasteHere.symbolName)
         case .hideSelectedFiles, .hideAllFilesInPath: return RightClickMenuActions.symbolIcon(RightClickMenuSwitch.hideSelected.symbolName)
         case .unhideSelectedFiles, .unhideAllFilesInPath: return RightClickMenuActions.symbolIcon(RightClickMenuSwitch.unhideSelected.symbolName)
         }
@@ -65,6 +73,8 @@ enum RightClickMenuAction: Equatable {
         case .copySelectedPaths: return #selector(RightClickMenuActionTarget.copySelectedPaths)
         case .copyFolderPath: return #selector(RightClickMenuActionTarget.copyFolderPath)
         case .newFile: return #selector(RightClickMenuActionTarget.newFile(_:))
+        case .cutSelectedItems: return #selector(RightClickMenuActionTarget.cutSelectedItems)
+        case .pasteHere: return #selector(RightClickMenuActionTarget.pasteHere)
         case .hideSelectedFiles: return #selector(RightClickMenuActionTarget.hideSelectedFiles)
         case .unhideSelectedFiles: return #selector(RightClickMenuActionTarget.unhideSelectedFiles)
         case .hideAllFilesInPath: return #selector(RightClickMenuActionTarget.hideAllFilesInPath)
@@ -87,7 +97,8 @@ struct RightClickMenuPlace {
     func allows(_ item: RightClickMenuItem) -> Bool {
         switch item {
         case .file, .group(.newFile): return canCreateFiles
-        case .action(.hideSelected), .action(.unhideSelected), .action(.hideAll), .action(.unhideAll): return canChangeVisibility
+        case .action(.cut), .action(.hideSelected), .action(.unhideSelected), .action(.hideAll), .action(.unhideAll): return canChangeVisibility
+        case .action(.pasteHere): return canChangeVisibility && canCreateFiles
         default: return true
         }
     }
@@ -121,6 +132,8 @@ enum RightClickMenuActions {
         switch item {
         case .group: return nil
         case .action(.copyPath): return context == .items ? .copySelectedPaths : .copyFolderPath
+        case .action(.cut): return .cutSelectedItems
+        case .action(.pasteHere): return .pasteHere
         case .action(.hideSelected): return .hideSelectedFiles
         case .action(.unhideSelected): return .unhideSelectedFiles
         case .action(.hideAll): return .hideAllFilesInPath
@@ -398,6 +411,41 @@ enum RightClickMenuActions {
             }
         }
         throw CocoaError(.fileWriteUnknown)
+    }
+
+    static var cutListURL: URL? {
+        FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: RightClickMenuSettings.appGroupIdentifier)?
+            .appendingPathComponent("RightClickMenuCutItems.json")
+    }
+
+    static func cutItems(_ urls: [URL], list: URL? = cutListURL) throws {
+        guard let list, !urls.isEmpty else { throw CocoaError(.fileNoSuchFile) }
+        try JSONEncoder().encode(urls.map(\.path)).write(to: list, options: .atomic)
+    }
+
+    static func pasteCutItems(into directory: URL, list: URL? = cutListURL,
+                              move: (URL, URL) throws -> Void = FileManager.default.moveItem(at:to:)) -> (moved: [URL], failureCount: Int) {
+        guard let list, let data = try? Data(contentsOf: list),
+              let paths = try? JSONDecoder().decode([String].self, from: data), !paths.isEmpty else { return ([], 1) }
+        let folder = directory.resolvingSymlinksInPath().path
+        var moved: [URL] = []
+        var failureCount = 0
+        for path in paths {
+            let source = URL(fileURLWithPath: path)
+            guard source.deletingLastPathComponent().resolvingSymlinksInPath().path != folder else { continue }
+            let name = source.lastPathComponent
+            let base = source.deletingPathExtension().lastPathComponent
+            let split = directory.appendingPathComponent(base).appendingPathExtension(source.pathExtension).lastPathComponent == name
+            do {
+                moved.append(try createFile(in: directory, baseName: split ? base : name, ext: split ? source.pathExtension : "") {
+                    try move(source, $0)
+                })
+            } catch {
+                failureCount += 1
+            }
+        }
+        try? FileManager.default.removeItem(at: list)
+        return (moved, failureCount)
     }
 }
 

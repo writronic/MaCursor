@@ -8,15 +8,16 @@ class LibraryController: @unchecked Sendable {
     weak var appliedTheme: CursorLibrary? {
         didSet {
             if let id = appliedTheme?.identifier {
-                MACPreferences.set(id, forKey: MACPreferences.appliedCursorKey)
+                MACPreferences.set(id, forKey: MACPreferences.appliedCursorKey, operations: preferences)
             } else {
-                MACPreferences.set(nil, forKey: MACPreferences.appliedCursorKey)
+                MACPreferences.set(nil, forKey: MACPreferences.appliedCursorKey, operations: preferences)
             }
         }
     }
 
     let undoManager: UndoManager
     let libraryURL: URL
+    private let preferences: MACPreferences.Operations
 
     var trashItem: (URL) throws -> URL? = { url in
         var resultingURL: NSURL?
@@ -27,8 +28,9 @@ class LibraryController: @unchecked Sendable {
     private var willSaveObserver: Any?
 
 
-    init(url: URL) {
+    init(url: URL, preferences: MACPreferences.Operations = .live) {
         self.libraryURL = url
+        self.preferences = preferences
         self.undoManager = UndoManager()
 
         willSaveObserver = NotificationCenter.default.addObserver(
@@ -88,7 +90,7 @@ class LibraryController: @unchecked Sendable {
         let themesPath = libraryURL.path
 
         guard let contents = try? fm.contentsOfDirectory(atPath: themesPath) else { return }
-        let applied = MACPreferences.value(forKey: MACPreferences.appliedCursorKey) as? String
+        let applied = MACPreferences.value(forKey: MACPreferences.appliedCursorKey, operations: preferences) as? String
 
         for filename in contents {
             guard !filename.hasPrefix(".") else { continue }
@@ -117,6 +119,32 @@ class LibraryController: @unchecked Sendable {
         guard lib.write(toFile: lib.fileURL!.path, atomically: true) else { return false }
 
         addTheme(lib)
+        return true
+    }
+
+    static func existingTheme(sameNameAs identifier: String, in themes: some Sequence<CursorLibrary>, excluding taken: [CursorLibrary]) -> CursorLibrary? {
+        let open = themes.filter { theme in !taken.contains { $0 === theme } }.sorted { $0.identifier < $1.identifier }
+        let same = { (candidate: String) in candidate.caseInsensitiveCompare(identifier) == .orderedSame }
+        return open.first { same($0.identifier) } ?? open.first { same(CursorLibrary.sanitizeName($0.name)) }
+    }
+
+    @MainActor
+    func replaceOrAdd(_ lib: CursorLibrary, replacing old: CursorLibrary?) -> Bool {
+        guard let old else {
+            return importTheme(lib)
+        }
+        lib.undoManager.disableUndoRegistration()
+        (lib.name, lib.identifier) = (old.name, old.identifier)
+        lib.undoManager.enableUndoRegistration()
+        lib.fileURL = old.fileURL ?? url(for: lib)
+        guard let path = lib.fileURL?.path, lib.write(toFile: path, atomically: true) else { return false }
+        old.library = nil
+        lib.library = self
+        themes = themes.filter { $0 !== old }
+        themes.insert(lib)
+        if appliedTheme === old {
+            appliedTheme = lib
+        }
         return true
     }
 
@@ -234,7 +262,7 @@ class LibraryController: @unchecked Sendable {
 
 
     private func willSaveNotification(_ note: Notification) {
-        guard let theme = note.object as? CursorLibrary else { return }
+        guard let theme = note.object as? CursorLibrary, theme.library === self else { return }
         theme.fileURL = url(for: theme)
     }
 }

@@ -20,6 +20,7 @@ final class AccessWindowController: NSWindowController, NSWindowDelegate {
         window.titlebarAppearsTransparent = true
         window.isMovableByWindowBackground = true
         window.isReleasedWhenClosed = false
+        window.useMacOS27Background()
         super.init(window: window)
         window.delegate = self
     }

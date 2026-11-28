@@ -30,11 +30,16 @@ enum MACPreferences {
     static let languageKey               = "MACLanguage"
     static let hideTahoeCursorsKey       = "MACHideTahoeCursors"
     static let advancedEditorLayoutKey   = "MACAdvancedEditorLayout"
-    static let autoSwitchRulesKey        = "MACAutoSwitchRules"
+    static let themesLayoutKey           = "MACThemesLayout"
+    static let galleryLayoutKey          = "MACGalleryLayout"
+    static let showCursorIdentifiersKey  = "MACShowCursorIdentifiers"
+    static let autoSwitchRulesKey       = "MACAutoSwitchRules"
     static let appOverrideKey            = "MACAutoSwitchAppOverride"
     static let appOverrideBaseKey        = "MACAutoSwitchAppOverrideBase"
     static let focusFollowsMouseKey      = "MACFocusFollowsMouse"
     static let cursorTrailsKey           = "MACCursorTrails"
+    static let cursorHighlightKey        = "MACCursorHighlight"
+    static let followReduceMotionKey     = "MACFollowReduceMotion"
     static let cursorGesturesKey         = "MACCursorGestures"
     static let cursorShakerKey           = "MACCursorShaker"
     static let cursorScreenshotKey       = "MACCursorScreenshot"
@@ -58,6 +63,7 @@ enum MACPreferences {
     static let pendingScreenshotAccessWindowKey = "MACPendingScreenshotAccessWindow"
     static let pendingTranslatorAccessWindowKey = "MACPendingTranslatorAccessWindow"
     static let pendingBoardAccessWindowKey = "MACPendingBoardAccessWindow"
+    static let pendingMagnifierAccessWindowKey = "MACPendingMagnifierAccessWindow"
     static let welcomeShownKey           = "MACWelcomeShown"
     static let welcomePageKey            = "MACWelcomePage"
     static let fullDiskAccessAskedKey   = "MACFullDiskAccessAsked"
@@ -76,6 +82,9 @@ enum MACPreferences {
         welcomePageKey,
         hideTahoeCursorsKey,
         advancedEditorLayoutKey,
+        themesLayoutKey,
+        galleryLayoutKey,
+        showCursorIdentifiersKey,
         cursorShadowKey,
         padCursorCanvasKey,
         autoSwitchRulesKey,
@@ -83,6 +92,8 @@ enum MACPreferences {
         appOverrideBaseKey,
         focusFollowsMouseKey,
         cursorTrailsKey,
+        cursorHighlightKey,
+        followReduceMotionKey,
         cursorGesturesKey,
         cursorShakerKey,
         cursorScreenshotKey,
@@ -105,12 +116,16 @@ enum MACPreferences {
         (value(forKey: hideTahoeCursorsKey) as? NSNumber)?.boolValue ?? true
     }
 
-    static var padCursorCanvas: Bool {
-        (value(forKey: padCursorCanvasKey) as? NSNumber)?.boolValue ?? true
+    static func padCursorCanvas(operations: Operations = .live) -> Bool {
+        (value(forKey: padCursorCanvasKey, operations: operations) as? NSNumber)?.boolValue ?? true
     }
 
-    static var advancedEditorLayout: String {
-        (value(forKey: advancedEditorLayoutKey) as? String) ?? "list"
+    static func advancedEditorLayout(operations: Operations = .live) -> String {
+        (value(forKey: advancedEditorLayoutKey, operations: operations) as? String) ?? ""
+    }
+
+    static var showCursorIdentifiers: Bool {
+        flag(showCursorIdentifiersKey)
     }
 
     static var isLeftHanded: Bool {

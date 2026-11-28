@@ -43,6 +43,8 @@ struct CursorEditorView: View {
     var onReplaceSource: ((URL) throws -> Void)? = nil
     var onClearSlot: (() -> Void)? = nil
 
+    @State private var confirmingClear = false
+
     private var availableIdentifiers: [(identifier: String, name: String)] {
         CursorIdentifier.allIdentifiers.filter {
             $0.identifier == cursor.identifier || !usedIdentifiers.contains($0.identifier)
@@ -51,94 +53,118 @@ struct CursorEditorView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
-                Section {
-                    Picker("Cursor Type:", selection: $cursor.identifier) {
-                        ForEach(availableIdentifiers, id: \.identifier) { entry in
-                            Text(entry.name).tag(entry.identifier)
+            VStack(alignment: .leading, spacing: 12) {
+                GroupBox {
+                    cell("Cursor Type") {
+                        Picker("Cursor Type", selection: $cursor.identifier) {
+                            ForEach(availableIdentifiers, id: \.identifier) { entry in
+                                Text(entry.name).tag(entry.identifier)
+                            }
                         }
-                    }
-                    .onChangeCompat(of: cursor.identifier) { _ in onDirty?() }
-                }
-
-                Divider()
-
-                Section("Animation") {
-                    HStack(spacing: 16) {
-                        LabeledContent("Frame Count:") {
-                            NumericTextField(value: Binding(
-                                get: { Double(cursor.frameCount) },
-                                set: { cursor.applyFrameCount(NumericFieldValue.integer(from: $0)) }
-                            ), fractionDigits: 0)
-                                .frame(width: 60)
-                                .onChangeCompat(of: cursor.frameCount) { _ in onDirty?() }
-                        }
-
-                        LabeledContent("Frame Duration:") {
-                            NumericTextField(
-                                value: $cursor.frameDuration,
-                                fractionDigits: ThemeFieldLimits.frameDurationFractionDigits)
-                                .frame(width: 80)
-                                .onChangeCompat(of: cursor.frameDuration) { _ in onDirty?() }
-                            Text("sec")
-                                .foregroundStyle(.secondary)
-                        }
+                        .labelsHidden()
+                        .fixedSize()
+                        .onChangeCompat(of: cursor.identifier) { _ in onDirty?() }
                     }
                 }
 
-                Divider()
-
-                Section("Representations") {
-                    HStack(spacing: 16) {
+                box("Representations") {
+                    HStack(spacing: 0) {
                         RepresentationDropZone(cursor: cursor, scale: 100, label: "1×", onDirty: onDirty)
+                            .frame(maxWidth: .infinity)
                         RepresentationDropZone(cursor: cursor, scale: 200, label: "2×", onDirty: onDirty)
+                            .frame(maxWidth: .infinity)
                         RepresentationDropZone(cursor: cursor, scale: 500, label: "5×", onDirty: onDirty)
+                            .frame(maxWidth: .infinity)
                         RepresentationDropZone(cursor: cursor, scale: 1000, label: "10×", onDirty: onDirty)
+                            .frame(maxWidth: .infinity)
                     }
+                    .padding(.vertical, 4)
                 }
 
-                Divider()
-
-                Section("Hot Spot") {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack(spacing: 16) {
-                            LabeledContent("X:") {
-                                NumericTextField(value: Binding(
-                                    get: { Double(cursor.hotSpot.x) },
-                                    set: { cursor.hotSpot.x = CGFloat($0); onDirty?() }
-                                ), fractionDigits: 1)
-                                    .frame(width: 60)
+                section("Animation and Hot Spot") {
+                    HStack(spacing: 10) {
+                        VStack(spacing: 10) {
+                            HStack(spacing: 10) {
+                                GroupBox {
+                                    cell("X") {
+                                        NumericTextField(value: Binding(
+                                            get: { Double(cursor.hotSpot.x) },
+                                            set: { cursor.hotSpot.x = CGFloat($0); onDirty?() }
+                                        ), fractionDigits: 1)
+                                            .frame(width: 50)
+                                    }
+                                }
+                                GroupBox {
+                                    cell("Y") {
+                                        NumericTextField(value: Binding(
+                                            get: { Double(cursor.hotSpot.y) },
+                                            set: { cursor.hotSpot.y = CGFloat($0); onDirty?() }
+                                        ), fractionDigits: 1)
+                                            .frame(width: 50)
+                                    }
+                                }
                             }
-
-                            LabeledContent("Y:") {
-                                NumericTextField(value: Binding(
-                                    get: { Double(cursor.hotSpot.y) },
-                                    set: { cursor.hotSpot.y = CGFloat($0); onDirty?() }
-                                ), fractionDigits: 1)
-                                    .frame(width: 60)
+                            HStack(spacing: 10) {
+                                GroupBox {
+                                    cell("Frame Count") {
+                                        NumericTextField(value: Binding(
+                                            get: { Double(cursor.frameCount) },
+                                            set: { cursor.applyFrameCount(NumericFieldValue.integer(from: $0)) }
+                                        ), fractionDigits: 0)
+                                            .frame(width: 50)
+                                            .onChangeCompat(of: cursor.frameCount) { _ in onDirty?() }
+                                    }
+                                }
+                                GroupBox {
+                                    cell("Frame Duration") {
+                                        NumericTextField(
+                                            value: $cursor.frameDuration,
+                                            fractionDigits: ThemeFieldLimits.frameDurationFractionDigits)
+                                            .frame(width: 50)
+                                            .onChangeCompat(of: cursor.frameDuration) { _ in onDirty?() }
+                                        Text("sec")
+                                            .foregroundStyle(.secondary)
+                                            .fixedSize()
+                                    }
+                                }
                             }
-
-                            LabeledContent("Size:") {
-                                Text("\(Int(cursor.size.width)) × \(Int(cursor.size.height))")
-                                    .foregroundStyle(.secondary)
+                            GroupBox {
+                                cell("Size") {
+                                    Text("\(Int(cursor.size.width)) × \(Int(cursor.size.height))")
+                                        .foregroundStyle(.secondary)
+                                }
                             }
                         }
-
                         HotspotEditorView(cursor: cursor, onDirty: onDirty)
                     }
                 }
 
-                Divider()
-
-                Section("Preview") {
-                    CursorTryAreaView(cursor: cursor)
+                box("Preview") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        CursorTryAreaView(cursor: cursor)
+                        Text(NSLocalizedString("Hover to try the cursor — click to check the hotspot",
+                                               comment: "Try area hint"))
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 if onReplaceSource != nil || onClearSlot != nil {
-                    actionBar
+                    GroupBox { actionBar }
                 }
             }
+            .groupBoxStyle(PaneBoxStyle())
+            .frame(maxWidth: 600)
+            .frame(maxWidth: .infinity)
             .padding()
+        }
+        .alert("Clear This Slot?", isPresented: $confirmingClear) {
+            Button("Cancel", role: .cancel) {}
+            Button(NSLocalizedString("Clear Slot", comment: "Clear slot button"), role: .destructive) {
+                onClearSlot?()
+            }
+        } message: {
+            Text("The cursor in this slot is removed from the theme when you save.")
         }
     }
 
@@ -168,14 +194,80 @@ struct CursorEditorView: View {
                     }
                 }
             }
-            if let onClearSlot {
-                Button(NSLocalizedString("Clear Slot", comment: "Clear slot button"),
-                       role: .destructive) {
-                    onClearSlot()
+            Spacer()
+            if onClearSlot != nil {
+                Button(role: .destructive) {
+                    confirmingClear = true
+                } label: {
+                    Text(NSLocalizedString("Clear Slot", comment: "Clear slot button"))
+                        .foregroundStyle(.red)
                 }
             }
-            Spacer()
         }
+    }
+
+    private func box<Content: View>(_ title: LocalizedStringKey,
+                                    @ViewBuilder content: () -> Content) -> some View {
+        GroupBox {
+            content()
+        } label: {
+            Text(title)
+                .fontWeight(.semibold)
+        }
+    }
+
+    private func section<Content: View>(_ title: LocalizedStringKey,
+                                        @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(title)
+                .fontWeight(.semibold)
+                .font(.subheadline)
+                .padding(.leading, 10)
+            content()
+        }
+    }
+
+    private func cell<Content: View>(_ title: LocalizedStringKey,
+                                     @ViewBuilder content: () -> Content) -> some View {
+        LabeledContent {
+            HStack(spacing: 4) {
+                Spacer(minLength: 0)
+                content()
+            }
+        } label: {
+            Text(title)
+                .lineLimit(1)
+        }
+        .padding(.horizontal, 6)
+        .padding(.vertical, 6)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct PaneBoxStyle: GroupBoxStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            configuration.label
+                .font(.subheadline)
+                .padding(.leading, 10)
+            configuration.content
+                .padding(5)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).strokeBorder(Color.editThemeLine, lineWidth: 0.5))
+        }
+    }
+}
+
+extension Color {
+    static let editThemeLine = editThemeGrey(light: 229, dark: 46)
+    static let editThemeTile = editThemeGrey(light: 243, dark: 44)
+
+    private static func editThemeGrey(light: CGFloat, dark: CGFloat) -> Color {
+        Color(nsColor: NSColor(name: nil) { appearance in
+            let shade = (appearance.bestMatch(from: [.aqua, .darkAqua]) == .darkAqua ? dark : light) / 255
+            return NSColor(srgbRed: shade, green: shade, blue: shade, alpha: 1)
+        })
     }
 }
 

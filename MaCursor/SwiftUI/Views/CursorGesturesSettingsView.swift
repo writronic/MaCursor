@@ -31,106 +31,59 @@ enum CursorGesturesTab: CaseIterable {
 
 struct CursorGesturesSettingsView: View {
     @EnvironmentObject private var library: LibraryViewModel
+
+    var body: some View {
+        CursorGesturesSettingsContent(preferences: library.preferences)
+    }
+}
+
+private struct CursorGesturesSettingsContent: View {
+    let preferences: MACPreferences.Operations
+    @EnvironmentObject private var library: LibraryViewModel
+    @EnvironmentObject private var router: MainWindowRouter
     @ObservedObject private var helperManager = HelperToolManager.shared
-    @State private var gestures = CursorGesturesConfig.load()
+    @State private var gestures: CursorGesturesConfig
     @State private var trusted = FocusFollowsMouseConfig.accessibilityTrusted
     @State private var tab = CursorGesturesTab.selected
-    @State private var search = ""
-    @State private var filter = CursorGestureFilter.all
     @State private var editing: CursorGestureAction?
     @State private var deleting: String?
     @State private var restoring = false
+
+    init(preferences: MACPreferences.Operations) {
+        self.preferences = preferences
+        _gestures = State(initialValue: CursorGesturesConfig.load(operations: preferences))
+    }
 
     private var usable: Bool {
         trusted && helperManager.isRunning
     }
 
+    private var gesturesOn: Bool { FocusFollowsMouseConfig.isOn(enabled: gestures.enabled, trusted: usable) }
+
+    private var tabIndex: Int { CursorGesturesTab.allCases.firstIndex(of: tab) ?? 0 }
+
     var body: some View {
         let themes = library.cursorThemes.map { (id: $0.id, name: $0.name) }
-        let shown = gestures.available(filter)
-        let groups = gestures.groups(shown, search: search, themes: themes)
-        GeometryReader { pane in
-            let column = RightClickMenuLayout.tableWidth(contentWidth: pane.size.width - 2 * RightClickMenuLayout.pageMargin)
-            ScrollView {
-                VStack(alignment: .leading, spacing: RightClickMenuLayout.blockSpacing) {
-                    Group {
-                        HStack(spacing: 12) {
-                            VStack(alignment: .leading, spacing: 1) {
-                                Text("Cursor Gestures")
-                                Text("Draw a shape with the pointer to run an action.")
-                                    .font(.callout)
-                                    .foregroundStyle(.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            Spacer(minLength: 0)
-                            Toggle("Cursor Gestures", isOn: Binding(
-                                get: { FocusFollowsMouseConfig.isOn(enabled: gestures.enabled, trusted: usable) },
-                                set: { _ in AccessWindowController.tapCursorGestures(enabled: gestures.enabled, usable: usable) }
-                            ))
-                            .labelsHidden()
-                            .toggleStyle(.switch)
-                            .controlSize(.mini)
-                        }
-                        .padding(RightClickMenuLayout.inset)
-                        .frame(minHeight: RightClickMenuLayout.twoLineRowHeight)
-                        .rightClickMenuCard()
-
-                        if gestures.enabled && !trusted {
-                            HStack(spacing: 10) {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(.orange)
-
-                                Text("Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility.")
-                                    .font(.callout)
-                                    .foregroundStyle(.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-
-                                Spacer(minLength: 6)
-
-                                Button("Open System Settings") {
-                                    FocusFollowsMouseConfig.requestAccessibility()
-                                }
-                            }
-                            .padding(.horizontal, RightClickMenuLayout.inset)
-                        }
-                    }
-                    .disabled(!helperManager.isInstalled)
-
-                    if !helperManager.isInstalled {
-                        HStack(spacing: 10) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(.yellow)
-
-                            Text("Cursor Gestures requires the Helper Tool. You can install it from General → Helper Tool.")
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                        .padding(.horizontal, RightClickMenuLayout.inset)
-                    }
-
-                    if FocusFollowsMouseConfig.isOn(enabled: gestures.enabled, trusted: usable) {
-                        Group {
-                            TabBar(
-                                titles: CursorGesturesTab.allCases.map(\.title),
-                                label: String(localized: "Cursor Gestures"),
-                                selection: Binding(
-                                    get: { CursorGesturesTab.allCases.firstIndex(of: tab) ?? 0 },
-                                    set: { tab = CursorGesturesTab.allCases[$0]; CursorGesturesTab.selected = tab }
-                                )
-                            )
-                            .frame(maxWidth: .infinity)
-
+        let shown = gestures.available(router.gestureFilter)
+        let groups = gestures.groups(shown, search: router.gestureSearch, themes: themes)
+        FeaturePageFrame(header: {
+            header
+        }, tabs: {
+            if gesturesOn {
+                FeatureTabList(titles: CursorGesturesTab.allCases.map(\.title), styles: FeatureTabCatalog.styles(for: .cursorGestures),
+                               label: String(localized: "Cursor Gestures"),
+                               selection: Binding(get: { tabIndex },
+                                                  set: { tab = CursorGesturesTab.allCases[$0]; CursorGesturesTab.selected = tab }))
+                .disabled(!helperManager.isInstalled)
+            }
+        }, pane: {
+            if gesturesOn {
+                Group {
+                    GeometryReader { pane in
+                        let column = RightClickMenuLayout.tableWidth(contentWidth: pane.size.width - 2 * RightClickMenuLayout.pageMargin)
+                        ScrollView {
                             VStack(alignment: .leading, spacing: RightClickMenuLayout.blockSpacing) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(tab.title)
-                                        .fontWeight(.semibold)
-                                    Text(tab.note)
-                                        .font(.callout)
-                                        .foregroundStyle(.secondary)
-                                        .fixedSize(horizontal: false, vertical: true)
-                                }
-                                .padding(.horizontal, RightClickMenuLayout.inset)
+                                ExplainerCard(tab.note)
 
                                 switch tab {
                                 case .general:
@@ -138,32 +91,39 @@ struct CursorGesturesSettingsView: View {
                                         row(\.raiseWindow, resettable: false) {
                                             Toggle("Bring the Window Under the Pointer Forward First", isOn: $gestures.raiseWindow)
                                         }
+                                        .searchAnchor("gRaise")
                                         divider
                                         row(\.showLine, resettable: false) {
                                             Toggle("Show the Line While You Draw", isOn: $gestures.showLine)
                                         }
+                                        .searchAnchor("gLine")
                                         divider
                                         row(\.colorByResult, resettable: false) {
                                             Toggle("Turn the Line Green When a Shape Matches", isOn: $gestures.colorByResult)
                                         }
+                                        .searchAnchor("gGreen")
                                         divider
                                         row(\.showShapeName, resettable: false) {
                                             Toggle("Show the Gesture Name and Match While You Draw", isOn: $gestures.showShapeName)
                                         }
+                                        .searchAnchor("gName")
                                         divider
                                         row(\.repeatMouse, resettable: false) {
                                             Toggle("Repeat with a Left Click on a Mouse", isOn: $gestures.repeatMouse)
                                         }
                                         .help("Keep holding the trigger after a gesture and left-click to run it again.")
+                                        .searchAnchor("gRepeatMouse")
                                         divider
                                         row(\.repeatTrackpad, resettable: false) {
                                             Toggle("Repeat with a Left Click on a Trackpad", isOn: $gestures.repeatTrackpad)
                                         }
                                         .help("Keep holding the trigger after a gesture and left-click to run it again.")
+                                        .searchAnchor("gRepeatPad")
                                         divider
                                         row(\.switchWhileRepeating, resettable: false) {
                                             Toggle("A New Shape Changes What Repeats", isOn: $gestures.switchWhileRepeating)
                                         }
+                                        .searchAnchor("gSwitch")
                                         divider
                                         row(\.lineColor) {
                                             Text("Line Color")
@@ -174,6 +134,7 @@ struct CursorGesturesSettingsView: View {
                                             ), supportsOpacity: false)
                                             .labelsHidden()
                                         }
+                                        .searchAnchor("gColor")
                                         divider
                                         row(\.lineWidth) {
                                             Text("Line Width")
@@ -184,6 +145,7 @@ struct CursorGesturesSettingsView: View {
                                             .labelsHidden()
                                             .frame(width: Self.sliderWidth)
                                         }
+                                        .searchAnchor("gWidth")
                                         divider
                                         row(\.strictness) {
                                             Text("Strictness")
@@ -194,6 +156,7 @@ struct CursorGesturesSettingsView: View {
                                             .labelsHidden()
                                             .frame(width: Self.sliderWidth)
                                         }
+                                        .searchAnchor("gStrict")
                                         divider
                                         row(\.minimumSize) {
                                             Text("Minimum Size")
@@ -204,10 +167,12 @@ struct CursorGesturesSettingsView: View {
                                             .labelsHidden()
                                             .frame(width: Self.sliderWidth)
                                         }
+                                        .searchAnchor("gMinSize")
                                         divider
                                         row(\.ignorePostedClicks) {
                                             Toggle("Use Only Clicks from Your Mouse or Trackpad", isOn: $gestures.ignorePostedClicks)
                                         }
+                                        .searchAnchor("gPosted")
                                     }
                                     .rightClickMenuCard()
 
@@ -222,6 +187,7 @@ struct CursorGesturesSettingsView: View {
                                         .padding(.horizontal, RightClickMenuLayout.inset)
                                         .frame(minHeight: RightClickMenuLayout.rowHeight)
                                         .help("Cursor Gestures stay off in these apps for the triggers you pick.")
+                                        .searchAnchor("gIgnored")
 
                                         ForEach(gestures.ignored, id: \.app) { entry in
                                             divider
@@ -268,6 +234,7 @@ struct CursorGesturesSettingsView: View {
                                     Button("Restore Ready-Made Gestures") {
                                         restoring = true
                                     }
+                                    .searchAnchor("gRestore")
                                     .alert("Restore Ready-Made Gestures", isPresented: $restoring) {
                                         Button("Restore") {
                                             change { $0.restoreReadyMade() }
@@ -279,33 +246,34 @@ struct CursorGesturesSettingsView: View {
                                     }
 
                                     Text("Hold the trigger keys or button, draw a shape with the pointer and let go to run its action. Esc or any other key cancels the gesture, and so does a left click when repeat is off. With repeat on, left-click while you still hold the trigger to run the last gesture again.")
-                                        .font(.callout)
+                                        .font(.system(size: 11))
                                         .foregroundStyle(.secondary)
                                         .fixedSize(horizontal: false, vertical: true)
                                         .padding(.horizontal, RightClickMenuLayout.inset)
                                 case .gestures:
                                     HStack(spacing: 8) {
-                                        SearchFieldView(text: $search, prompt: String(localized: "Search"))
+                                        SearchFieldView(text: $router.gestureSearch, prompt: String(localized: "Search"))
                                             .frame(maxWidth: .infinity)
 
                                         Button("New Gesture") {
-                                            GestureEditorWindow.shared.edit(CursorGesture(apps: shown.apps), title: String(localized: "New Gesture"), themes: themes)
+                                            router.editGesture(CursorGesture(apps: shown.apps), title: String(localized: "New Gesture"))
                                         }
+                                        .searchAnchor("gNew")
                                     }
 
                                     ScrollView(.horizontal, showsIndicators: false) {
                                         HStack(spacing: 6) {
                                             GestureChip(title: String(localized: "All"), selected: shown == .all) {
-                                                filter = .all
+                                                router.gestureFilter = .all
                                             }
 
                                             GestureChip(title: String(localized: "All Apps"), selected: shown == .allApps) {
-                                                filter = .allApps
+                                                router.gestureFilter = .allApps
                                             }
 
                                             ForEach(gestures.scopedApps, id: \.self) { app in
                                                 GestureChip(title: CursorGestures.appName(app), app: app, selected: shown == .app(app)) {
-                                                    filter = .app(app)
+                                                    router.gestureFilter = .app(app)
                                                 }
                                             }
                                         }
@@ -316,7 +284,7 @@ struct CursorGesturesSettingsView: View {
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                     } else if groups.isEmpty {
-                                        Text("No Results for “\(search)”")
+                                        Text("No Results for “\(router.gestureSearch)”")
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                     } else {
@@ -324,7 +292,9 @@ struct CursorGesturesSettingsView: View {
                                             ForEach(groups) { group in
                                                 VStack(alignment: .leading, spacing: 8) {
                                                     Text(group.family?.title ?? String(localized: "Your Shapes"))
-                                                        .font(.headline)
+                                                        .font(.system(size: 12, weight: .semibold))
+                                                        .foregroundStyle(.secondary)
+                                                        .padding(.horizontal, RightClickMenuLayout.inset)
 
                                                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 240), spacing: 12)], spacing: 12) {
                                                         ForEach(group.items) { gesture in
@@ -335,12 +305,12 @@ struct CursorGesturesSettingsView: View {
                                                                     }
                                                                 }
                                                             } edit: {
-                                                                GestureEditorWindow.shared.edit(gesture, title: String(localized: "Edit Gesture"), themes: themes)
+                                                                router.editGesture(gesture, title: String(localized: "Edit Gesture"))
                                                             } duplicate: {
                                                                 var copy = gesture
                                                                 copy.id = UUID()
                                                                 copy.name = gestures.title(gesture, themes: themes)
-                                                                GestureEditorWindow.shared.edit(copy, title: String(localized: "New Gesture"), themes: themes)
+                                                                router.editGesture(copy, title: String(localized: "New Gesture"))
                                                             } delete: {
                                                                 change { config in config.gestures.removeAll { $0.id == gesture.id } }
                                                             }
@@ -362,7 +332,6 @@ struct CursorGesturesSettingsView: View {
                                     }
                                 }
                             }
-                            .padding(.top, RightClickMenuLayout.headerSpacing - RightClickMenuLayout.blockSpacing)
                             .alert("Delete It?", isPresented: Binding(get: { deleting != nil }, set: { if !$0 { deleting = nil } })) {
                                 Button("Delete", role: .destructive) {
                                     if let deleting { gestures.remove(deleting) }
@@ -377,16 +346,16 @@ struct CursorGesturesSettingsView: View {
                                     gestures.put($0)
                                 }
                             }
+                            .frame(width: column)
+                            .padding(.leading, (pane.size.width - column) / 2)
+                            .padding(.vertical, RightClickMenuLayout.pageMargin)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
-                        .disabled(!helperManager.isInstalled)
                     }
                 }
-                .frame(width: column)
-                .padding(.leading, (pane.size.width - column) / 2)
-                .padding(.vertical, RightClickMenuLayout.pageMargin)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .disabled(!helperManager.isInstalled)
             }
-        }
+        })
         .onAppear {
             helperManager.refreshStatus()
             reload()
@@ -395,11 +364,11 @@ struct CursorGesturesSettingsView: View {
             }
         }
         .onChangeCompat(of: gestures) { edited in
-            let latest = CursorGesturesConfig.load()
+            let latest = CursorGesturesConfig.load(operations: preferences)
             var merged = edited
             merged.enabled = latest.enabled
             guard merged != latest else { return }
-            merged.save()
+            merged.save(operations: preferences)
         }
         .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorGesturesDidChange)) { _ in
             reload()
@@ -409,15 +378,61 @@ struct CursorGesturesSettingsView: View {
         }
     }
 
+    private var header: some View {
+        VStack(spacing: 10) {
+            Group {
+                FeatureOnOffBox(title: String(localized: "Cursor Gestures"),
+                                subtitle: String(localized: "Draw a shape with the pointer to run an action."),
+                                symbol: "scribble.variable", tint: .purple, isOn: Binding(
+                                    get: { gesturesOn },
+                                    set: { _ in AccessWindowController.tapCursorGestures(enabled: gestures.enabled, usable: usable, operations: preferences) }
+                                ))
+
+                if gestures.enabled && !trusted {
+                    HStack(spacing: 10) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundStyle(.orange)
+
+                        Text("Accessibility access is missing. Allow MaCursorHelper in Privacy & Security → Accessibility.")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        Spacer(minLength: 6)
+
+                        Button("Open System Settings") {
+                            FocusFollowsMouseConfig.requestAccessibility()
+                        }
+                    }
+                    .featureNotice()
+                }
+            }
+            .disabled(!helperManager.isInstalled)
+
+            if !helperManager.isInstalled {
+                HStack(spacing: 10) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.yellow)
+
+                    Text("Cursor Gestures requires the Helper Tool. You can install it from General → Helper Tool.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .featureNotice()
+            }
+        }
+    }
+
     private func reload() {
-        gestures = CursorGesturesConfig.load()
+        gestures = CursorGesturesConfig.load(operations: preferences)
         trusted = FocusFollowsMouseConfig.accessibilityTrusted
     }
 
     private func change(_ edit: (inout CursorGesturesConfig) -> Void) {
-        var latest = CursorGesturesConfig.load()
+        var latest = CursorGesturesConfig.load(operations: preferences)
         edit(&latest)
-        latest.save()
+        latest.save(operations: preferences)
         gestures = latest
     }
 
@@ -710,6 +725,7 @@ private struct GestureShapeGallery: View {
     var taken: Set<String> = []
     var pick: (String) -> Void = { _ in }
     var delete: ((String) -> Void)?
+    var focusToken: Int? = nil
     let save: (CursorGestureShape) -> Void
     @State private var search = ""
     @State private var family: String?
@@ -719,12 +735,13 @@ private struct GestureShapeGallery: View {
         let shown = config.shapeGroups().contains { title($0) == family } ? family : nil
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
-                SearchFieldView(text: $search, prompt: String(localized: "Search"))
+                SearchFieldView(text: $search, prompt: String(localized: "Search"), focusToken: focusToken)
                     .frame(maxWidth: .infinity)
 
                 Button("Draw New") {
                     drawing = CursorGestureShape()
                 }
+                .searchAnchor("gDir")
             }
 
             ScrollView(.horizontal, showsIndicators: false) {
@@ -824,6 +841,7 @@ private struct GestureActionList: View {
 
                 if let add {
                     Button("New Custom Action", action: add)
+                        .searchAnchor("gAction")
                 }
             }
 
@@ -916,69 +934,132 @@ private struct GestureActionList: View {
     }
 }
 
-private struct GestureActionEditor: View {
+struct GestureActionEditor: View {
     @State var draft: CursorGestureAction
+    @State private var shortcuts: [String]?
     let isNew: Bool
     let save: (CursorGestureAction) -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             Text(isNew ? "New Custom Action" : "Edit Your Action")
                 .font(.headline)
+                .padding([.top, .horizontal], 20)
 
-            Picker("What It Does", selection: Binding(
-                get: {
+            Form {
+                Section {
+                    Picker("What It Does", selection: Binding(
+                        get: {
+                            switch draft.kind {
+                            case .text: return 1
+                            case .app: return 2
+                            case .website: return 3
+                            case .appleScript: return 4
+                            case .shortcutsApp: return 5
+                            case .shell: return 6
+                            default: return 0
+                            }
+                        },
+                        set: { value in
+                            let kinds: [CursorGestureKind] = [.shortcut(CursorGestureShortcut(keyCode: 0, flags: 0)), .text(""), .app(""), .website(""), .appleScript(""), .shortcutsApp(""), .shell("")]
+                            remake(kinds[value])
+                        }
+                    )) {
+                        Text("Keyboard Shortcut").tag(0)
+                        Text("Typed Text").tag(1)
+                        Text("App").tag(2)
+                        Text("Open Link").tag(3)
+                        Text("Run AppleScript").tag(4)
+                        Text("Run Shortcut").tag(5)
+                        Text("Run Shell Command").tag(6)
+                    }
+                    .pickerStyle(.menu)
+
+                    field("Name", text: $draft.name)
+                }
+
+                Section {
                     switch draft.kind {
-                    case .text: return 1
-                    case .app: return 2
-                    case .website: return 3
-                    default: return 0
+                    case .shortcut(let shortcut):
+                        row("Keyboard Shortcut") {
+                            GestureShortcutRecorder(shortcut: shortcut) { remake(.shortcut($0)) }
+                        }
+                    case .text(let text):
+                        textView("Typed Text", text) { remake(.text($0)) }
+                    case .app(let path):
+                        row("App") {
+                            Button {
+                                guard let url = NSOpenPanel.choose(applications: true) else { return }
+                                if draft.name.isEmpty { draft.name = FileManager.default.displayName(atPath: url.path) }
+                                remake(.app(url.path))
+                            } label: {
+                                if path.isEmpty {
+                                    Text("Pick an App…")
+                                } else {
+                                    Text(verbatim: draft.detail)
+                                }
+                            }
+                        }
+                    case .website(let address):
+                        field("Link Address", text: Binding(get: { address }, set: { remake(.website($0)) }))
+                    case .appleScript(let script):
+                        textView("Script", script) { remake(.appleScript($0)) }
+
+                        HStack {
+                            Spacer()
+
+                            Button {
+                                guard let url = NSOpenPanel.choose([.appleScript, .osaScript, .osaScriptBundle]) else { return }
+                                if draft.name.isEmpty { draft.name = FileManager.default.displayName(atPath: url.path) }
+                                remake(.appleScript(url.path))
+                            } label: {
+                                Text("Pick a Script File…")
+                            }
+                        }
+                    case .shortcutsApp(let name):
+                        if shortcuts?.isEmpty == true {
+                            field("Shortcut Name", text: Binding(get: { name }, set: { remake(.shortcutsApp($0)) }))
+                        } else {
+                            Picker(selection: Binding(get: { name }, set: { picked in
+                                if draft.name.isEmpty { draft.name = picked }
+                                remake(.shortcutsApp(picked))
+                            })) {
+                                Text("Pick a Shortcut…").tag("")
+                                ForEach((name.isEmpty || shortcuts?.contains(name) == true ? [] : [name]) + (shortcuts ?? []), id: \.self) { shortcut in
+                                    Text(verbatim: shortcut).tag(shortcut)
+                                }
+                            } label: {
+                                Text("Shortcut Name")
+                                    .fixedSize()
+                            }
+                            .pickerStyle(.menu)
+                            .task { shortcuts = CursorGestures.shortcutNames(await FinderExtensionManager.run("/usr/bin/shortcuts", ["list"])) }
+                        }
+                    case .shell(let command):
+                        textView("Command", command) { remake(.shell($0)) }
+                    default:
+                        EmptyView()
                     }
-                },
-                set: { value in
-                    let kinds: [CursorGestureKind] = [.shortcut(CursorGestureShortcut(keyCode: 0, flags: 0)), .text(""), .app(""), .website("")]
-                    remake(kinds[value])
-                }
-            )) {
-                Text("Keyboard Shortcut").tag(0)
-                Text("Typed Text").tag(1)
-                Text("App").tag(2)
-                Text("Website").tag(3)
-            }
-            .pickerStyle(.menu)
-            .fixedSize()
-
-            switch draft.kind {
-            case .shortcut(let shortcut):
-                GestureShortcutRecorder(shortcut: shortcut) { remake(.shortcut($0)) }
-            case .text(let text):
-                TextField("Typed Text", text: Binding(get: { text }, set: { remake(.text(String($0.prefix(CursorGestures.textLimit)))) }),
-                          axis: .vertical)
-                    .lineLimit(3...6)
-
-                Text("Up to 500 characters.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            case .app(let path):
-                Button {
-                    guard let url = NSOpenPanel.choose(applications: true) else { return }
-                    if draft.name.isEmpty { draft.name = FileManager.default.displayName(atPath: url.path) }
-                    remake(.app(url.path))
-                } label: {
-                    if path.isEmpty {
-                        Text("Pick an App…")
-                    } else {
-                        Text(verbatim: draft.detail)
+                } footer: {
+                    Group {
+                        switch draft.kind {
+                        case .text, .shell:
+                            Text("Up to 500 characters.")
+                        case .appleScript:
+                            Text("Up to 500 characters, or a script file. The first time a script controls an app, macOS asks you to allow it.")
+                        case .website:
+                            Text(String(localized: "For a name without a dot, type https:// before it, for example https://nas:5000."))
+                        case .shortcutsApp where shortcuts?.isEmpty == true:
+                            Text("No shortcuts found in the Shortcuts app.")
+                        default:
+                            EmptyView()
+                        }
                     }
+                    .foregroundColor(draft.overTextLimit ? .red : nil)
                 }
-            case .website(let address):
-                TextField("Website Address", text: Binding(get: { address }, set: { remake(.website($0)) }))
-            default:
-                EmptyView()
             }
-
-            TextField("Name", text: $draft.name)
+            .formStyle(.grouped)
 
             HStack {
                 Spacer()
@@ -995,9 +1076,41 @@ private struct GestureActionEditor: View {
                 .keyboardShortcut(.defaultAction)
                 .disabled(!draft.isValid)
             }
+            .padding([.horizontal, .bottom], 20)
         }
-        .padding(16)
         .frame(width: 420)
+    }
+
+    private func row<Content: View>(_ label: LocalizedStringKey, @ViewBuilder _ content: () -> Content) -> some View {
+        HStack {
+            Text(label)
+                .fixedSize()
+
+            content()
+                .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+    }
+
+    private func field(_ label: LocalizedStringKey, text: Binding<String>) -> some View {
+        row(label) {
+            TextField(label, text: text, prompt: Text(verbatim: ""))
+                .labelsHidden()
+                .textFieldStyle(.roundedBorder)
+                .frame(maxWidth: 220)
+        }
+    }
+
+    private func textView(_ label: LocalizedStringKey, _ text: String, set: @escaping (String) -> Void) -> some View {
+        VStack(alignment: .leading) {
+            Text(label)
+
+            GesturePlainTextView(text: text, set: set, cancel: { dismiss() })
+                .padding(4)
+                .frame(height: 88)
+                .background(Color(nsColor: .textBackgroundColor), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 6, style: .continuous).strokeBorder(Color(nsColor: .separatorColor)))
+                .accessibilityLabel(Text(label))
+        }
     }
 
     private func remake(_ kind: CursorGestureKind) {
@@ -1012,27 +1125,40 @@ private struct GestureShortcutRecorder: View {
     @State private var layout = shortcutLayout()
 
     var body: some View {
-        HStack {
-            KeyField(record: "Record Shortcut", press: "Press shortcut…",
-                     key: CursorGestureKeys.recordable(shortcut.keyCode, NSEvent.ModifierFlags(rawValue: shortcut.flags))
-                         ? CursorGestureKeys.label(shortcut, layout: layout) : nil,
-                     recording: monitor != nil) {
-                monitor == nil ? start() : stop()
-            } clear: {
-                stop()
-                record(CursorGestureShortcut(keyCode: 0, flags: 0))
+        ViewThatFits(in: .horizontal) {
+            HStack {
+                if monitor != nil { esc }
+                field
             }
 
-            if monitor != nil {
-                Text("Esc cancels.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .trailing, spacing: 4) {
+                field
+                if monitor != nil { esc }
             }
         }
         .onDisappear(perform: stop)
         .onReceive(NotificationCenter.default.publisher(for: NSWindow.willCloseNotification)) { _ in stop() }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.didResignActiveNotification)) { _ in stop() }
         .onReceive(DistributedNotificationCenter.default().publisher(for: .inputSourceChanged)) { _ in layout = shortcutLayout() }
+    }
+
+    private var esc: some View {
+        Text("Esc cancels.")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+    }
+
+    private var field: some View {
+        KeyField(record: "Record Shortcut", press: "Press shortcut…",
+                 key: CursorGestureKeys.recordable(shortcut.keyCode, NSEvent.ModifierFlags(rawValue: shortcut.flags))
+                     ? CursorGestureKeys.label(shortcut, layout: layout) : nil,
+                 recording: monitor != nil) {
+            monitor == nil ? start() : stop()
+        } clear: {
+            stop()
+            record(CursorGestureShortcut(keyCode: 0, flags: 0))
+        }
+        .fixedSize()
     }
 
     private func start() {
@@ -1056,82 +1182,41 @@ private struct GestureShortcutRecorder: View {
     }
 }
 
-final class GestureEditorWindow: NSWindowController, NSWindowDelegate {
-    static let shared = GestureEditorWindow()
-    var draft = CursorGesture()
-    private var original = CursorGesture()
+struct GestureEditorPage: View {
+    let gesture: CursorGesture
+    let themes: [(id: String, name: String)]
+    let preferences: MACPreferences.Operations
+    let pageTitle: String
 
-    private init() {
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 1200, height: 840),
-                              styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
-        window.isReleasedWhenClosed = false
-        window.contentMinSize = NSSize(width: 785, height: 560)
-        super.init(window: window)
-        window.delegate = self
-    }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-
-    func windowShouldClose(_ sender: NSWindow) -> Bool {
-        guard draft != original else { return true }
-        confirmDiscard { sender.close() }
-        return false
-    }
-
-    private func confirmDiscard(then discard: @escaping () -> Void) {
-        guard let window else { return }
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
-        guard window.attachedSheet == nil else { return }
-        let alert = NSAlert()
-        alert.messageText = String(localized: "Unsaved Changes")
-        alert.informativeText = String(localized: "Your changes will be discarded if you don't save them.")
-        alert.addButton(withTitle: String(localized: "Keep Editing"))
-        alert.addButton(withTitle: String(localized: "Discard")).hasDestructiveAction = true
-        alert.beginSheetModal(for: window) { response in
-            guard response == .alertSecondButtonReturn else { return }
-            self.draft = self.original
-            discard()
-        }
-    }
-
-    func edit(_ gesture: CursorGesture, title: String, themes: [(id: String, name: String)]) {
-        guard let window else { return }
-        if window.isVisible || window.isMiniaturized, draft != original {
-            return confirmDiscard { self.edit(gesture, title: title, themes: themes) }
-        }
-        (original, draft) = (gesture, gesture)
-        let frame = window.frame
-        let content = NSHostingController(rootView: GestureEditor(draft: gesture, themes: themes))
-        content.sizingOptions = [.minSize]
-        window.contentViewController = content
-        window.title = title
-        if window.isVisible {
-            window.setFrame(frame, display: true)
-        } else {
-            window.setContentSize(NSSize(width: 1200, height: 840))
-            window.center()
-        }
-        ModalWindowCoordinator.shared.register(window, as: .modal)
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+    var body: some View {
+        GestureEditor(draft: gesture, themes: themes, preferences: preferences, pageTitle: pageTitle)
     }
 }
 
 private struct GestureEditor: View {
+    @EnvironmentObject private var router: MainWindowRouter
     @State private var draft: CursorGesture
+    private let original: CursorGesture
     let themes: [(id: String, name: String)]
-    @State private var config = CursorGesturesConfig.load()
+    private let preferences: MACPreferences.Operations
+    @State private var config: CursorGesturesConfig
     @State private var chooseApps: Bool
     @State private var warning: String?
     @State private var step = CursorGestureEditorStep.shape
+    @State private var adding: CursorGestureAction?
+    @State private var window: NSWindow?
+    @State private var searchFocus: Int? = 0
+    @State private var columnVisibility = NavigationSplitViewVisibility.all
+    private let pageTitle: String
 
-    init(draft: CursorGesture, themes: [(id: String, name: String)]) {
+    init(draft: CursorGesture, themes: [(id: String, name: String)], preferences: MACPreferences.Operations, pageTitle: String) {
+        self.pageTitle = pageTitle
         _draft = State(initialValue: draft)
+        original = draft
         _chooseApps = State(initialValue: !draft.apps.isEmpty)
+        _config = State(initialValue: CursorGesturesConfig.load(operations: preferences))
         self.themes = themes
+        self.preferences = preferences
     }
 
     private var catalogue: [CursorGestureAction] {
@@ -1140,7 +1225,7 @@ private struct GestureEditor: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 0) {
+            NavigationSplitView(columnVisibility: $columnVisibility) {
                 VStack(alignment: .leading, spacing: 6) {
                     ForEach(Array(CursorGestureEditorStep.allCases.enumerated()), id: \.element) { index, item in
                         Button {
@@ -1193,9 +1278,20 @@ private struct GestureEditor: View {
                 .padding(.vertical, 20)
                 .frame(width: 268)
                 .frame(maxHeight: .infinity)
-
-                Divider()
-
+                .frame(minHeight: 0)
+                .background(Color.pageFill)
+                .toolbarTitleItem("MaCursor")
+                .toolbar {
+                    ToolbarItem {
+                        Button { router.back() } label: {
+                            Label("Back", systemImage: "chevron.backward")
+                        }
+                        .help("Back")
+                    }
+                }
+                .sidebarToggleRemoved()
+                .navigationSplitViewColumnWidth(268)
+            } detail: {
                 VStack(alignment: .leading, spacing: 14) {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(step.title)
@@ -1209,12 +1305,12 @@ private struct GestureEditor: View {
 
                     switch step {
                     case .shape:
-                        GestureShapeGallery(config: config, selected: draft.shape, taken: config.taken(by: draft), pick: { draft.shape = $0 }) { shape in
+                        GestureShapeGallery(config: config, selected: draft.shape, taken: config.taken(by: draft), pick: { draft.shape = $0 }, focusToken: searchFocus) { shape in
                             config.put(shape)
                             draft.shape = shape.id
-                            var latest = CursorGesturesConfig.load()
+                            var latest = CursorGesturesConfig.load(operations: preferences)
                             latest.put(shape)
-                            latest.save()
+                            latest.save(operations: preferences)
                         }
                     case .trigger:
                         ScrollView {
@@ -1244,8 +1340,16 @@ private struct GestureEditor: View {
                             .frame(height: 160)
                         }
 
-                        GestureActionList(actions: catalogue) { action in
+                        GestureActionList(actions: catalogue, pick: { action in
                             draft.steps.append(CursorGestureStep(action: action.id))
+                        }, add: { adding = CursorGestures.custom(.shortcut(CursorGestureShortcut(keyCode: 0, flags: 0)), name: "") })
+                        .sheet(item: $adding) { action in
+                            GestureActionEditor(draft: action, isNew: true) { action in
+                                config.add(action, to: &draft)
+                                var latest = CursorGesturesConfig.load(operations: preferences)
+                                latest.put(action)
+                                latest.save(operations: preferences)
+                            }
                         }
                     case .details:
                         ScrollView {
@@ -1298,6 +1402,13 @@ private struct GestureEditor: View {
                 .padding(.vertical, 20)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .background(Color(nsColor: .controlBackgroundColor))
+                .frame(minHeight: 0)
+                .toolbarTitleItem(Text(pageTitle))
+            }
+            .onChangeCompat(of: columnVisibility) { newValue in
+                if newValue != .all {
+                    columnVisibility = .all
+                }
             }
 
             Divider()
@@ -1328,7 +1439,7 @@ private struct GestureEditor: View {
 
                 HStack(spacing: 8) {
                     Button("Cancel") {
-                        GestureEditorWindow.shared.window?.performClose(nil)
+                        router.back()
                     }
                     .keyboardShortcut(.cancelAction)
 
@@ -1348,7 +1459,7 @@ private struct GestureEditor: View {
             }
             .padding(16)
         }
-        .frame(minWidth: 785, maxWidth: .infinity, minHeight: 560, maxHeight: .infinity)
+        .frame(minWidth: 785, maxWidth: .infinity, maxHeight: .infinity)
         .alert(warning ?? "", isPresented: Binding(get: { warning != nil }, set: { if !$0 { warning = nil } })) {
             Button("Replace", role: .destructive) {
                 save(replacing: true)
@@ -1359,9 +1470,25 @@ private struct GestureEditor: View {
         .onChangeCompat(of: chooseApps) { chosen in
             if !chosen { draft.apps = [] }
         }
-        .onChangeCompat(of: draft) { GestureEditorWindow.shared.draft = $0 }
+        .onChangeCompat(of: step) { _ in searchFocus = nil }
         .onReceive(DistributedNotificationCenter.default().publisher(for: .MACCursorGesturesDidChange)) { _ in
-            config = CursorGesturesConfig.load()
+            config = CursorGesturesConfig.load(operations: preferences)
+        }
+        .onAppear { router.leaveEditor = requestLeave }
+        .background(WindowAccessor(window: $window, onCloseAttempt: { router.back(); return false }))
+    }
+
+    private func requestLeave(then next: @escaping () -> Void) {
+        guard draft != original else { return next() }
+        guard let window, window.attachedSheet == nil else { return }
+        let alert = NSAlert()
+        alert.messageText = String(localized: "Unsaved Changes")
+        alert.informativeText = String(localized: "Your changes will be discarded if you don't save them.")
+        alert.addButton(withTitle: String(localized: "Keep Editing"))
+        alert.addButton(withTitle: String(localized: "Discard")).hasDestructiveAction = true
+        alert.beginSheetModal(for: window) { response in
+            guard response == .alertSecondButtonReturn else { return }
+            next()
         }
     }
 
@@ -1378,14 +1505,14 @@ private struct GestureEditor: View {
     }
 
     private func save(replacing: Bool) {
-        var latest = CursorGesturesConfig.load()
+        var latest = CursorGesturesConfig.load(operations: preferences)
         if !replacing, let clash = latest.conflictWarning(draft, themes: themes) {
             warning = clash
             return
         }
         latest.put(draft)
-        latest.save()
-        GestureEditorWindow.shared.close()
+        latest.save(operations: preferences)
+        router.closeEditor()
     }
 }
 
@@ -1628,15 +1755,15 @@ extension AccessWindowController {
 }
 
 extension AccessWindowController {
-    static func tapCursorGestures(enabled: Bool, usable: Bool) {
+    static func tapCursorGestures(enabled: Bool, usable: Bool, operations: MACPreferences.Operations = .live) {
         let helperManager = HelperToolManager.shared
         guard helperManager.isRunning else { return }
         switch FocusFollowsMouseConfig.toggleAction(enabled: enabled,
                                                     helperInstalled: helperManager.isInstalled,
                                                     trusted: usable) {
-        case .enable: CursorGesturesConfig.setEnabled(true)
+        case .enable: CursorGesturesConfig.setEnabled(true, operations: operations)
         case .requestAccess: AccessWindowController.cursorGestures.present()
-        case .disable: CursorGesturesConfig.setEnabled(false)
+        case .disable: CursorGesturesConfig.setEnabled(false, operations: operations)
         case .ignore: break
         }
     }

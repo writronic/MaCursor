@@ -36,6 +36,9 @@ class CursorModel: ObservableObject, Identifiable, Hashable {
     private var _frameCache: [String: NSImage] = [:]
     private var _frameCacheRevision: Int = -1
 
+    private var _trimmedPictureCache: CGImage?
+    private var _trimmedPictureCacheKey: String?
+
     init(from cursor: MACCursorSwift, id: String? = nil) {
         self.backingCursor = cursor
         self.id = id ?? UUID().uuidString
@@ -96,6 +99,18 @@ class CursorModel: ObservableObject, Identifiable, Hashable {
         _primaryImageCache = img
         _primaryImageCacheKey = key
         return img
+    }
+
+    var trimmedPicture: CGImage? {
+        let key = geometryCacheKey
+        if _trimmedPictureCacheKey == key { return _trimmedPictureCache }
+        let reps = [1000, 500, 200, 100].compactMap { MACCursorScale(rawValue: $0).flatMap(backingCursor.representation(for:)) }
+        let image = reps.max(by: { $0.pixelsWide * $0.pixelsHigh < $1.pixelsWide * $1.pixelsHigh })?.cgImage
+        _trimmedPictureCache = image.flatMap {
+            $0.cropping(to: CGRect(x: 0, y: 0, width: $0.width, height: max(1, $0.height / max(1, frameCount))))
+        }.flatMap(ThemeGalleryModel.trimmed)
+        _trimmedPictureCacheKey = key
+        return _trimmedPictureCache
     }
 
     func thumbnailImage(forScale scale: Int) -> NSImage? {
